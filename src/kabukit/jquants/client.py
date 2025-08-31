@@ -40,8 +40,8 @@ class JQuantsClient:
     """
 
     client: Client
-    refresh_token: str | None
-    id_token: str | None
+    refresh_token: str
+    id_token: str
 
     def __init__(self) -> None:
         """Initializes the JQuantsClient.
@@ -63,8 +63,8 @@ class JQuantsClient:
     def load_tokens(self) -> None:
         """Loads tokens from the .env file."""
         load_dotenv(self.dotenv_path)
-        self.refresh_token = os.environ.get(Key.REFRESH_TOKEN)
-        self.id_token = os.environ.get(Key.ID_TOKEN)
+        self.refresh_token = os.environ.get(Key.REFRESH_TOKEN) or ""
+        self.id_token = os.environ.get(Key.ID_TOKEN) or ""
 
     def set_header(self) -> None:
         """Sets the Authorization header if an ID token is available."""
