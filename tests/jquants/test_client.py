@@ -163,3 +163,13 @@ def test_prices_from_to(client: JQuantsClient) -> None:
     assert df.height == 6
     assert df.item(0, "Date") == datetime.date(2025, 8, 18)
     assert df.item(5, "Date") == datetime.date(2025, 8, 25)
+
+
+def test_prices_from(client: JQuantsClient) -> None:
+    df = client.get_prices(code="7203", from_="2025-08-16")
+    assert df.item(0, "Date") == datetime.date(2025, 8, 18)
+
+
+def test_prices_to(client: JQuantsClient) -> None:
+    df = client.get_prices(code="7203", to="2025-08-16")
+    assert df.item(-1, "Date") == datetime.date(2025, 8, 15)

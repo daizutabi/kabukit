@@ -230,15 +230,23 @@ class JQuantsClient:
     ) -> DataFrame:
         params = params_code_date(code, date)
 
+        if date and (from_ or to):
+            msg = "Cannot specify both date and from/to parameters."
+            raise ValueError(msg)
+
         if not date and from_:
             params["from"] = date_to_str(from_)
         if not date and to:
             params["to"] = date_to_str(to)
 
         url = "/prices/daily_quotes"
-        df = pl.concat(self.iter_pagaes(url, params, "daily_quotes"))
-        if df.is_empty():
-            return df
+        name = "daily_quotes"
+        dfs = list(self.iter_pagaes(url, params, name))
+
+        if not dfs:
+            return DataFrame()
+
+        df = pl.concat(dfs)
         return df.with_columns(pl.col("Date").str.to_date())
 
 
