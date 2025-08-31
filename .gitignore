@@ -1,0 +1,29 @@
+.coverage*
+.env
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+.vscode/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Virtual environment
+.venv/
+
+# Documentation
+site/
+
+# Lcov
+lcov.info
+
+.env/
+__pycache__/
+lcov.info
+uv.lock
