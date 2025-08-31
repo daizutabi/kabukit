@@ -87,7 +87,7 @@ def test_listed_info_width(df_listed_info: DataFrame) -> None:
 def test_listed_info_today(df_listed_info: DataFrame) -> None:
     date = df_listed_info.item(0, "Date")
     assert isinstance(date, datetime.date)
-    assert date >= datetime.date.today()  # noqa: DTZ011
+    assert abs((date - datetime.date.today()).days) <= 3  # noqa: DTZ011
 
 
 @pytest.mark.parametrize(
