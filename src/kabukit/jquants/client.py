@@ -51,9 +51,19 @@ class JQuantsClient:
         load_dotenv()
         self.refresh_token = os.environ.get(Key.REFRESH_TOKEN)
         self.id_token = os.environ.get(Key.ID_TOKEN)
+        self.set_header()
 
+    def set_header(self) -> None:
         if self.id_token:
             self.client.headers["Authorization"] = f"Bearer {self.id_token}"
+
+    def auth(self, mailaddress: str, password: str) -> None:
+        """Authenticates the user and retrieves tokens."""
+        self.refresh_token = self.get_refresh_token(mailaddress, password)
+        self.id_token = self.get_id_token(self.refresh_token)
+        self.save_token(Key.REFRESH_TOKEN, self.refresh_token)
+        self.save_token(Key.ID_TOKEN, self.id_token)
+        self.set_header()
 
     def get_refresh_token(self, mailaddress: str, password: str) -> str:
         """Gets a new refresh token from the API.
