@@ -312,6 +312,15 @@ class JQuantsClient:
         return df.with_columns(pl.col("DisclosedDate").str.to_date().alias("Date"))
 
     def get_announcement(self) -> DataFrame:
+        """Gets financial announcement from the API.
+
+        Returns:
+            A Polars DataFrame containing the financial announcement.
+
+        Raises:
+            AuthenticationError: If no ID token is available.
+            HTTPStatusError: If the API request fails.
+        """
         url = "fins/announcement"
         name = "announcement"
         df = pl.concat(self.iter_pages(url, {}, name))
@@ -326,6 +335,20 @@ class JQuantsClient:
         from_: str | datetime.date | None = None,
         to: str | datetime.date | None = None,
     ) -> DataFrame:
+        """Gets trading specification from the API.
+
+        Args:
+            section: Optional. The section to filter by.
+            from_: Optional. The start date for a range.
+            to: Optional. The end date for a range.
+
+        Returns:
+            A Polars DataFrame containing the trading specification.
+
+        Raises:
+            AuthenticationError: If no ID token is available.
+            HTTPStatusError: If the API request fails.
+        """
         params: dict[str, str] = {}
         if section:
             params["section"] = section
