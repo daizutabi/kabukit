@@ -173,3 +173,8 @@ def test_prices_from(client: JQuantsClient) -> None:
 def test_prices_to(client: JQuantsClient) -> None:
     df = client.get_prices(code="7203", to="2025-08-16")
     assert df.item(-1, "Date") == datetime.date(2025, 8, 15)
+
+
+def test_prices_error(client: JQuantsClient) -> None:
+    with pytest.raises(ValueError, match="Cannot"):
+        client.get_prices(code="7203", date="2025-08-18", to="2025-08-16")

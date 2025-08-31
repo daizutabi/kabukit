@@ -71,6 +71,7 @@ class JQuantsClient:
 
     @cached_property
     def dotenv_path(self) -> Path:
+        """Returns the path to the .env file in the user config directory."""
         config_dir = Path(user_config_dir("kabukit"))
         config_dir.mkdir(parents=True, exist_ok=True)
         return config_dir / ".env"
@@ -211,6 +212,20 @@ class JQuantsClient:
         params: dict[str, Any] | None,
         name: str,
     ) -> Iterator[DataFrame]:
+        """Iterates through paginated API responses.
+
+        Args:
+            url: The base URL for the API endpoint.
+            params: Optional. Dictionary of query parameters.
+            name: The key in the JSON response containing the list of items.
+
+        Yields:
+            A Polars DataFrame for each page of data.
+
+        Raises:
+            AuthenticationError: If no ID token is available.
+            HTTPStatusError: If the API request fails.
+        """
         params = params or {}
 
         while True:
@@ -228,6 +243,25 @@ class JQuantsClient:
         from_: str | datetime.date | None = None,
         to: str | datetime.date | None = None,
     ) -> DataFrame:
+        """Gets daily stock prices from the API.
+
+        Args:
+            code: Optional. The stock code to filter by.
+            date: Optional. The specific date for which to retrieve prices.
+                Cannot be used with `from_` or `to`.
+            from_: Optional. The start date for a price range.
+                Requires `to` if `date` is not specified.
+            to: Optional. The end date for a price range.
+                Requires `from_` if `date` is not specified.
+
+        Returns:
+            A Polars DataFrame containing daily stock prices.
+
+        Raises:
+            ValueError: If both `date` and `from_`/`to` are specified.
+            AuthenticationError: If no ID token is available.
+            HTTPStatusError: If the API request fails.
+        """
         params = params_code_date(code, date)
 
         if date and (from_ or to):
@@ -241,12 +275,11 @@ class JQuantsClient:
 
         url = "/prices/daily_quotes"
         name = "daily_quotes"
-        dfs = list(self.iter_pagaes(url, params, name))
 
-        if not dfs:
-            return DataFrame()
+        df = pl.concat(self.iter_pagaes(url, params, name))
+        if df.is_empty():
+            return df
 
-        df = pl.concat(dfs)
         return df.with_columns(pl.col("Date").str.to_date())
 
 
@@ -254,6 +287,15 @@ def params_code_date(
     code: str | None,
     date: str | datetime.date | None,
 ) -> dict[str, str]:
+    """Constructs a dictionary of parameters for code and date filtering.
+
+    Args:
+        code: Optional. The stock code.
+        date: Optional. The date (string or datetime.date object).
+
+    Returns:
+        A dictionary containing 'code' and/or 'date' parameters.
+    """
     params: dict[str, str] = {}
     if code:
         params["code"] = code
@@ -263,6 +305,14 @@ def params_code_date(
 
 
 def date_to_str(date: str | datetime.date) -> str:
+    """Converts a date object or string to a YYYY-MM-DD string.
+
+    Args:
+        date: The date to convert (string or datetime.date object).
+
+    Returns:
+        The date as a YYYY-MM-DD string.
+    """
     if isinstance(date, datetime.date):
         return date.strftime("%Y-%m-%d")
     return date
