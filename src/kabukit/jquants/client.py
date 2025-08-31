@@ -10,7 +10,7 @@ import os
 from enum import StrEnum
 
 from dotenv import find_dotenv, load_dotenv, set_key
-from httpx import Client
+from httpx import Client, HTTPStatusError  # noqa: F401
 
 API_VERSION = "v1"
 
@@ -27,8 +27,8 @@ class JQuantsClient:
 
     This client manages API authentication tokens (refresh and ID)
     and provides methods to access various J-Quants API
-    endpoints. Tokens are loaded from environment variables and
-    automatically saved to a .env file when they are issued.
+    endpoints. Tokens are loaded from environment variables.
+    Use `save_token` to persist them to a .env file.
 
     Attributes:
         client: An httpx.Client instance for making API requests.
@@ -47,12 +47,16 @@ class JQuantsClient:
         tokens from environment variables.
         """
         self.client = Client(base_url=f"https://api.jquants.com/{API_VERSION}")
+
         load_dotenv()
         self.refresh_token = os.environ.get(Key.REFRESH_TOKEN)
         self.id_token = os.environ.get(Key.ID_TOKEN)
 
+        if self.id_token:
+            self.client.headers["Authorization"] = f"Bearer {self.id_token}"
+
     def get_refresh_token(self, mailaddress: str, password: str) -> str:
-        """Gets a refresh token and saves it to the .env file.
+        """Gets a new refresh token from the API.
 
         Args:
             mailaddress: The user's email address.
@@ -67,30 +71,31 @@ class JQuantsClient:
         body = {"mailaddress": mailaddress, "password": password}
         resp = self.client.post("/token/auth_user", json=body)
         resp.raise_for_status()
-
-        refresh_token = resp.json()["refreshToken"]
-        dotenv_path = find_dotenv() or ".env"
-        set_key(dotenv_path, Key.REFRESH_TOKEN, refresh_token)
-        return refresh_token
+        return resp.json()["refreshToken"]
 
     def get_id_token(self, refresh_token: str) -> str:
-        """Gets an ID token and saves it to the .env file.
+        """Gets a new ID token from the API.
 
         Args:
-            refresh_token: The refresh token to use for getting
-                a new ID token.
+            refresh_token: The refresh token to use.
 
         Returns:
             The new ID token.
 
         Raises:
-            httpx.HTTPStatusError: If the API request fails.
+            HTTPStatusError: If the API request fails.
         """
         url = f"/token/auth_refresh?refreshtoken={refresh_token}"
         resp = self.client.post(url)
         resp.raise_for_status()
+        return resp.json()["idToken"]
 
-        id_token = resp.json()["idToken"]
+    def save_token(self, key: Key, value: str) -> None:
+        """Saves a token to the .env file.
+
+        Args:
+            key: The key of the token to save (e.g., Key.REFRESH_TOKEN).
+            value: The token value to save.
+        """
         dotenv_path = find_dotenv() or ".env"
-        set_key(dotenv_path, Key.ID_TOKEN, id_token)
-        return id_token
+        set_key(dotenv_path, key, value)
