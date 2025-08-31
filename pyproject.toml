@@ -9,7 +9,13 @@ description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "Daizu", email = "daizutabi@gmail.com" }]
 requires-python = ">=3.13"
-dependencies = ["httpx", "platformdirs", "python-dotenv", "typer"]
+dependencies = [
+    "httpx",
+    "platformdirs",
+    "polars>=1.32.3",
+    "python-dotenv",
+    "typer",
+]
 
 [project.scripts]
 kabu = "kabukit.cli:app"
@@ -20,13 +26,15 @@ dev = [
   "polars>=1",
   "pytest-clarity>=1",
   "pytest-cov>=6",
+  "pytest-httpx",
+  "pytest-mock",
   "pytest-randomly>=3.16",
   "pytest-xdist>=3.6",
 ]
-docs = ["mkapi>=4.4", "mkdocs-material", "mkdocs-nbsync", "nbconvert>=7"]
+docs = ["mkapi>=4.4", "mkdocs-material"]
 
 [tool.pytest.ini_options]
-addopts = ["--cov=fdray", "--cov-report=lcov:lcov.info", "--doctest-modules"]
+addopts = ["--cov=kabukit", "--cov-report=lcov:lcov.info", "--doctest-modules"]
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "raise NotImplementedError", "if TYPE_CHECKING:"]

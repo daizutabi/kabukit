@@ -30,3 +30,11 @@ def auth(
     client = JQuantsClient()
     typer.echo(f"refreshToken: {client.refresh_token[:30]}...")
     typer.echo(f"idToken: {client.id_token[:30]}...")
+
+
+@app.command()
+def version() -> None:
+    """Show kabukit version."""
+    from importlib.metadata import version
+
+    typer.echo(f"kabukit version: {version('kabukit')}")
