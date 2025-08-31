@@ -28,6 +28,10 @@ if TYPE_CHECKING:
 API_VERSION = "v1"
 
 
+class AuthenticationError(Exception):
+    """Custom exception for authentication failures."""
+
+
 class AuthKey(StrEnum):
     """Environment variable keys for J-Quants authentication."""
 
@@ -50,8 +54,8 @@ class JQuantsClient:
     """
 
     client: Client
-    refresh_token: str
-    id_token: str
+    refresh_token: str | None
+    id_token: str | None
 
     def __init__(self) -> None:
         """Initializes the JQuantsClient.
@@ -62,6 +66,7 @@ class JQuantsClient:
         """
         self.client = Client(base_url=f"https://api.jquants.com/{API_VERSION}")
         self.load_tokens()
+        self.set_header()
 
     @cached_property
     def dotenv_path(self) -> Path:
@@ -72,8 +77,16 @@ class JQuantsClient:
     def load_tokens(self) -> None:
         """Loads tokens from the .env file."""
         load_dotenv(self.dotenv_path)
-        self.refresh_token = os.environ.get(AuthKey.REFRESH_TOKEN) or ""
-        self.id_token = os.environ.get(AuthKey.ID_TOKEN) or ""
+        self.refresh_token = os.environ.get(AuthKey.REFRESH_TOKEN)
+        self.id_token = os.environ.get(AuthKey.ID_TOKEN)
+
+    def set_header(self) -> None:
+        """Sets the Authorization header if an ID token is available."""
+        if self.id_token:
+            self.client.headers["Authorization"] = f"Bearer {self.id_token}"
+        # Clear header if no ID token is available
+        elif "Authorization" in self.client.headers:
+            del self.client.headers["Authorization"]
 
     def auth(self, mailaddress: str, password: str) -> None:
         """Authenticates, saves tokens, and sets the auth header.
@@ -89,8 +102,26 @@ class JQuantsClient:
         self.id_token = self.get_id_token(self.refresh_token)
         set_key(self.dotenv_path, AuthKey.REFRESH_TOKEN, self.refresh_token)
         set_key(self.dotenv_path, AuthKey.ID_TOKEN, self.id_token)
+        self.set_header()
 
     def post(self, url: str, json: Any | None = None) -> Any:
+        """Sends a POST request to the specified URL.
+
+        Args:
+            url: The URL path for the POST request.
+            json: The JSON payload for the request body.
+
+        Returns:
+            The JSON response from the API.
+
+        Raises:
+            AuthenticationError: If no ID token is available.
+            HTTPStatusError: If the API request fails.
+        """
+        if not self.id_token:
+            msg = "ID token is not available. Please authenticate first."
+            raise AuthenticationError(msg)
+
         resp = self.client.post(url, json=json)
         resp.raise_for_status()
         return resp.json()
@@ -108,8 +139,8 @@ class JQuantsClient:
         Raises:
             httpx.HTTPStatusError: If the API request fails.
         """
-        json = {"mailaddress": mailaddress, "password": password}
-        return self.post("/token/auth_user", json=json)["refreshToken"]
+        json_data = {"mailaddress": mailaddress, "password": password}
+        return self.post("/token/auth_user", json=json_data)["refreshToken"]
 
     def get_id_token(self, refresh_token: str) -> str:
         """Gets a new ID token from the API.
@@ -127,8 +158,24 @@ class JQuantsClient:
         return self.post(url)["idToken"]
 
     def get(self, url: str, params: QueryParamTypes | None = None) -> Any:
-        headers = {"Authorization": f"Bearer {self.id_token}"}
-        resp = self.client.get(url, params=params, headers=headers)
+        """Sends a GET request to the specified URL.
+
+        Args:
+            url: The URL path for the GET request.
+            params: The query parameters for the request.
+
+        Returns:
+            The JSON response from the API.
+
+        Raises:
+            AuthenticationError: If no ID token is available.
+            HTTPStatusError: If the API request fails.
+        """
+        if not self.id_token:
+            msg = "ID token is not available. Please authenticate first."
+            raise AuthenticationError(msg)
+
+        resp = self.client.get(url, params=params)
         resp.raise_for_status()
         return resp.json()
 
@@ -137,6 +184,20 @@ class JQuantsClient:
         code: str | None = None,
         date: str | datetime.date | None = None,
     ) -> DataFrame:
+        """Gets listed info (e.g., stock details) from the API.
+
+        Args:
+            code: Optional. The stock code to filter by.
+            date: Optional. The date to filter by (YYYY-MM-DD format
+                or datetime.date object).
+
+        Returns:
+            A Polars DataFrame containing the listed info.
+
+        Raises:
+            AuthenticationError: If no ID token is available.
+            HTTPStatusError: If the API request fails.
+        """
         params: dict[str, str] = {}
         if code:
             params["code"] = code
