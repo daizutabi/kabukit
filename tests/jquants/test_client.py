@@ -93,17 +93,17 @@ def client() -> JQuantsClient:
 
 
 @pytest.fixture(scope="module")
-def df_listed_info(client: JQuantsClient) -> DataFrame:
-    return client.get_listed_info()
+def df_info(client: JQuantsClient) -> DataFrame:
+    return client.get_info()
 
 
-def test_listed_info_width(df_listed_info: DataFrame) -> None:
-    assert df_listed_info.height > 4000
-    assert 11 <= df_listed_info.width <= 13
+def test_info_width(df_info: DataFrame) -> None:
+    assert df_info.height > 4000
+    assert 11 <= df_info.width <= 13
 
 
-def test_listed_info_today(df_listed_info: DataFrame) -> None:
-    date = df_listed_info.item(0, "Date")
+def test_info_today(df_info: DataFrame) -> None:
+    date = df_info.item(0, "Date")
     assert isinstance(date, datetime.date)
     assert abs((date - datetime.date.today()).days) <= 3  # noqa: DTZ011
 
@@ -119,8 +119,8 @@ def test_listed_info_today(df_listed_info: DataFrame) -> None:
         ("MarketCodeName", 5),
     ],
 )
-def test_listed_info_sector17(df_listed_info: DataFrame, name: str, n: int) -> None:
-    assert df_listed_info[name].n_unique() == n
+def test_info_sector17(df_info: DataFrame, name: str, n: int) -> None:
+    assert df_info[name].n_unique() == n
 
 
 @pytest.mark.parametrize(
@@ -134,8 +134,8 @@ def test_listed_info_sector17(df_listed_info: DataFrame, name: str, n: int) -> N
         "TOPIX Large70",
     ],
 )
-def test_listed_info_scale_category(df_listed_info: DataFrame, sc: str) -> None:
-    assert sc in df_listed_info["ScaleCategory"]
+def test_info_scale_category(df_info: DataFrame, sc: str) -> None:
+    assert sc in df_info["ScaleCategory"]
 
 
 @pytest.fixture(scope="module")
@@ -144,16 +144,16 @@ def date() -> datetime.date:
     return today - datetime.timedelta(weeks=12)
 
 
-def test_listed_info_date(client: JQuantsClient, date: datetime.date) -> None:
-    df = client.get_listed_info(date=date)
+def test_info_date(client: JQuantsClient, date: datetime.date) -> None:
+    df = client.get_info(date=date)
     assert df.height > 4000
     df_date = df.item(0, "Date")
     assert isinstance(df_date, datetime.date)
     assert (df_date - date).days <= 7
 
 
-def test_listed_info_code(client: JQuantsClient) -> None:
-    df = client.get_listed_info(code="7203")
+def test_info_code(client: JQuantsClient) -> None:
+    df = client.get_info(code="7203")
     assert df.height == 1
     name = df.item(0, "CompanyName")
     assert isinstance(name, str)
@@ -196,3 +196,63 @@ def test_prices_to(client: JQuantsClient) -> None:
 def test_prices_error(client: JQuantsClient) -> None:
     with pytest.raises(ValueError, match="Cannot"):
         client.get_prices(code="7203", date="2025-08-18", to="2025-08-16")
+
+
+def test_statements_code(client: JQuantsClient) -> None:
+    df = client.get_statements(code="7203")
+    assert df.width == 108
+
+
+def test_statements_date(client: JQuantsClient) -> None:
+    df = client.get_statements(date="2025-08-29")
+    assert df.height == 18
+
+
+def test_statements_empty(client: JQuantsClient) -> None:
+    df = client.get_statements(date="2025-08-30")
+    assert df.shape == (0, 0)
+
+
+def test_announcement(client: JQuantsClient) -> None:
+    df = client.get_announcement()
+    assert df.width in [7, 0]
+
+
+def test_trades_spec(client: JQuantsClient) -> None:
+    df = client.get_trades_spec()
+    assert df.width == 56
+
+
+@pytest.mark.parametrize(
+    "section",
+    [
+        "TSE1st",
+        "TSE2nd",
+        "TSEMothers",
+        "TSEJASDAQ",
+        "TSEPrime",
+        "TSEStandard",
+        "TSEGrowth",
+        "TokyoNagoya",
+    ],
+)
+def test_trades_spec_section(client: JQuantsClient, section: str) -> None:
+    df = client.get_trades_spec(section=section)
+    assert len(df)
+    s = df["Section"].unique()
+    assert len(s) == 1
+    assert s[0] == section
+
+
+def test_trades_spec_from(client: JQuantsClient) -> None:
+    df = client.get_trades_spec(from_="2025-08-01")
+    date = df.item(0, "EndDate")
+    assert isinstance(date, datetime.date)
+    assert date == datetime.date(2025, 8, 1)
+
+
+def test_trades_spec_to(client: JQuantsClient) -> None:
+    df = client.get_trades_spec(to="2025-08-01")
+    date = df.item(-1, "EndDate")
+    assert isinstance(date, datetime.date)
+    assert date == datetime.date(2025, 7, 25)

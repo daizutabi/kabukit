@@ -181,7 +181,7 @@ class JQuantsClient:
         resp.raise_for_status()
         return resp.json()
 
-    def get_listed_info(
+    def get_info(
         self,
         code: str | None = None,
         date: str | datetime.date | None = None,
@@ -206,7 +206,7 @@ class JQuantsClient:
         df = DataFrame(data["info"])
         return df.with_columns(pl.col("Date").str.to_date())
 
-    def iter_pagaes(
+    def iter_pages(
         self,
         url: str,
         params: dict[str, Any] | None,
@@ -276,11 +276,75 @@ class JQuantsClient:
         url = "/prices/daily_quotes"
         name = "daily_quotes"
 
-        df = pl.concat(self.iter_pagaes(url, params, name))
+        df = pl.concat(self.iter_pages(url, params, name))
         if df.is_empty():
             return df
 
         return df.with_columns(pl.col("Date").str.to_date())
+
+    def get_statements(
+        self,
+        code: str | None = None,
+        date: str | datetime.date | None = None,
+    ) -> DataFrame:
+        """Gets financial statements from the API.
+
+        Args:
+            code: Optional. The stock code to filter by.
+            date: Optional. The date to filter by (YYYY-MM-DD format
+                or datetime.date object).
+
+        Returns:
+            A Polars DataFrame containing the financial statements.
+
+        Raises:
+            AuthenticationError: If no ID token is available.
+            HTTPStatusError: If the API request fails.
+        """
+        params = params_code_date(code, date)
+        url = "/fins/statements"
+        name = "statements"
+
+        df = pl.concat(self.iter_pages(url, params, name))
+        if df.is_empty():
+            return df
+
+        return df.with_columns(pl.col("DisclosedDate").str.to_date().alias("Date"))
+
+    def get_announcement(self) -> DataFrame:
+        url = "fins/announcement"
+        name = "announcement"
+        df = pl.concat(self.iter_pages(url, {}, name))
+        if df.is_empty():
+            return df
+
+        return df.with_columns(pl.col("Date").str.to_date())
+
+    def get_trades_spec(
+        self,
+        section: str | None = None,
+        from_: str | datetime.date | None = None,
+        to: str | datetime.date | None = None,
+    ) -> DataFrame:
+        params: dict[str, str] = {}
+        if section:
+            params["section"] = section
+        if from_:
+            params["from"] = date_to_str(from_)
+        if to:
+            params["to"] = date_to_str(to)
+
+        url = "/markets/trades_spec"
+        name = "trades_spec"
+
+        df = pl.concat(self.iter_pages(url, params, name))
+        if df.is_empty():
+            return df
+
+        return df.with_columns(
+            pl.col(name).str.to_date()
+            for name in ["PublishedDate", "StartDate", "EndDate"]
+        )
 
 
 def params_code_date(
