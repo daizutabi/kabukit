@@ -20,6 +20,7 @@ from platformdirs import user_config_dir
 from polars import DataFrame
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from typing import Any
 
     from httpx import HTTPStatusError  # noqa: F401
@@ -198,13 +199,62 @@ class JQuantsClient:
             AuthenticationError: If no ID token is available.
             HTTPStatusError: If the API request fails.
         """
-        params: dict[str, str] = {}
-        if code:
-            params["code"] = code
-        if date:
-            if isinstance(date, datetime.date):
-                date = date.strftime("%Y-%m-%d")
-            params["date"] = date
+        params = params_code_date(code, date)
+        url = "/listed/info"
+        data = self.get(url, params)
+        df = DataFrame(data["info"])
+        return df.with_columns(pl.col("Date").str.to_date())
 
-        data = self.get("/listed/info", params)["info"]
-        return DataFrame(data).with_columns(pl.col("Date").str.to_date())
+    def iter_pagaes(
+        self,
+        url: str,
+        params: dict[str, Any] | None,
+        name: str,
+    ) -> Iterator[DataFrame]:
+        params = params or {}
+
+        while True:
+            data = self.get(url, params)
+            yield DataFrame(data[name])
+            if "pagination_key" in data:
+                params["pagination_key"] = data["pagination_key"]
+            else:
+                break
+
+    def get_prices(
+        self,
+        code: str | None = None,
+        date: str | datetime.date | None = None,
+        from_: str | datetime.date | None = None,
+        to: str | datetime.date | None = None,
+    ) -> DataFrame:
+        params = params_code_date(code, date)
+
+        if not date and from_:
+            params["from"] = date_to_str(from_)
+        if not date and to:
+            params["to"] = date_to_str(to)
+
+        url = "/prices/daily_quotes"
+        df = pl.concat(self.iter_pagaes(url, params, "daily_quotes"))
+        if df.is_empty():
+            return df
+        return df.with_columns(pl.col("Date").str.to_date())
+
+
+def params_code_date(
+    code: str | None,
+    date: str | datetime.date | None,
+) -> dict[str, str]:
+    params: dict[str, str] = {}
+    if code:
+        params["code"] = code
+    if date:
+        params["date"] = date_to_str(date)
+    return params
+
+
+def date_to_str(date: str | datetime.date) -> str:
+    if isinstance(date, datetime.date):
+        return date.strftime("%Y-%m-%d")
+    return date

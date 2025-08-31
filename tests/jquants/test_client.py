@@ -140,3 +140,26 @@ def test_listed_info_code(client: JQuantsClient) -> None:
     name = df.item(0, "CompanyName")
     assert isinstance(name, str)
     assert "トヨタ" in name
+
+
+def test_prices_code(client: JQuantsClient) -> None:
+    df = client.get_prices(code="7203")
+    assert df.width == 16
+
+
+def test_prices_date(client: JQuantsClient) -> None:
+    df = client.get_prices(date="2025-08-29")
+    assert df.height > 4000
+    assert df.height == df["Code"].n_unique()
+
+
+def test_prices_empty(client: JQuantsClient) -> None:
+    df = client.get_prices(date="2025-08-30")
+    assert df.shape == (0, 0)
+
+
+def test_prices_from_to(client: JQuantsClient) -> None:
+    df = client.get_prices(code="7203", from_="2025-08-16", to="2025-08-25")
+    assert df.height == 6
+    assert df.item(0, "Date") == datetime.date(2025, 8, 18)
+    assert df.item(5, "Date") == datetime.date(2025, 8, 25)
