@@ -69,6 +69,24 @@ def test_auth_success(httpx_mock: HTTPXMock, mocker: MockerFixture) -> None:
     assert mock_set_key.call_count == 2
 
 
+def test_post_error() -> None:
+    from kabukit.jquants.client import AuthenticationError
+
+    client = JQuantsClient()
+    client.id_token = None
+    with pytest.raises(AuthenticationError, match="ID token is not available"):
+        client.post("/some/endpoint")
+
+
+def test_get_error() -> None:
+    from kabukit.jquants.client import AuthenticationError
+
+    client = JQuantsClient()
+    client.id_token = None
+    with pytest.raises(AuthenticationError, match="ID token is not available"):
+        client.get("/some/endpoint")
+
+
 @pytest.fixture(scope="module")
 def client() -> JQuantsClient:
     return JQuantsClient()
