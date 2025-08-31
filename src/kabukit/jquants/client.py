@@ -43,8 +43,9 @@ class JQuantsClient:
     def __init__(self) -> None:
         """Initializes the JQuantsClient.
 
-        It sets up the httpx client and loads authentication
-        tokens from environment variables.
+        It sets up the httpx client, loads authentication tokens
+        from environment variables, and sets the auth header if an
+        ID token is present.
         """
         self.client = Client(base_url=f"https://api.jquants.com/{API_VERSION}")
 
@@ -54,11 +55,27 @@ class JQuantsClient:
         self.set_header()
 
     def set_header(self) -> None:
+        """Sets the Authorization header if an ID token is available."""
         if self.id_token:
             self.client.headers["Authorization"] = f"Bearer {self.id_token}"
 
     def auth(self, mailaddress: str, password: str) -> None:
-        """Authenticates the user and retrieves tokens."""
+        """Authenticates, saves tokens, and sets the auth header.
+
+        This method orchestrates the entire authentication process:
+
+        1. Gets a new refresh token.
+        2. Gets a new ID token using the refresh token.
+        3. Saves both tokens to the .env file.
+        4. Sets the Authorization header for subsequent requests.
+
+        Args:
+            mailaddress: The user's email address.
+            password: The user's password.
+
+        Raises:
+            HTTPStatusError: If any API request fails.
+        """
         self.refresh_token = self.get_refresh_token(mailaddress, password)
         self.id_token = self.get_id_token(self.refresh_token)
         self.save_token(Key.REFRESH_TOKEN, self.refresh_token)

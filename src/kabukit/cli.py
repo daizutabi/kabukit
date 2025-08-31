@@ -6,6 +6,7 @@ import pprint
 from typing import TYPE_CHECKING, Annotated
 
 import typer
+from httpx import HTTPStatusError
 from typer import Argument, Exit, Option, Typer
 
 from .jquants.client import JQuantsClient, Key
@@ -21,36 +22,14 @@ def auth(
     """Authenticate and save/refresh tokens."""
     client = JQuantsClient()
 
-    client.get_refresh_token(mailaddress, password)
+    try:
+        client.auth(mailaddress, password)
+    except HTTPStatusError as e:
+        typer.echo(f"Authentication failed: {e}")
+        raise typer.Exit(code=1) from None
 
-    typer.echo(mailaddress)
-    typer.echo(password)
-    # try:
-    #     if email and password:
-    #         # Get and save a new refresh token
-    #         print("Issuing a new refresh token...")
-    #         refresh_token = client.get_refresh_token(email, password)
-    #         client.save_token(Key.REFRESH_TOKEN, refresh_token)
-    #         # Also get and save an ID token
-    #         print("Issuing a new ID token...")
-    #         id_token = client.get_id_token(refresh_token)
-    #         client.save_token(Key.ID_TOKEN, id_token)
-    #         print("\nAuthentication successful. Tokens are saved to .env file.")
-    #     elif client.refresh_token:
-    #         # Refresh and save the ID token using the existing refresh token
-    #         print("Refreshing ID token...")
-    #         id_token = client.get_id_token(client.refresh_token)
-    #         client.save_token(Key.ID_TOKEN, id_token)
-    #         print("ID token has been refreshed and saved.")
-    #     else:
-    #         print(
-    #             "Error: No credentials or refresh token found. Please provide email/password\n"
-    #             "or ensure JQUANTS_REFRESH_TOKEN is in your .env file.",
-    #         )
-    #         raise typer.Exit(code=1)
-    # except Exception as e:
-    #     print(f"An error occurred during authentication: {e}")
-    #     raise typer.Exit(code=1)
+    typer.echo(client.refresh_token)
+    typer.echo(client.id_token)
 
 
 @app.command()
