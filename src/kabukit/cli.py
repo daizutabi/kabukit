@@ -28,8 +28,12 @@ def auth(
         raise Exit(1) from None
 
     client = JQuantsClient()
-    typer.echo(f"refreshToken: {client.refresh_token[:30]}...")
-    typer.echo(f"idToken: {client.id_token[:30]}...")
+
+    typer.echo(f"dotenv_path: {client.dotenv_path}")
+    if refresh_token := client.refresh_token:
+        typer.echo(f"refreshToken: {refresh_token[:30]}...")
+    if id_token := client.id_token:
+        typer.echo(f"idToken: {id_token[:30]}...")
 
 
 @app.command()
