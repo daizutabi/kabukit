@@ -15,7 +15,7 @@ import polars as pl
 from httpx import Client
 from polars import DataFrame
 
-from kabukit.dotenv import load_dotenv, set_key
+from kabukit.config import load_dotenv, set_key
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

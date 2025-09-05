@@ -8,9 +8,12 @@ import typer
 from httpx import HTTPStatusError
 from typer import Argument, Exit, Option, Typer
 
-from .jquants.client import JQuantsClient
+from kabukit.jquants.client import JQuantsClient
+
+from . import config
 
 app = Typer(add_completion=False)
+app.add_typer(config.app)
 
 
 @app.command()
