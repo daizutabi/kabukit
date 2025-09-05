@@ -59,7 +59,7 @@ class JQuantsClient:
     id_token: str | None
 
     def __init__(self) -> None:
-        """Initializes the JQuantsClient.
+        """Initialize the JQuantsClient.
 
         It sets up the httpx client, determines the config path,
         loads authentication tokens, and sets the auth header if an
@@ -71,19 +71,19 @@ class JQuantsClient:
 
     @cached_property
     def dotenv_path(self) -> Path:
-        """Returns the path to the .env file in the user config directory."""
+        """Return the path to the .env file in the user config directory."""
         config_dir = Path(user_config_dir("kabukit"))
         config_dir.mkdir(parents=True, exist_ok=True)
         return config_dir / ".env"
 
     def load_tokens(self) -> None:
-        """Loads tokens from the .env file."""
+        """Load tokens from the .env file."""
         load_dotenv(self.dotenv_path)
         self.refresh_token = os.environ.get(AuthKey.REFRESH_TOKEN)
         self.id_token = os.environ.get(AuthKey.ID_TOKEN)
 
     def set_header(self) -> None:
-        """Sets the Authorization header if an ID token is available."""
+        """Set the Authorization header if an ID token is available."""
         if self.id_token:
             self.client.headers["Authorization"] = f"Bearer {self.id_token}"
         # Clear header if no ID token is available
@@ -91,7 +91,7 @@ class JQuantsClient:
             del self.client.headers["Authorization"]
 
     def auth(self, mailaddress: str, password: str) -> None:
-        """Authenticates, saves tokens, and sets the auth header.
+        """Authenticate, save tokens, and set the auth header.
 
         Args:
             mailaddress: The user's email address.
@@ -107,7 +107,7 @@ class JQuantsClient:
         self.set_header()
 
     def post(self, url: str, json: Any | None = None) -> Any:
-        """Sends a POST request to the specified URL.
+        """Send a POST request to the specified URL.
 
         Args:
             url: The URL path for the POST request.
@@ -129,7 +129,7 @@ class JQuantsClient:
         return resp.json()
 
     def get_refresh_token(self, mailaddress: str, password: str) -> str:
-        """Gets a new refresh token from the API.
+        """Get a new refresh token from the API.
 
         Args:
             mailaddress: The user's email address.
@@ -145,7 +145,7 @@ class JQuantsClient:
         return self.post("/token/auth_user", json=json_data)["refreshToken"]
 
     def get_id_token(self, refresh_token: str) -> str:
-        """Gets a new ID token from the API.
+        """Get a new ID token from the API.
 
         Args:
             refresh_token: The refresh token to use.
@@ -160,7 +160,7 @@ class JQuantsClient:
         return self.post(url)["idToken"]
 
     def get(self, url: str, params: QueryParamTypes | None = None) -> Any:
-        """Sends a GET request to the specified URL.
+        """Send a GET request to the specified URL.
 
         Args:
             url: The URL path for the GET request.
@@ -186,7 +186,7 @@ class JQuantsClient:
         code: str | None = None,
         date: str | datetime.date | None = None,
     ) -> DataFrame:
-        """Gets listed info (e.g., stock details) from the API.
+        """Get listed info (e.g., stock details) from the API.
 
         Args:
             code: Optional. The stock code to filter by.
@@ -212,7 +212,7 @@ class JQuantsClient:
         params: dict[str, Any] | None,
         name: str,
     ) -> Iterator[DataFrame]:
-        """Iterates through paginated API responses.
+        """Iterate through paginated API responses.
 
         Args:
             url: The base URL for the API endpoint.
@@ -243,7 +243,7 @@ class JQuantsClient:
         from_: str | datetime.date | None = None,
         to: str | datetime.date | None = None,
     ) -> DataFrame:
-        """Gets daily stock prices from the API.
+        """Get daily stock prices from the API.
 
         Args:
             code: Optional. The stock code to filter by.
@@ -287,7 +287,7 @@ class JQuantsClient:
         code: str | None = None,
         date: str | datetime.date | None = None,
     ) -> DataFrame:
-        """Gets financial statements from the API.
+        """Get financial statements from the API.
 
         Args:
             code: Optional. The stock code to filter by.
@@ -312,7 +312,7 @@ class JQuantsClient:
         return df.with_columns(pl.col("DisclosedDate").str.to_date().alias("Date"))
 
     def get_announcement(self) -> DataFrame:
-        """Gets financial announcement from the API.
+        """Get financial announcement from the API.
 
         Returns:
             A Polars DataFrame containing the financial announcement.
@@ -335,7 +335,7 @@ class JQuantsClient:
         from_: str | datetime.date | None = None,
         to: str | datetime.date | None = None,
     ) -> DataFrame:
-        """Gets trading specification from the API.
+        """Get trading specification from the API.
 
         Args:
             section: Optional. The section to filter by.
@@ -374,32 +374,35 @@ def params_code_date(
     code: str | None,
     date: str | datetime.date | None,
 ) -> dict[str, str]:
-    """Constructs a dictionary of parameters for code and date filtering.
+    """Construct a dictionary of parameters for code and date filtering.
 
     Args:
         code: Optional. The stock code.
-        date: Optional. The date (string or datetime.date object).
+        date: Optional. The date.
 
     Returns:
-        A dictionary containing 'code' and/or 'date' parameters.
+        A dictionary containing "code" and/or "date" parameters.
     """
     params: dict[str, str] = {}
+
     if code:
         params["code"] = code
     if date:
         params["date"] = date_to_str(date)
+
     return params
 
 
 def date_to_str(date: str | datetime.date) -> str:
-    """Converts a date object or string to a YYYY-MM-DD string.
+    """Convert a date object or string to a YYYY-MM-DD string.
 
     Args:
-        date: The date to convert (string or datetime.date object).
+        date: The date to convert.
 
     Returns:
         The date as a YYYY-MM-DD string.
     """
     if isinstance(date, datetime.date):
         return date.strftime("%Y-%m-%d")
+
     return date
