@@ -29,7 +29,6 @@ def auth(
 
     client = JQuantsClient()
 
-    typer.echo(f"dotenv_path: {client.dotenv_path}")
     if refresh_token := client.refresh_token:
         typer.echo(f"refreshToken: {refresh_token[:30]}...")
     if id_token := client.id_token:

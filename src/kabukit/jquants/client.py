@@ -9,15 +9,13 @@ from __future__ import annotations
 import datetime
 import os
 from enum import StrEnum
-from functools import cached_property
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import polars as pl
-from dotenv import load_dotenv, set_key
 from httpx import Client
-from platformdirs import user_config_dir
 from polars import DataFrame
+
+from kabukit.dotenv import load_dotenv, set_key
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -69,16 +67,9 @@ class JQuantsClient:
         self.load_tokens()
         self.set_header()
 
-    @cached_property
-    def dotenv_path(self) -> Path:
-        """Return the path to the .env file in the user config directory."""
-        config_dir = Path(user_config_dir("kabukit"))
-        config_dir.mkdir(parents=True, exist_ok=True)
-        return config_dir / ".env"
-
     def load_tokens(self) -> None:
         """Load tokens from the .env file."""
-        load_dotenv(self.dotenv_path)
+        load_dotenv()
         self.refresh_token = os.environ.get(AuthKey.REFRESH_TOKEN)
         self.id_token = os.environ.get(AuthKey.ID_TOKEN)
 
@@ -102,8 +93,8 @@ class JQuantsClient:
         """
         self.refresh_token = self.get_refresh_token(mailaddress, password)
         self.id_token = self.get_id_token(self.refresh_token)
-        set_key(self.dotenv_path, AuthKey.REFRESH_TOKEN, self.refresh_token)
-        set_key(self.dotenv_path, AuthKey.ID_TOKEN, self.id_token)
+        set_key(AuthKey.REFRESH_TOKEN, self.refresh_token)
+        set_key(AuthKey.ID_TOKEN, self.id_token)
         self.set_header()
 
     def post(self, url: str, json: Any | None = None) -> Any:

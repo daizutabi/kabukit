@@ -60,12 +60,8 @@ def test_auth_success(httpx_mock: HTTPXMock, mocker: MockerFixture) -> None:
     assert client.id_token == DUMMY_ID_TOKEN
 
     # Assert: Check if the tokens were saved correctly
-    mock_set_key.assert_any_call(
-        client.dotenv_path,
-        AuthKey.REFRESH_TOKEN,
-        DUMMY_REFRESH_TOKEN,
-    )
-    mock_set_key.assert_any_call(client.dotenv_path, AuthKey.ID_TOKEN, DUMMY_ID_TOKEN)
+    mock_set_key.assert_any_call(AuthKey.REFRESH_TOKEN, DUMMY_REFRESH_TOKEN)
+    mock_set_key.assert_any_call(AuthKey.ID_TOKEN, DUMMY_ID_TOKEN)
     assert mock_set_key.call_count == 2
 
 
