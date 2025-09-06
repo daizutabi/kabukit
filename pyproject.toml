@@ -18,7 +18,7 @@ dependencies = [
 ]
 
 [project.scripts]
-kabu = "kabukit.app.main:app"
+kabu = "kabukit.cli:app"
 
 [dependency-groups]
 dev = [
