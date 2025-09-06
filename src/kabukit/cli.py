@@ -12,7 +12,7 @@ from typer import Exit, Option
 
 app = AsyncTyper(
     add_completion=False,
-    help="Kabukit: J-QuantsおよびEDINETから金融データを取得するためのCLIツール。",
+    help="J-QuantsおよびEDINETの認証トークンを保存する。",
 )
 
 
@@ -76,7 +76,7 @@ def show() -> None:
 
 @app.command()
 def version() -> None:
-    """kabukitのバージョン情報を表示します。"""
+    """バージョン情報を表示します。"""
     from importlib.metadata import version
 
     typer.echo(f"kabukit version: {version('kabukit')}")
