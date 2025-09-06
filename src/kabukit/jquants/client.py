@@ -6,7 +6,6 @@ the API endpoints.
 
 from __future__ import annotations
 
-import datetime
 import os
 from enum import StrEnum
 from typing import TYPE_CHECKING
@@ -16,8 +15,10 @@ from httpx import Client
 from polars import DataFrame
 
 from kabukit.config import load_dotenv, set_key
+from kabukit.params import get_params
 
 if TYPE_CHECKING:
+    import datetime
     from collections.abc import Iterator
     from typing import Any
 
@@ -25,6 +26,7 @@ if TYPE_CHECKING:
     from httpx._types import QueryParamTypes
 
 API_VERSION = "v1"
+BASE_URL = f"https://api.jquants.com/{API_VERSION}"
 
 
 class AuthenticationError(Exception):
@@ -63,7 +65,7 @@ class JQuantsClient:
         loads authentication tokens, and sets the auth header if an
         ID token is present.
         """
-        self.client = Client(base_url=f"https://api.jquants.com/{API_VERSION}")
+        self.client = Client(base_url=BASE_URL)
         self.load_tokens()
         self.set_header()
 
@@ -191,7 +193,7 @@ class JQuantsClient:
             AuthenticationError: If no ID token is available.
             HTTPStatusError: If the API request fails.
         """
-        params = params_code_date(code, date)
+        params = get_params(code=code, date=date)
         url = "/listed/info"
         data = self.get(url, params)
         df = DataFrame(data["info"])
@@ -253,16 +255,11 @@ class JQuantsClient:
             AuthenticationError: If no ID token is available.
             HTTPStatusError: If the API request fails.
         """
-        params = params_code_date(code, date)
-
         if date and (from_ or to):
             msg = "Cannot specify both date and from/to parameters."
             raise ValueError(msg)
 
-        if not date and from_:
-            params["from"] = date_to_str(from_)
-        if not date and to:
-            params["to"] = date_to_str(to)
+        params = get_params(code=code, date=date, from_=from_, to=to)
 
         url = "/prices/daily_quotes"
         name = "daily_quotes"
@@ -292,7 +289,7 @@ class JQuantsClient:
             AuthenticationError: If no ID token is available.
             HTTPStatusError: If the API request fails.
         """
-        params = params_code_date(code, date)
+        params = get_params(code=code, date=date)
         url = "/fins/statements"
         name = "statements"
 
@@ -340,13 +337,7 @@ class JQuantsClient:
             AuthenticationError: If no ID token is available.
             HTTPStatusError: If the API request fails.
         """
-        params: dict[str, str] = {}
-        if section:
-            params["section"] = section
-        if from_:
-            params["from"] = date_to_str(from_)
-        if to:
-            params["to"] = date_to_str(to)
+        params = get_params(section=section, from_=from_, to=to)
 
         url = "/markets/trades_spec"
         name = "trades_spec"
@@ -359,41 +350,3 @@ class JQuantsClient:
             pl.col(name).str.to_date()
             for name in ["PublishedDate", "StartDate", "EndDate"]
         )
-
-
-def params_code_date(
-    code: str | None,
-    date: str | datetime.date | None,
-) -> dict[str, str]:
-    """Construct a dictionary of parameters for code and date filtering.
-
-    Args:
-        code: Optional. The stock code.
-        date: Optional. The date.
-
-    Returns:
-        A dictionary containing "code" and/or "date" parameters.
-    """
-    params: dict[str, str] = {}
-
-    if code:
-        params["code"] = code
-    if date:
-        params["date"] = date_to_str(date)
-
-    return params
-
-
-def date_to_str(date: str | datetime.date) -> str:
-    """Convert a date object or string to a YYYY-MM-DD string.
-
-    Args:
-        date: The date to convert.
-
-    Returns:
-        The date as a YYYY-MM-DD string.
-    """
-    if isinstance(date, datetime.date):
-        return date.strftime("%Y-%m-%d")
-
-    return date

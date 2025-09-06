@@ -240,15 +240,29 @@ def test_trades_spec_section(client: JQuantsClient, section: str) -> None:
     assert s[0] == section
 
 
-def test_trades_spec_from(client: JQuantsClient) -> None:
-    df = client.get_trades_spec(from_="2025-08-01")
+@pytest.mark.parametrize(
+    "from_",
+    [
+        "2025-08-01",
+        datetime.date(2025, 8, 1),
+    ],
+)
+def test_trades_spec_from(client: JQuantsClient, from_: str | datetime.date) -> None:
+    df = client.get_trades_spec(from_=from_)
     date = df.item(0, "EndDate")
     assert isinstance(date, datetime.date)
     assert date == datetime.date(2025, 8, 1)
 
 
-def test_trades_spec_to(client: JQuantsClient) -> None:
-    df = client.get_trades_spec(to="2025-08-01")
+@pytest.mark.parametrize(
+    "to",
+    [
+        "2025-08-01",
+        datetime.date(2025, 8, 1),
+    ],
+)
+def test_trades_spec_to(client: JQuantsClient, to: str | datetime.date) -> None:
+    df = client.get_trades_spec(to=to)
     date = df.item(-1, "EndDate")
     assert isinstance(date, datetime.date)
     assert date == datetime.date(2025, 7, 25)
