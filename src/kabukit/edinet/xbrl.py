@@ -6,9 +6,8 @@ import zipfile
 from enum import StrEnum
 from typing import TYPE_CHECKING
 
-import chardet
-import polars as pl
 from httpx import AsyncClient
+from lxml import etree
 from polars import DataFrame
 
 from kabukit.config import load_dotenv
@@ -16,7 +15,7 @@ from kabukit.params import get_params
 
 if TYPE_CHECKING:
     import datetime
-    from typing import Self
+    from typing import Any, Self
 
     from httpx import Response
     from httpx._types import QueryParamTypes
@@ -89,7 +88,7 @@ class EdinetClient:
         msg = "PDF is not available."
         raise ValueError(msg)
 
-    async def get_zip(self, doc_id: str, doc_type: int = 1) -> bytes:
+    async def get_zip(self, doc_id: str, doc_type: int) -> bytes:
         resp = await self.get_document(doc_id, doc_type=doc_type)
         if resp.headers["content-type"] == "application/octet-stream":
             return resp.content
@@ -97,21 +96,43 @@ class EdinetClient:
         msg = "ZIP is not available."
         raise ValueError(msg)
 
-    async def get_csv(self, doc_id: str) -> DataFrame:
-        content = await self.get_zip(doc_id, doc_type=5)
-        buffer = io.BytesIO(content)
-        zf = zipfile.ZipFile(buffer)
+    def parse_xbrl(self, xbrl_content: bytes) -> dict[str, Any]:
+        parser = etree.XMLParser(recover=True)
+        tree = etree.fromstring(xbrl_content, parser)
+        ns = {
+            k if k is not None else "xbrli": v
+            for k, v in tree.nsmap.items()
+            if k is not None
+        }
+        ns["jppfs_cor"] = (
+            "http://disclosure.edinet-fsa.go.jp/taxonomy/jppfs/2022-11-01/jppfs_cor"
+        )
 
-        for info in zf.infolist():
-            if info.filename.endswith(".csv"):
-                with zf.open(info) as f:
-                    return read_csv(f.read())
+        net_sales_element = tree.find(".//jppfs_cor:NetSales", namespaces=ns)
+        if net_sales_element is not None and net_sales_element.text is not None:
+            context_ref = net_sales_element.get("contextRef")
+            context = tree.find(f".//xbrli:context[@id='{context_ref}']", namespaces=ns)
+            if context is not None:
+                period = context.find(".//xbrli:period", namespaces=ns)
+                if period is not None:
+                    instant = period.find(".//xbrli:instant", namespaces=ns)
+                    if instant is not None:
+                        period_val = instant.text
+                    else:
+                        start_date = period.find(".//xbrli:startDate", namespaces=ns)
+                        end_date = period.find(".//xbrli:endDate", namespaces=ns)
+                        period_val = f"{start_date.text if start_date is not None else ''} - {end_date.text if end_date is not None else ''}"
+                else:
+                    period_val = None
 
-        msg = "CSV is not available."
-        raise ValueError(msg)
+                scenario = context.find(".//xbrli:scenario", namespaces=ns)
 
-
-def read_csv(source: bytes) -> DataFrame:
-    charset = chardet.detect(source)
-    encoding = charset["encoding"] or "utf-8"
-    return pl.read_csv(source, separator="\t", encoding=encoding)
+                return {
+                    "NetSales": net_sales_element.text,
+                    "context": {
+                        "id": context.get("id"),
+                        "period": period_val,
+                        "consolidated": scenario is None,
+                    },
+                }
+        return {}

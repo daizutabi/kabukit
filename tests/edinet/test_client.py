@@ -1,14 +1,6 @@
 import pytest
-import pytest_asyncio
 
 from kabukit.edinet.client import EdinetClient
-
-
-@pytest_asyncio.fixture
-async def client():
-    client = EdinetClient.create()
-    yield client
-    await client.aclose()
 
 
 @pytest.mark.asyncio
@@ -41,4 +33,10 @@ async def test_pdf(client: EdinetClient) -> None:
 
 @pytest.mark.asyncio
 async def test_zip(client: EdinetClient) -> None:
-    assert await client.get_zip("S100WKHJ", doc_type=5)
+    assert await client.get_zip("S100WKHJ", doc_type=5) is not None
+
+
+@pytest.mark.asyncio
+async def test_csv(client: EdinetClient) -> None:
+    df = await client.get_csv("S100WKHJ")
+    assert df.shape == (47, 9)
