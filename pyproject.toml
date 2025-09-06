@@ -11,14 +11,12 @@ authors = [{ name = "Daizu", email = "daizutabi@gmail.com" }]
 requires-python = ">=3.12"
 dependencies = [
   "async-typer>=0.1.10",
-  "httpx",
-  "lxml",
-  "platformdirs",
+  "httpx>=0.28",
+  "lxml>=6",
+  "platformdirs>=4.4",
   "polars>=1.32.3",
-  "pytest-asyncio>=1.1.0",
-  "pytest-xdist>=3.8.0",
-  "python-dotenv",
-  "typer",
+  "python-dotenv>=1.1",
+  "typer>=0.17",
 ]
 
 [project.scripts]
@@ -26,12 +24,15 @@ kabu = "kabukit.cli:app"
 
 [dependency-groups]
 dev = [
+  "lxml-stubs>=0.5",
   "matplotlib>=3.6",
   "polars>=1",
   "pytest-clarity>=1",
   "pytest-cov>=6",
-  "pytest-httpx",
-  "pytest-mock",
+  # "pytest-httpx",
+  # "pytest-mock",
+  "pytest-asyncio>=1.1.0",
+  "pytest-xdist>=3.8.0",
   "pytest-randomly>=3.16",
   "pytest-xdist>=3.6",
 ]
