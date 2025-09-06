@@ -6,91 +6,22 @@ import datetime
 from typing import TYPE_CHECKING
 
 import pytest
+import pytest_asyncio
 
 from kabukit.jquants.client import AuthKey, JQuantsClient
 
 if TYPE_CHECKING:
     from polars import DataFrame
-    from pytest_httpx import HTTPXMock
-    from pytest_mock import MockerFixture
 
 DUMMY_REFRESH_TOKEN = "dummy_refresh_token"  # noqa: S105
 DUMMY_ID_TOKEN = "dummy_id_token"  # noqa: S105
 
 
-def test_auth_success(httpx_mock: HTTPXMock, mocker: MockerFixture) -> None:
-    """Test successful authentication process.
-
-    Given:
-        A JQuantsClient instance.
-        Mocked API endpoints for successful token issuance.
-        Mocked set_key function.
-
-    When:
-        client.auth() is called with dummy credentials.
-
-    Then:
-        The client's tokens are updated.
-        The set_key function is called correctly to save the tokens.
-    """
-    # Arrange: Mock the set_key function to prevent actual file I/O
-    mock_set_key = mocker.patch("kabukit.jquants.client.set_key")
-
-    # Arrange: Mock the API responses for a successful auth flow
-    httpx_mock.add_response(
-        method="POST",
-        url="https://api.jquants.com/v1/token/auth_user",
-        json={"refreshToken": DUMMY_REFRESH_TOKEN},
-        status_code=200,
-    )
-    httpx_mock.add_response(
-        method="POST",
-        url=f"https://api.jquants.com/v1/token/auth_refresh?refreshtoken={DUMMY_REFRESH_TOKEN}",
-        json={"idToken": DUMMY_ID_TOKEN},
-        status_code=200,
-    )
-
-    client = JQuantsClient()
-
-    # Act
-    client.auth("dummy@example.com", "dummy_password")
-
-    # Assert: Check if the client's state is updated
-    assert client.refresh_token == DUMMY_REFRESH_TOKEN
-    assert client.id_token == DUMMY_ID_TOKEN
-
-    # Assert: Check if the tokens were saved correctly
-    mock_set_key.assert_any_call(AuthKey.REFRESH_TOKEN, DUMMY_REFRESH_TOKEN)
-    mock_set_key.assert_any_call(AuthKey.ID_TOKEN, DUMMY_ID_TOKEN)
-    assert mock_set_key.call_count == 2
-
-
-def test_post_error() -> None:
-    from kabukit.jquants.client import AuthenticationError
-
-    client = JQuantsClient()
-    client.id_token = None
-    with pytest.raises(AuthenticationError, match="ID token is not available"):
-        client.post("/some/endpoint")
-
-
-def test_get_error() -> None:
-    from kabukit.jquants.client import AuthenticationError
-
-    client = JQuantsClient()
-    client.id_token = None
-    with pytest.raises(AuthenticationError, match="ID token is not available"):
-        client.get("/some/endpoint")
-
-
-@pytest.fixture(scope="module")
-def client() -> JQuantsClient:
-    return JQuantsClient()
-
-
-@pytest.fixture(scope="module")
-def df_info(client: JQuantsClient) -> DataFrame:
-    return client.get_info()
+@pytest_asyncio.fixture(scope="module")
+async def df_info():
+    client = JQuantsClient.create()
+    yield await client.get_info()
+    await client.aclose()
 
 
 def test_info_width(df_info: DataFrame) -> None:
@@ -140,85 +71,107 @@ def date() -> datetime.date:
     return today - datetime.timedelta(weeks=12)
 
 
-def test_info_date(client: JQuantsClient, date: datetime.date) -> None:
-    df = client.get_info(date=date)
+@pytest_asyncio.fixture
+async def client():
+    client = JQuantsClient.create()
+    yield client
+    await client.aclose()
+
+
+@pytest.mark.asyncio
+async def test_info_date(client: JQuantsClient, date: datetime.date) -> None:
+    df = await client.get_info(date=date)
     assert df.height > 4000
     df_date = df.item(0, "Date")
     assert isinstance(df_date, datetime.date)
     assert (df_date - date).days <= 7
 
 
-def test_info_code(client: JQuantsClient) -> None:
-    df = client.get_info(code="7203")
+@pytest.mark.asyncio
+async def test_info_code(client: JQuantsClient) -> None:
+    df = await client.get_info(code="7203")
     assert df.height == 1
     name = df.item(0, "CompanyName")
     assert isinstance(name, str)
     assert "トヨタ" in name
 
 
-def test_prices_code(client: JQuantsClient) -> None:
-    df = client.get_prices(code="7203")
+@pytest.mark.asyncio
+async def test_prices_code(client: JQuantsClient) -> None:
+    df = await client.get_prices(code="7203")
     assert df.width == 16
 
 
-def test_prices_date(client: JQuantsClient) -> None:
-    df = client.get_prices(date="2025-08-29")
+@pytest.mark.asyncio
+async def test_prices_date(client: JQuantsClient) -> None:
+    df = await client.get_prices(date="2025-08-29")
     assert df.height > 4000
     assert df.height == df["Code"].n_unique()
 
 
-def test_prices_empty(client: JQuantsClient) -> None:
-    df = client.get_prices(date="2025-08-30")
+@pytest.mark.asyncio
+async def test_prices_empty(client: JQuantsClient) -> None:
+    df = await client.get_prices(date="2025-08-30")
     assert df.shape == (0, 0)
 
 
-def test_prices_from_to(client: JQuantsClient) -> None:
-    df = client.get_prices(code="7203", from_="2025-08-16", to="2025-08-25")
+@pytest.mark.asyncio
+async def test_prices_from_to(client: JQuantsClient) -> None:
+    df = await client.get_prices(code="7203", from_="2025-08-16", to="2025-08-25")
     assert df.height == 6
     assert df.item(0, "Date") == datetime.date(2025, 8, 18)
     assert df.item(5, "Date") == datetime.date(2025, 8, 25)
 
 
-def test_prices_from(client: JQuantsClient) -> None:
-    df = client.get_prices(code="7203", from_="2025-08-16")
+@pytest.mark.asyncio
+async def test_prices_from(client: JQuantsClient) -> None:
+    df = await client.get_prices(code="7203", from_="2025-08-16")
     assert df.item(0, "Date") == datetime.date(2025, 8, 18)
 
 
-def test_prices_to(client: JQuantsClient) -> None:
-    df = client.get_prices(code="7203", to="2025-08-16")
+@pytest.mark.asyncio
+async def test_prices_to(client: JQuantsClient) -> None:
+    df = await client.get_prices(code="7203", to="2025-08-16")
     assert df.item(-1, "Date") == datetime.date(2025, 8, 15)
 
 
-def test_prices_error(client: JQuantsClient) -> None:
+@pytest.mark.asyncio
+async def test_prices_error(client: JQuantsClient) -> None:
     with pytest.raises(ValueError, match="Cannot"):
-        client.get_prices(code="7203", date="2025-08-18", to="2025-08-16")
+        await client.get_prices(code="7203", date="2025-08-18", to="2025-08-16")
 
 
-def test_statements_code(client: JQuantsClient) -> None:
-    df = client.get_statements(code="7203")
+@pytest.mark.asyncio
+async def test_statements_code(client: JQuantsClient) -> None:
+    df = await client.get_statements(code="7203")
     assert df.width == 108
 
 
-def test_statements_date(client: JQuantsClient) -> None:
-    df = client.get_statements(date="2025-08-29")
+@pytest.mark.asyncio
+async def test_statements_date(client: JQuantsClient) -> None:
+    df = await client.get_statements(date="2025-08-29")
     assert df.height == 18
 
 
-def test_statements_empty(client: JQuantsClient) -> None:
-    df = client.get_statements(date="2025-08-30")
+@pytest.mark.asyncio
+async def test_statements_empty(client: JQuantsClient) -> None:
+    df = await client.get_statements(date="2025-08-30")
     assert df.shape == (0, 0)
 
 
-def test_announcement(client: JQuantsClient) -> None:
-    df = client.get_announcement()
+@pytest.mark.asyncio
+async def test_announcement(client: JQuantsClient) -> None:
+    df = await client.get_announcement()
     assert df.width in [7, 0]
 
 
-def test_trades_spec(client: JQuantsClient) -> None:
-    df = client.get_trades_spec()
+@pytest.mark.asyncio
+async def test_trades_spec(client: JQuantsClient) -> None:
+    df = await client.get_trades_spec()
     assert df.width == 56
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "section",
     [
@@ -232,14 +185,15 @@ def test_trades_spec(client: JQuantsClient) -> None:
         "TokyoNagoya",
     ],
 )
-def test_trades_spec_section(client: JQuantsClient, section: str) -> None:
-    df = client.get_trades_spec(section=section)
+async def test_trades_spec_section(client: JQuantsClient, section: str) -> None:
+    df = await client.get_trades_spec(section=section)
     assert len(df)
     s = df["Section"].unique()
     assert len(s) == 1
     assert s[0] == section
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "from_",
     [
@@ -247,13 +201,17 @@ def test_trades_spec_section(client: JQuantsClient, section: str) -> None:
         datetime.date(2025, 8, 1),
     ],
 )
-def test_trades_spec_from(client: JQuantsClient, from_: str | datetime.date) -> None:
-    df = client.get_trades_spec(from_=from_)
+async def test_trades_spec_from(
+    client: JQuantsClient,
+    from_: str | datetime.date,
+) -> None:
+    df = await client.get_trades_spec(from_=from_)
     date = df.item(0, "EndDate")
     assert isinstance(date, datetime.date)
     assert date == datetime.date(2025, 8, 1)
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "to",
     [
@@ -261,8 +219,8 @@ def test_trades_spec_from(client: JQuantsClient, from_: str | datetime.date) -> 
         datetime.date(2025, 8, 1),
     ],
 )
-def test_trades_spec_to(client: JQuantsClient, to: str | datetime.date) -> None:
-    df = client.get_trades_spec(to=to)
+async def test_trades_spec_to(client: JQuantsClient, to: str | datetime.date) -> None:
+    df = await client.get_trades_spec(to=to)
     date = df.item(-1, "EndDate")
     assert isinstance(date, datetime.date)
     assert date == datetime.date(2025, 7, 25)

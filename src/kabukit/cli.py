@@ -6,17 +6,18 @@ import os
 from typing import Annotated
 
 import typer
+from async_typer import AsyncTyper  # pyright: ignore[reportMissingTypeStubs]
 from httpx import HTTPStatusError
-from typer import Argument, Exit, Option, Typer
+from typer import Argument, Exit, Option
 
-app = Typer(
+app = AsyncTyper(
     add_completion=False,
     help="Kabukit: J-QuantsおよびEDINETから金融データを取得するためのCLIツール。",
 )
 
 
-@app.command()
-def auth(
+@app.async_command()  # pyright: ignore[reportUnknownMemberType]
+async def auth(
     mailaddress: Annotated[str, Argument(help="J-Quantsに登録したメールアドレス。")],
     password: Annotated[
         str,
@@ -26,13 +27,15 @@ def auth(
     """J-Quants APIの認証を行い、トークンを設定ファイルに保存します。"""
     from .jquants.client import JQuantsClient
 
-    client = JQuantsClient()
+    client = JQuantsClient.create()
 
     try:
-        client.auth(mailaddress, password)
+        await client.auth(mailaddress, password)
     except HTTPStatusError as e:
         typer.echo(f"認証に失敗しました: {e}")
         raise Exit(1) from None
+    finally:
+        await client.aclose()
 
     typer.echo("J-Quantsのリフレッシュトークン・IDトークンを保存しました。")
 

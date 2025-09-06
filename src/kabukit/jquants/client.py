@@ -11,7 +11,7 @@ from enum import StrEnum
 from typing import TYPE_CHECKING
 
 import polars as pl
-from httpx import Client
+from httpx import AsyncClient
 from polars import DataFrame
 
 from kabukit.config import load_dotenv, set_key
@@ -19,18 +19,14 @@ from kabukit.params import get_params
 
 if TYPE_CHECKING:
     import datetime
-    from collections.abc import Iterator
-    from typing import Any
+    from collections.abc import AsyncIterator
+    from typing import Any, Self
 
     from httpx import HTTPStatusError  # noqa: F401
     from httpx._types import QueryParamTypes
 
 API_VERSION = "v1"
 BASE_URL = f"https://api.jquants.com/{API_VERSION}"
-
-
-class AuthenticationError(Exception):
-    """Custom exception for authentication failures."""
 
 
 class AuthKey(StrEnum):
@@ -54,37 +50,25 @@ class JQuantsClient:
         id_token: The ID token for API requests.
     """
 
-    client: Client
-    refresh_token: str | None
-    id_token: str | None
+    client: AsyncClient
 
-    def __init__(self) -> None:
-        """Initialize the JQuantsClient.
+    def __init__(self, client: AsyncClient) -> None:
+        self.client = client
 
-        It sets up the httpx client, determines the config path,
-        loads authentication tokens, and sets the auth header if an
-        ID token is present.
-        """
-        self.client = Client(base_url=BASE_URL)
-        self.load_tokens()
-        self.set_header()
-
-    def load_tokens(self) -> None:
-        """Load tokens from the .env file."""
+    @classmethod
+    def create(cls) -> Self:
+        client = AsyncClient(base_url=BASE_URL)
         load_dotenv()
-        self.refresh_token = os.environ.get(AuthKey.REFRESH_TOKEN)
-        self.id_token = os.environ.get(AuthKey.ID_TOKEN)
+        if id_token := os.environ.get(AuthKey.ID_TOKEN):
+            client.headers["Authorization"] = f"Bearer {id_token}"
 
-    def set_header(self) -> None:
-        """Set the Authorization header if an ID token is available."""
-        if self.id_token:
-            self.client.headers["Authorization"] = f"Bearer {self.id_token}"
-        # Clear header if no ID token is available
-        elif "Authorization" in self.client.headers:
-            del self.client.headers["Authorization"]
+        return cls(client)
 
-    def auth(self, mailaddress: str, password: str) -> None:
-        """Authenticate, save tokens, and set the auth header.
+    async def aclose(self) -> None:
+        await self.client.aclose()
+
+    async def auth(self, mailaddress: str, password: str) -> None:
+        """Authenticate and save tokens.
 
         Args:
             mailaddress: The user's email address.
@@ -93,13 +77,12 @@ class JQuantsClient:
         Raises:
             HTTPStatusError: If any API request fails.
         """
-        self.refresh_token = self.get_refresh_token(mailaddress, password)
-        self.id_token = self.get_id_token(self.refresh_token)
-        set_key(AuthKey.REFRESH_TOKEN, self.refresh_token)
-        set_key(AuthKey.ID_TOKEN, self.id_token)
-        self.set_header()
+        refresh_token = await self.get_refresh_token(mailaddress, password)
+        id_token = await self.get_id_token(refresh_token)
+        set_key(AuthKey.REFRESH_TOKEN, refresh_token)
+        set_key(AuthKey.ID_TOKEN, id_token)
 
-    def post(self, url: str, json: Any | None = None) -> Any:
+    async def post(self, url: str, json: Any | None = None) -> Any:
         """Send a POST request to the specified URL.
 
         Args:
@@ -110,18 +93,13 @@ class JQuantsClient:
             The JSON response from the API.
 
         Raises:
-            AuthenticationError: If no ID token is available.
             HTTPStatusError: If the API request fails.
         """
-        if not self.id_token:
-            msg = "ID token is not available. Please authenticate first."
-            raise AuthenticationError(msg)
-
-        resp = self.client.post(url, json=json)
+        resp = await self.client.post(url, json=json)
         resp.raise_for_status()
         return resp.json()
 
-    def get_refresh_token(self, mailaddress: str, password: str) -> str:
+    async def get_refresh_token(self, mailaddress: str, password: str) -> str:
         """Get a new refresh token from the API.
 
         Args:
@@ -135,9 +113,10 @@ class JQuantsClient:
             httpx.HTTPStatusError: If the API request fails.
         """
         json_data = {"mailaddress": mailaddress, "password": password}
-        return self.post("/token/auth_user", json=json_data)["refreshToken"]
+        data = await self.post("/token/auth_user", json=json_data)
+        return data["refreshToken"]
 
-    def get_id_token(self, refresh_token: str) -> str:
+    async def get_id_token(self, refresh_token: str) -> str:
         """Get a new ID token from the API.
 
         Args:
@@ -150,9 +129,10 @@ class JQuantsClient:
             HTTPStatusError: If the API request fails.
         """
         url = f"/token/auth_refresh?refreshtoken={refresh_token}"
-        return self.post(url)["idToken"]
+        data = await self.post(url)
+        return data["idToken"]
 
-    def get(self, url: str, params: QueryParamTypes | None = None) -> Any:
+    async def get(self, url: str, params: QueryParamTypes | None = None) -> Any:
         """Send a GET request to the specified URL.
 
         Args:
@@ -163,18 +143,13 @@ class JQuantsClient:
             The JSON response from the API.
 
         Raises:
-            AuthenticationError: If no ID token is available.
             HTTPStatusError: If the API request fails.
         """
-        if not self.id_token:
-            msg = "ID token is not available. Please authenticate first."
-            raise AuthenticationError(msg)
-
-        resp = self.client.get(url, params=params)
+        resp = await self.client.get(url, params=params)
         resp.raise_for_status()
         return resp.json()
 
-    def get_info(
+    async def get_info(
         self,
         code: str | None = None,
         date: str | datetime.date | None = None,
@@ -195,16 +170,16 @@ class JQuantsClient:
         """
         params = get_params(code=code, date=date)
         url = "/listed/info"
-        data = self.get(url, params)
+        data = await self.get(url, params)
         df = DataFrame(data["info"])
         return df.with_columns(pl.col("Date").str.to_date())
 
-    def iter_pages(
+    async def iter_pages(
         self,
         url: str,
         params: dict[str, Any] | None,
         name: str,
-    ) -> Iterator[DataFrame]:
+    ) -> AsyncIterator[DataFrame]:
         """Iterate through paginated API responses.
 
         Args:
@@ -222,14 +197,14 @@ class JQuantsClient:
         params = params or {}
 
         while True:
-            data = self.get(url, params)
+            data = await self.get(url, params)
             yield DataFrame(data[name])
             if "pagination_key" in data:
                 params["pagination_key"] = data["pagination_key"]
             else:
                 break
 
-    def get_prices(
+    async def get_prices(
         self,
         code: str | None = None,
         date: str | datetime.date | None = None,
@@ -264,13 +239,14 @@ class JQuantsClient:
         url = "/prices/daily_quotes"
         name = "daily_quotes"
 
-        df = pl.concat(self.iter_pages(url, params, name))
+        dfs = [df async for df in self.iter_pages(url, params, name)]
+        df = pl.concat(dfs)
         if df.is_empty():
             return df
 
         return df.with_columns(pl.col("Date").str.to_date())
 
-    def get_statements(
+    async def get_statements(
         self,
         code: str | None = None,
         date: str | datetime.date | None = None,
@@ -293,13 +269,14 @@ class JQuantsClient:
         url = "/fins/statements"
         name = "statements"
 
-        df = pl.concat(self.iter_pages(url, params, name))
+        dfs = [df async for df in self.iter_pages(url, params, name)]
+        df = pl.concat(dfs)
         if df.is_empty():
             return df
 
         return df.with_columns(pl.col("DisclosedDate").str.to_date().alias("Date"))
 
-    def get_announcement(self) -> DataFrame:
+    async def get_announcement(self) -> DataFrame:
         """Get financial announcement from the API.
 
         Returns:
@@ -311,13 +288,15 @@ class JQuantsClient:
         """
         url = "fins/announcement"
         name = "announcement"
-        df = pl.concat(self.iter_pages(url, {}, name))
+
+        dfs = [df async for df in self.iter_pages(url, {}, name)]
+        df = pl.concat(dfs)
         if df.is_empty():
             return df
 
         return df.with_columns(pl.col("Date").str.to_date())
 
-    def get_trades_spec(
+    async def get_trades_spec(
         self,
         section: str | None = None,
         from_: str | datetime.date | None = None,
@@ -342,7 +321,8 @@ class JQuantsClient:
         url = "/markets/trades_spec"
         name = "trades_spec"
 
-        df = pl.concat(self.iter_pages(url, params, name))
+        dfs = [df async for df in self.iter_pages(url, params, name)]
+        df = pl.concat(dfs)
         if df.is_empty():
             return df
 
