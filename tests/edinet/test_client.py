@@ -41,10 +41,4 @@ async def test_pdf(client: EdinetClient) -> None:
 
 @pytest.mark.asyncio
 async def test_zip(client: EdinetClient) -> None:
-    zf = await client.get_zip("S100WKHJ", type=5)
-    print(zf.namelist())
-    # f = zf.namelist()[0]
-    # data = zf.read(f)
-    # print(data.decode("utf-8"))
-    zf.extractall("a")
-    assert 0
+    assert await client.get_zip("S100WKHJ", doc_type=5)

@@ -14,9 +14,10 @@ from kabukit.params import get_params
 
 if TYPE_CHECKING:
     import datetime
-    from typing import Any, Self
+    from typing import Self
 
     from httpx import Response
+    from httpx._types import QueryParamTypes
 
 API_VERSION = "v2"
 BASE_URL = f"https://api.edinet-fsa.go.jp/api/{API_VERSION}"
@@ -30,30 +31,25 @@ class AuthKey(StrEnum):
 
 class EdinetClient:
     client: AsyncClient
-    api_key: str | None
 
     def __init__(self, client: AsyncClient) -> None:
         self.client = client
-        load_dotenv()
-        self.api_key = os.getenv(AuthKey.API_KEY)
 
     @classmethod
     def create(cls) -> Self:
-        client = AsyncClient(base_url=BASE_URL)
-
+        load_dotenv()
+        api_key = os.getenv(AuthKey.API_KEY)
+        if not api_key:
+            msg = "EDINET_API_KEY is not set."
+            raise KeyError(msg)
+        params = {"Subscription-Key": api_key}
+        client = AsyncClient(base_url=BASE_URL, params=params)
         return cls(client)
 
     async def aclose(self) -> None:
         await self.client.aclose()
 
-    async def get(self, url: str, params: dict[str, Any]) -> Response:
-        if not self.api_key:
-            msg = "API key is not available. Please set the API key first."
-            raise KeyError(msg)
-
-        params = params.copy()
-        params["Subscription-Key"] = self.api_key
-
+    async def get(self, url: str, params: QueryParamTypes) -> Response:
         resp = await self.client.get(url, params=params)
         resp.raise_for_status()
         return resp
@@ -79,23 +75,22 @@ class EdinetClient:
 
         return DataFrame(data["results"], infer_schema_length=None)
 
-    async def get_document(self, doc_id: str, type: int) -> Response:
-        params = get_params(type=type)
+    async def get_document(self, doc_id: str, doc_type: int) -> Response:
+        params = get_params(type=doc_type)
         return await self.get(f"/documents/{doc_id}", params)
 
     async def get_pdf(self, doc_id: str) -> bytes:
-        resp = await self.get_document(doc_id, type=2)
-        if resp.headers["content-type"] != "application/pdf":
-            msg = "PDF is not available."
-            raise ValueError(msg)
+        resp = await self.get_document(doc_id, doc_type=2)
+        if resp.headers["content-type"] == "application/pdf":
+            return resp.content
 
-        return resp.content
+        msg = "PDF is not available."
+        raise ValueError(msg)
 
-    async def get_zip(self, doc_id: str, type: int) -> zipfile.ZipFile:
-        resp = await self.get_document(doc_id, type=type)
-        if resp.headers["content-type"] != "application/octet-stream":
-            msg = "ZIP is not available."
-            raise ValueError(msg)
+    async def get_zip(self, doc_id: str, doc_type: int) -> bytes:
+        resp = await self.get_document(doc_id, doc_type=doc_type)
+        if resp.headers["content-type"] == "application/octet-stream":
+            return resp.content
 
-        buffer = io.BytesIO(resp.content)
-        return zipfile.ZipFile(buffer)
+        msg = "ZIP is not available."
+        raise ValueError(msg)
