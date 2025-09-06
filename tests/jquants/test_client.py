@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 import pytest
 import pytest_asyncio
 
-from kabukit.jquants.client import AuthKey, JQuantsClient
+from kabukit.jquants.client import JQuantsClient
 
 if TYPE_CHECKING:
     from polars import DataFrame

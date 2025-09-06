@@ -8,7 +8,7 @@ from typing import Annotated
 import typer
 from async_typer import AsyncTyper  # pyright: ignore[reportMissingTypeStubs]
 from httpx import HTTPStatusError
-from typer import Argument, Exit, Option
+from typer import Exit, Option
 
 app = AsyncTyper(
     add_completion=False,
@@ -17,8 +17,11 @@ app = AsyncTyper(
 
 
 @app.async_command()  # pyright: ignore[reportUnknownMemberType]
-async def auth(
-    mailaddress: Annotated[str, Argument(help="J-Quantsに登録したメールアドレス。")],
+async def jquants(
+    mailaddress: Annotated[
+        str,
+        Option(prompt=True, help="J-Quantsに登録したメールアドレス。"),
+    ],
     password: Annotated[
         str,
         Option(prompt=True, hide_input=True, help="J-Quantsのパスワード。"),
