@@ -1,37 +1,50 @@
-from pydoc import cli
-
 import pytest
+import pytest_asyncio
 
 from kabukit.edinet.client import EdinetClient
 
 
-@pytest.fixture(scope="module")
-def client() -> EdinetClient:
-    return EdinetClient()
+@pytest_asyncio.fixture
+async def client():
+    client = EdinetClient.create()
+    yield client
+    await client.aclose()
 
 
-def test_count(client: EdinetClient) -> None:
-    assert client.get_count("2025-09-05") > 0
+@pytest.mark.asyncio
+async def test_count(client: EdinetClient) -> None:
+    assert await client.get_count("2025-09-05") > 0
 
 
-def test_count_zero(client: EdinetClient) -> None:
-    assert client.get_count("1000-01-01") == 0
+@pytest.mark.asyncio
+async def test_count_zero(client: EdinetClient) -> None:
+    assert await client.get_count("1000-01-01") == 0
 
 
-def test_list(client: EdinetClient) -> None:
-    count = client.get_count("2025-09-04")
-    df = client.get_list("2025-09-04")
+@pytest.mark.asyncio
+async def test_list(client: EdinetClient) -> None:
+    count = await client.get_count("2025-09-04")
+    df = await client.get_list("2025-09-04")
     assert df.shape == (count, 29)
 
 
-def test_list_zero(client: EdinetClient) -> None:
-    df = client.get_list("1000-01-01")
+@pytest.mark.asyncio
+async def test_list_zero(client: EdinetClient) -> None:
+    df = await client.get_list("1000-01-01")
     assert df.shape == (0, 0)
 
 
-def test_document(client: EdinetClient) -> None:
-    df = client.get_list("2025-09-04")
-    doc_id = df.item(0, "docID")
-    data = client.get_document(doc_id, type=1)
-    print(data)
+@pytest.mark.asyncio
+async def test_pdf(client: EdinetClient) -> None:
+    assert await client.get_pdf("S100WKHJ")
+
+
+@pytest.mark.asyncio
+async def test_zip(client: EdinetClient) -> None:
+    zf = await client.get_zip("S100WKHJ", type=5)
+    print(zf.namelist())
+    # f = zf.namelist()[0]
+    # data = zf.read(f)
+    # print(data.decode("utf-8"))
+    zf.extractall("a")
     assert 0
