@@ -15,7 +15,6 @@ from kabukit.params import get_params
 
 if TYPE_CHECKING:
     import datetime
-    from typing import Self
 
     from httpx import Response
     from httpx._types import QueryParamTypes

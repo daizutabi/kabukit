@@ -14,7 +14,7 @@ from kabukit.params import get_params
 if TYPE_CHECKING:
     import datetime
     from collections.abc import AsyncIterator
-    from typing import Any, Self
+    from typing import Any
 
     from httpx import HTTPStatusError  # noqa: F401
     from httpx._types import QueryParamTypes
