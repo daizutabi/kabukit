@@ -243,7 +243,10 @@ class JQuantsClient:
         if df.is_empty():
             return df
 
-        return df.with_columns(pl.col("Date").str.to_date())
+        return df.with_columns(
+            pl.col("Date").str.to_date(),
+            pl.col("^.*Limit$").cast(pl.Int8).cast(pl.Boolean),
+        )
 
     async def get_latest_available_prices(self) -> DataFrame:
         today = datetime.date.today()  # noqa: DTZ011
@@ -290,10 +293,7 @@ class JQuantsClient:
         if df.is_empty():
             return df
 
-        return df.with_columns(
-            pl.col("^.*Date$").str.to_date(strict=False),
-            pl.col("DisclosedTime").str.to_time(),
-        ).rename({"LocalCode": "Code"})
+        return _cast_statements(df)
 
     async def get_announcement(self) -> DataFrame:
         """Get financial announcement from the API.
@@ -346,3 +346,49 @@ class JQuantsClient:
             return df
 
         return df.with_columns(pl.col("^.*Date$").str.to_date(strict=False))
+
+
+def _cast_statements(df: DataFrame) -> DataFrame:
+    return (
+        df.rename({"LocalCode": "Code"})
+        .with_columns(
+            pl.col("^.*Date$").str.to_date(strict=False),
+            pl.col("DisclosedTime").str.to_time(),
+        )
+        .pipe(_cast_float)
+        .pipe(_cast_bool)
+    )
+
+
+def _cast_float(df: DataFrame) -> DataFrame:
+    return df.with_columns(
+        pl.col(f"^.*{name}.*$").cast(pl.Float64, strict=False)
+        for name in [
+            "Assets",
+            "BookValue",
+            "Cash",
+            "Distributions",
+            "Dividend",
+            "Earnings",
+            "Equity",
+            "NetSales",
+            "NumberOf",
+            "PayoutRatio",
+            "Profit",
+        ]
+    )
+
+
+def _cast_bool(df: DataFrame) -> DataFrame:
+    columns = df.select(pl.col("^.*Changes.*$")).columns
+    columns.append("RetrospectiveRestatement")
+
+    return df.with_columns(
+        pl.when(pl.col(col) == "true")
+        .then(True)  # noqa: FBT003
+        .when(pl.col(col) == "false")
+        .then(False)  # noqa: FBT003
+        .otherwise(None)
+        .alias(col)
+        for col in columns
+    )
