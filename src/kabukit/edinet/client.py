@@ -6,7 +6,6 @@ import zipfile
 from enum import StrEnum
 from typing import TYPE_CHECKING
 
-import chardet
 import polars as pl
 from httpx import AsyncClient
 from polars import DataFrame
@@ -89,7 +88,7 @@ class EdinetClient:
         msg = "PDF is not available."
         raise ValueError(msg)
 
-    async def get_zip(self, doc_id: str, doc_type: int = 1) -> bytes:
+    async def get_zip(self, doc_id: str, doc_type: int) -> bytes:
         resp = await self.get_document(doc_id, doc_type=doc_type)
         if resp.headers["content-type"] == "application/octet-stream":
             return resp.content
@@ -100,18 +99,16 @@ class EdinetClient:
     async def get_csv(self, doc_id: str) -> DataFrame:
         content = await self.get_zip(doc_id, doc_type=5)
         buffer = io.BytesIO(content)
-        zf = zipfile.ZipFile(buffer)
 
-        for info in zf.infolist():
-            if info.filename.endswith(".csv"):
-                with zf.open(info) as f:
-                    return read_csv(f.read())
+        with zipfile.ZipFile(buffer) as zf:
+            for info in zf.infolist():
+                if info.filename.endswith(".csv"):
+                    with zf.open(info) as f:
+                        return pl.read_csv(
+                            f.read(),
+                            separator="\t",
+                            encoding="utf-16-le",
+                        )
 
         msg = "CSV is not available."
         raise ValueError(msg)
-
-
-def read_csv(source: bytes) -> DataFrame:
-    charset = chardet.detect(source)
-    encoding = charset["encoding"] or "utf-8"
-    return pl.read_csv(source, separator="\t", encoding=encoding)

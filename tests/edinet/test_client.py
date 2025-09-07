@@ -1,4 +1,6 @@
 import pytest
+import pytest_asyncio
+from polars import DataFrame
 
 from kabukit.edinet.client import EdinetClient
 
@@ -40,3 +42,24 @@ async def test_zip(client: EdinetClient) -> None:
 async def test_csv(client: EdinetClient) -> None:
     df = await client.get_csv("S100WKHJ")
     assert df.shape == (47, 9)
+
+
+@pytest_asyncio.fixture(scope="module")
+async def df():
+    client = EdinetClient.create()
+    yield await client.get_list("2025-06-27")
+    await client.aclose()
+
+
+def test_df_shape(df: DataFrame) -> None:
+    assert df.shape == (1757, 29)
+
+
+def test_df_xbrl_csv(df: DataFrame) -> None:
+    df = df.filter(xbrlFlag="1")
+    assert df.height == df.filter(csvFlag="1").height
+
+
+def test_df_xbrl_pdf(df: DataFrame) -> None:
+    df = df.filter(xbrlFlag="1")
+    assert df.height == df.filter(pdfFlag="1").height
