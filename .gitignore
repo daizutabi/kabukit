@@ -7,3 +7,4 @@ dist/
 docs/
 lcov.info
 uv.lock
+data/

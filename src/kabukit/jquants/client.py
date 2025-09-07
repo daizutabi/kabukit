@@ -157,7 +157,7 @@ class JQuantsClient:
         """Get listed info (e.g., stock details) from the API.
 
         Args:
-            code: Optional. The stock code to filter by.
+            code (str | None): The stock code to filter by.
             date: Optional. The date to filter by (YYYY-MM-DD format
                 or datetime.date object).
 
