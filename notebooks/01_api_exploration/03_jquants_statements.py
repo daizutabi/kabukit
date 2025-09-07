@@ -32,13 +32,18 @@ def _(JQuantsClient):
 
 @app.cell
 async def _(client):
-    await client.get_statements(date="20250904")
+    await client.get_statements(date="20250905")
     return
 
 
 @app.cell
 async def _(client):
-    await client.get_statements(code="1301")
+    await client.get_statements(code="36620")
+    return
+
+
+@app.cell
+def _():
     return
 
 
