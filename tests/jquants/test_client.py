@@ -16,7 +16,7 @@ async def df_info():
 
 def test_info_width(df_info: DataFrame) -> None:
     assert df_info.height > 4000
-    assert 11 <= df_info.width <= 13
+    assert df_info.width == 7
 
 
 def test_info_today(df_info: DataFrame) -> None:
@@ -28,11 +28,8 @@ def test_info_today(df_info: DataFrame) -> None:
 @pytest.mark.parametrize(
     ("name", "n"),
     [
-        ("Sector17Code", 18),
         ("Sector17CodeName", 18),
-        ("Sector33Code", 34),
         ("Sector33CodeName", 34),
-        ("MarketCode", 5),
         ("MarketCodeName", 5),
     ],
 )

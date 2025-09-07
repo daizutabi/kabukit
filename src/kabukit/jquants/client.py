@@ -163,7 +163,10 @@ class JQuantsClient:
         url = "/listed/info"
         data = await self.get(url, params)
         df = DataFrame(data["info"])
-        return df.with_columns(pl.col("Date").str.to_date())
+        return df.with_columns(
+            pl.col("Date").str.to_date(),
+            pl.col("^.*CodeName$", "ScaleCategory").cast(pl.Categorical),
+        ).drop("^.+Code$", "CompanyNameEnglish")
 
     async def iter_pages(
         self,
