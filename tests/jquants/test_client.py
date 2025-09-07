@@ -1,20 +1,10 @@
-"""Tests for JQuantsClient."""
-
-from __future__ import annotations
-
 import datetime
-from typing import TYPE_CHECKING
 
 import pytest
 import pytest_asyncio
+from polars import DataFrame
 
 from kabukit.jquants.client import JQuantsClient
-
-if TYPE_CHECKING:
-    from polars import DataFrame
-
-DUMMY_REFRESH_TOKEN = "dummy_refresh_token"  # noqa: S105
-DUMMY_ID_TOKEN = "dummy_id_token"  # noqa: S105
 
 
 @pytest_asyncio.fixture(scope="module")
@@ -69,13 +59,6 @@ def test_info_scale_category(df_info: DataFrame, sc: str) -> None:
 def date() -> datetime.date:
     today = datetime.date.today()  # noqa: DTZ011
     return today - datetime.timedelta(weeks=12)
-
-
-@pytest_asyncio.fixture
-async def client():
-    client = JQuantsClient()
-    yield client
-    await client.aclose()
 
 
 @pytest.mark.asyncio
