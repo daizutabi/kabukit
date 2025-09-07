@@ -38,52 +38,13 @@ async def _(client):
 
 @app.cell
 async def _(client):
-    await client.get_prices(code="1301")
+    await client.get_prices("1301")
     return
 
 
 @app.cell
 async def _(client):
-    info = await client.get_info()
-    codes = info["Code"]
-    return (codes,)
-
-
-@app.cell
-async def _(client, codes):
-    await client.get_prices(codes[1])
-    return
-
-
-@app.cell
-def _():
-    from kabukit.concurrent import fetch
-    return (fetch,)
-
-
-@app.cell
-async def _(client, codes, fetch):
-    df = await fetch(client.get_statements, codes[:3])
-    df
-    return (df,)
-
-
-@app.cell
-def _(df):
-    df["DisclosedDate"]
-    return
-
-
-@app.cell
-def _():
-    import polars as pl
-
-    pl.read_parquet("data/statements")
-    return
-
-
-@app.cell
-def _():
+    await client.get_prices(["1301", "1332"])
     return
 
 

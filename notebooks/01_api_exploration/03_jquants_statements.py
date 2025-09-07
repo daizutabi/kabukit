@@ -43,6 +43,29 @@ async def _(client):
 
 
 @app.cell
+async def _(client):
+    import polars as pl
+
+    df = await client.get_statements(code="36620")
+    columns = [c for c in df.columns if df[c].dtype == pl.Boolean]
+    for column in columns:
+        print(column)
+    return columns, df, pl
+
+
+@app.cell
+def _(columns, df):
+    df.select(columns)
+    return
+
+
+@app.cell
+def _(df, pl):
+    df.select(pl.col("^.*Changes.*$"))
+    return
+
+
+@app.cell
 def _():
     return
 
