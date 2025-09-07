@@ -136,6 +136,12 @@ async def test_prices_to(client: JQuantsClient) -> None:
 
 
 @pytest.mark.asyncio
+async def test_latest_available_prices(client: JQuantsClient) -> None:
+    df = await client.get_latest_available_prices()
+    assert df.height > 3000
+
+
+@pytest.mark.asyncio
 async def test_prices_error(client: JQuantsClient) -> None:
     with pytest.raises(ValueError, match="Cannot"):
         await client.get_prices(code="7203", date="2025-08-18", to="2025-08-16")

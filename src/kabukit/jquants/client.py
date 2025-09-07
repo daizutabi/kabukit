@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 import os
 from enum import StrEnum
 from typing import TYPE_CHECKING
@@ -12,7 +13,6 @@ from kabukit.config import load_dotenv, set_key
 from kabukit.params import get_params
 
 if TYPE_CHECKING:
-    import datetime
     from collections.abc import AsyncIterator
     from typing import Any
 
@@ -221,6 +221,9 @@ class JQuantsClient:
             AuthenticationError: If no ID token is available.
             HTTPStatusError: If the API request fails.
         """
+        if not date and not code:
+            return await self.get_latest_available_prices()
+
         if date and (from_ or to):
             msg = "Cannot specify both date and from/to parameters."
             raise ValueError(msg)
@@ -236,6 +239,17 @@ class JQuantsClient:
             return df
 
         return df.with_columns(pl.col("Date").str.to_date())
+
+    async def get_latest_available_prices(self) -> DataFrame:
+        today = datetime.date.today()  # noqa: DTZ011
+
+        for days in range(30):
+            date = today - datetime.timedelta(days)
+            df = await self.get_prices(date=date)
+            if not df.is_empty():
+                return df
+
+        return DataFrame()
 
     async def get_statements(
         self,
