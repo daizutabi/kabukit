@@ -9,11 +9,12 @@ import polars as pl
 from httpx import AsyncClient
 from polars import DataFrame
 
+from kabukit.concurrent import fetch
 from kabukit.config import load_dotenv, set_key
 from kabukit.params import get_params
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
+    from collections.abc import AsyncIterator, Iterable
     from typing import Any
 
     from httpx import HTTPStatusError  # noqa: F401
@@ -148,9 +149,8 @@ class JQuantsClient:
         """Get listed info (e.g., stock details) from the API.
 
         Args:
-            code (str | None): The stock code to filter by.
-            date: Optional. The date to filter by (YYYY-MM-DD format
-                or datetime.date object).
+            code (str | None): The stock code for which to retrieve info.
+            date (str | datetime.date | None): The date for which to retrieve info.
 
         Returns:
             A Polars DataFrame containing the listed info.
@@ -197,7 +197,7 @@ class JQuantsClient:
 
     async def get_prices(
         self,
-        code: str | None = None,
+        code: str | Iterable[str] | None = None,
         date: str | datetime.date | None = None,
         from_: str | datetime.date | None = None,
         to: str | datetime.date | None = None,
@@ -205,12 +205,14 @@ class JQuantsClient:
         """Get daily stock prices from the API.
 
         Args:
-            code: Optional. The stock code to filter by.
-            date: Optional. The specific date for which to retrieve prices.
-                Cannot be used with `from_` or `to`.
-            from_: Optional. The start date for a price range.
+            code (str | Iterable[str] | None): The stock code for which to
+                retrieve prices. If an iterable of strings is provided,
+                prices for all specified codes will be fetched concurrently.
+            date (str | datetime.date | None): The specific date for which to
+                retrieve prices.  Cannot be used with `from_` or `to`.
+            from_ (str | datetime.date | None): The start date for a price range.
                 Requires `to` if `date` is not specified.
-            to: Optional. The end date for a price range.
+            to (str | datetime.date | None): The end date for a price range.
                 Requires `from_` if `date` is not specified.
 
         Returns:
@@ -221,6 +223,9 @@ class JQuantsClient:
             AuthenticationError: If no ID token is available.
             HTTPStatusError: If the API request fails.
         """
+        if code is not None and not isinstance(code, str):
+            return await fetch(self.get_prices, code)
+
         if not date and not code:
             return await self.get_latest_available_prices()
 
@@ -253,15 +258,18 @@ class JQuantsClient:
 
     async def get_statements(
         self,
-        code: str | None = None,
+        code: str | Iterable[str] | None = None,
         date: str | datetime.date | None = None,
     ) -> DataFrame:
         """Get financial statements from the API.
 
         Args:
-            code: Optional. The stock code to filter by.
-            date: Optional. The date to filter by (YYYY-MM-DD format
-                or datetime.date object).
+            code (str | Iterable[str] | None): The stock code for which to
+                retrieve financial statements. If an iterable of strings is
+                provided, statements for all specified codes will be fetched
+                concurrently.
+            date (str | datetime.date | None): The date for which to
+                retrieve financial statements.
 
         Returns:
             A Polars DataFrame containing the financial statements.
@@ -270,6 +278,9 @@ class JQuantsClient:
             AuthenticationError: If no ID token is available.
             HTTPStatusError: If the API request fails.
         """
+        if code is not None and not isinstance(code, str):
+            return await fetch(self.get_statements, code)
+
         params = get_params(code=code, date=date)
         url = "/fins/statements"
         name = "statements"
@@ -282,7 +293,7 @@ class JQuantsClient:
         return df.with_columns(
             pl.col("^.*Date$").str.to_date(strict=False),
             pl.col("DisclosedTime").str.to_time(),
-        )
+        ).rename({"LocalCode": "Code"})
 
     async def get_announcement(self) -> DataFrame:
         """Get financial announcement from the API.

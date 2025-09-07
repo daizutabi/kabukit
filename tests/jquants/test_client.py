@@ -103,6 +103,14 @@ async def test_prices_code(client: JQuantsClient) -> None:
 
 
 @pytest.mark.asyncio
+async def test_prices_codes(client: JQuantsClient) -> None:
+    df = await client.get_prices(code=["1301", "7203"])
+    assert df["Code"].n_unique() == 2
+    assert "13010" in df["Code"]
+    assert "72030" in df["Code"]
+
+
+@pytest.mark.asyncio
 async def test_prices_date(client: JQuantsClient) -> None:
     df = await client.get_prices(date="2025-08-29")
     assert df.height > 4000
@@ -151,6 +159,14 @@ async def test_prices_error(client: JQuantsClient) -> None:
 async def test_statements_code(client: JQuantsClient) -> None:
     df = await client.get_statements(code="7203")
     assert df.width == 107
+
+
+@pytest.mark.asyncio
+async def test_statements_codes(client: JQuantsClient) -> None:
+    df = await client.get_statements(code=["1301", "7203"])
+    assert df["Code"].n_unique() == 2
+    assert "13010" in df["Code"]
+    assert "72030" in df["Code"]
 
 
 @pytest.mark.asyncio
