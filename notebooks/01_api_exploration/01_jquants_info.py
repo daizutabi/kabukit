@@ -18,32 +18,52 @@ def _(mo):
 
 @app.cell
 def _():
-    import datetime
     import marimo as mo
+    from polars import col as c
     from kabukit import JQuantsClient
-    return JQuantsClient, datetime, mo
+    return JQuantsClient, c, mo
 
 
 @app.cell
 def _(JQuantsClient):
-    client = JQuantsClient.create()
+    client = JQuantsClient()
     return (client,)
 
 
 @app.cell
-async def _(client, datetime):
-    info = await client.get_info(date=datetime.date.today())
-    return (info,)
+async def _(c, client):
+    df = await client.get_info()
+    df = df.filter(c.Sector17CodeName != "その他", c.MarketCodeName != "TOKYO PRO MARKET")
+    return (df,)
 
 
 @app.cell
-def _(info):
-    info.columns
+def _(df):
+    df
     return
 
 
 @app.cell
-def _():
+def _(df):
+    df["Sector17CodeName"].unique()
+    return
+
+
+@app.cell
+def _(df):
+    df["Sector33CodeName"].unique()
+    return
+
+
+@app.cell
+def _(df):
+    df["MarketCodeName"].unique()
+    return
+
+
+@app.cell
+async def _(client):
+    await client.get_info(code="1301")
     return
 
 
