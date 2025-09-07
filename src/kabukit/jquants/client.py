@@ -279,7 +279,10 @@ class JQuantsClient:
         if df.is_empty():
             return df
 
-        return df.with_columns(pl.col("DisclosedDate").str.to_date().alias("Date"))
+        return df.with_columns(
+            pl.col("^.*Date$").str.to_date(strict=False),
+            pl.col("DisclosedTime").str.to_time(),
+        )
 
     async def get_announcement(self) -> DataFrame:
         """Get financial announcement from the API.
@@ -331,7 +334,4 @@ class JQuantsClient:
         if df.is_empty():
             return df
 
-        return df.with_columns(
-            pl.col(name).str.to_date()
-            for name in ["PublishedDate", "StartDate", "EndDate"]
-        )
+        return df.with_columns(pl.col("^.*Date$").str.to_date(strict=False))
