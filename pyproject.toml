@@ -13,6 +13,7 @@ dependencies = [
   "async-typer>=0.1.10",
   "httpx>=0.28",
   "lxml>=6",
+  "marimo>=0.15.2",
   "platformdirs>=4.4",
   "polars>=1.32.3",
   "python-dotenv>=1.1",
