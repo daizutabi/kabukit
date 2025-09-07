@@ -19,7 +19,7 @@ DUMMY_ID_TOKEN = "dummy_id_token"  # noqa: S105
 
 @pytest_asyncio.fixture(scope="module")
 async def df_info():
-    client = JQuantsClient.create()
+    client = JQuantsClient()
     yield await client.get_info()
     await client.aclose()
 
@@ -73,7 +73,7 @@ def date() -> datetime.date:
 
 @pytest_asyncio.fixture
 async def client():
-    client = JQuantsClient.create()
+    client = JQuantsClient()
     yield client
     await client.aclose()
 

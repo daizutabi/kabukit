@@ -42,6 +42,7 @@ docs = ["mkapi>=4.4", "mkdocs-material"]
 
 [tool.pytest.ini_options]
 addopts = ["--cov=kabukit", "--cov-report=lcov:lcov.info", "--doctest-modules"]
+testpaths = ["src", "tests"]
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "raise NotImplementedError", "if TYPE_CHECKING:"]

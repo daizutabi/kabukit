@@ -46,7 +46,7 @@ async def test_csv(client: EdinetClient) -> None:
 
 @pytest_asyncio.fixture(scope="module")
 async def df():
-    client = EdinetClient.create()
+    client = EdinetClient()
     yield await client.get_list("2025-06-27")
     await client.aclose()
 

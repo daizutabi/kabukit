@@ -5,6 +5,6 @@ import pytest_asyncio
 async def client():
     from kabukit.edinet.client import EdinetClient
 
-    client = EdinetClient.create()
+    client = EdinetClient()
     yield client
     await client.aclose()

@@ -30,7 +30,7 @@ async def jquants(
     """J-Quants APIの認証を行い、トークンを設定ファイルに保存します。"""
     from .jquants.client import JQuantsClient
 
-    client = JQuantsClient.create()
+    client = JQuantsClient()
 
     try:
         await client.auth(mailaddress, password)

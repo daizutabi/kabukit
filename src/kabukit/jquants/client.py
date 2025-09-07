@@ -1,9 +1,3 @@
-"""This module provides a client for the J-Quants API.
-
-It handles authentication and provides methods to interact with
-the API endpoints.
-"""
-
 from __future__ import annotations
 
 import os
@@ -52,17 +46,14 @@ class JQuantsClient:
 
     client: AsyncClient
 
-    def __init__(self, client: AsyncClient) -> None:
-        self.client = client
-
-    @classmethod
-    def create(cls) -> Self:
-        client = AsyncClient(base_url=BASE_URL)
+    def __init__(self) -> None:
         load_dotenv()
+        client = AsyncClient(base_url=BASE_URL)
+
         if id_token := os.environ.get(AuthKey.ID_TOKEN):
             client.headers["Authorization"] = f"Bearer {id_token}"
 
-        return cls(client)
+        self.client = client
 
     async def aclose(self) -> None:
         await self.client.aclose()
