@@ -204,6 +204,8 @@ class JQuantsClient:
         date: str | datetime.date | None = None,
         from_: str | datetime.date | None = None,
         to: str | datetime.date | None = None,
+        *,
+        bar: bool = False,
     ) -> DataFrame:
         """Get daily stock prices from the API.
 
@@ -217,6 +219,8 @@ class JQuantsClient:
                 Requires `to` if `date` is not specified.
             to (str | datetime.date | None): The end date for a price range.
                 Requires `from_` if `date` is not specified.
+            bar (bool): Whether to display a progress bar when fetching data
+                for multiple codes.
 
         Returns:
             A Polars DataFrame containing daily stock prices.
@@ -227,7 +231,7 @@ class JQuantsClient:
             HTTPStatusError: If the API request fails.
         """
         if code is not None and not isinstance(code, str):
-            return await fetch(self.get_prices, code)
+            return await fetch(self.get_prices, code, bar=bar)
 
         if not date and not code:
             return await self.get_latest_available_prices()
@@ -266,6 +270,8 @@ class JQuantsClient:
         self,
         code: str | Iterable[str] | None = None,
         date: str | datetime.date | None = None,
+        *,
+        bar: bool = False,
     ) -> DataFrame:
         """Get financial statements from the API.
 
@@ -276,6 +282,8 @@ class JQuantsClient:
                 concurrently.
             date (str | datetime.date | None): The date for which to
                 retrieve financial statements.
+            bar (bool): Whether to display a progress bar when fetching data
+                for multiple codes.
 
         Returns:
             A Polars DataFrame containing the financial statements.
@@ -285,7 +293,7 @@ class JQuantsClient:
             HTTPStatusError: If the API request fails.
         """
         if code is not None and not isinstance(code, str):
-            return await fetch(self.get_statements, code)
+            return await fetch(self.get_statements, code, bar=bar)
 
         params = get_params(code=code, date=date)
         url = "/fins/statements"

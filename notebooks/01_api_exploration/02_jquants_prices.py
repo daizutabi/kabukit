@@ -48,5 +48,25 @@ async def _(client):
     return
 
 
+@app.cell
+def _():
+    import asyncio
+    from polars import DataFrame
+
+
+    async def asleep(time: int) -> DataFrame:
+        await asyncio.sleep(time)
+        return DataFrame({"a": [time]})
+    return (asleep,)
+
+
+@app.cell
+async def _(asleep):
+    from kabukit.concurrent import fetch
+
+    await fetch(asleep, [1, 2, 3], bar=True)
+    return
+
+
 if __name__ == "__main__":
     app.run()

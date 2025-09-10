@@ -28,6 +28,7 @@ kabu = "kabukit.cli:app"
 
 [dependency-groups]
 dev = [
+  "numpy>=2",                # polars 1.33 type hinting workaround
   "polars>=1.33.1",
   "pytest-clarity>=1.0.1",
   "pytest-cov>=7.0.0",
