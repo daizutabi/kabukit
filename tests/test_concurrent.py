@@ -1,22 +1,9 @@
+import asyncio
+
 import pytest
-
-from kabukit.jquants.client import JQuantsClient
-
-
-@pytest.mark.asyncio
-async def test_fetch():
-    from kabukit.concurrent import fetch
-
-    client = JQuantsClient()
-    df = await fetch(client.get_prices, ["1301", "1332"])
-    assert df["Code"].n_unique() == 2
-    assert "13010" in df["Code"]
-    assert "13320" in df["Code"]
 
 
 async def sleep(seconds: list[float]):
-    import asyncio
-
     x = (asyncio.sleep(s, s) for s in seconds)
     y = asyncio.as_completed(x)
     async for i in y:
@@ -25,6 +12,28 @@ async def sleep(seconds: list[float]):
 
 @pytest.mark.asyncio
 async def test_sleep():
-    ait = sleep([0.3, 0.2, 0.1])
+    ait = sleep([0.03, 0.02, 0.01])
     result = [s async for s in ait]
-    assert result == [0.1, 0.2, 0.3]
+    assert result == [0.01, 0.02, 0.03]
+
+
+@pytest.mark.asyncio
+async def test_collect():
+    from src.kabukit.concurrent import collect
+
+    x = (asyncio.sleep(s, s) for s in [0.03, 0.02, 0.01])
+    ait = collect(x, max_concurrency=2)
+    result = [s async for s in ait]
+    assert sorted(result) == [0.01, 0.02, 0.03]
+
+
+@pytest.mark.asyncio
+async def test_collect_fn():
+    from src.kabukit.concurrent import collect_fn
+
+    async def sleep(s: float) -> float:
+        return await asyncio.sleep(s, s)
+
+    ait = collect_fn(sleep, [0.03, 0.02, 0.01], max_concurrency=3)
+    result = [s async for s in ait]
+    assert sorted(result) == [0.01, 0.02, 0.03]
