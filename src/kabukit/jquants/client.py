@@ -9,12 +9,11 @@ import polars as pl
 from httpx import AsyncClient
 from polars import DataFrame
 
-
 from kabukit.config import load_dotenv, set_key
 from kabukit.params import get_params
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator, Iterable
+    from collections.abc import AsyncIterator
     from typing import Any
 
     from httpx import HTTPStatusError  # noqa: F401
