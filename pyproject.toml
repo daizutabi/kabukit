@@ -8,12 +8,12 @@ version = "0.1.0"
 description = "A Python toolkit for Japanese financial market data, supporting J-Quants and EDINET APIs."
 readme = "README.md"
 authors = [{ name = "Daizu", email = "daizutabi@gmail.com" }]
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = [
   "altair>=5.5.0",
   "async-typer>=0.1.10",
   "httpx>=0.28.1",
-  "marimo>=0.15.2",
+  "marimo>=0.15.3",
   "platformdirs>=4.4.0",
   "polars>=1.33.1",
   "python-dotenv>=1.1.1",
@@ -28,13 +28,12 @@ kabu = "kabukit.cli:app"
 
 [dependency-groups]
 dev = [
-  "numpy>=2",                # polars 1.33 type hinting workaround
+  "numpy>=2.3.3",           # polars 1.33 type hinting workaround,
   "polars>=1.33.1",
+  "pytest-asyncio>=1.2.0",
   "pytest-clarity>=1.0.1",
   "pytest-cov>=7.0.0",
-  "pytest-asyncio>=1.1.0",
-  "pytest-xdist>=3.8.0",
-  "pytest-randomly>=3.16.0",
+  "pytest-randomly>=4.0.1",
   "pytest-xdist>=3.8.0",
 ]
 docs = ["mkapi>=4.4", "mkdocs-material"]
@@ -49,7 +48,7 @@ skip_covered = true
 
 [tool.ruff]
 line-length = 88
-target-version = "py312"
+target-version = "py313"
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -61,7 +60,6 @@ ignore = [
   "FBT001",
   "N802",
   "PGH003",
-  "PD901",
   "PLR0913",
   "PLC0415",
   "PLR2004",
