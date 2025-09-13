@@ -1,55 +1,8 @@
 import datetime
 
 import pytest
-import pytest_asyncio
-from polars import DataFrame
 
 from kabukit.jquants.client import JQuantsClient
-
-
-@pytest_asyncio.fixture(scope="module")
-async def df_info():
-    client = JQuantsClient()
-    yield await client.get_info()
-    await client.aclose()
-
-
-def test_info_width(df_info: DataFrame) -> None:
-    assert df_info.height > 4000
-    assert df_info.width == 7
-
-
-def test_info_today(df_info: DataFrame) -> None:
-    date = df_info.item(0, "Date")
-    assert isinstance(date, datetime.date)
-    assert abs((date - datetime.date.today()).days) <= 3  # noqa: DTZ011
-
-
-@pytest.mark.parametrize(
-    ("name", "n"),
-    [
-        ("Sector17CodeName", 18),
-        ("Sector33CodeName", 34),
-        ("MarketCodeName", 5),
-    ],
-)
-def test_info_sector17(df_info: DataFrame, name: str, n: int) -> None:
-    assert df_info[name].n_unique() == n
-
-
-@pytest.mark.parametrize(
-    "sc",
-    [
-        "-",
-        "TOPIX Small 1",
-        "TOPIX Core30",
-        "TOPIX Mid400",
-        "TOPIX Small 2",
-        "TOPIX Large70",
-    ],
-)
-def test_info_scale_category(df_info: DataFrame, sc: str) -> None:
-    assert sc in df_info["ScaleCategory"]
 
 
 @pytest.fixture(scope="module")

@@ -40,7 +40,7 @@ async def _(client):
 
 @app.cell
 async def _(client):
-    await client.get_prices("1301")
+    await client.get_prices("3671")
     return
 
 
