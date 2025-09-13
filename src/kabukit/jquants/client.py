@@ -9,7 +9,7 @@ import polars as pl
 from httpx import AsyncClient
 from polars import DataFrame
 
-from kabukit.concurrent import fetch
+
 from kabukit.config import load_dotenv, set_key
 from kabukit.params import get_params
 
@@ -200,27 +200,21 @@ class JQuantsClient:
 
     async def get_prices(
         self,
-        code: str | Iterable[str] | None = None,
+        code: str | None = None,
         date: str | datetime.date | None = None,
         from_: str | datetime.date | None = None,
         to: str | datetime.date | None = None,
-        *,
-        bar: bool = False,
     ) -> DataFrame:
         """Get daily stock prices from the API.
 
         Args:
-            code (str | Iterable[str] | None): The stock code for which to
-                retrieve prices. If an iterable of strings is provided,
-                prices for all specified codes will be fetched concurrently.
+            code (str | None): The stock code for which to retrieve prices.
             date (str | datetime.date | None): The specific date for which to
                 retrieve prices.  Cannot be used with `from_` or `to`.
             from_ (str | datetime.date | None): The start date for a price range.
                 Requires `to` if `date` is not specified.
             to (str | datetime.date | None): The end date for a price range.
                 Requires `from_` if `date` is not specified.
-            bar (bool): Whether to display a progress bar when fetching data
-                for multiple codes.
 
         Returns:
             A Polars DataFrame containing daily stock prices.
@@ -230,9 +224,6 @@ class JQuantsClient:
             AuthenticationError: If no ID token is available.
             HTTPStatusError: If the API request fails.
         """
-        if code is not None and not isinstance(code, str):
-            return await fetch(self.get_prices, code, bar=bar)
-
         if not date and not code:
             return await self.get_latest_available_prices()
 
@@ -268,22 +259,16 @@ class JQuantsClient:
 
     async def get_statements(
         self,
-        code: str | Iterable[str] | None = None,
+        code: str | None = None,
         date: str | datetime.date | None = None,
-        *,
-        bar: bool = False,
     ) -> DataFrame:
         """Get financial statements from the API.
 
         Args:
-            code (str | Iterable[str] | None): The stock code for which to
-                retrieve financial statements. If an iterable of strings is
-                provided, statements for all specified codes will be fetched
-                concurrently.
+            code (str | None): The stock code for which to
+                retrieve financial statements.
             date (str | datetime.date | None): The date for which to
                 retrieve financial statements.
-            bar (bool): Whether to display a progress bar when fetching data
-                for multiple codes.
 
         Returns:
             A Polars DataFrame containing the financial statements.
@@ -292,9 +277,6 @@ class JQuantsClient:
             AuthenticationError: If no ID token is available.
             HTTPStatusError: If the API request fails.
         """
-        if code is not None and not isinstance(code, str):
-            return await fetch(self.get_statements, code, bar=bar)
-
         params = get_params(code=code, date=date)
         url = "/fins/statements"
         name = "statements"
