@@ -32,15 +32,17 @@ class AuthKey(StrEnum):
 class EdinetClient:
     client: AsyncClient
 
-    def __init__(self) -> None:
-        load_dotenv()
+    def __init__(self, api_key: str | None = None) -> None:
+        self.client = AsyncClient(base_url=BASE_URL)
+        self.set_api_key(api_key)
 
-        params = None
-        if api_key := os.getenv(AuthKey.API_KEY):
-            params = {"Subscription-Key": api_key}
+    def set_api_key(self, api_key: str | None = None) -> None:
+        if api_key is None:
+            load_dotenv()
+            api_key = os.environ.get(AuthKey.API_KEY)
 
-        client = AsyncClient(base_url=BASE_URL, params=params)
-        self.client = client
+        if api_key:
+            self.client.params = {"Subscription-Key": api_key}
 
     async def aclose(self) -> None:
         await self.client.aclose()

@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.15.2"
+__generated_with = "0.15.3"
 app = marimo.App(width="medium")
 
 
@@ -19,9 +19,11 @@ def _(mo):
 @app.cell
 def _():
     import marimo as mo
+    import polars as pl
     from polars import col as c
     from kabukit import JQuantsClient
-    return JQuantsClient, mo
+    from kabukit.concurrent import collect_fn
+    return JQuantsClient, collect_fn, mo, pl
 
 
 @app.cell
@@ -43,28 +45,8 @@ async def _(client):
 
 
 @app.cell
-async def _(client):
-    await client.get_prices(["1301", "1332"])
-    return
-
-
-@app.cell
-def _():
-    import asyncio
-    from polars import DataFrame
-
-
-    async def asleep(time: int) -> DataFrame:
-        await asyncio.sleep(time)
-        return DataFrame({"a": [time]})
-    return (asleep,)
-
-
-@app.cell
-async def _(asleep):
-    from kabukit.concurrent import fetch
-
-    await fetch(asleep, [1, 2, 3], bar=True)
+async def _(client, collect_fn, pl):
+    pl.concat([df async for df in collect_fn(client.get_prices, ["1301", "1332"]) if not df.is_empty()])
     return
 
 

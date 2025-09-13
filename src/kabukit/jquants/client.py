@@ -14,7 +14,7 @@ from kabukit.params import get_params
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
-    from typing import Any
+    from typing import Any, Self
 
     from httpx import HTTPStatusError  # noqa: F401
     from httpx._types import QueryParamTypes
@@ -46,19 +46,22 @@ class JQuantsClient:
 
     client: AsyncClient
 
-    def __init__(self) -> None:
-        load_dotenv()
-        client = AsyncClient(base_url=BASE_URL)
+    def __init__(self, id_token: str | None = None) -> None:
+        self.client = AsyncClient(base_url=BASE_URL)
+        self.set_id_token(id_token)
 
-        if id_token := os.environ.get(AuthKey.ID_TOKEN):
-            client.headers["Authorization"] = f"Bearer {id_token}"
+    def set_id_token(self, id_token: str | None = None) -> None:
+        if id_token is None:
+            load_dotenv()
+            id_token = os.environ.get(AuthKey.ID_TOKEN)
 
-        self.client = client
+        if id_token:
+            self.client.headers["Authorization"] = f"Bearer {id_token}"
 
     async def aclose(self) -> None:
         await self.client.aclose()
 
-    async def auth(self, mailaddress: str, password: str) -> None:
+    async def auth(self, mailaddress: str, password: str) -> Self:
         """Authenticate and save tokens.
 
         Args:
@@ -72,6 +75,8 @@ class JQuantsClient:
         id_token = await self.get_id_token(refresh_token)
         set_key(AuthKey.REFRESH_TOKEN, refresh_token)
         set_key(AuthKey.ID_TOKEN, id_token)
+        self.set_id_token(id_token)
+        return self
 
     async def post(self, url: str, json: Any | None = None) -> Any:
         """Send a POST request to the specified URL.

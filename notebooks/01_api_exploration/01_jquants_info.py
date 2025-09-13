@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.15.2"
+__generated_with = "0.15.3"
 app = marimo.App(width="medium")
 
 
@@ -63,7 +63,12 @@ def _(df):
 
 @app.cell
 async def _(client):
-    await client.get_info(code="1301")
+    await client.get_info("1301")
+    return
+
+
+@app.cell
+def _():
     return
 
 
