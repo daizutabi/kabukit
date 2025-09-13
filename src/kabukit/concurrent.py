@@ -128,3 +128,6 @@ async def progress_bar[T](
         async for item in ait:
             yield item
             bar.update()
+
+    it = (x for x in range(10))
+    progress_bar(it)
