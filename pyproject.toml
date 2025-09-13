@@ -49,6 +49,7 @@ skip_covered = true
 [tool.ruff]
 line-length = 88
 target-version = "py313"
+include = ["src", "tests"]
 
 [tool.ruff.lint]
 select = ["ALL"]
