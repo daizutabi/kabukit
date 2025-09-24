@@ -21,14 +21,10 @@ dependencies = [
   "async-typer>=0.1",
   "holidays>=0.81",
   "httpx>=0.28.1",
-  "marimo[lsp]>=0.16",
   "platformdirs>=4",
   "polars>=1",
   "python-dotenv>=1",
   "typer>=0.19",
-  "vegafusion-python-embed>=1.6",
-  "vegafusion>=2",
-  "vl-convert-python>=1.8",
 ]
 
 [project.scripts]
@@ -42,7 +38,8 @@ Issues = "https://github.com/daizutabi/kabukit/issues"
 [dependency-groups]
 dev = [
   "basedpyright>=1.31.4",
-  "numpy>=2.3.3",           # polars 1.33 type hinting workaround,
+  "marimo[lsp]>=0.16",
+  "numpy>=2.3.3",                 # polars 1.33 type hinting workaround,
   "pytest-asyncio>=1.2.0",
   "pytest-clarity>=1.0.1",
   "pytest-cov>=7.0.0",
@@ -50,6 +47,9 @@ dev = [
   "pytest-xdist>=3.8.0",
   "rich>=14.1.0",
   "tqdm>=4.67.1",
+  "vegafusion-python-embed>=1.6",
+  "vegafusion>=2",
+  "vl-convert-python>=1.8",
 ]
 docs = ["mkapi>=4.4", "mkdocs-marimo", "mkdocs-material"]
 
