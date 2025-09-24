@@ -42,6 +42,9 @@ plugins:
   - search
   - mkapi:
       debug: true
+  # - marimo:
+  #     enabled: true
+  #     display_code: true
 markdown_extensions:
   - admonition
   - attr_list
