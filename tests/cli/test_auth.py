@@ -1,0 +1,84 @@
+from pathlib import Path
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+from httpx import HTTPStatusError, Request, Response
+from typer.testing import CliRunner
+
+from kabukit.cli.app import app
+
+runner = CliRunner()
+
+
+@pytest.mark.parametrize("command", ["jquants", "j"])
+@patch("kabukit.jquants.client.JQuantsClient")
+def test_jquants_success(client: MagicMock, command: str) -> None:
+    mock_instance = client.return_value
+    mock_instance.__aenter__.return_value.auth = AsyncMock()
+
+    result = runner.invoke(
+        app,
+        ["auth", command],
+        input="test@example.com\npassword123\n",
+    )
+
+    assert result.exit_code == 0
+    assert "J-Quantsのリフレッシュトークン・IDトークンを保存しました。" in result.stdout
+    mock_instance.__aenter__.return_value.auth.assert_awaited_once_with(
+        "test@example.com",
+        "password123",
+        save=True,
+    )
+
+
+@pytest.mark.parametrize("command", ["jquants", "j"])
+@patch("kabukit.jquants.client.JQuantsClient")
+def test_jquants_error(client: MagicMock, command: str) -> None:
+    instance = client.return_value
+    instance.__aenter__.return_value.auth = AsyncMock(
+        side_effect=HTTPStatusError(
+            "400 Bad Request",
+            request=Request("POST", "http://example.com"),
+            response=Response(400),
+        ),
+    )
+
+    result = runner.invoke(app, ["auth", command], input="a\nb\n")
+    assert result.exit_code == 1
+    assert "認証に失敗しました: 400 Bad Request" in result.stdout
+
+
+@pytest.mark.parametrize("command", ["edinet", "e"])
+@patch("kabukit.utils.config.set_key")
+def test_edinet(set_key: MagicMock, command: str) -> None:
+    api_key = "my_edinet_api_key"
+    result = runner.invoke(app, ["auth", command], input=f"{api_key}\n")
+
+    assert result.exit_code == 0
+    assert "EDINETのAPIキーを保存しました。" in result.stdout
+    set_key.assert_called_once_with("EDINET_API_KEY", api_key)
+
+
+def test_show() -> None:
+    result = runner.invoke(app, ["auth", "show"])
+    assert result.exit_code == 0
+    assert "Configuration file: " in result.stdout
+
+
+def test_show_with_config(tmp_path: Path) -> None:
+    config_path = tmp_path / ".env"
+    config_content = {
+        "JQUANTS_REFRESH_TOKEN": "dummy_refresh_token",
+        "EDINET_API_KEY": "dummy_api_key",
+    }
+
+    with config_path.open("w", encoding="utf-8") as f:
+        f.writelines(f"{key}={value}\n" for key, value in config_content.items())
+
+    with patch("kabukit.utils.config.get_dotenv_path", return_value=config_path):
+        result = runner.invoke(app, ["auth", "show"])
+
+        assert result.exit_code == 0
+        assert f"Configuration file: {config_path}" in result.stdout
+        for key, value in config_content.items():
+            assert f"{key}: {value}" in result.stdout
