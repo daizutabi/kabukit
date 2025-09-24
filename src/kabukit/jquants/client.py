@@ -140,7 +140,7 @@ class JQuantsClient(Client):
             date (str | datetime.date, optional): 情報を取得する日付。
 
         Returns:
-            銘柄情報を含むPolars DataFrame。
+            銘柄情報を含むDataFrame。
 
         Raises:
             HTTPStatusError: APIリクエストが失敗した場合。
@@ -164,7 +164,7 @@ class JQuantsClient(Client):
             name (str): アイテムのリストを含むJSONレスポンスのキー。
 
         Yields:
-            データの各ページに対応するPolars DataFrame。
+            データの各ページに対応するDataFrame。
 
         Raises:
             HTTPStatusError: APIリクエストが失敗した場合。
@@ -200,7 +200,7 @@ class JQuantsClient(Client):
                 `date`とは併用不可。
 
         Returns:
-            日々の株価四本値を含むPolars DataFrame。
+            日々の株価四本値を含むDataFrame。
 
         Raises:
             ValueError: `date`と`from_`/`to`の両方が指定された場合。
