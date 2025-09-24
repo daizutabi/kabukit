@@ -35,7 +35,7 @@ dependencies = [
 kabu = "kabukit.cli.app:app"
 
 [project.urls]
-Documentation = "https://github.com/daizutabi/kabukit"
+Documentation = "https://daizutabi.github.io/kabukit/"
 Source = "https://github.com/daizutabi/kabukit"
 Issues = "https://github.com/daizutabi/kabukit/issues"
 
