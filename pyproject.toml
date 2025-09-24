@@ -86,7 +86,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["ANN", "FBT", "S101", "S607"]
+"tests/*" = ["ANN", "FBT", "S101", "S607", "PLC2401"]
 "schema.py" = ["E501"]
 "notebooks/*" = ["F704", "PLE1142"]
 
