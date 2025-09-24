@@ -34,13 +34,15 @@ dependencies = [
 [project.scripts]
 kabu = "kabukit.cli.app:app"
 
+[project.urls]
+Documentation = "https://github.com/daizutabi/kabukit"
+Source = "https://github.com/daizutabi/kabukit"
+Issues = "https://github.com/daizutabi/kabukit/issues"
+
 [dependency-groups]
 dev = [
   "basedpyright>=1.31.4",
-  "mkdocs-marimo>=0.2.1",
-  "mkdocs-material>=9.6.20",
-  "mkdocs>=1.6.1",
-  "numpy>=2.3.3",            # polars 1.33 type hinting workaround,
+  "numpy>=2.3.3",           # polars 1.33 type hinting workaround,
   "pytest-asyncio>=1.2.0",
   "pytest-clarity>=1.0.1",
   "pytest-cov>=7.0.0",
@@ -49,7 +51,7 @@ dev = [
   "rich>=14.1.0",
   "tqdm>=4.67.1",
 ]
-docs = ["mkapi>=4.4", "mkdocs-material"]
+docs = ["mkapi>=4.4", "mkdocs-marimo", "mkdocs-material"]
 
 [tool.pytest.ini_options]
 addopts = ["--cov=kabukit", "--cov-report=lcov:lcov.info", "--doctest-modules"]
