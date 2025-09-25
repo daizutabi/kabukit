@@ -14,20 +14,12 @@
   "hostRequirements": {
     "gpu": "optional"
   },
-  "mounts": [
-    {
-      "source": "${localEnv:HOME}/.gemini",
-      "target": "/home/vscode/.gemini",
-      "type": "bind"
-    }
-  ],
   "customizations": {
     "vscode": {
       "extensions": [
         "charliermarsh.ruff",
         "detachhead.basedpyright",
         "fill-labs.dependi",
-        "google.gemini-cli-vscode-ide-companion",
         "markis.code-coverage",
         "ms-python.python",
         "tamasfe.even-better-toml"
