@@ -37,7 +37,12 @@ class Base:
         data_dir = cls.data_dir()
 
         if path is None:
-            filename = sorted(data_dir.glob("*.parquet"))[-1]
+            filenames = sorted(data_dir.glob("*.parquet"))
+            if not filenames:
+                msg = f"No data found in {data_dir}"
+                raise FileNotFoundError(msg)
+
+            filename = filenames[-1]
         else:
             filename = data_dir / path
 
