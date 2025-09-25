@@ -3,11 +3,16 @@ import pytest
 from polars import DataFrame
 from polars import col as c
 
+from kabukit.core.statements import Statements
+
+try:
+    Statements.read()
+except FileNotFoundError:
+    pytest.skip("No data found. Run `kabukit download` first.", allow_module_level=True)
+
 
 @pytest.fixture(scope="module")
 def df() -> DataFrame:
-    from kabukit.core.statements import Statements
-
     return Statements.read().data
 
 
