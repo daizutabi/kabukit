@@ -4,7 +4,7 @@ from typing import Annotated, Any
 
 import typer
 from async_typer import AsyncTyper  # pyright: ignore[reportMissingTypeStubs]
-from typer import Argument, Exit
+from typer import Argument
 
 app = AsyncTyper(
     add_completion=False,
@@ -48,7 +48,7 @@ async def _fetch(
         async with JQuantsClient() as client:
             df = await getattr(client, fetch_func_name)(code)
         typer.echo(df)
-        raise Exit
+        return
 
     import tqdm.asyncio
 
@@ -87,3 +87,22 @@ async def prices(code: Code = None) -> None:
         message="株価情報",
         max_concurrency=8,
     )
+
+
+@app.async_command(name="all")  # pyright: ignore[reportUnknownMemberType]
+async def all_(code: Code = None) -> None:
+    """上場銘柄一覧、財務情報、株価を連続して取得します。"""
+    typer.echo("上場銘柄一覧を取得します。")
+    await info(code)
+
+    if code is None:
+        typer.echo("---")
+
+    typer.echo("財務情報を取得します。")
+    await statements(code)
+
+    if code is None:
+        typer.echo("---")
+
+    typer.echo("株価を取得します。")
+    await prices(code)
