@@ -10,9 +10,8 @@ from kabukit.jquants.client import JQuantsClient
 
 @pytest_asyncio.fixture(scope="module")
 async def df():
-    client = JQuantsClient()
-    yield await client.get_info()
-    await client.aclose()
+    async with JQuantsClient() as client:
+        yield await client.get_info()
 
 
 def test_width(df: DataFrame) -> None:
