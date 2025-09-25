@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Any
 
 import typer
 from async_typer import AsyncTyper  # pyright: ignore[reportMissingTypeStubs]
@@ -33,15 +33,20 @@ async def info(code: Code = None) -> None:
         typer.echo(f"全銘柄の情報を '{path}' に保存しました。")
 
 
-@app.async_command()  # pyright: ignore[reportUnknownMemberType]
-async def statements(code: Code = None) -> None:
-    """財務情報を取得します。"""
-    from kabukit.core.statements import Statements
+async def _fetch(
+    code: str | None,
+    target: str,
+    writer_cls: type,
+    fetch_func_name: str,
+    message: str,
+    **kwargs: Any,
+) -> None:
+    """財務情報・株価情報を取得するための共通処理"""
     from kabukit.jquants.client import JQuantsClient
 
     if code is not None:
         async with JQuantsClient() as client:
-            df = await client.get_statements(code)
+            df = await getattr(client, fetch_func_name)(code)
         typer.echo(df)
         raise Exit
 
@@ -49,29 +54,36 @@ async def statements(code: Code = None) -> None:
 
     from kabukit.jquants.concurrent import fetch_all
 
-    df = await fetch_all("statements", progress=tqdm.asyncio.tqdm)
+    df = await fetch_all(target, progress=tqdm.asyncio.tqdm, **kwargs)
     typer.echo(df)
-    path = Statements(df).write()
-    typer.echo(f"全銘柄の財務情報を '{path}' に保存しました。")
+    path = writer_cls(df).write()
+    typer.echo(f"全銘柄の{message}を '{path}' に保存しました。")
+
+
+@app.async_command()  # pyright: ignore[reportUnknownMemberType]
+async def statements(code: Code = None) -> None:
+    """財務情報を取得します。"""
+    from kabukit.core.statements import Statements
+
+    await _fetch(
+        code=code,
+        target="statements",
+        writer_cls=Statements,
+        fetch_func_name="get_statements",
+        message="財務情報",
+    )
 
 
 @app.async_command()  # pyright: ignore[reportUnknownMemberType]
 async def prices(code: Code = None) -> None:
     """株価を取得します。"""
     from kabukit.core.prices import Prices
-    from kabukit.jquants.client import JQuantsClient
 
-    if code is not None:
-        async with JQuantsClient() as client:
-            df = await client.get_prices(code)
-        typer.echo(df)
-        raise Exit
-
-    import tqdm.asyncio
-
-    from kabukit.jquants.concurrent import fetch_all
-
-    df = await fetch_all("prices", max_concurrency=8, progress=tqdm.asyncio.tqdm)
-    typer.echo(df)
-    path = Prices(df).write()
-    typer.echo(f"全銘柄の株価情報を '{path}' に保存しました。")
+    await _fetch(
+        code=code,
+        target="prices",
+        writer_cls=Prices,
+        fetch_func_name="get_prices",
+        message="株価情報",
+        max_concurrency=8,
+    )
