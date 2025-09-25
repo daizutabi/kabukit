@@ -36,15 +36,15 @@ class Base:
     def read(cls, path: str | None = None) -> Self:
         data_dir = cls.data_dir()
 
-        if path is None:
+        if path:
+            filename = data_dir / path
+        else:
             filenames = sorted(data_dir.glob("*.parquet"))
             if not filenames:
                 msg = f"No data found in {data_dir}"
                 raise FileNotFoundError(msg)
 
             filename = filenames[-1]
-        else:
-            filename = data_dir / path
 
         data = pl.read_parquet(filename)
         return cls(data)
