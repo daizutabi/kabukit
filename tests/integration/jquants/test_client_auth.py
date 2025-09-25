@@ -5,6 +5,7 @@ import pytest
 from kabukit.jquants.client import AuthKey, JQuantsClient
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_auth_successful_no_save():
     """Test successful authentication without saving tokens."""
@@ -41,6 +42,7 @@ async def test_auth_successful_no_save():
             assert client.client.headers["Authorization"] == "Bearer test_id_token"
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_auth_successful_with_save():
     """Test successful authentication with saving tokens."""

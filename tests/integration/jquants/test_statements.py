@@ -20,10 +20,12 @@ async def df(client: JQuantsClient):
     yield await client.get_statements(date="20250627")
 
 
+@pytest.mark.integration
 def test_width(df: DataFrame) -> None:
     assert df.width == 75
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize(
     ("name", "dtype"),
     [
@@ -45,6 +47,7 @@ def test_column_dtype(df: DataFrame, name: str, dtype: type) -> None:
     assert df[name].dtype == dtype
 
 
+@pytest.mark.integration
 def test_columns(df: DataFrame) -> None:
     from kabukit.jquants.schema import StatementColumns
 
@@ -52,6 +55,7 @@ def test_columns(df: DataFrame) -> None:
     assert df.columns == [c.name for c in StatementColumns]
 
 
+@pytest.mark.integration
 def test_rename(df: DataFrame) -> None:
     from kabukit.jquants.schema import StatementColumns
 
@@ -64,6 +68,7 @@ async def df_7203(client: JQuantsClient):
     yield await client.get_statements("7203")  # Toyota
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize("prefix", ["1Q", "2Q", "3Q", "FY"])
 def test_column_names(df_7203: DataFrame, prefix: str) -> None:
     name = f"{prefix}FinancialStatements_Consolidated_IFRS"

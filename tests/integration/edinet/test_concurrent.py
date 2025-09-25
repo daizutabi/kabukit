@@ -23,6 +23,7 @@ def test_dates_error() -> None:
         get_dates()
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_fetch() -> None:
     from kabukit.edinet.concurrent import fetch
@@ -38,6 +39,7 @@ def callback(df: DataFrame) -> DataFrame:
     return df
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_fetch_list() -> None:
     from kabukit.edinet.concurrent import fetch_list
@@ -46,6 +48,7 @@ async def test_fetch_list() -> None:
     assert df.width == 30
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_fetch_csv() -> None:
     from kabukit.edinet.concurrent import fetch, fetch_csv

@@ -14,11 +14,13 @@ async def df():
         yield await client.get_info()
 
 
+@pytest.mark.integration
 def test_width(df: DataFrame) -> None:
     assert df.height > 4000
     assert df.width in [7, 8]  # 7: ライトプラン, 8: スタンダードプラン
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize(
     ("name", "dtype"),
     [
@@ -35,12 +37,14 @@ def test_column_dtype(df: DataFrame, name: str, dtype: type) -> None:
     assert df[name].dtype == dtype
 
 
+@pytest.mark.integration
 def test_today(df: DataFrame) -> None:
     date = df.item(0, "Date")
     assert isinstance(date, datetime.date)
     assert abs((date - datetime.date.today()).days) <= 3  # noqa: DTZ011
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize(
     ("name", "n"),
     [
@@ -53,6 +57,7 @@ def test_sector17(df: DataFrame, name: str, n: int) -> None:
     assert df[name].n_unique() == n
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "sc",
     [
@@ -68,12 +73,14 @@ def test_scale_category(df: DataFrame, sc: str) -> None:
     assert sc in df["ScaleCategory"]
 
 
+@pytest.mark.integration
 def test_columns(df: DataFrame) -> None:
     from kabukit.jquants.schema import InfoColumns
 
     assert df.columns == [c.name for c in InfoColumns]
 
 
+@pytest.mark.integration
 def test_rename(df: DataFrame) -> None:
     from kabukit.jquants.schema import InfoColumns
 
@@ -81,6 +88,7 @@ def test_rename(df: DataFrame) -> None:
     assert df_renamed.columns == [c.value for c in InfoColumns]
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_get_codes() -> None:
     from kabukit.jquants.info import get_codes

@@ -11,6 +11,7 @@ def date() -> datetime.date:
     return today - datetime.timedelta(weeks=12)
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_info_date(client: JQuantsClient, date: datetime.date) -> None:
     df = await client.get_info(date=date)
@@ -20,6 +21,7 @@ async def test_info_date(client: JQuantsClient, date: datetime.date) -> None:
     assert (df_date - date).days <= 7
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_info_code(client: JQuantsClient) -> None:
     df = await client.get_info(code="7203")
@@ -29,12 +31,14 @@ async def test_info_code(client: JQuantsClient) -> None:
     assert "トヨタ" in name
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_prices_code(client: JQuantsClient) -> None:
     df = await client.get_prices(code="7203")
     assert df.width == 16
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_prices_date(client: JQuantsClient) -> None:
     df = await client.get_prices(date="2025-08-29")
@@ -42,12 +46,14 @@ async def test_prices_date(client: JQuantsClient) -> None:
     assert df.height == df["Code"].n_unique()
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_prices_empty(client: JQuantsClient) -> None:
     df = await client.get_prices(date="2025-08-30")
     assert df.shape == (0, 0)
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_prices_from_to(client: JQuantsClient) -> None:
     df = await client.get_prices(code="7203", from_="2025-08-16", to="2025-08-25")
@@ -56,78 +62,91 @@ async def test_prices_from_to(client: JQuantsClient) -> None:
     assert df.item(5, "Date") == datetime.date(2025, 8, 25)
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_prices_from(client: JQuantsClient) -> None:
     df = await client.get_prices(code="7203", from_="2025-08-16")
     assert df.item(0, "Date") == datetime.date(2025, 8, 18)
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_prices_to(client: JQuantsClient) -> None:
     df = await client.get_prices(code="7203", to="2025-08-16")
     assert df.item(-1, "Date") == datetime.date(2025, 8, 15)
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_prices_without_code(client: JQuantsClient) -> None:
     df = await client.get_prices()
     assert df.height > 3000
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_latest_available_prices(client: JQuantsClient) -> None:
     df = await client.get_latest_available_prices()
     assert df.height > 3000
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_latest_available_prices_empty(client: JQuantsClient) -> None:
     df = await client.get_latest_available_prices(0)
     assert df.is_empty()
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_prices_error(client: JQuantsClient) -> None:
     with pytest.raises(ValueError, match="dateとfrom/toの"):
         await client.get_prices(code="7203", date="2025-08-18", to="2025-08-16")
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_statements_code(client: JQuantsClient) -> None:
     df = await client.get_statements(code="7203")
     assert df.width == 75
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_statements_date(client: JQuantsClient) -> None:
     df = await client.get_statements(date="2025-08-29")
     assert df.height == 18
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_statements_empty(client: JQuantsClient) -> None:
     df = await client.get_statements(date="2025-08-30")
     assert df.shape == (0, 0)
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_statements_error(client: JQuantsClient) -> None:
     with pytest.raises(ValueError, match="codeまたはdate"):
         await client.get_statements()
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_announcement(client: JQuantsClient) -> None:
     df = await client.get_announcement()
     assert df.width in [7, 0]
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_trades_spec(client: JQuantsClient) -> None:
     df = await client.get_trades_spec()
     assert df.width == 56
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "section",
@@ -150,6 +169,7 @@ async def test_trades_spec_section(client: JQuantsClient, section: str) -> None:
     assert s[0] == section
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "from_",
@@ -168,6 +188,7 @@ async def test_trades_spec_from(
     assert date == datetime.date(2025, 8, 1)
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "to",
@@ -183,6 +204,7 @@ async def test_trades_spec_to(client: JQuantsClient, to: str | datetime.date) ->
     assert date == datetime.date(2025, 7, 25)
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_trades_spec_empty(client: JQuantsClient) -> None:
     df = await client.get_trades_spec(from_="2025-01-01", to="2025-01-01")
