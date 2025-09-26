@@ -3,6 +3,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from httpx import HTTPStatusError, Request, Response
+from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
 from kabukit.cli.app import app
@@ -10,10 +11,13 @@ from kabukit.cli.app import app
 runner = CliRunner()
 
 
+@pytest.fixture
+def client(mocker: MockerFixture) -> MagicMock:
+    return mocker.patch("kabukit.jquants.client.JQuantsClient").return_value
+
+
 @pytest.mark.parametrize("command", ["jquants", "j"])
-@patch("kabukit.jquants.client.JQuantsClient")
-def test_jquants_success(Client: MagicMock, command: str) -> None:  # noqa: N803
-    client = Client.return_value
+def test_jquants_success(client: MagicMock, command: str) -> None:
     auth = AsyncMock()
     client.__aenter__.return_value.auth = auth
     result = runner.invoke(app, ["auth", command], input="t@e.com\n123\n")
@@ -23,9 +27,7 @@ def test_jquants_success(Client: MagicMock, command: str) -> None:  # noqa: N803
 
 
 @pytest.mark.parametrize("command", ["jquants", "j"])
-@patch("kabukit.jquants.client.JQuantsClient")
-def test_jquants_error(Client: MagicMock, command: str) -> None:  # noqa: N803
-    client = Client.return_value
+def test_jquants_error(client: MagicMock, command: str) -> None:
     client.__aenter__.return_value.auth = AsyncMock(
         side_effect=HTTPStatusError(
             "400 Bad Request",
@@ -39,8 +41,12 @@ def test_jquants_error(Client: MagicMock, command: str) -> None:  # noqa: N803
     assert "認証に失敗しました: 400 Bad Request" in result.stdout
 
 
+@pytest.fixture
+def set_key(mocker: MockerFixture) -> MagicMock:
+    return mocker.patch("kabukit.utils.config.set_key").return_value
+
+
 @pytest.mark.parametrize("command", ["edinet", "e"])
-@patch("kabukit.utils.config.set_key")
 def test_edinet(set_key: MagicMock, command: str) -> None:
     api_key = "my_edinet_api_key"
     result = runner.invoke(app, ["auth", command], input=f"{api_key}\n")
