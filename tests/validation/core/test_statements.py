@@ -6,27 +6,33 @@ from polars import col as c
 from kabukit.core.statements import Statements
 
 try:
-    Statements.read()
+    stmts = Statements.read()
 except FileNotFoundError:
-    pytest.skip("No data found. Run `kabukit download` first.", allow_module_level=True)
+    stmts = None
+
+pytestmark = [
+    pytest.mark.validation,
+    pytest.mark.skipif(
+        stmts is None,
+        reason="No data found. Run `kabu get statements` first.",
+    ),
+]
 
 
 @pytest.fixture(scope="module")
 def df() -> DataFrame:
-    return Statements.read().data
+    assert stmts is not None
+    return stmts.data
 
 
-@pytest.mark.integration
 def test_width(df: DataFrame) -> None:
     assert df.width == 75
 
 
-@pytest.mark.integration
-def test_heigth(df: DataFrame) -> None:
+def test_height(df: DataFrame) -> None:
     assert df.height > 150_000
 
 
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "column",
     [
@@ -44,9 +50,8 @@ def test_is_not_null_all(df: DataFrame, column: str) -> None:
     assert df[column].is_not_null().all()
 
 
-@pytest.mark.integration
 @pytest.mark.parametrize("column", ["Time"])
-def test_is_null_any(df: DataFrame, column: str) -> None:
+def test_is_not_null_any(df: DataFrame, column: str) -> None:
     assert df[column].is_not_null().any()
 
 
@@ -62,7 +67,6 @@ def pct(df: DataFrame) -> DataFrame:
     ).sort("TypeOfDocument")
 
 
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "column",
     ["NextFiscalYearStartDate", "NextFiscalYearEndDate"],
@@ -77,7 +81,6 @@ def test_next_fiscal_year_start_end(pct: DataFrame, column: str) -> None:
     assert pct.filter(cond.not_())[column].eq(0).all()
 
 
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "column",
     ["NetSales", "OperatingProfit", "Profit", "EarningsPerShare"],

@@ -58,10 +58,13 @@ addopts = [
   "--cov=kabukit",
   "--cov-report=lcov:lcov.info",
   "--doctest-modules",
-  "-m not integration",
+  "-m 'not integration and not validation'",
 ]
-testpaths = ["tests/unit", "tests/integration"]
-markers = ["integration: marks tests as integration tests"]
+testpaths = ["tests/unit", "tests/integration", "tests/validation"]
+markers = [
+  "integration: marks tests as integration tests",
+  "validation: marks tests as data validation tests",
+]
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "raise NotImplementedError", "if TYPE_CHECKING:"]
