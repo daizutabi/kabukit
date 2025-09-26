@@ -1,4 +1,5 @@
 import polars as pl
+import pytest
 import pytest_asyncio
 from polars import DataFrame
 
@@ -13,6 +14,7 @@ async def prices():
         yield Prices(data)
 
 
+@pytest.mark.integration
 def test_prices_data(prices: Prices) -> None:
     assert not prices.data.is_empty()
     assert "Date" in prices.data.columns
@@ -20,6 +22,7 @@ def test_prices_data(prices: Prices) -> None:
     assert prices.data["Code"].unique().to_list() == ["62000"]
 
 
+@pytest.mark.integration
 def test_adjustment_factor(prices: Prices) -> None:
     df = prices.data.filter(pl.col("AdjustmentFactor") != 1)
     assert df.height == 4
@@ -31,6 +34,7 @@ async def stmts():
         yield await client.get_statements("6200")
 
 
+@pytest.mark.integration
 def test_statements(stmts: DataFrame) -> None:
     assert not stmts.is_empty()
     assert "Date" in stmts.columns
