@@ -1,7 +1,16 @@
-import asyncio
+from __future__ import annotations
 
+import asyncio
+from typing import TYPE_CHECKING
+
+import polars as pl
 import pytest
 from polars import DataFrame
+
+from kabukit.core.client import Client
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterable, AsyncIterator
 
 
 async def sleep(seconds: list[float]):
@@ -60,3 +69,55 @@ async def test_concat_fn() -> None:
 
     df = await concat_fn(sleep_df, [0.03, 0.02, 0.01], max_concurrency=2)
     assert df.sort("a").to_series().to_list() == [0.01, 0.02, 0.03]
+
+
+class MockClient(Client):
+    async def get_data(self, code: int) -> DataFrame:
+        await asyncio.sleep(0.01)
+        return DataFrame({"Code": [code]})
+
+
+@pytest.mark.asyncio
+async def test_stream() -> None:
+    from kabukit.utils.concurrent import Stream
+
+    stream = Stream(MockClient, "data", args=[1, 2, 3])
+
+    dfs = [df async for df in stream]
+    assert sorted(df["Code"].to_list() for df in dfs) == [[1], [2], [3]]
+
+
+@pytest.mark.asyncio
+async def test_fetch() -> None:
+    from kabukit.utils.concurrent import fetch
+
+    df = await fetch(MockClient, "data", [1, 2, 3], max_concurrency=2)
+    assert df["Code"].sort().to_list() == [1, 2, 3]
+
+
+async def progress(
+    ait: AsyncIterable[DataFrame],
+    total: int | None = None,
+) -> AsyncIterator[DataFrame]:
+    async for x in ait:
+        yield x.with_columns(pl.col("Code") * total)
+
+
+@pytest.mark.asyncio
+async def test_fetch_progress() -> None:
+    from kabukit.utils.concurrent import fetch
+
+    df = await fetch(MockClient, "data", [1, 2, 3], progress=progress)
+    assert df["Code"].sort().to_list() == [3, 6, 9]
+
+
+def callback(df: DataFrame) -> DataFrame:
+    return df.with_columns(pl.col("Code") * 10)
+
+
+@pytest.mark.asyncio
+async def test_fetch_callback() -> None:
+    from kabukit.utils.concurrent import fetch
+
+    df = await fetch(MockClient, "data", [1, 2, 3], callback=callback)
+    assert df["Code"].sort().to_list() == [10, 20, 30]

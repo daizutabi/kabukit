@@ -23,13 +23,14 @@ if TYPE_CHECKING:
     from kabukit.core.client import Client
 
     class _Progress(Protocol):
-        def __call__[T](
+        def __call__(
             self,
-            aiterable: AsyncIterable[T],
+            aiterable: AsyncIterable[Any],
+            /,
             total: int | None = None,
             *args: Any,
             **kwargs: Any,
-        ) -> AsyncIterator[T]: ...
+        ) -> AsyncIterator[Any]: ...
 
 
 MAX_CONCURRENCY = 12
