@@ -1,8 +1,14 @@
-from unittest.mock import AsyncMock, MagicMock
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pytest
 from polars import DataFrame
-from pytest_mock import MockerFixture
+
+if TYPE_CHECKING:
+    from unittest.mock import AsyncMock, MagicMock
+
+    from pytest_mock import MockerFixture
 
 MOCK_DF = DataFrame({"A": [1, 2], "B": [3, 4]})
 MOCK_CODE = "1234"
@@ -15,22 +21,22 @@ def jquants_client(mocker: MockerFixture) -> MagicMock:
 
 
 @pytest.fixture
-def get_info(jquants_client: MagicMock) -> AsyncMock:
-    get_info = AsyncMock(return_value=MOCK_DF)
+def get_info(jquants_client: MagicMock, mocker: MockerFixture) -> AsyncMock:
+    get_info = mocker.AsyncMock(return_value=MOCK_DF)
     jquants_client.__aenter__.return_value.get_info = get_info
     return get_info
 
 
 @pytest.fixture
-def get_statements(jquants_client: MagicMock) -> AsyncMock:
-    get_statements = AsyncMock(return_value=MOCK_DF)
+def get_statements(jquants_client: MagicMock, mocker: MockerFixture) -> AsyncMock:
+    get_statements = mocker.AsyncMock(return_value=MOCK_DF)
     jquants_client.__aenter__.return_value.get_statements = get_statements
     return get_statements
 
 
 @pytest.fixture
-def get_prices(jquants_client: MagicMock) -> AsyncMock:
-    get_prices = AsyncMock(return_value=MOCK_DF)
+def get_prices(jquants_client: MagicMock, mocker: MockerFixture) -> AsyncMock:
+    get_prices = mocker.AsyncMock(return_value=MOCK_DF)
     jquants_client.__aenter__.return_value.get_prices = get_prices
     return get_prices
 
@@ -39,7 +45,7 @@ def get_prices(jquants_client: MagicMock) -> AsyncMock:
 def fetch_all(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
         "kabukit.jquants.concurrent.fetch_all",
-        new_callable=AsyncMock,
+        new_callable=mocker.AsyncMock,
         return_value=MOCK_DF,
     )
 
