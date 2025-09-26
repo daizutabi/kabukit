@@ -5,7 +5,6 @@ __marimo__/
 __pycache__/
 data/
 dist/
-docs/
 lcov.info
 site/
 uv.lock
