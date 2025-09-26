@@ -85,41 +85,41 @@ def test_get_prices_all_codes(
 
 
 @pytest.fixture
-def mock_info(mocker: MockerFixture) -> AsyncMock:
+def app_info(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch("kabukit.cli.get.info", new_callable=AsyncMock)
 
 
 @pytest.fixture
-def mock_statements(mocker: MockerFixture) -> AsyncMock:
+def app_statements(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch("kabukit.cli.get.statements", new_callable=AsyncMock)
 
 
 @pytest.fixture
-def mock_prices(mocker: MockerFixture) -> AsyncMock:
+def app_prices(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch("kabukit.cli.get.prices", new_callable=AsyncMock)
 
 
 def test_get_all_single_code(
-    mock_info: AsyncMock,
-    mock_statements: AsyncMock,
-    mock_prices: AsyncMock,
+    app_info: AsyncMock,
+    app_statements: AsyncMock,
+    app_prices: AsyncMock,
 ) -> None:
     result = runner.invoke(app, ["get", "all", MOCK_CODE])
 
     assert result.exit_code == 0
-    mock_info.assert_awaited_once_with(MOCK_CODE)
-    mock_statements.assert_awaited_once_with(MOCK_CODE)
-    mock_prices.assert_awaited_once_with(MOCK_CODE)
+    app_info.assert_awaited_once_with(MOCK_CODE)
+    app_statements.assert_awaited_once_with(MOCK_CODE)
+    app_prices.assert_awaited_once_with(MOCK_CODE)
 
 
 def test_get_all_all_codes(
-    mock_info: AsyncMock,
-    mock_statements: AsyncMock,
-    mock_prices: AsyncMock,
+    app_info: AsyncMock,
+    app_statements: AsyncMock,
+    app_prices: AsyncMock,
 ) -> None:
     result = runner.invoke(app, ["get", "all"])
 
     assert result.exit_code == 0
-    mock_info.assert_awaited_once_with(None)
-    mock_statements.assert_awaited_once_with(None)
-    mock_prices.assert_awaited_once_with(None)
+    app_info.assert_awaited_once_with(None)
+    app_statements.assert_awaited_once_with(None)
+    app_prices.assert_awaited_once_with(None)

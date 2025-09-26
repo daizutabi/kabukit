@@ -1,12 +1,9 @@
 from datetime import date
 
-import polars as pl
 import pytest
-import pytest_asyncio
 from polars import DataFrame
 
 from kabukit.core.prices import Prices
-from kabukit.jquants.client import JQuantsClient
 
 
 @pytest.fixture(scope="module")
@@ -57,35 +54,3 @@ def test_truncate_month(data: DataFrame) -> None:
     assert df["Close"].to_list() == [108, 110, 112, 113]
     assert df["Volume"].to_list() == [1500, 1700, 1900, 2100]
     assert df["TurnoverValue"].to_list() == [3000, 3400, 3800, 4200]
-
-
-@pytest_asyncio.fixture(scope="module")
-async def prices():
-    async with JQuantsClient() as client:
-        data = await client.get_prices("6200")
-        yield Prices(data)
-
-
-def test_prices_data(prices: Prices) -> None:
-    assert not prices.data.is_empty()
-    assert "Date" in prices.data.columns
-    assert "Code" in prices.data.columns
-    assert prices.data["Code"].unique().to_list() == ["62000"]
-
-
-def test_adjustment_factor(prices: Prices) -> None:
-    df = prices.data.filter(pl.col("AdjustmentFactor") != 1)
-    assert df.height == 4
-
-
-@pytest_asyncio.fixture(scope="module")
-async def stmts():
-    async with JQuantsClient() as client:
-        yield await client.get_statements("6200")
-
-
-def test_statements(stmts: DataFrame) -> None:
-    assert not stmts.is_empty()
-    assert "Date" in stmts.columns
-    assert "Code" in stmts.columns
-    assert stmts["Code"].unique().to_list() == ["62000"]

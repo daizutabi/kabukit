@@ -1,3 +1,5 @@
+from typing import cast
+
 import altair as alt
 import polars as pl
 import pytest
