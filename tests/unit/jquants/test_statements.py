@@ -1,7 +1,64 @@
 import datetime
+from typing import Any
 
 import polars as pl
+import pytest
 from polars import DataFrame
+
+
+@pytest.fixture
+def df() -> DataFrame:
+    from kabukit.jquants.statements import clean
+
+    return DataFrame(
+        {
+            "DisclosedDate": ["2023-01-01", "2023-01-02", "2023-01-03"],
+            "DisclosedTime": ["09:00", "15:30", "12:00"],
+            "LocalCode": ["1300", "1301", "1302"],
+            "NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock": [  # noqa: E501
+                1,
+                2,
+                3,
+            ],
+            "NumberOfTreasuryStockAtTheEndOfFiscalYear": [4, 5, 6],
+            "TypeOfCurrentPeriod": ["A", "B", "C"],
+            "RetrospectiveRestatement": ["true", "false", ""],
+            "ForcastProfit": [1.0, 2.0, None],
+        },
+    ).pipe(clean)
+
+
+def test_clean_shape(df: DataFrame) -> None:
+    assert df.shape == (3, 8)
+
+
+def test_clean_date(df: DataFrame) -> None:
+    assert df["Date"].dtype == pl.Date
+
+
+def test_clean_time(df: DataFrame) -> None:
+    assert df["Time"].dtype == pl.Time
+
+
+def test_clean_current_period(df: DataFrame) -> None:
+    assert df["TypeOfCurrentPeriod"].dtype == pl.Categorical
+
+
+def test_clean_float(df: DataFrame) -> None:
+    assert df["ForcastProfit"].dtype == pl.Float64
+
+
+@pytest.mark.parametrize(
+    ("column", "values"),
+    [
+        ("NumberOfShares", [1, 2, 3]),
+        ("NumberOfTreasuryStock", [4, 5, 6]),
+        ("ForcastProfit", [1.0, 2.0, None]),
+        ("RetrospectiveRestatement", [True, False, None]),
+    ],
+)
+def test_clean(df: DataFrame, column: str, values: list[Any]) -> None:
+    assert df[column].to_list() == values
 
 
 def test_holidays() -> None:

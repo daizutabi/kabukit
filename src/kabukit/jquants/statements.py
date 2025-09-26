@@ -2,24 +2,13 @@ from __future__ import annotations
 
 import datetime
 from functools import cache
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING
 
 import holidays
 import polars as pl
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterable, AsyncIterator
-
     from polars import DataFrame
-
-    class Progress(Protocol):
-        def __call__[T](
-            self,
-            async_iterable: AsyncIterable[T],
-            total: int | None = None,
-            *args: Any,
-            **kwargs: Any,
-        ) -> AsyncIterator[T]: ...
 
 
 def clean(df: DataFrame) -> DataFrame:
