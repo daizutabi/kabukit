@@ -58,7 +58,8 @@ addopts = [
   "--cov=kabukit",
   "--cov-report=lcov:lcov.info",
   "--doctest-modules",
-  "-m 'not integration and not validation'",
+  "-m",
+  "not integration and not validation",
 ]
 testpaths = ["tests/unit", "tests/integration", "tests/validation"]
 markers = [
