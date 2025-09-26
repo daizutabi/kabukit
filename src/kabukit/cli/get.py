@@ -95,14 +95,10 @@ async def all_(code: Code = None) -> None:
     typer.echo("上場銘柄一覧を取得します。")
     await info(code)
 
-    if code is None:
-        typer.echo("---")
-
+    typer.echo("---")
     typer.echo("財務情報を取得します。")
     await statements(code)
 
-    if code is None:
-        typer.echo("---")
-
+    typer.echo("---")
     typer.echo("株価を取得します。")
     await prices(code)
