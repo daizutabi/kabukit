@@ -214,7 +214,7 @@ class JQuantsClient(Client):
             HTTPStatusError: APIリクエストが失敗した場合。
         """
         if not date and not code:
-            return await self.get_latest_available_prices()
+            return await self.get_latest_available_prices(clean=clean)
 
         if date and (from_ or to):
             msg = "dateとfrom/toの両方を指定することはできません。"
@@ -233,13 +233,18 @@ class JQuantsClient(Client):
 
         return prices.clean(df) if clean else df
 
-    async def get_latest_available_prices(self, num_days: int = 30) -> DataFrame:
+    async def get_latest_available_prices(
+        self,
+        num_days: int = 30,
+        *,
+        clean: bool = True,
+    ) -> DataFrame:
         """直近利用可能な日付の株価を取得する。"""
         today = datetime.date.today()  # noqa: DTZ011
 
         for days in range(num_days):
             date = today - datetime.timedelta(days)
-            df = await self.get_prices(date=date)
+            df = await self.get_prices(date=date, clean=clean)
 
             if not df.is_empty():
                 return df
@@ -250,12 +255,15 @@ class JQuantsClient(Client):
         self,
         code: str | None = None,
         date: str | datetime.date | None = None,
+        *,
+        clean: bool = True,
     ) -> DataFrame:
         """四半期毎の決算短信サマリーおよび業績・配当の修正に関する開示情報を取得する。
 
         Args:
             code (str, optional): 財務情報を取得する銘柄のコード。
             date (str | datetime.date, optional): 財務情報を取得する日付。
+            clean (bool, optional): 取得したデータをクリーンアップするかどうか。
 
         Returns:
             財務情報を含むDataFrame。
@@ -278,7 +286,7 @@ class JQuantsClient(Client):
         if df.is_empty():
             return df
 
-        return statements.clean(df)
+        return statements.clean(df) if clean else df
 
     async def get_announcement(self) -> DataFrame:
         """翌日発表予定の決算情報を取得する。

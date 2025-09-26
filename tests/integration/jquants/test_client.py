@@ -99,13 +99,6 @@ async def test_latest_available_prices_empty(client: JQuantsClient) -> None:
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-async def test_prices_error(client: JQuantsClient) -> None:
-    with pytest.raises(ValueError, match="dateとfrom/toの"):
-        await client.get_prices(code="7203", date="2025-08-18", to="2025-08-16")
-
-
-@pytest.mark.integration
-@pytest.mark.asyncio
 async def test_statements_code(client: JQuantsClient) -> None:
     df = await client.get_statements(code="7203")
     assert df.width == 75
@@ -123,13 +116,6 @@ async def test_statements_date(client: JQuantsClient) -> None:
 async def test_statements_empty(client: JQuantsClient) -> None:
     df = await client.get_statements(date="2025-08-30")
     assert df.shape == (0, 0)
-
-
-@pytest.mark.integration
-@pytest.mark.asyncio
-async def test_statements_error(client: JQuantsClient) -> None:
-    with pytest.raises(ValueError, match="codeまたはdate"):
-        await client.get_statements()
 
 
 @pytest.mark.integration

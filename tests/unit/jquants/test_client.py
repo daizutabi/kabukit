@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import datetime
 from typing import TYPE_CHECKING
 
-import httpx
 import pytest
+from httpx import HTTPStatusError, Response
 
 from kabukit.jquants.client import AuthKey, JQuantsClient
 
@@ -46,7 +47,7 @@ def get(async_client: MagicMock, mocker: MockerFixture) -> AsyncMock:
 @pytest.mark.asyncio
 async def test_post_success(post: AsyncMock, mocker: MockerFixture) -> None:
     json = {"message": "success"}
-    expected_response = httpx.Response(200, json=json)
+    expected_response = Response(200, json=json)
     post.return_value = expected_response
     expected_response.raise_for_status = mocker.MagicMock()
 
@@ -60,10 +61,10 @@ async def test_post_success(post: AsyncMock, mocker: MockerFixture) -> None:
 
 @pytest.mark.asyncio
 async def test_post_failure(post: AsyncMock, mocker: MockerFixture) -> None:
-    error_response = httpx.Response(400)
+    error_response = Response(400)
     post.return_value = error_response
     error_response.raise_for_status = mocker.MagicMock(
-        side_effect=httpx.HTTPStatusError(
+        side_effect=HTTPStatusError(
             "Bad Request",
             request=mocker.MagicMock(),
             response=error_response,
@@ -72,7 +73,7 @@ async def test_post_failure(post: AsyncMock, mocker: MockerFixture) -> None:
 
     client = JQuantsClient("test_token")
 
-    with pytest.raises(httpx.HTTPStatusError):
+    with pytest.raises(HTTPStatusError):
         await client.post("test/path")
 
     error_response.raise_for_status.assert_called_once()
@@ -81,7 +82,7 @@ async def test_post_failure(post: AsyncMock, mocker: MockerFixture) -> None:
 @pytest.mark.asyncio
 async def test_get_success(get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"message": "success"}
-    expected_response = httpx.Response(200, json=json)
+    expected_response = Response(200, json=json)
     get.return_value = expected_response
     expected_response.raise_for_status = mocker.MagicMock()
 
@@ -95,10 +96,10 @@ async def test_get_success(get: AsyncMock, mocker: MockerFixture) -> None:
 
 @pytest.mark.asyncio
 async def test_get_failure(get: AsyncMock, mocker: MockerFixture) -> None:
-    error_response = httpx.Response(400)
+    error_response = Response(400)
     get.return_value = error_response
     error_response.raise_for_status = mocker.MagicMock(
-        side_effect=httpx.HTTPStatusError(
+        side_effect=HTTPStatusError(
             "Bad Request",
             request=mocker.MagicMock(),
             response=error_response,
@@ -107,7 +108,7 @@ async def test_get_failure(get: AsyncMock, mocker: MockerFixture) -> None:
 
     client = JQuantsClient("test_token")
 
-    with pytest.raises(httpx.HTTPStatusError):
+    with pytest.raises(HTTPStatusError):
         await client.get("test/path")
 
     error_response.raise_for_status.assert_called_once()
@@ -118,7 +119,7 @@ async def test_auth_success(post: AsyncMock, mocker: MockerFixture) -> None:
     from kabukit.utils.config import get_dotenv_path
 
     json = {"refreshToken": "refresh", "idToken": "id"}
-    response = httpx.Response(200, json=json)
+    response = Response(200, json=json)
     post.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
@@ -132,7 +133,7 @@ async def test_auth_success(post: AsyncMock, mocker: MockerFixture) -> None:
 @pytest.mark.asyncio
 async def test_get_info(get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"info": [{"Date": "2023-01-01", "Code": "7203"}]}
-    response = httpx.Response(200, json=json)
+    response = Response(200, json=json)
     get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
@@ -144,9 +145,9 @@ async def test_get_info(get: AsyncMock, mocker: MockerFixture) -> None:
 
 @pytest.mark.asyncio
 async def test_iter_pages(get: AsyncMock, mocker: MockerFixture) -> None:
-    def side_effect(_url: str, params: dict[str, str]) -> httpx.Response:
+    def side_effect(_url: str, params: dict[str, str]) -> Response:
         if "pagination_key" not in params:
-            response = httpx.Response(
+            response = Response(
                 200,
                 json={
                     "info": [{"Code": "1"}, {"Code": "2"}],
@@ -154,7 +155,7 @@ async def test_iter_pages(get: AsyncMock, mocker: MockerFixture) -> None:
                 },
             )
         else:
-            response = httpx.Response(
+            response = Response(
                 200,
                 json={"info": [{"Code": "3"}, {"Code": "4"}]},
             )
@@ -167,3 +168,117 @@ async def test_iter_pages(get: AsyncMock, mocker: MockerFixture) -> None:
     dfs = [df async for df in client.iter_pages("/test", {}, "info")]
     assert dfs[0]["Code"].to_list() == ["1", "2"]
     assert dfs[1]["Code"].to_list() == ["3", "4"]
+
+
+@pytest.mark.asyncio
+async def test_prices(get: AsyncMock, mocker: MockerFixture) -> None:
+    json = {"daily_quotes": [{"Open": 100}, {"Open": 200}]}
+    response = Response(200, json=json)
+    get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    client = JQuantsClient("test_token")
+    df = await client.get_prices("123", clean=False)
+    assert df["Open"].to_list() == [100, 200]
+    df = await client.get_latest_available_prices(clean=False)
+    assert df["Open"].to_list() == [100, 200]
+    df = await client.get_prices(clean=False)
+    assert df["Open"].to_list() == [100, 200]
+
+
+@pytest.mark.asyncio
+async def test_prices_empty(get: AsyncMock, mocker: MockerFixture) -> None:
+    json: dict[str, list[dict[str, str]]] = {"daily_quotes": []}
+    response = Response(200, json=json)
+    get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    client = JQuantsClient("test_token")
+    df = await client.get_prices("123")
+    assert df.is_empty()
+    df = await client.get_latest_available_prices()
+    assert df.is_empty()
+
+
+@pytest.mark.asyncio
+async def test_prices_error(client: JQuantsClient) -> None:
+    with pytest.raises(ValueError, match="dateとfrom/toの"):
+        await client.get_prices(code="7203", date="2025-08-18", to="2025-08-16")
+
+
+@pytest.mark.asyncio
+async def test_statements(get: AsyncMock, mocker: MockerFixture) -> None:
+    json = {"statements": [{"Profit": 100}, {"Profit": 200}]}
+    response = Response(200, json=json)
+    get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    client = JQuantsClient("test_token")
+    df = await client.get_statements("123", clean=False)
+    assert df["Profit"].to_list() == [100, 200]
+
+
+@pytest.mark.asyncio
+async def test_statements_empty(get: AsyncMock, mocker: MockerFixture) -> None:
+    json: dict[str, list[dict[str, str]]] = {"statements": []}
+    response = Response(200, json=json)
+    get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    client = JQuantsClient("test_token")
+    df = await client.get_statements("123")
+    assert df.is_empty()
+
+
+@pytest.mark.asyncio
+async def test_statements_error(client: JQuantsClient) -> None:
+    with pytest.raises(ValueError, match="codeまたはdate"):
+        await client.get_statements()
+
+
+@pytest.mark.asyncio
+async def test_announcement(get: AsyncMock, mocker: MockerFixture) -> None:
+    json = {"announcement": [{"Date": "2025-01-01"}]}
+    response = Response(200, json=json)
+    get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    client = JQuantsClient("test_token")
+    df = await client.get_announcement()
+    assert df["Date"].to_list() == [datetime.date(2025, 1, 1)]
+
+
+@pytest.mark.asyncio
+async def test_announcement_empty(get: AsyncMock, mocker: MockerFixture) -> None:
+    json: dict[str, list[dict[str, str]]] = {"announcement": []}
+    response = Response(200, json=json)
+    get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    client = JQuantsClient("test_token")
+    df = await client.get_announcement()
+    assert df.is_empty()
+
+
+@pytest.mark.asyncio
+async def test_trades_spec(get: AsyncMock, mocker: MockerFixture) -> None:
+    json = {"trades_spec": [{"Date": "2025-01-01"}]}
+    response = Response(200, json=json)
+    get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    client = JQuantsClient("test_token")
+    df = await client.get_trades_spec()
+    assert df["Date"].to_list() == [datetime.date(2025, 1, 1)]
+
+
+@pytest.mark.asyncio
+async def test_trades_spec_empty(get: AsyncMock, mocker: MockerFixture) -> None:
+    json: dict[str, list[dict[str, str]]] = {"trades_spec": []}
+    response = Response(200, json=json)
+    get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    client = JQuantsClient("test_token")
+    df = await client.get_trades_spec()
+    assert df.is_empty()
