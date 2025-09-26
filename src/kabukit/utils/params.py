@@ -18,16 +18,16 @@ def iter_items(kwargs: dict[str, Any]) -> Iterator[tuple[str, Any]]:
             yield key, value
 
 
-def get_params(**kwargs: Any) -> dict[str, str]:
-    params: dict[str, str] = {}
+def get_params(**kwargs: Any) -> dict[str, Any]:
+    params: dict[str, Any] = {}
 
     for key, value in iter_items(kwargs):
         if isinstance(value, datetime.date):
             params[key] = date_to_str(value)
-        elif not isinstance(value, str):
-            params[key] = str(value)
-        else:
+        elif isinstance(value, str | int | float | bool):
             params[key] = value
+        else:
+            params[key] = str(value)
 
     return params
 
