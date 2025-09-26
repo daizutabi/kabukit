@@ -12,30 +12,21 @@ runner = CliRunner()
 
 @pytest.mark.parametrize("command", ["jquants", "j"])
 @patch("kabukit.jquants.client.JQuantsClient")
-def test_jquants_success(client: MagicMock, command: str) -> None:
-    mock_instance = client.return_value
-    mock_instance.__aenter__.return_value.auth = AsyncMock()
-
-    result = runner.invoke(
-        app,
-        ["auth", command],
-        input="test@example.com\npassword123\n",
-    )
-
+def test_jquants_success(Client: MagicMock, command: str) -> None:  # noqa: N803
+    client = Client.return_value
+    auth = AsyncMock()
+    client.__aenter__.return_value.auth = auth
+    result = runner.invoke(app, ["auth", command], input="t@e.com\n123\n")
     assert result.exit_code == 0
     assert "J-Quantsのリフレッシュトークン・IDトークンを保存しました。" in result.stdout
-    mock_instance.__aenter__.return_value.auth.assert_awaited_once_with(
-        "test@example.com",
-        "password123",
-        save=True,
-    )
+    auth.assert_awaited_once_with("t@e.com", "123", save=True)
 
 
 @pytest.mark.parametrize("command", ["jquants", "j"])
 @patch("kabukit.jquants.client.JQuantsClient")
-def test_jquants_error(client: MagicMock, command: str) -> None:
-    instance = client.return_value
-    instance.__aenter__.return_value.auth = AsyncMock(
+def test_jquants_error(Client: MagicMock, command: str) -> None:  # noqa: N803
+    client = Client.return_value
+    client.__aenter__.return_value.auth = AsyncMock(
         side_effect=HTTPStatusError(
             "400 Bad Request",
             request=Request("POST", "http://example.com"),

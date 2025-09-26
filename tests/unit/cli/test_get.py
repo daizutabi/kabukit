@@ -13,43 +13,34 @@ MOCK_CODE = "1234"
 
 
 @patch("kabukit.jquants.client.JQuantsClient")
-def test_get_info_single_code(mock_client: MagicMock) -> None:
-    # setup mock
-    mock_instance = mock_client.return_value
-    mock_instance.__aenter__.return_value.get_info = AsyncMock(return_value=MOCK_DF)
+def test_get_info_single_code(Client: MagicMock) -> None:  # noqa: N803
+    client = Client.return_value
+    get_info = AsyncMock(return_value=MOCK_DF)
+    client.__aenter__.return_value.get_info = get_info
 
-    # run command
     result = runner.invoke(app, ["get", "info", MOCK_CODE])
 
-    # assert
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
-    mock_instance.__aenter__.return_value.get_info.assert_awaited_once_with(MOCK_CODE)
+    get_info.assert_awaited_once_with(MOCK_CODE)
 
 
 @patch("kabukit.core.info.Info")
 @patch("kabukit.jquants.client.JQuantsClient")
-def test_get_info_all_codes(
-    mock_client: MagicMock,
-    mock_info_writer: MagicMock,
-) -> None:
-    # setup mock
-    mock_client_instance = mock_client.return_value
-    mock_client_instance.__aenter__.return_value.get_info = AsyncMock(
-        return_value=MOCK_DF,
-    )
-    mock_writer_instance = mock_info_writer.return_value
-    mock_writer_instance.write.return_value = "fake/path.csv"
+def test_get_info_all_codes(Client: MagicMock, Info: MagicMock) -> None:  # noqa: N803
+    client = Client.return_value
+    get_info = AsyncMock(return_value=MOCK_DF)
+    client.__aenter__.return_value.get_info = get_info
+    info = Info.return_value
+    info.write.return_value = "fake/path.csv"
 
-    # run command
     result = runner.invoke(app, ["get", "info"])
 
-    # assert
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
-    mock_client_instance.__aenter__.return_value.get_info.assert_awaited_once_with(None)
-    mock_info_writer.assert_called_once_with(MOCK_DF)
-    mock_writer_instance.write.assert_called_once()
+    get_info.assert_awaited_once_with(None)
+    Info.assert_called_once_with(MOCK_DF)
+    info.write.assert_called_once()
     assert "全銘柄の情報を 'fake/path.csv' に保存しました。" in result.stdout
 
 
