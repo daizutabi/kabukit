@@ -19,22 +19,9 @@ def _(mo):
 @app.cell
 def _():
     import marimo as mo
-
     from kabukit import JQuantsClient
-    from kabukit.jquants.schema import rename
+    from kabukit.jquants import rename
     return JQuantsClient, mo, rename
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(
-        r"""
-    上場銘柄について情報を取得します。
-
-    `InfoColumns.rename` 関数で、カラム名を日本語に変換できます。
-    """,
-    )
-    return
 
 
 @app.cell
@@ -42,11 +29,6 @@ async def _(JQuantsClient, rename):
     async with JQuantsClient() as client:
         df = await client.get_info()
     rename(df)
-    return
-
-
-@app.cell
-def _():
     return
 
 

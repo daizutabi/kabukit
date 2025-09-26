@@ -21,22 +21,30 @@ def _(mo):
 @app.cell
 def _():
     import marimo as mo
-
     from kabukit import JQuantsClient
-    from kabukit.jquants.schema import rename
-    return JQuantsClient, mo, rename
+    from kabukit.jquants import fetch_all, rename
+    return JQuantsClient, fetch_all, mo, rename
 
 
 @app.cell
 async def _(JQuantsClient, rename):
     async with JQuantsClient() as client:
-        df = await client.get_statements(date="20250901")
+        df = await client.get_statements("1301")
     rename(df)
     return
 
 
 @app.cell
-def _():
+def _(mo):
+    button = mo.ui.run_button(label="全銘柄の財務情報を取得する")
+    button
+    return (button,)
+
+
+@app.cell
+async def _(button, fetch_all, mo):
+    if button.value:
+        await fetch_all("statements", limit=100, progress=mo.status.progress_bar)
     return
 
 

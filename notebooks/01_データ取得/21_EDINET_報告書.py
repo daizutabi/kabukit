@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.16.2"
-app = marimo.App(width="medium")
+app = marimo.App(width="medium", sql_output="polars")
 
 
 @app.cell
@@ -14,7 +14,7 @@ def _():
 @app.cell
 async def _(EdinetClient):
     async with EdinetClient() as client:
-        df = await client.get_list("2025-09-22")
+        df = await client.get_csv("S100WQ4C")
     df
     return
 

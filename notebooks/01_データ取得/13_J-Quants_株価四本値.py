@@ -20,20 +20,8 @@ def _(mo):
 def _():
     import marimo as mo
     from kabukit import JQuantsClient
-    from kabukit.jquants.schema import rename
-    return JQuantsClient, mo, rename
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(
-        r"""
-    銘柄コードを与えると、指定した銘柄の全期間の株価を取得します。
-
-    `rename` 関数で、カラム名を日本語に変換できます。
-    """,
-    )
-    return
+    from kabukit.jquants import fetch_all, rename
+    return JQuantsClient, fetch_all, mo, rename
 
 
 @app.cell
@@ -41,6 +29,20 @@ async def _(JQuantsClient, rename):
     async with JQuantsClient() as client:
         df = await client.get_prices("3671")
     rename(df)
+    return
+
+
+@app.cell
+def _(mo):
+    button = mo.ui.run_button(label="全銘柄の株価を取得する")
+    button
+    return (button,)
+
+
+@app.cell
+async def _(button, fetch_all, mo):
+    if button.value:
+        await fetch_all("prices", limit=30, max_concurrency=8, progress=mo.status.progress_bar)
     return
 
 
