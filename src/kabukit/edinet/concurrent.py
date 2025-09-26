@@ -1,42 +1,19 @@
 from __future__ import annotations
 
-import datetime
 from typing import TYPE_CHECKING
 
 from kabukit.utils import concurrent
+from kabukit.utils.date import get_dates
 
 from .client import EdinetClient
 
 if TYPE_CHECKING:
+    import datetime
     from collections.abc import Iterable
 
     from polars import DataFrame
 
     from kabukit.utils.concurrent import Callback, Progress
-
-
-def get_dates(days: int | None = None, years: int | None = None) -> list[datetime.date]:
-    """過去days日またはyears年の日付リストを返す。
-
-    Args:
-        days (int | None): 過去days日の日付リストを取得する。
-        years (int | None): 過去years年の日付リストを取得する。
-            daysが指定されている場合は無視される。
-    """
-    end_date = datetime.date.today()  # noqa: DTZ011
-
-    if days is not None:
-        start_date = end_date - datetime.timedelta(days=days)
-    elif years is not None:
-        start_date = end_date.replace(year=end_date.year - years)
-    else:
-        msg = "daysまたはyearsのいずれかを指定してください。"
-        raise ValueError(msg)
-
-    return [
-        start_date + datetime.timedelta(days=i)
-        for i in range(1, (end_date - start_date).days + 1)
-    ]
 
 
 async def fetch(
