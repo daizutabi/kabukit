@@ -5,6 +5,8 @@ from polars import DataFrame
 
 from kabukit.jquants.client import JQuantsClient
 
+pytestmark = pytest.mark.integration
+
 
 @pytest_asyncio.fixture(scope="module")
 async def df():
@@ -12,12 +14,10 @@ async def df():
         yield await client.get_prices("3671")
 
 
-@pytest.mark.integration
 def test_width(df: DataFrame) -> None:
     assert df.width == 16
 
 
-@pytest.mark.integration
 @pytest.mark.parametrize(
     ("name", "dtype"),
     [
@@ -43,7 +43,6 @@ def test_column_dtype(df: DataFrame, name: str, dtype: type) -> None:
     assert df[name].dtype == dtype
 
 
-@pytest.mark.integration
 def test_turnover_value(df: DataFrame) -> None:
     a = df["TurnoverValue"]
     b = df["RawHigh"] * df["RawVolume"]
@@ -52,14 +51,12 @@ def test_turnover_value(df: DataFrame) -> None:
     assert (a >= c).all()
 
 
-@pytest.mark.integration
 def test_columns(df: DataFrame) -> None:
     from kabukit.jquants.schema import PriceColumns
 
     assert df.columns == [c.name for c in PriceColumns]
 
 
-@pytest.mark.integration
 def test_rename(df: DataFrame) -> None:
     from kabukit.jquants.schema import PriceColumns
 

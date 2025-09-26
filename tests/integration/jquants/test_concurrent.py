@@ -2,6 +2,8 @@ import marimo as mo
 import pytest
 from polars import DataFrame
 
+pytestmark = pytest.mark.integration
+
 
 @pytest.fixture(params=["statements", "prices"])
 def resource(request: pytest.FixtureRequest) -> str:
@@ -12,7 +14,6 @@ def callback(df: DataFrame) -> None:
     assert isinstance(df, DataFrame)
 
 
-@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_fetch(resource: str) -> None:
     from kabukit.jquants.concurrent import fetch
@@ -21,7 +22,6 @@ async def test_fetch(resource: str) -> None:
     assert sorted(df["Code"].unique()) == ["67580", "72030"]
 
 
-@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_fetch_all(resource: str) -> None:
     from kabukit.jquants.concurrent import fetch_all
