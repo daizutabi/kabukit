@@ -111,3 +111,32 @@ async def test_get_failure(get: AsyncMock, mocker: MockerFixture) -> None:
         await client.get("test/path")
 
     error_response.raise_for_status.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_auth_success(post: AsyncMock, mocker: MockerFixture) -> None:
+    from kabukit.utils.config import get_dotenv_path
+
+    json = {"refreshToken": "refresh", "idToken": "id"}
+    respose = httpx.Response(200, json=json)
+    post.return_value = respose
+    respose.raise_for_status = mocker.MagicMock()
+
+    client = JQuantsClient("test_token")
+    await client.auth("", "", save=True)
+    text = get_dotenv_path().read_text()
+    assert "JQUANTS_REFRESH_TOKEN='refresh'\n" in text
+    assert "JQUANTS_ID_TOKEN='id'\n" in text
+
+
+@pytest.mark.asyncio
+async def test_get_info(get: AsyncMock, mocker: MockerFixture) -> None:
+    json = {"info": [{"Date": "2023-01-01", "Code": "7203"}]}
+    respose = httpx.Response(200, json=json)
+    get.return_value = respose
+    respose.raise_for_status = mocker.MagicMock()
+
+    client = JQuantsClient("test_token")
+    df = await client.get_info(clean=False)
+    assert df["Date"].to_list() == ["2023-01-01"]
+    assert df["Code"].to_list() == ["7203"]

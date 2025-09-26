@@ -6,6 +6,7 @@ import pytest
 from polars import DataFrame
 
 if TYPE_CHECKING:
+    from pathlib import Path
     from unittest.mock import AsyncMock, MagicMock
 
     from pytest_mock import MockerFixture
@@ -13,6 +14,17 @@ if TYPE_CHECKING:
 MOCK_DF = DataFrame({"A": [1, 2], "B": [3, 4]})
 MOCK_CODE = "1234"
 MOCK_PATH = "fake/path.csv"
+
+
+@pytest.fixture(autouse=True)
+def user_config_dir(mocker: MockerFixture, tmp_path: Path) -> MagicMock:
+    def side_effect(name: str) -> str:
+        return str(tmp_path / name)
+
+    return mocker.patch(
+        "kabukit.utils.config.user_config_dir",
+        side_effect=side_effect,
+    )
 
 
 @pytest.fixture
