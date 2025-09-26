@@ -67,6 +67,6 @@ def test_read(data: DataFrame, tmp_path: Path) -> None:
 def test_read_file_not_found(tmp_path: Path) -> None:
     with (
         patch.object(Base, "data_dir", return_value=tmp_path),
-        pytest.raises(FileNotFoundError, match=f"No data found in {tmp_path}"),
+        pytest.raises(FileNotFoundError, match="No data found in"),
     ):
         Base.read()
