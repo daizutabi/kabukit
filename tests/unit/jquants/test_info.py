@@ -36,7 +36,12 @@ def test_clean() -> None:
 
 
 @pytest.fixture
-def get_info(jquants_client: MagicMock, mocker: MockerFixture) -> AsyncMock:
+def client(mocker: MockerFixture) -> MagicMock:
+    return mocker.patch("kabukit.jquants.client.JQuantsClient").return_value
+
+
+@pytest.fixture
+def get_info(client: MagicMock, mocker: MockerFixture) -> AsyncMock:
     df = DataFrame(
         {
             "Code": ["1301", "1302", "1303"],
@@ -46,7 +51,7 @@ def get_info(jquants_client: MagicMock, mocker: MockerFixture) -> AsyncMock:
     )
 
     get_info = mocker.AsyncMock(return_value=df)
-    jquants_client.__aenter__.return_value.get_info = get_info
+    client.__aenter__.return_value.get_info = get_info
     return get_info
 
 

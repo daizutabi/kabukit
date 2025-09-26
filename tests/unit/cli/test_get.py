@@ -6,7 +6,8 @@ from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
 from kabukit.cli.app import app
-from tests.unit.conftest import MOCK_CODE, MOCK_DF, MOCK_PATH
+
+from .conftest import MOCK_CODE, MOCK_DF, MOCK_PATH
 
 runner = CliRunner()
 
