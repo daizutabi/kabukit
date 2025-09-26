@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.12", "3.13"]
+        python-version: ["3.13"]
 
     steps:
       - uses: actions/checkout@v4
@@ -38,7 +38,6 @@ jobs:
       # - name: Type check (ty)
       #   run: uvx ty check
       - name: Type check (basedpyright)
-        if: matrix.python-version == '3.13'
         run: uvx basedpyright src
       - name: Run tests
         run: uv run pytest -v -n8 --junitxml=junit.xml
