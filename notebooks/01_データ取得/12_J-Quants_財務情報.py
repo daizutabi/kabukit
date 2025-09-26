@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.16.1"
+__generated_with = "0.16.2"
 app = marimo.App(width="medium")
 
 
@@ -20,46 +20,23 @@ def _(mo):
 
 @app.cell
 def _():
-    import datetime
-
     import marimo as mo
 
-    from kabukit import JQuantsClient, Statements
-    from kabukit.jquants import fetch_all
-    return JQuantsClient, Statements, fetch_all, mo
+    from kabukit import JQuantsClient
+    from kabukit.jquants.schema import rename
+    return JQuantsClient, mo, rename
 
 
 @app.cell
-def _(JQuantsClient):
-    client = JQuantsClient()
-    return (client,)
-
-
-@app.cell
-async def _(client):
-    await client.get_statements(date="20250901")
+async def _(JQuantsClient, rename):
+    async with JQuantsClient() as client:
+        df = await client.get_statements(date="20250901")
+    rename(df)
     return
 
 
 @app.cell
-async def _(client):
-    import polars as pl
-    (await client.get_statements(date="20250901")).select(pl.col("^.*NumberOf.*$"))
-    return
-
-
-@app.cell
-def _(mo):
-    button = mo.ui.run_button(label="全銘柄の財務情報を取得する")
-    button
-    return (button,)
-
-
-@app.cell
-async def _(Statements, button, fetch_all, mo):
-    if button.value:
-        df = await fetch_all("statements", progress=mo.status.progress_bar)
-        Statements(df).write()
+def _():
     return
 
 
