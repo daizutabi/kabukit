@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from httpx import HTTPStatusError, Request, Response
@@ -11,15 +11,10 @@ from kabukit.cli.app import app
 runner = CliRunner()
 
 
-@pytest.fixture
-def client(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("kabukit.jquants.client.JQuantsClient").return_value
-
-
 @pytest.mark.parametrize("command", ["jquants", "j"])
-def test_jquants_success(client: MagicMock, command: str) -> None:
+def test_jquants_success(jquants_client: MagicMock, command: str) -> None:
     auth = AsyncMock()
-    client.__aenter__.return_value.auth = auth
+    jquants_client.__aenter__.return_value.auth = auth
     result = runner.invoke(app, ["auth", command], input="t@e.com\n123\n")
     assert result.exit_code == 0
     assert "J-Quantsのリフレッシュトークン・IDトークンを保存しました。" in result.stdout
@@ -27,8 +22,8 @@ def test_jquants_success(client: MagicMock, command: str) -> None:
 
 
 @pytest.mark.parametrize("command", ["jquants", "j"])
-def test_jquants_error(client: MagicMock, command: str) -> None:
-    client.__aenter__.return_value.auth = AsyncMock(
+def test_jquants_error(jquants_client: MagicMock, command: str) -> None:
+    jquants_client.__aenter__.return_value.auth = AsyncMock(
         side_effect=HTTPStatusError(
             "400 Bad Request",
             request=Request("POST", "http://example.com"),
@@ -43,7 +38,7 @@ def test_jquants_error(client: MagicMock, command: str) -> None:
 
 @pytest.fixture
 def set_key(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("kabukit.utils.config.set_key").return_value
+    return mocker.patch("kabukit.utils.config.set_key")
 
 
 @pytest.mark.parametrize("command", ["edinet", "e"])
@@ -62,8 +57,15 @@ def test_show() -> None:
     assert "Configuration file: " in result.stdout
 
 
-def test_show_with_config(tmp_path: Path) -> None:
+@pytest.fixture
+def get_dotenv_path(mocker: MockerFixture) -> MagicMock:
+    return mocker.patch("kabukit.utils.config.get_dotenv_path")
+
+
+def test_show_with_config(get_dotenv_path: MagicMock, tmp_path: Path) -> None:
     config_path = tmp_path / ".env"
+    get_dotenv_path.return_value = config_path
+
     config_content = {
         "JQUANTS_REFRESH_TOKEN": "dummy_refresh_token",
         "EDINET_API_KEY": "dummy_api_key",
@@ -72,10 +74,9 @@ def test_show_with_config(tmp_path: Path) -> None:
     with config_path.open("w", encoding="utf-8") as f:
         f.writelines(f"{key}={value}\n" for key, value in config_content.items())
 
-    with patch("kabukit.utils.config.get_dotenv_path", return_value=config_path):
-        result = runner.invoke(app, ["auth", "show"])
+    result = runner.invoke(app, ["auth", "show"])
 
-        assert result.exit_code == 0
-        assert f"Configuration file: {config_path}" in result.stdout
-        for key, value in config_content.items():
-            assert f"{key}: {value}" in result.stdout
+    assert result.exit_code == 0
+    assert f"Configuration file: {config_path}" in result.stdout
+    for key, value in config_content.items():
+        assert f"{key}: {value}" in result.stdout
