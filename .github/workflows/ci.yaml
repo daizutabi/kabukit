@@ -38,6 +38,7 @@ jobs:
       # - name: Type check (ty)
       #   run: uvx ty check
       - name: Type check (basedpyright)
+        if: matrix.python-version == '3.13'
         run: uvx basedpyright src
       - name: Run tests
         run: uv run pytest -v -n8 --junitxml=junit.xml
