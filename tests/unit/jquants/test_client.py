@@ -118,9 +118,9 @@ async def test_auth_success(post: AsyncMock, mocker: MockerFixture) -> None:
     from kabukit.utils.config import get_dotenv_path
 
     json = {"refreshToken": "refresh", "idToken": "id"}
-    respose = httpx.Response(200, json=json)
-    post.return_value = respose
-    respose.raise_for_status = mocker.MagicMock()
+    response = httpx.Response(200, json=json)
+    post.return_value = response
+    response.raise_for_status = mocker.MagicMock()
 
     client = JQuantsClient("test_token")
     await client.auth("", "", save=True)
@@ -132,11 +132,38 @@ async def test_auth_success(post: AsyncMock, mocker: MockerFixture) -> None:
 @pytest.mark.asyncio
 async def test_get_info(get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"info": [{"Date": "2023-01-01", "Code": "7203"}]}
-    respose = httpx.Response(200, json=json)
-    get.return_value = respose
-    respose.raise_for_status = mocker.MagicMock()
+    response = httpx.Response(200, json=json)
+    get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
 
     client = JQuantsClient("test_token")
     df = await client.get_info(clean=False)
     assert df["Date"].to_list() == ["2023-01-01"]
     assert df["Code"].to_list() == ["7203"]
+
+
+@pytest.mark.asyncio
+async def test_iter_pages(get: AsyncMock, mocker: MockerFixture) -> None:
+    def side_effect(_url: str, params: dict[str, str]) -> httpx.Response:
+        if "pagination_key" not in params:
+            response = httpx.Response(
+                200,
+                json={
+                    "info": [{"Code": "1"}, {"Code": "2"}],
+                    "pagination_key": "2",
+                },
+            )
+        else:
+            response = httpx.Response(
+                200,
+                json={"info": [{"Code": "3"}, {"Code": "4"}]},
+            )
+        response.raise_for_status = mocker.MagicMock()
+        return response
+
+    get.side_effect = side_effect
+
+    client = JQuantsClient("test_token")
+    dfs = [df async for df in client.iter_pages("/test", {}, "info")]
+    assert dfs[0]["Code"].to_list() == ["1", "2"]
+    assert dfs[1]["Code"].to_list() == ["3", "4"]

@@ -189,6 +189,8 @@ class JQuantsClient(Client):
         date: str | datetime.date | None = None,
         from_: str | datetime.date | None = None,
         to: str | datetime.date | None = None,
+        *,
+        clean: bool = True,
     ) -> DataFrame:
         """日々の株価四本値を取得する。
 
@@ -202,6 +204,7 @@ class JQuantsClient(Client):
                 `date`とは併用不可。
             to (str | datetime.date, optional): 取得期間の終了日。
                 `date`とは併用不可。
+            clean (bool, optional): 取得したデータをクリーンアップするかどうか。
 
         Returns:
             日々の株価四本値を含むDataFrame。
@@ -228,7 +231,7 @@ class JQuantsClient(Client):
         if df.is_empty():
             return df
 
-        return prices.clean(df)
+        return prices.clean(df) if clean else df
 
     async def get_latest_available_prices(self, num_days: int = 30) -> DataFrame:
         """直近利用可能な日付の株価を取得する。"""
