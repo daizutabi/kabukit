@@ -83,13 +83,14 @@ async def fetch_list(
     if limit is not None:
         dates = dates[:limit]
 
-    return await fetch(
+    df = await fetch(
         "list",
         dates,
         max_concurrency=max_concurrency,
         progress=progress,
         callback=callback,
     )
+    return df.sort("Date")
 
 
 async def fetch_csv(
@@ -121,10 +122,11 @@ async def fetch_csv(
     if limit is not None:
         doc_ids = doc_ids[:limit]
 
-    return await fetch(
+    df = await fetch(
         "csv",
         doc_ids,
         max_concurrency=max_concurrency,
         progress=progress,
         callback=callback,
     )
+    return df.sort("docID")

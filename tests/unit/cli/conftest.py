@@ -84,3 +84,24 @@ def prices(Prices: MagicMock) -> MagicMock:  # noqa: N803
     instance = Prices.return_value
     instance.write.return_value = MOCK_PATH
     return instance
+
+
+@pytest.fixture
+def fetch_list(mocker: MockerFixture) -> AsyncMock:
+    return mocker.patch(
+        "kabukit.edinet.concurrent.fetch_list",
+        new_callable=mocker.AsyncMock,
+        return_value=MOCK_DF,
+    )
+
+
+@pytest.fixture
+def List(mocker: MockerFixture) -> MagicMock:
+    return mocker.patch("kabukit.core.list.List")
+
+
+@pytest.fixture
+def list_obj(List: MagicMock) -> MagicMock:  # noqa: N803
+    instance = List.return_value
+    instance.write.return_value = MOCK_PATH
+    return instance

@@ -85,6 +85,21 @@ def test_get_prices_all_codes(
     assert f"全銘柄の株価情報を '{MOCK_PATH}' に保存しました。" in result.stdout
 
 
+def test_get_list(
+    fetch_list: AsyncMock,
+    List: MagicMock,  # noqa: N803
+    list_obj: MagicMock,
+) -> None:
+    result = runner.invoke(app, ["get", "list"])
+
+    assert result.exit_code == 0
+    assert str(MOCK_DF) in result.stdout
+    fetch_list.assert_awaited_once_with(years=10, progress=tqdm.asyncio.tqdm)
+    List.assert_called_once_with(MOCK_DF)
+    list_obj.write.assert_called_once()
+    assert f"書類一覧を '{MOCK_PATH}' に保存しました。" in result.stdout
+
+
 @pytest.fixture
 def app_info(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch("kabukit.cli.get.info", new_callable=AsyncMock)
@@ -98,6 +113,11 @@ def app_statements(mocker: MockerFixture) -> AsyncMock:
 @pytest.fixture
 def app_prices(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch("kabukit.cli.get.prices", new_callable=AsyncMock)
+
+
+@pytest.fixture
+def app_list(mocker: MockerFixture) -> AsyncMock:
+    return mocker.patch("kabukit.cli.get.list_", new_callable=AsyncMock)
 
 
 def test_get_all_single_code(
@@ -117,6 +137,7 @@ def test_get_all_all_codes(
     app_info: AsyncMock,
     app_statements: AsyncMock,
     app_prices: AsyncMock,
+    app_list: AsyncMock,
 ) -> None:
     result = runner.invoke(app, ["get", "all"])
 
@@ -124,3 +145,4 @@ def test_get_all_all_codes(
     app_info.assert_awaited_once_with(None)
     app_statements.assert_awaited_once_with(None)
     app_prices.assert_awaited_once_with(None)
+    app_list.assert_awaited_once_with()

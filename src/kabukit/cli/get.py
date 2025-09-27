@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-from typing import Annotated, Any
+from typing import TYPE_CHECKING, Annotated, Any
 
 import typer
 from async_typer import AsyncTyper  # pyright: ignore[reportMissingTypeStubs]
 from typer import Argument
+
+if TYPE_CHECKING:
+    from kabukit.core.base import Base
 
 app = AsyncTyper(
     add_completion=False,
@@ -36,7 +39,7 @@ async def info(code: Code = None) -> None:
 async def _fetch(
     code: str | None,
     target: str,
-    writer_cls: type,
+    cls: type[Base],
     fetch_func_name: str,
     message: str,
     **kwargs: Any,
@@ -56,7 +59,7 @@ async def _fetch(
 
     df = await fetch_all(target, progress=tqdm.asyncio.tqdm, **kwargs)
     typer.echo(df)
-    path = writer_cls(df).write()
+    path = cls(df).write()
     typer.echo(f"全銘柄の{message}を '{path}' に保存しました。")
 
 
@@ -68,7 +71,7 @@ async def statements(code: Code = None) -> None:
     await _fetch(
         code=code,
         target="statements",
-        writer_cls=Statements,
+        cls=Statements,
         fetch_func_name="get_statements",
         message="財務情報",
     )
@@ -82,16 +85,30 @@ async def prices(code: Code = None) -> None:
     await _fetch(
         code=code,
         target="prices",
-        writer_cls=Prices,
+        cls=Prices,
         fetch_func_name="get_prices",
         message="株価情報",
         max_concurrency=8,
     )
 
 
+@app.async_command(name="list")  # pyright: ignore[reportUnknownMemberType]
+async def list_() -> None:
+    """書類一覧を取得します。"""
+    import tqdm.asyncio
+
+    from kabukit.core.list import List
+    from kabukit.edinet.concurrent import fetch_list
+
+    df = await fetch_list(years=10, progress=tqdm.asyncio.tqdm)
+    typer.echo(df)
+    path = List(df).write()
+    typer.echo(f"書類一覧を '{path}' に保存しました。")
+
+
 @app.async_command(name="all")  # pyright: ignore[reportUnknownMemberType]
 async def all_(code: Code = None) -> None:
-    """上場銘柄一覧、財務情報、株価を連続して取得します。"""
+    """上場銘柄一覧、財務情報、株価、書類一覧を連続して取得します。"""
     typer.echo("上場銘柄一覧を取得します。")
     await info(code)
 
@@ -102,3 +119,8 @@ async def all_(code: Code = None) -> None:
     typer.echo("---")
     typer.echo("株価を取得します。")
     await prices(code)
+
+    if code is None:
+        typer.echo("---")
+        typer.echo("書類一覧を取得します。")
+        await list_()

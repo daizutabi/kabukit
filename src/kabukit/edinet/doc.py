@@ -13,16 +13,21 @@ def clean_list(df: DataFrame, date: str | datetime.date) -> DataFrame:
     if isinstance(date, str):
         date = datetime.datetime.strptime(date, "%Y-%m-%d").date()  # noqa: DTZ007
 
-    return df.with_columns(
-        pl.lit(date).alias("Date"),
-        pl.col("submitDateTime").str.to_datetime("%Y-%m-%d %H:%M", strict=False),
-        pl.col("^period.+$").str.to_date("%Y-%m-%d", strict=False),
-        pl.col("^.+Flag$").cast(pl.Int8).cast(pl.Boolean),
-        pl.col("^.+Code$").cast(pl.String),
-        pl.col("opeDateTime")
-        .cast(pl.String)
-        .str.to_datetime("%Y-%m-%d %H:%M", strict=False),
-    ).select("Date", pl.exclude("Date"))
+    null_columns = [c for c in df.columns if df[c].dtype == pl.Null]
+
+    return (
+        df.with_columns(
+            pl.col(null_columns).cast(pl.String),
+        )
+        .with_columns(
+            pl.lit(date).alias("Date"),
+            pl.col("^.+DateTime$").str.to_datetime("%Y-%m-%d %H:%M", strict=False),
+            pl.col("^period.+$").str.to_date("%Y-%m-%d", strict=False),
+            pl.col("^.+Flag$").cast(pl.Int8).cast(pl.Boolean),
+            pl.col("^.+Code$").cast(pl.String),
+        )
+        .select("Date", pl.exclude("Date"))
+    )
 
 
 def clean_csv(df: DataFrame, doc_id: str) -> DataFrame:

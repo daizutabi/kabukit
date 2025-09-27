@@ -77,7 +77,7 @@ async def test_fetch_list(mocker: MockerFixture, mock_get_dates: MagicMock) -> N
         "kabukit.edinet.concurrent.fetch",
         new_callable=mocker.AsyncMock,
     )
-    mock_fetch.return_value = DataFrame({"b": [2]})
+    mock_fetch.return_value = DataFrame({"Date": [2]})
 
     result = await fetch_list(
         days=3,
@@ -87,7 +87,7 @@ async def test_fetch_list(mocker: MockerFixture, mock_get_dates: MagicMock) -> N
         callback=dummy_callback,
     )
 
-    assert result.equals(DataFrame({"b": [2]}))
+    assert result.equals(DataFrame({"Date": [2]}))
     mock_get_dates.assert_called_once_with(days=3, years=None)
     mock_fetch.assert_awaited_once_with(
         "list",
@@ -106,7 +106,7 @@ async def test_fetch_csv(mocker: MockerFixture) -> None:
         "kabukit.edinet.concurrent.fetch",
         new_callable=mocker.AsyncMock,
     )
-    mock_fetch.return_value = DataFrame({"c": [3]})
+    mock_fetch.return_value = DataFrame({"docID": [3]})
 
     result = await fetch_csv(
         ["doc1", "doc2", "doc3"],
@@ -116,7 +116,7 @@ async def test_fetch_csv(mocker: MockerFixture) -> None:
         callback=dummy_callback,
     )
 
-    assert result.equals(DataFrame({"c": [3]}))
+    assert result.equals(DataFrame({"docID": [3]}))
     mock_fetch.assert_awaited_once_with(
         "csv",
         ["doc1", "doc2"],
