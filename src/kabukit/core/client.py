@@ -12,7 +12,7 @@ class Client:
     client: AsyncClient
 
     def __init__(self, base_url: str = "") -> None:
-        self.client = AsyncClient(base_url=base_url)
+        self.client = AsyncClient(base_url=base_url, timeout=20)
 
     async def aclose(self) -> None:
         """HTTPクライアントを閉じる。"""
