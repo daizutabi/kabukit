@@ -96,6 +96,15 @@ def fetch_list(mocker: MockerFixture) -> AsyncMock:
 
 
 @pytest.fixture
+def fetch_csv(mocker: MockerFixture) -> AsyncMock:
+    return mocker.patch(
+        "kabukit.edinet.concurrent.fetch_csv",
+        new_callable=mocker.AsyncMock,
+        return_value=MOCK_DF,
+    )
+
+
+@pytest.fixture
 def List(mocker: MockerFixture) -> MagicMock:
     return mocker.patch("kabukit.core.list.List")
 
@@ -103,5 +112,17 @@ def List(mocker: MockerFixture) -> MagicMock:
 @pytest.fixture
 def list_obj(List: MagicMock) -> MagicMock:  # noqa: N803
     instance = List.return_value
+    instance.write.return_value = MOCK_PATH
+    return instance
+
+
+@pytest.fixture
+def Reports(mocker: MockerFixture) -> MagicMock:
+    return mocker.patch("kabukit.core.reports.Reports")
+
+
+@pytest.fixture
+def reports(Reports: MagicMock) -> MagicMock:  # noqa: N803
+    instance = Reports.return_value
     instance.write.return_value = MOCK_PATH
     return instance

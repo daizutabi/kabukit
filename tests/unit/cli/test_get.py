@@ -97,7 +97,22 @@ def test_get_list(
     fetch_list.assert_awaited_once_with(years=10, progress=tqdm.asyncio.tqdm)
     List.assert_called_once_with(MOCK_DF)
     list_obj.write.assert_called_once()
-    assert f"書類一覧を '{MOCK_PATH}' に保存しました。" in result.stdout
+    assert f"報告書一覧を '{MOCK_PATH}' に保存しました。" in result.stdout
+
+
+def test_get_reports(
+    fetch_csv: AsyncMock,
+    Reports: MagicMock,  # noqa: N803
+    reports: MagicMock,
+) -> None:
+    result = runner.invoke(app, ["get", "reports"])
+
+    assert result.exit_code == 0
+    assert str(MOCK_DF) in result.stdout
+    fetch_csv.assert_awaited_once()
+    Reports.assert_called_once_with(MOCK_DF)
+    reports.write.assert_called_once()
+    assert f"報告書を '{MOCK_PATH}' に保存しました。" in result.stdout
 
 
 @pytest.fixture
@@ -120,6 +135,11 @@ def app_list(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch("kabukit.cli.get.list_", new_callable=AsyncMock)
 
 
+@pytest.fixture
+def app_reports(mocker: MockerFixture) -> AsyncMock:
+    return mocker.patch("kabukit.cli.get.reports", new_callable=AsyncMock)
+
+
 def test_get_all_single_code(
     app_info: AsyncMock,
     app_statements: AsyncMock,
@@ -138,6 +158,7 @@ def test_get_all_all_codes(
     app_statements: AsyncMock,
     app_prices: AsyncMock,
     app_list: AsyncMock,
+    app_reports: AsyncMock,
 ) -> None:
     result = runner.invoke(app, ["get", "all"])
 
@@ -146,3 +167,4 @@ def test_get_all_all_codes(
     app_statements.assert_awaited_once_with(None)
     app_prices.assert_awaited_once_with(None)
     app_list.assert_awaited_once_with()
+    app_reports.assert_awaited_once_with()
