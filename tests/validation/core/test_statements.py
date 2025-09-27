@@ -1,6 +1,6 @@
 import polars as pl
 import pytest
-from polars import DataFrame
+from polars import DataFrame, Series
 from polars import col as c
 
 from kabukit.core.statements import Statements
@@ -20,17 +20,17 @@ pytestmark = [
 
 
 @pytest.fixture(scope="module")
-def df() -> DataFrame:
+def data() -> DataFrame:
     assert stmts is not None
     return stmts.data
 
 
-def test_width(df: DataFrame) -> None:
-    assert df.width == 104
+def test_width(data: DataFrame) -> None:
+    assert data.width == 104
 
 
-def test_height(df: DataFrame) -> None:
-    assert df.height > 150_000
+def test_height(data: DataFrame) -> None:
+    assert data.height > 160_000
 
 
 @pytest.mark.parametrize(
@@ -46,19 +46,49 @@ def test_height(df: DataFrame) -> None:
         "CurrentFiscalYearEndDate",
     ],
 )
-def test_is_not_null_all(df: DataFrame, column: str) -> None:
-    assert df[column].is_not_null().all()
+def test_is_not_null_all(data: DataFrame, column: str) -> None:
+    assert data[column].is_not_null().all()
 
 
 @pytest.mark.parametrize("column", ["Time"])
-def test_is_not_null_any(df: DataFrame, column: str) -> None:
-    assert df[column].is_not_null().any()
+def test_is_not_null_any(data: DataFrame, column: str) -> None:
+    assert data[column].is_not_null().any()
 
 
 @pytest.fixture(scope="module")
-def pct(df: DataFrame) -> DataFrame:
+def tod(data: DataFrame) -> Series:
+    return data["TypeOfDocument"].unique()
+
+
+def test_type_of_document_financial_period(tod: Series) -> None:
+    x = (
+        tod.filter(tod.str.contains("Financial"))
+        .str.split("Financial")
+        .list.first()
+        .unique()
+    )
+    assert sorted(x) == ["1Q", "2Q", "3Q", "FY", "OtherPeriod"]
+
+
+def test_type_of_document_financial_consolidated(tod: Series) -> None:
+    x = tod.filter(tod.str.contains("Financial")).str.split("_").list[1].unique()
+    assert sorted(x) == ["Consolidated", "NonConsolidated"]
+
+
+def test_type_of_document_financial_type(tod: Series) -> None:
+    x = tod.filter(tod.str.contains("Financial")).str.split("_").list.last().unique()
+    assert sorted(x) == ["Foreign", "IFRS", "JP", "US"]
+
+
+def test_type_of_document_other(tod: Series) -> None:
+    x = tod.filter(tod.str.contains("Financial").not_()).unique()
+    assert sorted(x) == ["DividendForecastRevision", "EarnForecastRevision"]
+
+
+@pytest.fixture(scope="module")
+def pct(data: DataFrame) -> DataFrame:
     return (
-        df.filter(c.TypeOfDocument.str.starts_with("Other").not_())
+        data.filter(c.TypeOfDocument.str.starts_with("Other").not_())
         .group_by(c.TypeOfDocument.str.split("_").list.first())
         .agg(pl.len(), pl.all().is_not_null().sum())
         .with_columns(
