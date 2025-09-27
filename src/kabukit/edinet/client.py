@@ -6,14 +6,13 @@ import zipfile
 from enum import StrEnum
 from typing import TYPE_CHECKING
 
-import polars as pl
 from polars import DataFrame
 
 from kabukit.core.client import Client
 from kabukit.utils.config import load_dotenv
 from kabukit.utils.params import get_params
 
-from .doc import clean_csv, clean_list
+from .doc import clean_csv, clean_list, read_csv
 
 if TYPE_CHECKING:
     import datetime
@@ -103,11 +102,8 @@ class EdinetClient(Client):
             for info in zf.infolist():
                 if info.filename.endswith(".csv"):
                     with zf.open(info) as f:
-                        return pl.read_csv(
-                            f.read(),
-                            separator="\t",
-                            encoding="utf-16-le",
-                        ).pipe(clean_csv, doc_id)
+                        df = read_csv(f.read())
+                        return clean_csv(df, doc_id)
 
         msg = "CSV is not available."
         raise ValueError(msg)

@@ -71,6 +71,7 @@ async def test_csv(client: EdinetClient) -> None:
     df = await client.get_csv("S100WKHJ")
     assert df.columns[0] == "docID"
     assert df.shape == (47, 10)
+    assert "値" in df.columns
 
 
 @pytest_asyncio.fixture(scope="module")

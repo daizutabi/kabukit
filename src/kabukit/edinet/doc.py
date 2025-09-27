@@ -30,6 +30,15 @@ def clean_list(df: DataFrame, date: str | datetime.date) -> DataFrame:
     )
 
 
+def read_csv(data: bytes) -> DataFrame:
+    return pl.read_csv(
+        data,
+        separator="\t",
+        encoding="utf-16-le",
+        infer_schema_length=None,
+    )
+
+
 def clean_csv(df: DataFrame, doc_id: str) -> DataFrame:
     return df.select(
         pl.lit(doc_id).alias("docID"),

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import io
 import zipfile
-from socket import MsgFlag
 from typing import TYPE_CHECKING
 
 import polars as pl

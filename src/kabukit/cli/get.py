@@ -94,7 +94,7 @@ async def prices(code: Code = None) -> None:
 
 @app.async_command(name="list")  # pyright: ignore[reportUnknownMemberType]
 async def list_() -> None:
-    """書類一覧を取得します。"""
+    """報告書一覧を取得します。"""
     import tqdm.asyncio
 
     from kabukit.core.list import List
@@ -103,12 +103,37 @@ async def list_() -> None:
     df = await fetch_list(years=10, progress=tqdm.asyncio.tqdm)
     typer.echo(df)
     path = List(df).write()
-    typer.echo(f"書類一覧を '{path}' に保存しました。")
+    typer.echo(f"報告書一覧を '{path}' に保存しました。")
+
+
+@app.async_command()  # pyright: ignore[reportUnknownMemberType]
+async def reports() -> None:
+    """報告書を取得します。"""
+    import polars as pl
+    import tqdm.asyncio
+
+    from kabukit.core.list import List
+    from kabukit.core.reports import Reports
+    from kabukit.edinet.concurrent import fetch_csv
+
+    try:
+        df = List.read().data
+    except FileNotFoundError:
+        await list_()
+        df = List.read().data
+
+    lst = df.filter(pl.col("csvFlag"), pl.col("secCode").is_not_null())
+    doc_ids = lst["docID"].unique()
+
+    df = await fetch_csv(doc_ids, limit=1000, progress=tqdm.asyncio.tqdm)
+    typer.echo(df)
+    path = Reports(df).write()
+    typer.echo(f"報告書を '{path}' に保存しました。")
 
 
 @app.async_command(name="all")  # pyright: ignore[reportUnknownMemberType]
 async def all_(code: Code = None) -> None:
-    """上場銘柄一覧、財務情報、株価、書類一覧を連続して取得します。"""
+    """上場銘柄一覧、財務情報、株価、報告書を連続して取得します。"""
     typer.echo("上場銘柄一覧を取得します。")
     await info(code)
 
@@ -122,5 +147,8 @@ async def all_(code: Code = None) -> None:
 
     if code is None:
         typer.echo("---")
-        typer.echo("書類一覧を取得します。")
+        typer.echo("報告書一覧を取得します。")
         await list_()
+        typer.echo("---")
+        typer.echo("報告書を取得します。")
+        await reports()
