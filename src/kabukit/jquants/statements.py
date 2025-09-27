@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 def clean(df: DataFrame) -> DataFrame:
     return (
-        df.select(pl.exclude(r"^.*\(REIT\)|.*NonConsolidated.*$"))
+        df.select(pl.exclude(r"^.*\(REIT\)$"))
         .rename(
             {
                 "DisclosedDate": "Date",
