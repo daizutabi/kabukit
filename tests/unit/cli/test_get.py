@@ -7,7 +7,7 @@ from typer.testing import CliRunner
 
 from kabukit.cli.app import app
 
-from .conftest import MOCK_CODE, MOCK_DF, MOCK_PATH
+from .conftest import MOCK_CODE, MOCK_DF, MOCK_LIST_DF, MOCK_PATH
 
 runner = CliRunner()
 
@@ -104,12 +104,51 @@ def test_get_reports(
     fetch_csv: AsyncMock,
     Reports: MagicMock,  # noqa: N803
     reports: MagicMock,
+    List: MagicMock,  # noqa: N803
+    mocker: MockerFixture,
 ) -> None:
+    mock_read_instance = mocker.MagicMock()
+    mock_read_instance.data = MOCK_LIST_DF
+    List.read.return_value = mock_read_instance
+
     result = runner.invoke(app, ["get", "reports"])
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
-    fetch_csv.assert_awaited_once()
+
+    doc_ids = fetch_csv.call_args[0][0]
+    assert sorted(doc_ids.to_list()) == ["doc1", "doc2"]
+
+    Reports.assert_called_once_with(MOCK_DF)
+    reports.write.assert_called_once()
+    assert f"報告書を '{MOCK_PATH}' に保存しました。" in result.stdout
+
+
+def test_get_reports_file_not_found(
+    mocker: MockerFixture,
+    List: MagicMock,  # noqa: N803
+    app_list: AsyncMock,
+    fetch_csv: AsyncMock,
+    Reports: MagicMock,  # noqa: N803
+    reports: MagicMock,
+) -> None:
+    mock_read_instance = mocker.MagicMock()
+    mock_read_instance.data = MOCK_LIST_DF
+    List.read.side_effect = [
+        FileNotFoundError,
+        mock_read_instance,
+    ]
+
+    result = runner.invoke(app, ["get", "reports"])
+
+    assert result.exit_code == 0
+    app_list.assert_awaited_once_with()
+
+    assert List.read.call_count == 2
+
+    doc_ids = fetch_csv.call_args[0][0]
+    assert sorted(doc_ids.to_list()) == ["doc1", "doc2"]
+
     Reports.assert_called_once_with(MOCK_DF)
     reports.write.assert_called_once()
     assert f"報告書を '{MOCK_PATH}' に保存しました。" in result.stdout

@@ -11,6 +11,13 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
 MOCK_DF = DataFrame({"A": [1, 2], "B": [3, 4]})
+MOCK_LIST_DF = DataFrame(
+    {
+        "docID": ["doc1", "doc2", "doc3", "doc4"],
+        "secCode": ["1111", "2222", None, "4444"],
+        "csvFlag": [True, True, True, False],
+    },
+)
 MOCK_CODE = "1234"
 MOCK_PATH = "fake/path.csv"
 
