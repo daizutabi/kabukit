@@ -1,18 +1,12 @@
 import marimo
 
-__generated_with = "0.16.1"
+__generated_with = "0.16.2"
 app = marimo.App(width="medium")
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        """
-    # J-Quantsで取得できる財務情報を確認する
-
-    <https://jpx.gitbook.io/j-quants-ja/api-reference/statements>
-    """
-    )
+    mo.md("""# J-Quantsで取得できる財務情報を検証する""")
     return
 
 
