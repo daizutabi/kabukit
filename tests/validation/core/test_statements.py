@@ -26,7 +26,7 @@ def df() -> DataFrame:
 
 
 def test_width(df: DataFrame) -> None:
-    assert df.width == 75
+    assert df.width == 104
 
 
 def test_height(df: DataFrame) -> None:
