@@ -135,7 +135,6 @@ class StatementColumns(BaseColumns):
     NumberOfTreasuryStock = "期末自己株式数"
     AverageNumberOfShares = "期中平均株式数"
 
-    """
     NonConsolidatedNetSales = "売上高_非連結"
     NonConsolidatedOperatingProfit = "営業利益_非連結"
     NonConsolidatedOrdinaryProfit = "経常利益_非連結"
@@ -170,7 +169,6 @@ class StatementColumns(BaseColumns):
     NextYearForecastNonConsolidatedOrdinaryProfit = "経常利益_予想_翌事業年度期末_非連結"
     NextYearForecastNonConsolidatedProfit = "当期純利益_予想_翌事業年度期末_非連結"
     NextYearForecastNonConsolidatedEarningsPerShare = "一株あたり当期純利益_予想_翌事業年度期末_非連結"
-    """
 
 
 def rename(df: DataFrame, *, strict: bool = False) -> DataFrame:
