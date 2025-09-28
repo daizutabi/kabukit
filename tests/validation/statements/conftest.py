@@ -3,7 +3,6 @@ from polars import DataFrame
 from polars import col as c
 
 from kabukit.core.statements import Statements
-from tests.validation.conftest import pytestmark  # noqa: F401
 
 
 @pytest.fixture(scope="module")

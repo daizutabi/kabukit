@@ -45,7 +45,7 @@ import pytest
 from polars import DataFrame
 from polars import col as c
 
-from .conftest import pytestmark  # noqa: F401
+from tests.validation.conftest import pytestmark  # noqa: F401
 
 
 def test_fin_profit_loss(fin: DataFrame, pl_col: str) -> None:
