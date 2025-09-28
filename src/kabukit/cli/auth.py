@@ -20,8 +20,8 @@ async def auth_jquants(mailaddress: str, password: str) -> None:
     async with JQuantsClient() as client:
         try:
             await client.auth(mailaddress, password, save=True)
-        except HTTPStatusError as e:
-            typer.echo(f"認証に失敗しました: {e}")
+        except HTTPStatusError:
+            typer.echo("認証に失敗しました。")
             raise Exit(1) from None
 
     typer.echo("J-Quantsのリフレッシュトークン・IDトークンを保存しました。")
