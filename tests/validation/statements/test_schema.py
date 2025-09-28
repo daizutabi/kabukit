@@ -1,3 +1,12 @@
+"""各種カラムの欠損状況や値の分布を確認する
+
+
+
+# 株式数
+- 1Q、2Q、3Q、FYともに、ほぼ100%埋まっている
+- OtherPeriodでは、存在しない
+"""
+
 import polars as pl
 import pytest
 from polars import DataFrame, Series
