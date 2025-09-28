@@ -1,5 +1,4 @@
 import pytest
-from polars import col as c
 
 from kabukit.core.prices import Prices
 from kabukit.jquants.concurrent import fetch
