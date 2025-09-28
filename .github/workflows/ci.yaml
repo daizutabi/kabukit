@@ -52,3 +52,44 @@ jobs:
         uses: codecov/test-results-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+
+  ci-full:
+    name: Full Test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: ci
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install uv
+        run: pip install uv
+      - name: Install the project
+        run: uv sync
+      - name: Authenticate (J-Quants)
+        env:
+          JQUANTS_MAILADDRESS: ${{ secrets.JQUANTS_MAILADDRESS }}
+          JQUANTS_PASSWORD: ${{ secrets.JQUANTS_PASSWORD }}
+        run: uv run kabu auth jquants --mailaddress "$JQUANTS_MAILADDRESS" --password "$JQUANTS_PASSWORD"
+      - name: Authenticate (EDINET)
+        env:
+          EDINET_API_KEY: ${{ secrets.EDINET_API_KEY }}
+        run: uv run kabu auth edinet --api-key "$EDINET_API_KEY"
+      - name: Cache and get data
+        id: cache-data
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/kabukit
+          key: data-${{ runner.os }}-${{ hashFiles('**/uv.lock') }}
+      - name: Get statements if cache not found
+        if: steps.cache-data.outputs.cache-hit != 'true'
+        run: uv run kabu get statements
+      - name: Run all tests
+        run: uv run pytest -v --junitxml=junit.xml
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
