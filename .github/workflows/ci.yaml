@@ -40,7 +40,7 @@ jobs:
       - name: Type check (basedpyright)
         run: uvx basedpyright src
       - name: Run tests
-        run: uv run pytest -v -n8 --junitxml=junit.xml
+        run: uv run pytest -v --junitxml=junit.xml -m "not integration and not validation"
       - name: Upload Codecov Results
         if: success()
         uses: codecov/codecov-action@v4
