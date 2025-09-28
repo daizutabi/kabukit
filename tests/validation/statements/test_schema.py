@@ -25,8 +25,8 @@ def test_is_not_null_all(data: DataFrame, column: str) -> None:
 
 @pytest.mark.parametrize("column", ["Time"])
 def test_is_not_null_any(data: DataFrame, column: str) -> None:
-    """Timeカラムは一部非欠損"""
-    assert data[column].is_not_null().any()
+    """Timeカラムは一部欠損"""
+    assert data[column].is_null().any()
 
 
 @pytest.fixture(scope="module")
