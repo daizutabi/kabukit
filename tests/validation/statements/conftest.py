@@ -5,15 +5,15 @@ from polars import col as c
 from kabukit.core.statements import Statements
 
 try:
-    stmts = Statements.read()
+    statements = Statements.read()
 except FileNotFoundError:
-    stmts = None
+    statements = None
 
 
 pytestmark = [
     pytest.mark.validation,
     pytest.mark.skipif(
-        stmts is None,
+        statements is None,
         reason="No data found. Run `kabu get statements` first.",
     ),
 ]
@@ -21,8 +21,8 @@ pytestmark = [
 
 @pytest.fixture(scope="module")
 def data() -> DataFrame:
-    assert stmts is not None
-    return stmts.data
+    assert statements is not None
+    return statements.data
 
 
 COMMON_COLUMNS = [
