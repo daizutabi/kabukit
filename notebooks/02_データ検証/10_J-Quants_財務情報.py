@@ -42,7 +42,13 @@ def _(x):
 
 @app.cell
 def _(data, pl):
-    data.select(pl.col("^Result.*Annual.*$"))
+    data.select(pl.col("^.*PerShare.*$"))
+    return
+
+
+@app.cell
+def _(data, pl):
+    data.select(pl.col("^Result.*Annual$"))
     return
 
 

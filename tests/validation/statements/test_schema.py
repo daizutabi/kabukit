@@ -145,6 +145,11 @@ def test_fin_current_period_days(fin: DataFrame, period: str, days: int) -> None
     assert 0.995 < x <= 1
 
 
+def test_per_share(data: DataFrame) -> None:
+    df = data.select(pl.col("^.*PerShare.*$"))
+    assert df.width == 28
+
+
 @pytest.mark.parametrize(
     "name",
     ["DividendPerShare", "TotalDividendPaid", "PayoutRatio"],
