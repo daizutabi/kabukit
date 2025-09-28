@@ -54,13 +54,7 @@ dev = [
 docs = ["mkapi>=4.4", "mkdocs-marimo", "mkdocs-material"]
 
 [tool.pytest.ini_options]
-addopts = [
-  "--cov=kabukit",
-  "--cov-report=lcov:lcov.info",
-  "--doctest-modules",
-  "-m",
-  "not integration and not validation",
-]
+addopts = ["--cov=kabukit", "--cov-report=lcov:lcov.info", "--doctest-modules"]
 testpaths = ["tests/unit", "tests/integration", "tests/validation"]
 markers = [
   "integration: marks tests as integration tests",
