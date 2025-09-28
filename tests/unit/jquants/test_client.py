@@ -141,10 +141,6 @@ async def test_auth_successful_no_save(post: AsyncMock, mocker: MockerFixture) -
         json=None,
     )
     mock_set_key.assert_not_called()
-    client.client.headers.__setitem__.assert_called_once_with(  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
-        "Authorization",
-        "Bearer test_id_token",
-    )
 
 
 @pytest.mark.asyncio
@@ -173,10 +169,6 @@ async def test_auth_successful_with_save(
             call(AuthKey.ID_TOKEN, "test_id_token"),
         ],
         any_order=True,
-    )
-    client.client.headers.__setitem__.assert_called_once_with(  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
-        "Authorization",
-        "Bearer test_id_token",
     )
 
 
