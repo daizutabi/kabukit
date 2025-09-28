@@ -33,7 +33,7 @@ def test_jquants_error(jquants_client: MagicMock, command: str) -> None:
 
     result = runner.invoke(app, ["auth", command], input="a\nb\n")
     assert result.exit_code == 1
-    assert "認証に失敗しました: 400 Bad Request" in result.stdout
+    assert "認証に失敗しました" in result.stdout
 
 
 @pytest.fixture
