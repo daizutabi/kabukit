@@ -1,7 +1,16 @@
 import pytest
 from polars import DataFrame
 
-from .conftest import pytestmark  # noqa: F401
+from tests.validation.conftest import pytestmark  # noqa: F401
+
+
+def test_equity_to_asset_ratio(data: DataFrame) -> None:
+    x = data["EquityToAssetRatio"]
+    y = data["Equity"] / data["TotalAssets"]
+    r = x / y
+    m = ((r > 0.9) & (r < 1.1)).mean()
+    assert isinstance(m, float)
+    assert m > 0.93
 
 
 def test_earnings_per_share(data: DataFrame) -> None:
