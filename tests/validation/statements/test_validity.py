@@ -34,10 +34,17 @@ def test_dividend_per_share(data: DataFrame) -> None:
     assert m > 0.94
 
 
-def test_payout_ratio(data: DataFrame) -> None:
-    """配当性向 = DPS / EPS"""
+@pytest.mark.parametrize(
+    ("d", "e"),
+    [
+        ("ResultDividendPerShareAnnual", "EarningsPerShare"),
+        ("ResultTotalDividendPaidAnnual", "Profit"),
+    ],
+)
+def test_payout_ratio(data: DataFrame, d: str, e: str) -> None:
+    """配当性向 = 配当金 / 当期利益 = DPS / EPS"""
     x = data["ResultPayoutRatioAnnual"]
-    y = data["ResultDividendPerShareAnnual"] / data["EarningsPerShare"]
+    y = data[d] / data[e]
     r = x / y
     m = ((r > 0.9) & (r < 1.1)).mean()
     assert isinstance(m, float)
