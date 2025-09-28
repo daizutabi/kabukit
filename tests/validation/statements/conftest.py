@@ -3,25 +3,11 @@ from polars import DataFrame
 from polars import col as c
 
 from kabukit.core.statements import Statements
-
-try:
-    statements = Statements.read()
-except FileNotFoundError:
-    statements = None
-
-
-pytestmark = [
-    pytest.mark.validation,
-    pytest.mark.skipif(
-        statements is None,
-        reason="No data found. Run `kabu get statements` first.",
-    ),
-]
+from tests.validation.conftest import pytestmark  # noqa: F401
 
 
 @pytest.fixture(scope="module")
-def data() -> DataFrame:
-    assert statements is not None
+def data(statements: Statements) -> DataFrame:
     return statements.data
 
 
