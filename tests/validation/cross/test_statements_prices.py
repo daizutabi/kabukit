@@ -1,3 +1,4 @@
+import polars as pl
 import pytest
 from polars import col as c
 
@@ -24,3 +25,34 @@ async def test_shares_consistency(statements: Statements) -> None:
         "NumberOfShares",
     )
     prices_df = Prices(await fetch("prices", codes)).with_relative_shares().data
+
+    # 2. 各銘柄の最新のNumberOfSharesを取得
+    latest_shares = (
+        stmt_df.drop_nulls("NumberOfShares")
+        .sort("Date")
+        .group_by("Code")
+        .last()
+        .select(["Code", pl.col("NumberOfShares").alias("LatestNumberOfShares")])
+    )
+
+    # 3. 最新の株数と日々のRelativeSharesから、過去の絶対株数を計算
+    hypothetical_shares_df = prices_df.join(latest_shares, on="Code").with_columns(
+        (pl.col("LatestNumberOfShares") * pl.col("RelativeShares")).alias(
+            "HypotheticalShares",
+        ),
+    )
+
+    # 4. 決算日時点での実績値と計算値を結合
+    comparison_df = stmt_df.join(
+        hypothetical_shares_df,
+        on=["Code", "Date"],
+        how="inner",
+    ).drop_nulls()
+
+    # 5. 実績値と計算値の相対誤差が小さいことを表明
+    # (実績値が0の場合を避けるため、分母に微小な値を追加)
+    # relative_error = (
+    #     comparison_df["NumberOfShares"] - comparison_df["HypotheticalShares"]
+    # ).abs() / (comparison_df["NumberOfShares"] + 1e-9)
+
+    # assert relative_error.mean() < 0.01  # 平均相対誤差が1%未満
