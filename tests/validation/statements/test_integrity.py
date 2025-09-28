@@ -1,3 +1,45 @@
+"""
+                         損益計算書 貸借対照表 キャッシュフロー 株式数
+1QFinancialStatements    o        o        o             o
+2QFinancialStatements    o        o        o             o
+3QFinancialStatements    o        o        o             o
+FYFinancialStatements    o        o        o             o
+OtherPeriodFinancialS    o        o        o
+
+                         配当実績
+                         ResultDividendPerShare
+                         1st 2nd 3rd FYE        ResultXXXAnnual
+1QFinancialStatements    o
+2QFinancialStatements    o   o
+3QFinancialStatements    o   o   o
+FYFinancialStatements    o   o   o   o          o
+
+                         損益予想 (当期)
+                         ForecastXXX2ndQuarter ForecastXXX
+1QFinancialStatements    o                     o
+2QFinancialStatements                          o
+3QFinancialStatements                          o
+EarnForecastRevision     o                     o
+
+                         損益予想 (来期)
+                         NextYearForecastXXX2ndQuarter NextYearForecastXXX
+FYFinancialStatements    o                             o
+
+                         配当予想 (当期)
+                         ForecastDividendPerShare
+                         1st 2nd 3rd FYE          ForecastXXXAnnual
+1QFinancialStatements        o   o   o            o
+2QFinancialStatements            o   o            o
+3QFinancialStatements                o            o
+DividendForecastRevision o   o   o   o            o
+EarnForecastRevision     o   o   o   o            o
+
+                         配当予想 (来期)
+                         NextYearForcastDividendPerShare
+                         1st 2nd 3rd FYE                 NextYerForecastXXXAnnual
+FYFinancialStatements    o   o   o   o                   o
+"""
+
 import polars as pl
 import pytest
 from polars import DataFrame, Series
