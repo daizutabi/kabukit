@@ -1,7 +1,7 @@
 import pytest
 from polars import DataFrame
 
-from .conftest import COMMON_COLUMNS, pytestmark  # noqa: F401
+from .conftest import pytestmark  # noqa: F401
 
 
 def test_earnings_per_share(data: DataFrame) -> None:
