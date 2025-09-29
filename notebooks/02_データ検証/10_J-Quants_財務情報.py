@@ -15,40 +15,32 @@ def _():
     import marimo as mo
     import polars as pl
     from polars import col as c
-    from kabukit import Statements
-    return Statements, c, mo, pl
+    from kabukit import Statements, Prices
+    return Prices, Statements, mo
 
 
 @app.cell
-def _(Statements):
-    data = Statements.read().data
-    data.shape
-    return (data,)
+def _(Prices, Statements):
+    statements = Statements.read()
+    prices = Prices.read()
+    return (statements,)
 
 
 @app.cell
-def _(c, data, pl):
-    x=data.with_columns(c.TypeOfDocument.str.split("_").list.first()).group_by("TypeOfDocument").agg(
-        pl.len(), pl.all().is_not_null().mean()
-    ).sort("TypeOfDocument")
-    return (x,)
-
-
-@app.cell
-def _(x):
-    x.write_csv('a.csv')
+def _(statements):
+    statements.number_of_shares().filter(Code="39970")
     return
 
 
 @app.cell
-def _(data, pl):
-    data.select(pl.col("^.*PerShare.*$"))
+def _():
+    (3901800+920)*10
     return
 
 
 @app.cell
-def _(data, pl):
-    data.select(pl.col("^Result.*Annual$"))
+def _(statements):
+    statements.data.filter(Code="39970")
     return
 
 
