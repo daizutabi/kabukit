@@ -3,6 +3,8 @@ from polars import DataFrame
 
 from tests.validation.conftest import pytestmark  # noqa: F401
 
+# 指標が乖離している決算書を確認する必要あり
+
 
 def test_equity_to_asset_ratio(data: DataFrame) -> None:
     x = data["EquityToAssetRatio"]
