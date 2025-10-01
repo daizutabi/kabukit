@@ -18,7 +18,7 @@ def test_equity_to_asset_ratio(data: DataFrame) -> None:
 def test_earnings_per_share(data: DataFrame) -> None:
     """EPS = 当期純利益 / 発行済株式数"""
     x = data["EarningsPerShare"]
-    y = data["Profit"] / data["AverageNumberOfShares"]
+    y = data["Profit"] / data["AverageOutstandingShares"]
     r = x / y
     m = ((r > 0.9) & (r < 1.1)).mean()
     assert isinstance(m, float)
@@ -28,7 +28,7 @@ def test_earnings_per_share(data: DataFrame) -> None:
 def test_bookvalue_per_share(data: DataFrame) -> None:
     """BPS = 純資産 / 発行済株式数"""
     x = data["BookValuePerShare"]
-    y = data["Equity"] / data["AverageNumberOfShares"]
+    y = data["Equity"] / data["AverageOutstandingShares"]
     r = x / y
     m = ((r > 0.9) & (r < 1.1)).mean()
     assert isinstance(m, float)
@@ -38,7 +38,7 @@ def test_bookvalue_per_share(data: DataFrame) -> None:
 def test_dividend_per_share(data: DataFrame) -> None:
     """DPS = 配当金 / 発行済株式数"""
     x = data["ResultDividendPerShareAnnual"]
-    y = data["ResultTotalDividendPaidAnnual"] / data["AverageNumberOfShares"]
+    y = data["ResultTotalDividendPaidAnnual"] / data["AverageOutstandingShares"]
     r = x / y
     m = ((r > 0.9) & (r < 1.1)).mean()
     assert isinstance(m, float)
@@ -67,7 +67,7 @@ def test_payout_ratio(data: DataFrame, d: str, e: str) -> None:
 def test_forecast_earnings_per_share(data: DataFrame, prefix: str, suffix: str) -> None:
     """EPS_予想 = 純利益_予想 / 発行済株式数"""
     x = data[f"{prefix}ForecastEarningsPerShare{suffix}"]
-    y = data[f"{prefix}ForecastProfit{suffix}"] / data["AverageNumberOfShares"]
+    y = data[f"{prefix}ForecastProfit{suffix}"] / data["AverageOutstandingShares"]
     r = x / y
     m = ((r > 0.9) & (r < 1.1)).mean()
     assert isinstance(m, float)

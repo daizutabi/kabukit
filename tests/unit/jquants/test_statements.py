@@ -16,20 +16,21 @@ def df() -> DataFrame:
             "DisclosedTime": ["09:00", "15:30", "12:00"],
             "LocalCode": ["1300", "1301", "1302"],
             "NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock": [  # noqa: E501
-                1,
-                2,
-                3,
+                "1",
+                "2",
+                "3",
             ],
-            "NumberOfTreasuryStockAtTheEndOfFiscalYear": [4, 5, 6],
+            "NumberOfTreasuryStockAtTheEndOfFiscalYear": ["4", "5", "6"],
+            "AverageNumberOfShares": ["7", "8", "9"],
             "TypeOfCurrentPeriod": ["A", "B", "C"],
             "RetrospectiveRestatement": ["true", "false", ""],
-            "ForcastProfit": [1.0, 2.0, None],
+            "ForcastProfit": ["1.0", "2.0", ""],
         },
     ).pipe(clean)
 
 
 def test_clean_shape(df: DataFrame) -> None:
-    assert df.shape == (3, 8)
+    assert df.shape == (3, 9)
 
 
 def test_clean_date(df: DataFrame) -> None:
@@ -51,8 +52,9 @@ def test_clean_float(df: DataFrame) -> None:
 @pytest.mark.parametrize(
     ("column", "values"),
     [
-        ("NumberOfShares", [1, 2, 3]),
-        ("NumberOfTreasuryStock", [4, 5, 6]),
+        ("TotalShares", [1, 2, 3]),
+        ("TreasuryShares", [4, 5, 6]),
+        ("AverageOutstandingShares", [7, 8, 9]),
         ("ForcastProfit", [1.0, 2.0, None]),
         ("RetrospectiveRestatement", [True, False, None]),
     ],

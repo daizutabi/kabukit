@@ -11,7 +11,7 @@ from tests.validation.conftest import pytestmark  # noqa: F401
 async def test_shares_consistency(statements: Statements) -> None:
     """
     最新のNumberOfSharesを基準に、過去の各時点での絶対株数を計算し、
-    それが各決算短信のNumberOfSharesと一致するかを検証する。
+    それが各決算短信のTotalSharesと一致するかを検証する。
     """
     from kabukit.jquants.concurrent import fetch
 
@@ -22,22 +22,22 @@ async def test_shares_consistency(statements: Statements) -> None:
     stmt_df = statements.data.filter(c.Code.is_in(codes)).select(
         "Code",
         "Date",
-        "NumberOfShares",
+        "TotalShares",
     )
     prices_df = Prices(await fetch("prices", codes)).with_relative_shares().data
 
-    # 2. 各銘柄の最新のNumberOfSharesを取得
+    # 2. 各銘柄の最新のTotalSharesを取得
     latest_shares = (
-        stmt_df.drop_nulls("NumberOfShares")
+        stmt_df.drop_nulls("TotalShares")
         .sort("Date")
         .group_by("Code")
         .last()
-        .select(["Code", pl.col("NumberOfShares").alias("LatestNumberOfShares")])
+        .select(["Code", pl.col("TotalShares").alias("LatestTotalShares")])
     )
 
     # 3. 最新の株数と日々のRelativeSharesから、過去の絶対株数を計算
     hypothetical_shares_df = prices_df.join(latest_shares, on="Code").with_columns(
-        (pl.col("LatestNumberOfShares") * pl.col("RelativeShares")).alias(
+        (pl.col("LatestTotalShares") * pl.col("RelativeShares")).alias(
             "HypotheticalShares",
         ),
     )

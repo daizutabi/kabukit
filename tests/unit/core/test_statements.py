@@ -9,10 +9,10 @@ def test_number_of_shares() -> None:
         {
             "Date": [1, 2],
             "Code": [3, 4],
-            "NumberOfShares": [5, None],
-            "AverageNumberOfShares": [9, 10],
+            "TotalShares": [5, None],
+            "AverageOutstandingShares": [9, 10],
             "OtherColumn": ["a", "b"],
-            "NumberOfTreasuryStock": [7, 8],
+            "TreasuryShares": [7, 8],
         },
     )
     statements = Statements(data)
@@ -23,9 +23,9 @@ def test_number_of_shares() -> None:
         {
             "Date": [1],
             "Code": [3],
-            "NumberOfShares": [5],
-            "NumberOfTreasuryStock": [7],
-            "AverageNumberOfShares": [9],
+            "TotalShares": [5],
+            "TreasuryShares": [7],
+            "AverageOutstandingShares": [9],
         },
     )
 

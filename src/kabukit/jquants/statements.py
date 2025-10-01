@@ -19,8 +19,9 @@ def clean(df: DataFrame) -> DataFrame:
                 "DisclosedDate": "Date",
                 "DisclosedTime": "Time",
                 "LocalCode": "Code",
-                "NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock": "NumberOfShares",  # noqa: E501
-                "NumberOfTreasuryStockAtTheEndOfFiscalYear": "NumberOfTreasuryStock",
+                "NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock": "TotalShares",  # noqa: E501
+                "NumberOfTreasuryStockAtTheEndOfFiscalYear": "TreasuryShares",
+                "AverageNumberOfShares": "AverageOutstandingShares",
             },
         )
         .with_columns(
@@ -45,10 +46,15 @@ def _cast_float(df: DataFrame) -> DataFrame:
             "Earnings",
             "Equity",
             "NetSales",
-            "NumberOf",
             "PayoutRatio",
             "Profit",
         ]
+    ).with_columns(
+        pl.col(
+            "TotalShares",
+            "TreasuryShares",
+            "AverageOutstandingShares",
+        ).cast(pl.Float64, strict=False),
     )
 
 

@@ -348,27 +348,27 @@ def test_fin_next_year_forecast_profit_loss(fin: DataFrame, pl_col: str) -> None
     assert 0.80 <= x <= 0.90
 
 
-@pytest.mark.parametrize("period", ["1Q", "2Q", "3Q", "FY"])
-@pytest.mark.parametrize(
-    "column",
-    ["NumberOfShares", "NumberOfTreasuryStock", "AverageNumberOfShares"],
+@pytest.fixture(
+    scope="module",
+    params=["TotalShares", "TreasuryShares", "AverageOutstandingShares"],
 )
-def test_fin_number_of_shares(fin: DataFrame, period: str, column: str) -> None:
+def col_shares(request: pytest.FixtureRequest) -> str:
+    return request.param
+
+
+@pytest.mark.parametrize("period", ["1Q", "2Q", "3Q", "FY"])
+def test_fin_number_of_shares(fin: DataFrame, period: str, col_shares: str) -> None:
     """決算の株式数は、ほぼ100%埋まっている"""
     df = fin.filter(c.TypeOfDocument.str.starts_with(period))
-    x = df[column].is_not_null().mean()
+    x = df[col_shares].is_not_null().mean()
     assert isinstance(x, float)
     assert 0.94 < x <= 1.0  # 割合 1 に近い
 
 
-@pytest.mark.parametrize(
-    "column",
-    ["NumberOfShares", "NumberOfTreasuryStock", "AverageNumberOfShares"],
-)
-def test_fin_number_of_shares_other(fin: DataFrame, column: str) -> None:
+def test_fin_number_of_shares_other(fin: DataFrame, col_shares: str) -> None:
     """OtherPeriod決算では、株式数は存在しない"""
     df = fin.filter(c.TypeOfDocument.str.starts_with("OtherPeriod"))
-    assert df[column].is_null().all()
+    assert df[col_shares].is_null().all()
 
 
 def test_earn_revision_column_name_starts_with_forecast(

@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.16.2"
+__generated_with = "0.16.3"
 app = marimo.App(width="medium")
 
 
@@ -13,10 +13,11 @@ def _(mo):
 @app.cell
 def _():
     import marimo as mo
+    from datetime import date
     import polars as pl
     from polars import col as c
     from kabukit import Statements, Prices
-    return Prices, Statements, mo
+    return Prices, Statements, c, date, mo
 
 
 @app.cell
@@ -27,14 +28,8 @@ def _(Prices, Statements):
 
 
 @app.cell
-def _(statements):
-    statements.number_of_shares().filter(Code="39970")
-    return
-
-
-@app.cell
-def _():
-    (3901800+920)*10
+def _(c, date, statements):
+    statements.number_of_shares().filter(c.Code == "39970", c.Date > date(2025, 1, 1))
     return
 
 
