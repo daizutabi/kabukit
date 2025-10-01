@@ -31,58 +31,38 @@ class Prices(Base):
         )
         return self.__class__(data)
 
-    def with_adjusted_shares(
-        self,
-        statements: Statements,
-        target: str | Expr = "TotalShares",
-        alias: str | None = None,
-    ) -> Self:
+    def with_adjusted_shares(self, statements: Statements) -> Self:
         """日次の調整済み株式数を計算し、列として追加する。
 
-        `statements`から指定された株式数（発行済株式総数など）を取得し、
-        日々の株式分割・併合（`AdjustmentFactor`）を反映させて調整します。
+        決算短信で報告される株式数（例：発行済株式総数）は、四半期ごとなど
+        特定の日付のデータです。一方で、株式分割や併合は日々発生し、株式数を
+        変動させます。
+        このメソッドは、直近の決算で報告された株式数を、日々の調整係数
+        (`AdjustmentFactor`) を用いて補正し、日次ベースの時系列データとして
+        提供します。これにより、日々の時価総額計算などが正確に行えるようになります。
+
+        具体的には、`statements`から`TotalShares`（発行済株式総数）と
+        `TreasuryShares`（自己株式数）を取得し、それぞれを調整します。
+        計算結果は、元の列名との混同を避けるため、接頭辞`Adjusted`を付与した
+        新しい列（`AdjustedTotalShares`, `AdjustedTreasuryShares`）として
+        追加されます。
+
+        .. note::
+            この計算は、決算発表間の株式数の変動が、株式分割・併合
+            （`AdjustmentFactor`）にのみ起因すると仮定しています。
+            期中に行われる増資や自己株式取得など、`AdjustmentFactor`に
+            反映されないイベントによる株式数の変動は考慮されません。
 
         Args:
-            statements (Statements): 発行済株式数を含むStatementsオブジェクト。
-            target (str | Expr, optional):
-                調整対象の株式数を指定する。
-                文字列ショートカット ("TotalShares", "TreasuryShares",
-                "OutstandingShares")
-                または polars.Expr が使用可能。デフォルトは "TotalShares"。
-            alias (str | None, optional):
-                追加される列の名前。指定しない場合、`target`が文字列なら自動生成される。
-                `target`がExprの場合は必須。
+            statements (Statements):
+                `number_of_shares()`メソッドを通じて株式数データを提供できる
+                Statementsオブジェクト。
 
         Returns:
-            Self: 調整済み株式数列が追加された新しいPricesオブジェクト。
-
-        Raises:
-            ValueError: サポート外の`target`文字列や、`alias`の指定漏れがあった場合。
+            Self:
+                `AdjustedTotalShares`および`AdjustedTreasuryShares`列が
+                追加された、新しいPricesオブジェクト。
         """
-        if isinstance(target, str):
-            if target == "TotalShares":
-                target_expr = pl.col("TotalShares")
-            elif target == "TreasuryShares":
-                target_expr = pl.col("TreasuryShares")
-            elif target == "OutstandingShares":
-                target_expr = pl.col("TotalShares") - pl.col("TreasuryShares")
-            else:
-                msg = f"サポート外のtarget文字列: {target}"
-                msg += " 'TotalShares', 'TreasuryShares',"
-                msg += " 'OutstandingShares'のいずれか、あるいはpolars.Exprを使用する。"
-                raise ValueError(msg)
-        else:
-            target_expr = target
-
-        if alias is None:
-            if isinstance(target, str):
-                output_col_name = f"Adjusted{target}"
-            else:
-                msg = "`alias`は、polars.Exprを`target`に指定した場合には必須です。"
-                raise ValueError(msg)
-        else:
-            output_col_name = alias
-
         shares = statements.number_of_shares().rename({"Date": "ReportDate"})
 
         adjusted = (
@@ -102,10 +82,10 @@ class Prices(Base):
             .select(
                 "Date",
                 "Code",
-                (target_expr * pl.col("CumulativeRatio"))
+                (pl.col("TotalShares", "TreasuryShares") * pl.col("CumulativeRatio"))
                 .round(0)
                 .cast(pl.Int64)
-                .alias(output_col_name),
+                .name.prefix("Adjusted"),
             )
         )
 
