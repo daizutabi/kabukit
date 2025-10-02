@@ -67,10 +67,11 @@ def test_with_adjusted_shares() -> None:
                 date(2023, 7, 15),
                 date(2023, 8, 1),
                 date(2023, 2, 1),
+                date(2023, 4, 30),
                 date(2023, 5, 1),
             ],
-            "Code": ["A", "A", "A", "B", "B"],
-            "AdjustmentFactor": [1.0, 0.5, 0.2, 1.0, 1.0],
+            "Code": ["A", "A", "A", "B", "B", "B"],
+            "AdjustmentFactor": [1.0, 0.5, 0.2, 1.0, 1.0, 2.0],
         },
     )
 
@@ -95,12 +96,12 @@ def test_with_adjusted_shares() -> None:
         [
             Series(
                 "AdjustedTotalShares",
-                [1000, 2400, 12000, None, 2000],
+                [1000, 2400, 12000, None, 2000, 1000],
                 dtype=pl.Int64,
             ),
             Series(
                 "AdjustedTreasuryShares",
-                [100, 240, 1200, None, 200],
+                [100, 240, 1200, None, 200, 100],
                 dtype=pl.Int64,
             ),
         ],
