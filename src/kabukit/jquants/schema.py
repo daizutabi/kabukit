@@ -45,8 +45,9 @@ class PriceColumns(BaseColumns):
 
 
 class StatementColumns(BaseColumns):
-    Date = "開示日"
-    Time = "開示時刻"
+    Date = "日付"
+    DisclosedDate = "開示日"
+    DisclosedTime = "開示時刻"
     Code = "銘柄コード"
     DisclosureNumber = "開示番号"
     TypeOfDocument = "開示書類種別"
@@ -129,11 +130,9 @@ class StatementColumns(BaseColumns):
     ChangesInAccountingEstimates = "会計上の見積りの変更"
     RetrospectiveRestatement = "修正再表示"
 
-    # NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock
-    NumberOfShares = "期末発行済株式数"
-    # NumberOfTreasuryStockAtTheEndOfFiscalYear
-    NumberOfTreasuryStock = "期末自己株式数"
-    AverageNumberOfShares = "期中平均株式数"
+    TotalShares = "期末発行済株式数" # 自己株式を含む (NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock)
+    TreasuryShares = "期末自己株式数" # (NumberOfTreasuryStockAtTheEndOfFiscalYear)
+    AverageOutstandingShares = "期中平均株式数" # 自己株式を除く。EPSなどの計算に使用される (AverageNumberOfShares)
 
     NonConsolidatedNetSales = "売上高_非連結"
     NonConsolidatedOperatingProfit = "営業利益_非連結"

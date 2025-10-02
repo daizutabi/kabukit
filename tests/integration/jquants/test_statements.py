@@ -20,14 +20,15 @@ async def df(client: JQuantsClient):
 
 
 def test_width(df: DataFrame) -> None:
-    assert df.width == 104
+    assert df.width == 105
 
 
 @pytest.mark.parametrize(
     ("name", "dtype"),
     [
         ("Date", pl.Date),
-        ("Time", pl.Time),
+        ("DisclosedDate", pl.Date),
+        ("DisclosedTime", pl.Time),
         ("Code", pl.String),
         ("DisclosureNumber", pl.String),
         ("TypeOfDocument", pl.String),

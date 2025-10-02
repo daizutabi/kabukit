@@ -4,30 +4,16 @@ from polars import col as c
 
 from kabukit.core.statements import Statements
 
-try:
-    statements = Statements.read()
-except FileNotFoundError:
-    statements = None
-
-
-pytestmark = [
-    pytest.mark.validation,
-    pytest.mark.skipif(
-        statements is None,
-        reason="No data found. Run `kabu get statements` first.",
-    ),
-]
-
 
 @pytest.fixture(scope="module")
-def data() -> DataFrame:
-    assert statements is not None
+def data(statements: Statements) -> DataFrame:
     return statements.data
 
 
 COMMON_COLUMNS = [
     "Date",
-    "Time",
+    "DisclosedDate",
+    "DisclosedTime",
     "Code",
     "DisclosureNumber",
     "TypeOfDocument",

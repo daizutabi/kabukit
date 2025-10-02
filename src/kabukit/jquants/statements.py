@@ -16,16 +16,15 @@ def clean(df: DataFrame) -> DataFrame:
         df.select(pl.exclude(r"^.*\(REIT\)$"))
         .rename(
             {
-                "DisclosedDate": "Date",
-                "DisclosedTime": "Time",
                 "LocalCode": "Code",
-                "NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock": "NumberOfShares",  # noqa: E501
-                "NumberOfTreasuryStockAtTheEndOfFiscalYear": "NumberOfTreasuryStock",
+                "NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock": "TotalShares",  # noqa: E501
+                "NumberOfTreasuryStockAtTheEndOfFiscalYear": "TreasuryShares",
+                "AverageNumberOfShares": "AverageOutstandingShares",
             },
         )
         .with_columns(
             pl.col("^.*Date$").str.to_date("%Y-%m-%d", strict=False),
-            pl.col("Time").str.to_time("%H:%M:%S", strict=False),
+            pl.col("DisclosedTime").str.to_time("%H:%M:%S", strict=False),
             pl.col("TypeOfCurrentPeriod").cast(pl.Categorical),
         )
         .pipe(_cast_float)
@@ -45,10 +44,17 @@ def _cast_float(df: DataFrame) -> DataFrame:
             "Earnings",
             "Equity",
             "NetSales",
-            "NumberOf",
             "PayoutRatio",
             "Profit",
         ]
+    ).with_columns(
+        pl.col(
+            "TotalShares",
+            "TreasuryShares",
+        ).cast(pl.Int64, strict=False),
+        pl.col(
+            "AverageOutstandingShares",
+        ).cast(pl.Float64, strict=False),
     )
 
 
@@ -77,15 +83,22 @@ def get_holidays(year: int | None = None, n: int = 10) -> list[datetime.date]:
     return sorted(dates.keys())
 
 
-def update_effective_date(df: DataFrame, year: int | None = None) -> DataFrame:
-    """開示日が休日や15時以降の場合、翌営業日に更新する。"""
+def with_date(df: DataFrame, year: int | None = None) -> DataFrame:
+    """`Date`列を追加する。
+
+    開示日が休日のとき、あるいは、開示時刻が15時以降の場合、Dateを開示日の翌営業日に設定する。
+    """
+    is_after_hours = pl.col("DisclosedTime").is_null() | (
+        pl.col("DisclosedTime") > datetime.time(15, 0)
+    )
+
     holidays = get_holidays(year=year)
 
-    cond = pl.col("Time").is_null() | (pl.col("Time") > datetime.time(15, 0))
-
-    return df.with_columns(
-        pl.when(cond)
-        .then(pl.col("Date").dt.add_business_days(1, holidays=holidays))
-        .otherwise(pl.col("Date"))
+    return df.select(
+        pl.when(is_after_hours)
+        .then(pl.col("DisclosedDate") + datetime.timedelta(days=1))
+        .otherwise(pl.col("DisclosedDate"))
+        .dt.add_business_days(0, holidays=holidays, roll="forward")
         .alias("Date"),
+        pl.all(),
     )

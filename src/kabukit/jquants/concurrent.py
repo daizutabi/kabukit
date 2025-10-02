@@ -23,7 +23,7 @@ async def fetch(
     progress: Progress | None = None,
     callback: Callback | None = None,
 ) -> DataFrame:
-    """全銘柄の各種データを取得し、単一のDataFrameにまとめて返す。
+    """複数の銘柄の各種データを取得し、単一のDataFrameにまとめて返す。
 
     Args:
         resource (str): 取得するデータの種類。JQuantsClientのメソッド名から"get_"を

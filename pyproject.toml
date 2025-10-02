@@ -16,10 +16,9 @@ classifiers = [
 ]
 requires-python = ">=3.13"
 dependencies = [
-  "altair>=5",
   "async-typer>=0.1",
   "holidays>=0.81",
-  "httpx>=0.28.1",
+  "httpx>=0.28",
   "platformdirs>=4",
   "polars>=1",
   "python-dotenv>=1",
@@ -36,6 +35,7 @@ Issues = "https://github.com/daizutabi/kabukit/issues"
 
 [dependency-groups]
 dev = [
+  "altair>=5",
   "basedpyright>=1.31.4",
   "marimo[lsp]>=0.16",
   "numpy>=2.3.3",                 # polars 1.33 type hinting workaround,
