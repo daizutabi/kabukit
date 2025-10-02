@@ -54,14 +54,12 @@ class Prices(Base):
             反映されないイベントによる株式数の変動は考慮されません。
 
         Args:
-            statements (Statements):
-                `number_of_shares()`メソッドを通じて株式数データを提供できる
-                Statementsオブジェクト。
+            statements (Statements): `number_of_shares()`メソッドを通じて
+                株式数データを提供できる`Statements`オブジェクト。
 
         Returns:
-            Self:
-                `AdjustedTotalShares`および`AdjustedTreasuryShares`列が
-                追加された、新しいPricesオブジェクト。
+            Self: `AdjustedTotalShares`および`AdjustedTreasuryShares`列が
+            追加された、新しいPricesオブジェクト。
         """
         shares = statements.number_of_shares().rename({"Date": "ReportDate"})
 
