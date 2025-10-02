@@ -12,7 +12,8 @@ def data(statements: Statements) -> DataFrame:
 
 COMMON_COLUMNS = [
     "Date",
-    "Time",
+    "DisclosedDate",
+    "DisclosedTime",
     "Code",
     "DisclosureNumber",
     "TypeOfDocument",

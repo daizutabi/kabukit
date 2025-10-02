@@ -9,7 +9,7 @@ from .conftest import COMMON_COLUMNS
 
 
 def test_width(data: DataFrame) -> None:
-    assert data.width == 104
+    assert data.width == 105
 
 
 def test_height(data: DataFrame) -> None:
@@ -18,14 +18,14 @@ def test_height(data: DataFrame) -> None:
 
 @pytest.mark.parametrize(
     "column",
-    [c for c in COMMON_COLUMNS if c not in ["Time"]],
+    [c for c in COMMON_COLUMNS if c not in ["DisclosedTime"]],
 )
 def test_is_not_null_all(data: DataFrame, column: str) -> None:
     """共通カラムのうち、Time以外は全て非欠損"""
     assert data[column].is_not_null().all()
 
 
-@pytest.mark.parametrize("column", ["Time"])
+@pytest.mark.parametrize("column", ["DisclosedTime"])
 def test_is_not_null_any(data: DataFrame, column: str) -> None:
     """Timeカラムは一部欠損"""
     assert data[column].is_null().any()
