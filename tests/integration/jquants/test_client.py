@@ -91,7 +91,7 @@ async def test_latest_available_prices_empty(client: JQuantsClient) -> None:
 @pytest.mark.asyncio
 async def test_statements_code(client: JQuantsClient) -> None:
     df = await client.get_statements(code="7203")
-    assert df.width == 104
+    assert df.width == 105
 
 
 @pytest.mark.asyncio

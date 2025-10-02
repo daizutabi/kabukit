@@ -12,7 +12,7 @@ def df() -> DataFrame:
 
     return DataFrame(
         {
-            "DisclosedDate": ["2023-01-01", "2023-01-02", "2023-01-03"],
+            "DisclosedDate": ["2023-01-01", "2023-01-20", "2023-01-30"],
             "DisclosedTime": ["09:00", "15:30", "12:00"],
             "LocalCode": ["1300", "1301", "1302"],
             "NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock": [  # noqa: E501
@@ -21,10 +21,10 @@ def df() -> DataFrame:
                 "3",
             ],
             "NumberOfTreasuryStockAtTheEndOfFiscalYear": ["4", "5", "6"],
-            "AverageNumberOfShares": ["7", "8", "9"],
+            "AverageNumberOfShares": ["7.1", "8.2", "9.3"],
             "TypeOfCurrentPeriod": ["A", "B", "C"],
             "RetrospectiveRestatement": ["true", "false", ""],
-            "ForcastProfit": ["1.0", "2.0", ""],
+            "ForecastProfit": ["1.0", "2.0", ""],
         },
     ).pipe(clean)
 
@@ -33,20 +33,26 @@ def test_clean_shape(df: DataFrame) -> None:
     assert df.shape == (3, 9)
 
 
-def test_clean_date(df: DataFrame) -> None:
-    assert df["Date"].dtype == pl.Date
+def test_clean_disclosed_date(df: DataFrame) -> None:
+    assert df["DisclosedDate"].dtype == pl.Date
 
 
-def test_clean_time(df: DataFrame) -> None:
-    assert df["Time"].dtype == pl.Time
+def test_clean_disclosed_time(df: DataFrame) -> None:
+    assert df["DisclosedTime"].dtype == pl.Time
 
 
 def test_clean_current_period(df: DataFrame) -> None:
     assert df["TypeOfCurrentPeriod"].dtype == pl.Categorical
 
 
-def test_clean_float(df: DataFrame) -> None:
-    assert df["ForcastProfit"].dtype == pl.Float64
+@pytest.mark.parametrize("column", ["ForecastProfit", "AverageOutstandingShares"])
+def test_clean_float(df: DataFrame, column: str) -> None:
+    assert df[column].dtype == pl.Float64
+
+
+@pytest.mark.parametrize("column", ["TotalShares", "TreasuryShares"])
+def test_clean_int(df: DataFrame, column: str) -> None:
+    assert df[column].dtype == pl.Int64
 
 
 @pytest.mark.parametrize(
@@ -54,8 +60,8 @@ def test_clean_float(df: DataFrame) -> None:
     [
         ("TotalShares", [1, 2, 3]),
         ("TreasuryShares", [4, 5, 6]),
-        ("AverageOutstandingShares", [7, 8, 9]),
-        ("ForcastProfit", [1.0, 2.0, None]),
+        ("AverageOutstandingShares", [7.1, 8.2, 9.3]),
+        ("ForecastProfit", [1.0, 2.0, None]),
         ("RetrospectiveRestatement", [True, False, None]),
     ],
 )
@@ -82,32 +88,39 @@ def test_holidays_year() -> None:
     assert holidays[0].day == 1
 
 
-def test_update_effective_date() -> None:
+def test_with_date() -> None:
     from datetime import date, time
 
-    from kabukit.jquants.statements import update_effective_date
+    from kabukit.jquants.statements import with_date
 
     df = DataFrame(
         {
-            "Date": [
+            "DisclosedDate": [
+                date(2025, 1, 4),
+                date(2025, 1, 4),
                 date(2025, 1, 10),
                 date(2025, 1, 10),
                 date(2025, 1, 10),
             ],
-            "Time": [
+            "DisclosedTime": [
+                time(9, 0),
+                time(16, 0),
                 time(9, 0),
                 time(15, 30),
                 None,
             ],
-            "EPS": [1, 2, 3],
+            "EPS": [1, 2, 3, 4, 5],
         },
     )
 
-    df = update_effective_date(df, 2025)
+    df = with_date(df, 2025)
+    assert df.columns == ["Date", "DisclosedDate", "DisclosedTime", "EPS"]
     x = df["Date"].to_list()
-    assert x[0] == date(2025, 1, 10)
-    assert x[1] == date(2025, 1, 14)
-    assert x[2] == date(2025, 1, 14)
+    assert x[0] == date(2025, 1, 6)
+    assert x[1] == date(2025, 1, 6)
+    assert x[2] == date(2025, 1, 10)
+    assert x[3] == date(2025, 1, 14)
+    assert x[4] == date(2025, 1, 14)
 
 
 def test_join_asof() -> None:

@@ -35,9 +35,9 @@ DividendForecastRevision o   o   o   o            o
 EarnForecastRevision     o   o   o   o            o
 
                          配当予想 (来期)
-                         NextYearForcastDividendPerShare
-                         1st 2nd 3rd FYE                 NextYerForecastXXXAnnual
-FYFinancialStatements    o   o   o   o                   o
+                         NextYearForecastDividendPerShare
+                         1st 2nd 3rd FYE                  NextYerForecastXXXAnnual
+FYFinancialStatements    o   o   o   o                    o
 """
 
 import polars as pl

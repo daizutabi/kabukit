@@ -1,10 +1,12 @@
 from datetime import date
 
+import polars as pl
 import pytest
 from polars import DataFrame, Series
 from polars.testing import assert_frame_equal
 
 from kabukit.core.prices import Prices
+from kabukit.core.statements import Statements
 
 
 @pytest.fixture(scope="module")
@@ -55,3 +57,55 @@ def test_truncate_month(data: DataFrame) -> None:
     assert df["Close"].to_list() == [108, 110, 112, 113]
     assert df["Volume"].to_list() == [1500, 1700, 1900, 2100]
     assert df["TurnoverValue"].to_list() == [3000, 3400, 3800, 4200]
+
+
+def test_with_adjusted_shares() -> None:
+    prices_df = DataFrame(
+        {
+            "Date": [
+                date(2023, 5, 1),
+                date(2023, 7, 15),
+                date(2023, 8, 1),
+                date(2023, 2, 1),
+                date(2023, 5, 1),
+            ],
+            "Code": ["A", "A", "A", "B", "B"],
+            "AdjustmentFactor": [1.0, 0.5, 0.2, 1.0, 1.0],
+        },
+    )
+
+    statements_df = DataFrame(
+        {
+            "Date": [
+                date(2023, 3, 31),
+                date(2023, 6, 30),
+                date(2023, 4, 30),
+            ],
+            "Code": ["A", "A", "B"],
+            "TotalShares": [1000, 1200, 2000],
+            "TreasuryShares": [100, 120, 200],
+            "AverageOutstandingShares": [0, 0, 0],
+        },
+    )
+
+    prices = Prices(prices_df)
+    statements = Statements(statements_df)
+
+    expected = prices_df.with_columns(
+        [
+            Series(
+                "AdjustedTotalShares",
+                [1000, 2400, 12000, None, 2000],
+                dtype=pl.Int64,
+            ),
+            Series(
+                "AdjustedTreasuryShares",
+                [100, 240, 1200, None, 200],
+                dtype=pl.Int64,
+            ),
+        ],
+    )
+
+    result = prices.with_adjusted_shares(statements)
+
+    assert_frame_equal(result.data, expected)
