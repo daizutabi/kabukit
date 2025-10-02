@@ -4,7 +4,6 @@ import datetime
 from typing import TYPE_CHECKING
 from unittest.mock import call
 
-import polars as pl
 import pytest
 from httpx import HTTPStatusError, Response
 from polars import DataFrame
@@ -307,11 +306,11 @@ async def test_get_statements_flags(
 
     mock_clean = mocker.patch(
         "kabukit.jquants.statements.clean",
-        return_value=pl.DataFrame({"Code": ["7203"]}),
+        return_value=DataFrame({"Code": ["7203"]}),
     )
     mock_with_date = mocker.patch(
         "kabukit.jquants.statements.with_date",
-        return_value=pl.DataFrame({"Date": [datetime.date(2023, 1, 1)]}),
+        return_value=DataFrame({"Date": [datetime.date(2023, 1, 1)]}),
     )
 
     client = JQuantsClient("test_token")
