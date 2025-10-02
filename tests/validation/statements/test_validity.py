@@ -60,6 +60,21 @@ def test_dividend_per_share(data: DataFrame) -> None:
     assert m > 0.94
 
 
+@pytest.mark.parametrize("prefix", ["Result", "Forecast", "NextYearForecast"])
+def test_dividend_per_share_sum(data: DataFrame, prefix: str) -> None:
+    x = data[f"{prefix}DividendPerShareAnnual"]
+    y = (
+        data[f"{prefix}DividendPerShare1stQuarter"]
+        + data[f"{prefix}DividendPerShare2ndQuarter"]
+        + data[f"{prefix}DividendPerShare3rdQuarter"]
+        + data[f"{prefix}DividendPerShareFiscalYearEnd"]
+    )
+    r = x / y
+    m = ((r > 0.9) & (r < 1.1)).mean()
+    assert isinstance(m, float)
+    assert m > 0.8
+
+
 @pytest.mark.parametrize(
     ("d", "e"),
     [
