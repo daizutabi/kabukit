@@ -53,7 +53,7 @@ class Base:
 
     def filter(
         self,
-        *predicates: IntoExprColumn | Iterable[IntoExprColumn],
+        *predicates: IntoExprColumn | Iterable[IntoExprColumn] | bool | list[bool],
         **constraints: Any,
     ) -> Self:
         """Filter the data with given predicates and constraints."""
