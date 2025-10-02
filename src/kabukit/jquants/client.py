@@ -257,6 +257,7 @@ class JQuantsClient(Client):
         date: str | datetime.date | None = None,
         *,
         clean: bool = True,
+        with_date: bool = True,
     ) -> DataFrame:
         """四半期毎の決算短信サマリーおよび業績・配当の修正に関する開示情報を取得する。
 
@@ -264,6 +265,8 @@ class JQuantsClient(Client):
             code (str, optional): 財務情報を取得する銘柄のコード。
             date (str | datetime.date, optional): 財務情報を取得する日付。
             clean (bool, optional): 取得したデータをクリーンアップするかどうか。
+            with_date (bool, optional): クリーンアップ後に営業日ベースで開示日の翌日を
+                計算して`Date`列を追加するかどうか。
 
         Returns:
             財務情報を含むDataFrame。
@@ -283,10 +286,12 @@ class JQuantsClient(Client):
         dfs = [df async for df in self.iter_pages(url, params, name)]
         df = pl.concat(dfs)
 
-        if df.is_empty():
+        if df.is_empty() or not clean:
             return df
 
-        return statements.clean(df) if clean else df
+        df = statements.clean(df)
+
+        return statements.with_date(df) if with_date else df
 
     async def get_announcement(self) -> DataFrame:
         """翌日発表予定の決算情報を取得する。
