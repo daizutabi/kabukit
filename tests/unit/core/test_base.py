@@ -70,3 +70,8 @@ def test_read_file_not_found(tmp_path: Path) -> None:
         pytest.raises(FileNotFoundError, match="No data found in"),
     ):
         Base.read()
+
+
+def test_filter(data: DataFrame) -> None:
+    expected = DataFrame({"A": [1], "B": ["x"]})
+    assert_frame_equal(Base(data).filter(pl.col("A") == 1).data, expected)
