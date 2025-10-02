@@ -29,7 +29,9 @@ def _(Prices, Statements):
 
 @app.cell
 def _(c, prices):
-    prices.data.filter(c.Code == "39970").tail()
+    prices.data.filter(c.Code == "62000").select(
+        "Date", "Close","RawClose", "AdjustmentFactor", "AdjustedTotalShares"
+    )
     return
 
 
