@@ -1,5 +1,8 @@
+from datetime import date
+
 import pytest
 from polars import DataFrame
+from polars import col as c
 
 from tests.validation.conftest import pytestmark  # noqa: F401
 
@@ -72,3 +75,24 @@ def test_forecast_earnings_per_share(data: DataFrame, prefix: str, suffix: str) 
     m = ((r > 0.9) & (r < 1.1)).mean()
     assert isinstance(m, float)
     assert m > 0.94
+
+
+def test_earnings_per_share_consistency(data: DataFrame) -> None:
+    """
+    サマリーの利益額(Profit)は丸められている。
+    決算短信の詳細数値を使うと、EPSを再現できることを示す。
+
+    例: トレードワークス(3997) 2025年12月期 第2四半期決算短信
+    <https://pdf.irpocket.com/C3997/bffO/ugVK/I9Yg.pdf>
+    """
+    x = data.filter(
+        c.Code == "39970",
+        c.DisclosedDate == date(2025, 8, 8),
+    ).row(0, named=True)
+
+    assert x["Profit"] == -69_000_000
+    assert x["EarningsPerShare"] == -18.57
+
+    actual_profit = -69_558_000  # 決算短信の詳細数値
+    eps = actual_profit / x["AverageOutstandingShares"]
+    assert round(eps, 2) == x["EarningsPerShare"]
