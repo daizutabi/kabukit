@@ -4,8 +4,10 @@ import datetime
 from typing import TYPE_CHECKING
 from unittest.mock import call
 
+import polars as pl
 import pytest
 from httpx import HTTPStatusError, Response
+from polars import DataFrame
 
 from kabukit.jquants.client import AuthKey, JQuantsClient
 
@@ -276,6 +278,58 @@ async def test_statements_empty(get: AsyncMock, mocker: MockerFixture) -> None:
 async def test_statements_error(client: JQuantsClient) -> None:
     with pytest.raises(ValueError, match="codeまたはdate"):
         await client.get_statements()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("clean_flag", "with_date_flag", "clean_called", "with_date_called"),
+    [
+        (True, True, True, True),
+        (True, False, True, False),
+        (False, True, False, False),
+        (False, False, False, False),
+    ],
+)
+async def test_get_statements_flags(
+    get: AsyncMock,
+    mocker: MockerFixture,
+    clean_flag: bool,
+    with_date_flag: bool,
+    clean_called: bool,
+    with_date_called: bool,
+) -> None:
+    """Test the clean and with_date flags in get_statements."""
+    # 1. Mock the API response
+    json = {"statements": [{"LocalCode": "7203"}]}
+    response = Response(200, json=json)
+    get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    mock_clean = mocker.patch(
+        "kabukit.jquants.statements.clean",
+        return_value=pl.DataFrame({"Code": ["7203"]}),
+    )
+    mock_with_date = mocker.patch(
+        "kabukit.jquants.statements.with_date",
+        return_value=pl.DataFrame({"Date": [datetime.date(2023, 1, 1)]}),
+    )
+
+    client = JQuantsClient("test_token")
+    await client.get_statements(
+        code="7203",
+        clean=clean_flag,
+        with_date=with_date_flag,
+    )
+
+    if clean_called:
+        mock_clean.assert_called_once()
+    else:
+        mock_clean.assert_not_called()
+
+    if with_date_called:
+        mock_with_date.assert_called_once()
+    else:
+        mock_with_date.assert_not_called()
 
 
 @pytest.mark.asyncio
