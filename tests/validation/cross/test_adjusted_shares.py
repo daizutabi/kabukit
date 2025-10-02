@@ -21,9 +21,18 @@ def test_adjusted_shares(prices: Prices, statements: Statements) -> None:
         data.with_columns(
             MarketCap=c.RawClose * c.AdjustedTotalShares,
         )
-        .with_columns(PrevMarketCap=c.MarketCap.shift(1).over("Code"))
+        .with_columns(
+            PrevMarketCap=c.MarketCap.shift(1).over("Code"),
+            PrevClose=c.Close.shift(1).over("Code"),
+        )
         .filter(c.AdjustmentFactor != 1)
-        .with_columns(Ratio=(c.MarketCap - c.PrevMarketCap).abs() / c.PrevMarketCap)
+        .with_columns(
+            Ratio=(c.MarketCap - c.PrevMarketCap).abs() / c.PrevMarketCap,
+            CloseRatio=(c.Close - c.PrevClose).abs() / c.PrevClose,
+        )
+        .with_columns(
+            RatioRatio=c.Ratio / c.CloseRatio,
+        )
     )
 
     x = df["Ratio"].mean()
@@ -33,3 +42,11 @@ def test_adjusted_shares(prices: Prices, statements: Statements) -> None:
     x = df["Ratio"].max()
     assert isinstance(x, float)
     assert x < 0.25
+
+    x = df["RatioRatio"].min()
+    assert isinstance(x, float)
+    assert x > 0.995
+
+    x = df["RatioRatio"].max()
+    assert isinstance(x, float)
+    assert x < 1.05
