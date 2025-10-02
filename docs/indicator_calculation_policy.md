@@ -20,16 +20,20 @@
 
 3. **基準となる財務データの取得**:
    * 特定した決算情報から、以下の基準値を取得する。
-      * `純資産` (通期実績)
-      * `純利益` (通期実績 or 通期予想)
-      * `年間配当総額` (通期実績 or 通期予想)
-      * `発行済株式数` (`TotalShares`)
-      * `自己株式数` (`TreasuryShares`)
+      * `Equity` (純資産)
+      * `Profit` (実績純利益)
+      * `ForecastProfit` (当期予想純利益, FY決算以外)
+      * `NextYearForecastProfit` (来期予想純利益, FY決算)
+      * `ResultDividendPerShareAnnual` (実績配当)
+      * `ForecastDividendPerShareAnnual` (当期予想配当, FY決算以外)
+      * `NextYearForecastDividendPerShareAnnual` (来期予想配当, FY決算)
+      * `TotalShares` (発行済株式数)
+      * `TreasuryShares` (自己株式数)
 
 4. **株式数の更新と流通株式数の算出**:
-   * `daily_adjusted_shares.md` に記載されているロジックに基づき、日々の株価データに含まれる `AdjustmentFactor` を用いて、`発行済株式数` と `自己株式数` を日次で調整する。
+   * `daily_adjusted_shares.md` に記載されているロジックに基づき、日々の株価データに含まれる `AdjustmentFactor` を用いて、`TotalShares` (発行済株式数) と `TreasuryShares` (自己株式数) を日次で調整する。
    * これにより、各日 `t` における `AdjustedTotalShares` (調整後発行済株式数) と `AdjustedTreasuryShares` (調整後自己株式数) を算出する。
-   * **流通株式数** = `AdjustedTotalShares` - `AdjustedTreasuryShares` の計算式で、当日 `t` 時点での有効な流通株式数を求める。
+   * `流通株式数` = `AdjustedTotalShares` - `AdjustedTreasuryShares` の計算式で、当日 `t` 時点での有効な流通株式数を求める。この処理は、過去の基準値を現在の状態に合わせる「**更新**」と位置づける。
 
 ## 各指標の計算アルゴリズム
 
@@ -40,23 +44,24 @@
 企業の資産価値に対する株価の割安度を測る指標。PBRの逆数に相当する。
 
 * **必要なデータ**:
-  * 分子: `純資産`
+  * 分子: `Equity` (純資産)
   * 分母: `流通株式数`、`RawClose`
 * **計算式**:
   ```
-  純資産利回り = 純資産 / (流通株式数 × RawClose)
+  純資産利回り = Equity / (流通株式数 × RawClose)
   ```
 
-### 2. 純利益利回り (Earnings Yield)
+### 2. 収益利回り (Earnings Yield)
 
 企業の利益創出力を測る指標。PERの逆数に相当する。
+（注: ここでいう「収益」は「純利益」を指します。）
 
 * **必要なデータ**:
-  * 分子: `純利益`
+  * 分子: 各`Profit`
   * 分母: `流通株式数`、`RawClose`
 * **計算式**:
   ```
-  純利益利回り = 純利益 / (流通株式数 × RawClose)
+  純利益利回り = Profit / (流通株式数 × RawClose)
   ```
 
 ### 3. 配当利回り (Dividend Yield)
@@ -79,7 +84,7 @@
 
 ## このアプローチの利点
 
-* **企業行動の反映**: 新しい決算が公表されると、`基準発行済株式数` (`TotalShares`) や `基準自己株式数` (`TreasuryShares`) が更新されるため、増資、自己株式取得、株式償却などの企業行動が自然に反映される。
+* **企業行動の反映**: 新しい決算が公表されると、`TotalShares` (発行済株式数) や `TreasuryShares` (自己株式数) が更新されるため、増資、自己株式取得、株式償却などの企業行動が自然に反映される。
 * **株式分割・併合の反映**: `AdjustmentFactor` を用いた日次調整により、株価と株式数の間の不整合を解消し、過去に遡って正確な流通株式数を維持する。
 * **直感的な分かりやすさ**: すべての利回り指標が「高いほど良い（割安・高効率）」という統一された基準で評価可能となり、計算の意図が明確になる。
 * **将来情報の排除**: 計算の各ステップで、その時点で入手不可能な将来のデータ（未来の決算、未来から見た調整後株価など）を利用しない。
