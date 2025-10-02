@@ -209,8 +209,6 @@ def test_fin_forecast_dividend(
     ("column", "low", "high"),
     [
         ("ForecastDividendPerShareAnnual", 0.88, 0.92),
-        ("ForecastTotalDividendPaidAnnual", 0, 0),
-        ("ForecastPayoutRatioAnnual", 0, 0),
     ],
 )
 def test_fin_forecast_dividend_annual(
@@ -219,11 +217,24 @@ def test_fin_forecast_dividend_annual(
     low: float,
     high: float,
 ) -> None:
-    """通期決算以外では、年間配当予想がある程度埋まっている"""
+    """通期決算以外において、年間配当予想がある程度埋まっている"""
     df = fin.filter(~c.TypeOfDocument.str.starts_with("FY"))
     x = df[column].is_not_null().mean()
     assert isinstance(x, float)
     assert low <= x <= high
+
+
+@pytest.mark.parametrize(
+    "column",
+    [
+        "ForecastTotalDividendPaidAnnual",
+        "ForecastPayoutRatioAnnual",
+    ],
+)
+def test_forecast_dividend_annual_null(fin: DataFrame, column: str) -> None:
+    """通期決算以外において、年間配当予想の総額と配当性向はnull"""
+    df = fin.filter(~c.TypeOfDocument.str.starts_with("FY"))
+    assert df[column].is_null().all()
 
 
 @pytest.mark.parametrize(
@@ -266,6 +277,17 @@ def test_fin_next_year_forecast_dividend_annual(
     x = df[column].is_not_null().mean()
     assert isinstance(x, float)
     assert low <= x <= high
+
+
+def test_fin_next_year_forecast_dividend_annual_column(fin: DataFrame) -> None:
+    """NextYearForecastTotalDividendPaidAnnualが欠落。"""
+    assert "ForecastDividendPerShareAnnual" in fin.columns
+    assert "ForecastPayoutRatioAnnual" in fin.columns
+    assert "ForecastTotalDividendPaidAnnual" in fin.columns
+
+    assert "NextYearForecastDividendPerShareAnnual" in fin.columns
+    assert "NextYearForecastPayoutRatioAnnual" in fin.columns
+    assert "NextYearForecastTotalDividendPaidAnnual" not in fin.columns
 
 
 def test_fin_next_year_forecast(fin: DataFrame) -> None:
