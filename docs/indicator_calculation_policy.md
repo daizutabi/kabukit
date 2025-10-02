@@ -56,13 +56,30 @@
 企業の利益創出力を測る指標。PERの逆数に相当する。
 （注: ここでいう「収益」は「純利益」を指します。）
 
-* **必要なデータ**:
-  * 分子: 各`Profit`
-  * 分母: `流通株式数`、`RawClose`
-* **計算式**:
-  ```
-  純利益利回り = Profit / (流通株式数 × RawClose)
-  ```
+*   **収益利回りの種類**:
+    *   **実績収益利回り**: 実績純利益 (TTM) を用いて計算する。
+    *   **予想収益利回り**: 最新の決算情報に基づいて決定される予想純利益を用いて計算する。
+
+*   **実績純利益 (TTM) の決定方法**:
+    *   収益利回りの計算には、**常に通期の純利益に相当する値**を用いる。
+    *   FY決算の場合は `Profit` (当期の実績純利益) を使用する。
+    *   FY決算以外 (1Q, 2Q, 3Q) の場合は、過去4四半期の `Profit` を合算して算出する。各四半期の純利益は累積値で提供されるため、`当期累積純利益 - 前期累積純利益` で当該四半期の純利益を算出し、過去4四半期分を合算する。
+
+*   **予想純利益の決定方法**:
+    *   計算対象日 `t` において、以下の条件に基づき、使用する予想純利益を決定する。
+        *   もし最新の決算情報がFY決算であり、`NextYearForecastProfit` (来期の予想純利益) が存在する場合、**これを使用する**。
+        *   そうでなく、もし最新の決算情報がFY決決算以外 (1Q, 2Q, 3Q) であり、`ForecastProfit` (当期の予想純利益) が存在する場合、**これを使用する**。
+        *   上記いずれの予想値も存在しない場合、予想純利益は算出しない。
+
+*   **計算式**:
+    *   **実績収益利回り**:
+        ```
+        実績収益利回り = (実績純利益 (TTM)) / (流通株式数 × RawClose)
+        ```
+    *   **予想収益利回り**:
+        ```
+        予想収益利回り = (予想純利益) / (流通株式数 × RawClose)
+        ```
 
 ### 3. 配当利回り (Dividend Yield)
 
@@ -71,12 +88,18 @@
 * **必要なデータ**:
   * 分子: `年間配当総額`
   * 分母: `流通株式数`、`RawClose`
-* **年間配当総額の算出方法**:
-  * **実績配当**: 決算情報に含まれる `ResultTotalDividendPaidAnnual` を優先的に使用する。
-  * **予想配当**: `financial_statements_schema.md` に記載の通り、`ForecastTotalDividendPaidAnnual` や `NextYearForecastTotalDividendAnnual` はデータが欠落しているか、カラム自体が存在しない。このため、以下の計算式で算出する。
-    * `年間配当総額 = ForecastDividendPerShareAnnual × 流通株式数`
-    * `年間配当総額 = NextYearForecastDividendPerShareAnnual × 流通株式数`
-    * （注: `ForecastDividendPerShareAnnual` や `NextYearForecastDividendPerShareAnnual` が利用できない場合は、四半期ごとの配当予想を合算するなど、別途ロジックを検討する。）
+*   **年間配当総額の算出方法**:
+    *   **実績配当**: 
+        *   配当利回りの計算には、**常に通期の配当総額に相当する値**を用いる。
+        *   **実績配当総額 (TTM) の決定方法**:
+            *   FY決算の場合は `ResultTotalDividendPaidAnnual` を使用する。
+            *   FY決算以外 (1Q, 2Q, 3Q) の場合は、直近12ヶ月の一株あたり配当実績 (TTM DPS) を算出し、`流通株式数` を乗じて年間配当総額とする。
+                *   TTM DPSは、過去4四半期の `ResultDividendPerShare1stQuarter`, `ResultDividendPerShare2ndQuarter`, `ResultDividendPerShare3rdQuarter`, `ResultDividendPerShareFiscalYearEnd` の該当する値を合算して算出する。
+    *   **予想配当**:
+        *   `financial_statements_schema.md` に記載の通り、`ForecastTotalDividendPaidAnnual` や `NextYearForecastTotalDividendAnnual` はデータが欠落しているか、カラム自体が存在しない。このため、以下の計算式で算出する。
+            *   `年間配当総額 = ForecastDividendPerShareAnnual × 流通株式数`
+            *   `年間配当総額 = NextYearForecastDividendPerShareAnnual × 流通株式数`
+            *   （注: `ForecastDividendPerShareAnnual` や `NextYearForecastDividendPerShareAnnual` が利用できない場合は、四半期ごとの配当予想を合算するなど、別途ロジックを検討する。）
 * **計算式**:
   ```
   配当利回り = 年間配当総額 / (流通株式数 × RawClose)
