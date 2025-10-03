@@ -76,29 +76,32 @@ class Prices(Base):
                 .over("Code", "ReportDate")
                 .alias("CumulativeRatio"),
             )
-            .select(
-                "Date",
-                "Code",
+            .with_columns(
                 (pl.col("IssuedShares", "TreasuryShares") * pl.col("CumulativeRatio"))
                 .round(0)
                 .cast(pl.Int64)
                 .name.prefix("Adjusted"),
             )
+            .select("Date", "Code", "AdjustedIssuedShares", "AdjustedTreasuryShares")
         )
 
         data = self.data.join(adjusted, on=["Date", "Code"], how="left")
 
         return self.__class__(data)
 
-    # def with_yields(self, statements: Statements) -> Self:
-    #     """各種利回り指標（収益利回り、純資産利回り、配当利回り）を計算し、列として追加する。
+    def with_forecast_profit(self, statements: Statements) -> Self:
+        """時系列の予想純利益を列として追加する。
 
-    #     Args:
-    #         statements (Statements): 財務データを提供する`Statements`オブジェクト。
+        Args:
+            statements (Statements): 財務データを提供する`Statements`オブジェクト。
 
-    #     Returns:
-    #         Self: 各種利回り指標が追加された、新しいPricesオブジェクト。
-    #     """
-    #     prices_with_adjusted_shares = self.with_adjusted_shares(statements)
-    #     data_with_yields = calculate_all_yields(prices_with_adjusted_shares, statements)
-    #     return self.__class__(data_with_yields)
+        Returns:
+            Self: `ForecastProfit` 列が追加された、新しいPricesオブジェクト。
+        """
+        data = self.data.join_asof(
+            statements.forecast_profit(),
+            on="Date",
+            by="Code",
+            check_sortedness=False,
+        )
+        return self.__class__(data)
