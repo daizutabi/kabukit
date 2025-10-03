@@ -31,7 +31,7 @@ class Statements(Base):
         """
         return (
             self.data.with_columns(
-                pl.when(pl.col("TypeOfCurrentPeriod").str.starts_with("FY"))
+                pl.when(pl.col("TypeOfDocument").str.starts_with("FY"))
                 .then(pl.col("NextYearForecastProfit"))
                 .otherwise(pl.col("ForecastProfit"))
                 .alias("ForecastProfit"),
