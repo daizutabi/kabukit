@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.16.4"
+__generated_with = "0.16.5"
 app = marimo.App(width="medium")
 
 
@@ -11,7 +11,6 @@ def _(mo):
     # J-Quantsで取得できる財務情報を検証する
 
     <https://pdf.irpocket.com/C3997/bffO/ugVK/I9Yg.pdf>
-
     """
     )
     return
@@ -24,46 +23,22 @@ def _():
     import polars as pl
     from polars import col as c
     from kabukit import Statements, Prices
-    return Statements, c, date, mo
+    return Prices, Statements, c, mo
 
 
 @app.cell
-def _(Statements, c, date):
-    x = (
-        Statements.read()
-        .filter(c.Code == "39970", c.DisclosedDate == date(2025, 8, 8))
-        .data.row(0, named=True)
+def _(Prices, Statements):
+    statements = Statements.read()
+    prices = Prices.read()
+    return prices, statements
+
+
+@app.cell
+def _(c, prices, statements):
+    prices.with_forecast_profit(statements).data.filter(c.Code == "72030").select(
+        "Date",
+        "ForecastProfit",
     )
-    return (x,)
-
-
-@app.cell
-def _(x):
-    x["Profit"]
-    return
-
-
-@app.cell
-def _(x):
-    x["EarningsPerShare"]
-    return
-
-
-@app.cell
-def _(x):
-    x["AverageOutstandingShares"]
-    return
-
-
-@app.cell
-def _():
-    actual_profit = -69_558_000
-    return (actual_profit,)
-
-
-@app.cell
-def _(actual_profit, x):
-    round(actual_profit / x["AverageOutstandingShares"], 2)
     return
 
 
