@@ -41,10 +41,10 @@ class Prices(Base):
         (`AdjustmentFactor`) を用いて補正し、日次ベースの時系列データとして
         提供します。これにより、日々の時価総額計算などが正確に行えるようになります。
 
-        具体的には、`statements`から`TotalShares`（発行済株式総数）と
+        具体的には、`statements`から`IssuedShares`（発行済株式総数）と
         `TreasuryShares`（自己株式数）を取得し、それぞれを調整します。
         計算結果は、元の列名との混同を避けるため、接頭辞`Adjusted`を付与した
-        新しい列（`AdjustedTotalShares`, `AdjustedTreasuryShares`）として
+        新しい列（`AdjustedIssuedShares`, `AdjustedTreasuryShares`）として
         追加されます。
 
         .. note::
@@ -54,11 +54,10 @@ class Prices(Base):
             反映されないイベントによる株式数の変動は考慮されません。
 
         Args:
-            statements (Statements): `number_of_shares()`メソッドを通じて
-                株式数データを提供できる`Statements`オブジェクト。
+            statements (Statements): 財務データを提供する`Statements`オブジェクト。
 
         Returns:
-            Self: `AdjustedTotalShares`および`AdjustedTreasuryShares`列が
+            Self: `AdjustedIssuedShares`および`AdjustedTreasuryShares`列が
             追加された、新しいPricesオブジェクト。
         """
         shares = statements.number_of_shares().rename({"Date": "ReportDate"})
@@ -80,7 +79,7 @@ class Prices(Base):
             .select(
                 "Date",
                 "Code",
-                (pl.col("TotalShares", "TreasuryShares") * pl.col("CumulativeRatio"))
+                (pl.col("IssuedShares", "TreasuryShares") * pl.col("CumulativeRatio"))
                 .round(0)
                 .cast(pl.Int64)
                 .name.prefix("Adjusted"),
@@ -90,3 +89,16 @@ class Prices(Base):
         data = self.data.join(adjusted, on=["Date", "Code"], how="left")
 
         return self.__class__(data)
+
+    # def with_yields(self, statements: Statements) -> Self:
+    #     """各種利回り指標（収益利回り、純資産利回り、配当利回り）を計算し、列として追加する。
+
+    #     Args:
+    #         statements (Statements): 財務データを提供する`Statements`オブジェクト。
+
+    #     Returns:
+    #         Self: 各種利回り指標が追加された、新しいPricesオブジェクト。
+    #     """
+    #     prices_with_adjusted_shares = self.with_adjusted_shares(statements)
+    #     data_with_yields = calculate_all_yields(prices_with_adjusted_shares, statements)
+    #     return self.__class__(data_with_yields)

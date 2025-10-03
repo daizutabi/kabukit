@@ -1,45 +1,3 @@
-"""
-                         損益計算書 貸借対照表 キャッシュフロー 株式数
-1QFinancialStatements    o        o        o             o
-2QFinancialStatements    o        o        o             o
-3QFinancialStatements    o        o        o             o
-FYFinancialStatements    o        o        o             o
-OtherPeriodFinancialS    o        o        o
-
-                         配当実績
-                         ResultDividendPerShare
-                         1st 2nd 3rd FYE        ResultXXXAnnual
-1QFinancialStatements    o
-2QFinancialStatements    o   o
-3QFinancialStatements    o   o   o
-FYFinancialStatements    o   o   o   o          o
-
-                         損益予想 (当期)
-                         ForecastXXX2ndQuarter ForecastXXX
-1QFinancialStatements    o                     o
-2QFinancialStatements                          o
-3QFinancialStatements                          o
-EarnForecastRevision     o                     o
-
-                         損益予想 (来期)
-                         NextYearForecastXXX2ndQuarter NextYearForecastXXX
-FYFinancialStatements    o                             o
-
-                         配当予想 (当期)
-                         ForecastDividendPerShare
-                         1st 2nd 3rd FYE          ForecastXXXAnnual
-1QFinancialStatements        o   o   o            o
-2QFinancialStatements            o   o            o
-3QFinancialStatements                o            o
-DividendForecastRevision o   o   o   o            o
-EarnForecastRevision     o   o   o   o            o
-
-                         配当予想 (来期)
-                         NextYearForecastDividendPerShare
-                         1st 2nd 3rd FYE                  NextYerForecastXXXAnnual
-FYFinancialStatements    o   o   o   o                    o
-"""
-
 import polars as pl
 import pytest
 from polars import DataFrame
@@ -209,8 +167,6 @@ def test_fin_forecast_dividend(
     ("column", "low", "high"),
     [
         ("ForecastDividendPerShareAnnual", 0.88, 0.92),
-        ("ForecastTotalDividendPaidAnnual", 0, 0),
-        ("ForecastPayoutRatioAnnual", 0, 0),
     ],
 )
 def test_fin_forecast_dividend_annual(
@@ -219,11 +175,24 @@ def test_fin_forecast_dividend_annual(
     low: float,
     high: float,
 ) -> None:
-    """通期決算以外では、年間配当予想がある程度埋まっている"""
+    """通期決算以外において、年間配当予想がある程度埋まっている"""
     df = fin.filter(~c.TypeOfDocument.str.starts_with("FY"))
     x = df[column].is_not_null().mean()
     assert isinstance(x, float)
     assert low <= x <= high
+
+
+@pytest.mark.parametrize(
+    "column",
+    [
+        "ForecastTotalDividendPaidAnnual",
+        "ForecastPayoutRatioAnnual",
+    ],
+)
+def test_forecast_dividend_annual_null(fin: DataFrame, column: str) -> None:
+    """通期決算以外において、年間配当予想の総額と配当性向はnull"""
+    df = fin.filter(~c.TypeOfDocument.str.starts_with("FY"))
+    assert df[column].is_null().all()
 
 
 @pytest.mark.parametrize(
@@ -266,6 +235,17 @@ def test_fin_next_year_forecast_dividend_annual(
     x = df[column].is_not_null().mean()
     assert isinstance(x, float)
     assert low <= x <= high
+
+
+def test_fin_next_year_forecast_dividend_annual_column(fin: DataFrame) -> None:
+    """NextYearForecastTotalDividendPaidAnnualが欠落。"""
+    assert "ForecastDividendPerShareAnnual" in fin.columns
+    assert "ForecastPayoutRatioAnnual" in fin.columns
+    assert "ForecastTotalDividendPaidAnnual" in fin.columns
+
+    assert "NextYearForecastDividendPerShareAnnual" in fin.columns
+    assert "NextYearForecastPayoutRatioAnnual" in fin.columns
+    assert "NextYearForecastTotalDividendPaidAnnual" not in fin.columns
 
 
 def test_fin_next_year_forecast(fin: DataFrame) -> None:
@@ -350,7 +330,7 @@ def test_fin_next_year_forecast_profit_loss(fin: DataFrame, pl_col: str) -> None
 
 @pytest.fixture(
     scope="module",
-    params=["TotalShares", "TreasuryShares", "AverageOutstandingShares"],
+    params=["IssuedShares", "TreasuryShares", "AverageOutstandingShares"],
 )
 def col_shares(request: pytest.FixtureRequest) -> str:
     return request.param

@@ -14,11 +14,11 @@ class Statements(Base):
     def number_of_shares(self) -> DataFrame:
         """発行済株式数を取得する。"""
         return self.data.filter(
-            pl.col("TotalShares").is_not_null(),
+            pl.col("IssuedShares").is_not_null(),
         ).select(
             "Date",
             "Code",
-            "TotalShares",
+            "IssuedShares",
             "TreasuryShares",
             "AverageOutstandingShares",
         )

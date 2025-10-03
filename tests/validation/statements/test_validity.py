@@ -19,7 +19,7 @@ def test_equity_to_asset_ratio(data: DataFrame) -> None:
 
 
 def test_earnings_per_share(data: DataFrame) -> None:
-    """EPS = 当期純利益 / 発行済株式数"""
+    """EPS = 当期純利益 / 期中平均株式数"""
     x = data["EarningsPerShare"]
     y = data["Profit"] / data["AverageOutstandingShares"]
     r = x / y
@@ -28,8 +28,20 @@ def test_earnings_per_share(data: DataFrame) -> None:
     assert m > 0.98
 
 
+@pytest.mark.parametrize("prefix", ["", "NextYear"])
+@pytest.mark.parametrize("suffix", ["", "2ndQuarter"])
+def test_forecast_earnings_per_share(data: DataFrame, prefix: str, suffix: str) -> None:
+    """EPS_予想 = 純利益_予想 / 期中平均株式数"""
+    x = data[f"{prefix}ForecastEarningsPerShare{suffix}"]
+    y = data[f"{prefix}ForecastProfit{suffix}"] / data["AverageOutstandingShares"]
+    r = x / y
+    m = ((r > 0.9) & (r < 1.1)).mean()
+    assert isinstance(m, float)
+    assert m > 0.94
+
+
 def test_bookvalue_per_share(data: DataFrame) -> None:
-    """BPS = 純資産 / 発行済株式数"""
+    """BPS = 純資産 / 期中平均株式数"""
     x = data["BookValuePerShare"]
     y = data["Equity"] / data["AverageOutstandingShares"]
     r = x / y
@@ -39,13 +51,28 @@ def test_bookvalue_per_share(data: DataFrame) -> None:
 
 
 def test_dividend_per_share(data: DataFrame) -> None:
-    """DPS = 配当金 / 発行済株式数"""
+    """DPS = 配当金 / 期中平均株式数"""
     x = data["ResultDividendPerShareAnnual"]
     y = data["ResultTotalDividendPaidAnnual"] / data["AverageOutstandingShares"]
     r = x / y
     m = ((r > 0.9) & (r < 1.1)).mean()
     assert isinstance(m, float)
     assert m > 0.94
+
+
+@pytest.mark.parametrize("prefix", ["Result", "Forecast", "NextYearForecast"])
+def test_dividend_per_share_sum(data: DataFrame, prefix: str) -> None:
+    x = data[f"{prefix}DividendPerShareAnnual"]
+    y = (
+        data[f"{prefix}DividendPerShare1stQuarter"]
+        + data[f"{prefix}DividendPerShare2ndQuarter"]
+        + data[f"{prefix}DividendPerShare3rdQuarter"]
+        + data[f"{prefix}DividendPerShareFiscalYearEnd"]
+    )
+    r = x / y
+    m = ((r > 0.9) & (r < 1.1)).mean()
+    assert isinstance(m, float)
+    assert m > 0.8
 
 
 @pytest.mark.parametrize(
@@ -63,18 +90,6 @@ def test_payout_ratio(data: DataFrame, d: str, e: str) -> None:
     m = ((r > 0.9) & (r < 1.1)).mean()
     assert isinstance(m, float)
     assert m > 0.97
-
-
-@pytest.mark.parametrize("prefix", ["", "NextYear"])
-@pytest.mark.parametrize("suffix", ["", "2ndQuarter"])
-def test_forecast_earnings_per_share(data: DataFrame, prefix: str, suffix: str) -> None:
-    """EPS_予想 = 純利益_予想 / 発行済株式数"""
-    x = data[f"{prefix}ForecastEarningsPerShare{suffix}"]
-    y = data[f"{prefix}ForecastProfit{suffix}"] / data["AverageOutstandingShares"]
-    r = x / y
-    m = ((r > 0.9) & (r < 1.1)).mean()
-    assert isinstance(m, float)
-    assert m > 0.94
 
 
 def test_earnings_per_share_consistency(data: DataFrame) -> None:

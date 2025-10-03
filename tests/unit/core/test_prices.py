@@ -83,7 +83,7 @@ def test_with_adjusted_shares() -> None:
                 date(2023, 4, 30),
             ],
             "Code": ["A", "A", "B"],
-            "TotalShares": [1000, 1200, 2000],
+            "IssuedShares": [1000, 1200, 2000],
             "TreasuryShares": [100, 120, 200],
             "AverageOutstandingShares": [0, 0, 0],
         },
@@ -95,7 +95,7 @@ def test_with_adjusted_shares() -> None:
     expected = prices_df.with_columns(
         [
             Series(
-                "AdjustedTotalShares",
+                "AdjustedIssuedShares",
                 [1000, 2400, 12000, None, 2000, 1000],
                 dtype=pl.Int64,
             ),
