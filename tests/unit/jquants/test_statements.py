@@ -50,7 +50,7 @@ def test_clean_float(df: DataFrame, column: str) -> None:
     assert df[column].dtype == pl.Float64
 
 
-@pytest.mark.parametrize("column", ["TotalShares", "TreasuryShares"])
+@pytest.mark.parametrize("column", ["IssuedShares", "TreasuryShares"])
 def test_clean_int(df: DataFrame, column: str) -> None:
     assert df[column].dtype == pl.Int64
 
@@ -58,7 +58,7 @@ def test_clean_int(df: DataFrame, column: str) -> None:
 @pytest.mark.parametrize(
     ("column", "values"),
     [
-        ("TotalShares", [1, 2, 3]),
+        ("IssuedShares", [1, 2, 3]),
         ("TreasuryShares", [4, 5, 6]),
         ("AverageOutstandingShares", [7.1, 8.2, 9.3]),
         ("ForecastProfit", [1.0, 2.0, None]),

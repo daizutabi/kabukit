@@ -17,7 +17,7 @@ def clean(df: DataFrame) -> DataFrame:
         .rename(
             {
                 "LocalCode": "Code",
-                "NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock": "TotalShares",  # noqa: E501
+                "NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock": "IssuedShares",  # noqa: E501
                 "NumberOfTreasuryStockAtTheEndOfFiscalYear": "TreasuryShares",
                 "AverageNumberOfShares": "AverageOutstandingShares",
             },
@@ -49,7 +49,7 @@ def _cast_float(df: DataFrame) -> DataFrame:
         ]
     ).with_columns(
         pl.col(
-            "TotalShares",
+            "IssuedShares",
             "TreasuryShares",
         ).cast(pl.Int64, strict=False),
         pl.col(

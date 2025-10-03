@@ -9,7 +9,7 @@ def test_number_of_shares() -> None:
         {
             "Date": [1, 2],
             "Code": [3, 4],
-            "TotalShares": [5, None],
+            "IssuedShares": [5, None],
             "AverageOutstandingShares": [9, 10],
             "OtherColumn": ["a", "b"],
             "TreasuryShares": [7, 8],
@@ -23,7 +23,7 @@ def test_number_of_shares() -> None:
         {
             "Date": [1],
             "Code": [3],
-            "TotalShares": [5],
+            "IssuedShares": [5],
             "TreasuryShares": [7],
             "AverageOutstandingShares": [9],
         },

@@ -330,7 +330,7 @@ def test_fin_next_year_forecast_profit_loss(fin: DataFrame, pl_col: str) -> None
 
 @pytest.fixture(
     scope="module",
-    params=["TotalShares", "TreasuryShares", "AverageOutstandingShares"],
+    params=["IssuedShares", "TreasuryShares", "AverageOutstandingShares"],
 )
 def col_shares(request: pytest.FixtureRequest) -> str:
     return request.param

@@ -11,7 +11,7 @@
 以下の2つのデータソースが存在することを前提とする。
 
 1.  **財務データ (`statements`)**
-    *   **主なカラム**: `DisclosedDate`, `DisclosedTime`, `Code`, `TotalShares`, `TreasuryShares`
+    *   **主なカラム**: `DisclosedDate`, `DisclosedTime`, `Code`, `IssuedShares`, `TreasuryShares`
     *   **特徴**: データは四半期ごとなど、特定の日にのみ存在する。
 
 2.  **株価データ (`prices`)**
@@ -26,7 +26,7 @@
 
 ### 2. 最新の株式数のマッピング
 
-`prices`の各行に対して、ステップ1で計算した`statements`の有効日`Date`をキーとして`join_asof`を実行する。これにより、各営業日に、その日以前の最新の決算情報（`TotalShares`など）が紐付く。この際、計算期間をグループ化するために、元の開示日も`ReportDate`のような名前で保持しておく。
+`prices`の各行に対して、ステップ1で計算した`statements`の有効日`Date`をキーとして`join_asof`を実行する。これにより、各営業日に、その日以前の最新の決算情報（`IssuedShares`など）が紐付く。この際、計算期間をグループ化するために、元の開示日も`ReportDate`のような名前で保持しておく。
 
 ### 3. 計算期間のグループ化
 
@@ -38,9 +38,9 @@
 
 ### 5. 日次株式数の算出と命名
 
-ステップ2でマッピングした決算時点の株式数（例: `TotalShares`）に、ステップ4で計算した`CumulativeRatio`を掛け合わせることで、その日の正しい株式数が求まる。
+ステップ2でマッピングした決算時点の株式数（例: `IssuedShares`）に、ステップ4で計算した`CumulativeRatio`を掛け合わせることで、その日の正しい株式数が求まる。
 
-計算結果の列は、元の情報と区別するために、`Adjusted`という接頭辞を付けて命名する（例: `AdjustedTotalShares`）。
+計算結果の列は、元の情報と区別するために、`Adjusted`という接頭辞を付けて命名する（例: `AdjustedIssuedShares`）。
 
 ## 実装コード例 (polars)
 
@@ -62,7 +62,7 @@ statements_df = pl.DataFrame(
         "DisclosedDate": [date(2023, 3, 31), date(2023, 6, 30)],
         "DisclosedTime": [time(16, 0), time(15, 30)],
         "Code": ["A", "A"],
-        "TotalShares": [1000, 1200],
+        "IssuedShares": [1000, 1200],
         "TreasuryShares": [100, 120],
     }
 )
@@ -93,7 +93,7 @@ adjusted_df = daily_df.with_columns(
     .alias("CumulativeRatio")
 ).with_columns(
     # ステップ5: 日次株式数の算出と命名
-    (pl.col("TotalShares") * pl.col("CumulativeRatio"))
+    (pl.col("IssuedShares") * pl.col("CumulativeRatio"))
     .round(0)
     .cast(pl.Int64)
     .name.prefix("Adjusted")
@@ -101,7 +101,7 @@ adjusted_df = daily_df.with_columns(
 
 print(
     adjusted_df.select(
-        "Date", "Code", "ReportDate", "TotalShares", "AdjustedTotalShares"
+        "Date", "Code", "ReportDate", "IssuedShares", "AdjustedIssuedShares"
     )
 )
 ```

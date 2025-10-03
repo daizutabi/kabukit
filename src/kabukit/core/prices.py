@@ -41,10 +41,10 @@ class Prices(Base):
         (`AdjustmentFactor`) を用いて補正し、日次ベースの時系列データとして
         提供します。これにより、日々の時価総額計算などが正確に行えるようになります。
 
-        具体的には、`statements`から`TotalShares`（発行済株式総数）と
+        具体的には、`statements`から`IssuedShares`（発行済株式総数）と
         `TreasuryShares`（自己株式数）を取得し、それぞれを調整します。
         計算結果は、元の列名との混同を避けるため、接頭辞`Adjusted`を付与した
-        新しい列（`AdjustedTotalShares`, `AdjustedTreasuryShares`）として
+        新しい列（`AdjustedIssuedShares`, `AdjustedTreasuryShares`）として
         追加されます。
 
         .. note::
@@ -57,7 +57,7 @@ class Prices(Base):
             statements (Statements): 財務データを提供する`Statements`オブジェクト。
 
         Returns:
-            Self: `AdjustedTotalShares`および`AdjustedTreasuryShares`列が
+            Self: `AdjustedIssuedShares`および`AdjustedTreasuryShares`列が
             追加された、新しいPricesオブジェクト。
         """
         shares = statements.number_of_shares().rename({"Date": "ReportDate"})
@@ -79,7 +79,7 @@ class Prices(Base):
             .select(
                 "Date",
                 "Code",
-                (pl.col("TotalShares", "TreasuryShares") * pl.col("CumulativeRatio"))
+                (pl.col("IssuedShares", "TreasuryShares") * pl.col("CumulativeRatio"))
                 .round(0)
                 .cast(pl.Int64)
                 .name.prefix("Adjusted"),
@@ -100,75 +100,5 @@ class Prices(Base):
     #         Self: 各種利回り指標が追加された、新しいPricesオブジェクト。
     #     """
     #     prices_with_adjusted_shares = self.with_adjusted_shares(statements)
-
-    #     # 結合のために必要なカラムを選択し、リネーム
-    #     statements_for_join = statements_with_effective_date.select(
-    #         "Code",
-    #         pl.col("Date").alias("EffectiveDate"),
-    #         "Profit",  # 収益利回り用
-    #         "Equity",  # 純資産利回り用
-    #         "DividendsPerShare",  # 配当利回り用
-    #     )
-
-    #     # prices_with_adjusted_sharesのデータとstatements_for_joinを結合
-    #     combined_df = prices_with_adjusted_shares.data.join_asof(
-    #         statements_for_join,
-    #         left_on="Date",
-    #         right_on="EffectiveDate",
-    #         by="Code",
-    #         strategy="backward",
-    #     )
-
-    #     # 収益利回り (Earnings Yield) の計算
-    #     eps = (
-    #         pl.when(
-    #             pl.col("AdjustedTotalShares").is_not_null()
-    #             & (pl.col("AdjustedTotalShares") > 0),
-    #         )
-    #         .then(pl.col("Profit") / pl.col("AdjustedTotalShares"))
-    #         .otherwise(None)
-    #         .alias("EPS")
-    #     )
-
-    #     earnings_yield = (
-    #         pl.when(eps.is_not_null() & (pl.col("Close") > 0))
-    #         .then(eps / pl.col("Close"))
-    #         .otherwise(None)
-    #         .alias("EarningsYield")
-    #     )
-
-    #     # 純資産利回り (Book-value Yield) の計算
-    #     bps = (
-    #         pl.when(
-    #             pl.col("AdjustedTotalShares").is_not_null()
-    #             & (pl.col("AdjustedTotalShares") > 0),
-    #         )
-    #         .then(pl.col("Equity") / pl.col("AdjustedTotalShares"))
-    #         .otherwise(None)
-    #         .alias("BPS")
-    #     )
-
-    #     book_value_yield = (
-    #         pl.when(bps.is_not_null() & (pl.col("Close") > 0))
-    #         .then(bps / pl.col("Close"))
-    #         .otherwise(None)
-    #         .alias("BookValueYield")
-    #     )
-
-    #     # 配当利回り (Dividend Yield) の計算
-    #     dividend_yield = (
-    #         pl.when(pl.col("DividendsPerShare").is_not_null() & (pl.col("Close") > 0))
-    #         .then(pl.col("DividendsPerShare") / pl.col("Close"))
-    #         .otherwise(None)
-    #         .alias("DividendYield")
-    #     )
-
-    #     data_with_yields = combined_df.with_columns(
-    #         eps,
-    #         earnings_yield,
-    #         bps,
-    #         book_value_yield,
-    #         dividend_yield,
-    #     )
-
+    #     data_with_yields = calculate_all_yields(prices_with_adjusted_shares, statements)
     #     return self.__class__(data_with_yields)
