@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from unittest import expectedFailure
 
 import pytest
 from polars import DataFrame
