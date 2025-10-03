@@ -41,7 +41,7 @@ async def fetch(
         DataFrame:
             すべての銘柄の財務情報を含む単一のDataFrame。
     """
-    return await concurrent.fetch(
+    data = await concurrent.fetch(
         JQuantsClient,
         resource,
         codes,
@@ -49,6 +49,7 @@ async def fetch(
         progress=progress,
         callback=callback,
     )
+    return data.sort("Code", "Date")
 
 
 async def fetch_all(

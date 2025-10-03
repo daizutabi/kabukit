@@ -110,3 +110,43 @@ def test_with_adjusted_shares() -> None:
     result = prices.with_adjusted_shares(statements)
 
     assert_frame_equal(result.data, expected)
+
+
+def test_with_forecast_profit() -> None:
+    prices_df = DataFrame(
+        {
+            "Date": [
+                date(2023, 4, 1),
+                date(2023, 5, 15),
+                date(2023, 6, 10),
+                date(2023, 3, 10),
+                date(2023, 4, 5),
+            ],
+            "Code": ["A", "A", "A", "B", "B"],
+        },
+    )
+
+    statements_df = DataFrame(
+        {
+            "Date": [
+                date(2023, 5, 1),
+                date(2023, 6, 1),
+                date(2023, 4, 1),
+            ],
+            "Code": ["A", "A", "B"],
+            "TypeOfDocument": ["1Q", "2Q", "FY"],
+            "ForecastProfit": [100.0, 150.0, None],
+            "NextYearForecastProfit": [None, None, 200.0],
+        },
+    )
+
+    prices = Prices(prices_df)
+    statements = Statements(statements_df)
+
+    result = prices.with_forecast_profit(statements)
+
+    expected = prices_df.with_columns(
+        Series("ForecastProfit", [None, 100.0, 150.0, None, 200.0]),
+    )
+
+    assert_frame_equal(result.data, expected)

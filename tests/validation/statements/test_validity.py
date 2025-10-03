@@ -4,6 +4,7 @@ import pytest
 from polars import DataFrame
 from polars import col as c
 
+from kabukit.core.statements import Statements
 from tests.validation.conftest import pytestmark  # noqa: F401
 
 # 指標が乖離している決算書を確認する必要あり
@@ -111,3 +112,39 @@ def test_earnings_per_share_consistency(data: DataFrame) -> None:
     actual_profit = -69_558_000  # 決算短信の詳細数値
     eps = actual_profit / x["AverageOutstandingShares"]
     assert round(eps, 2) == x["EarningsPerShare"]
+
+
+@pytest.mark.parametrize(
+    ("d", "n"),
+    [
+        (date(2025, 2, 5), 13314911412),
+        (date(2025, 5, 8), 13252455897),
+        (date(2025, 8, 7), 13032932250),
+    ],
+)
+def test_number_of_shares_7203(statements: Statements, d: date, n: float) -> None:
+    x = (
+        statements.number_of_shares()
+        .filter(c.Code == "72030", c.Date == d)
+        .item(0, "AverageOutstandingShares")
+    )
+    assert x == n
+
+
+@pytest.mark.parametrize(
+    ("d", "n"),
+    [
+        (date(2024, 5, 8), 3570000000000),  # FY
+        (date(2024, 8, 1), 3570000000000),  # 1Q
+        (date(2024, 11, 6), 3570000000000),  # 2Q
+        (date(2025, 2, 5), 4520000000000),  # 3Q
+        (date(2025, 5, 8), 3100000000000),  # FY
+    ],
+)
+def test_forecast_profit_7203(statements: Statements, d: date, n: float) -> None:
+    x = (
+        statements.forecast_profit()
+        .filter(c.Code == "72030", c.Date == d)
+        .item(0, "ForecastProfit")
+    )
+    assert x == n

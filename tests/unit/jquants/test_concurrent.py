@@ -45,7 +45,9 @@ def mock_get_codes(mocker: MockerFixture) -> AsyncMock:
 async def test_fetch(mock_util_fetch: AsyncMock) -> None:
     from kabukit.jquants.concurrent import fetch
 
-    mock_util_fetch.return_value = DataFrame({"a": [1]})
+    mock_util_fetch.return_value = DataFrame(
+        {"Date": [4, 3, 2, 1], "Code": ["a", "b", "b", "a"]},
+    )
 
     result = await fetch(
         "test_resource",
@@ -55,7 +57,9 @@ async def test_fetch(mock_util_fetch: AsyncMock) -> None:
         callback=dummy_callback,
     )
 
-    assert result.equals(DataFrame({"a": [1]}))
+    expected = DataFrame({"Date": [1, 4, 2, 3], "Code": ["a", "a", "b", "b"]})
+    assert result.equals(expected)
+
     mock_util_fetch.assert_awaited_once_with(
         JQuantsClient,
         "test_resource",
