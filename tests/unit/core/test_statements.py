@@ -15,9 +15,8 @@ def test_number_of_shares() -> None:
             "TreasuryShares": [7, 8],
         },
     )
-    statements = Statements(data)
 
-    df = statements.number_of_shares()
+    result = Statements(data).number_of_shares()
 
     expected = DataFrame(
         {
@@ -29,4 +28,28 @@ def test_number_of_shares() -> None:
         },
     )
 
-    assert_frame_equal(df, expected)
+    assert_frame_equal(result, expected)
+
+
+def test_forecast_profit() -> None:
+    data = DataFrame(
+        {
+            "Date": [1, 2, 1, 2],
+            "Code": [1, 1, 2, 2],
+            "TypeOfDocument": ["FY", "1Q", "FY", "1Q"],
+            "ForecastProfit": [100, 200, 300, 400],
+            "NextYearForecastProfit": [None, 600, 700, 800],
+        },
+    )
+
+    result = Statements(data).forecast_profit()
+
+    expected = DataFrame(
+        {
+            "Date": [2, 1, 2],
+            "Code": [1, 2, 2],
+            "ForecastProfit": [200, 700, 400],
+        },
+    )
+
+    assert_frame_equal(result, expected)
