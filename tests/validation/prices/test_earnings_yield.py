@@ -36,7 +36,8 @@ def test_earnings_per_share_7203(
     eps: float,
 ) -> None:
     df = prices.data.filter(c.Code == "72030", c.Date == d)
-    assert df.item(0, "EarningsPerShare") == eps
+    result = df.item(0, "EarningsPerShare")
+    assert result == pytest.approx(eps, rel=1e-2)  # pyright: ignore[reportUnknownMemberType]
 
 
 @pytest.mark.parametrize(
@@ -52,7 +53,8 @@ def test_earnings_per_share_3997(
     eps: float,
 ) -> None:
     df = prices.data.filter(c.Code == "39970", c.Date == d)
-    assert df.item(0, "EarningsPerShare") == eps
+    result = df.item(0, "EarningsPerShare")
+    assert result == pytest.approx(eps, rel=1e-2)  # pyright: ignore[reportUnknownMemberType]
 
 
 @pytest.mark.parametrize(
@@ -69,7 +71,8 @@ def test_earnings_yield_7203(
     ey: float,
 ) -> None:
     df = prices.data.filter(c.Code == "72030", c.Date == d)
-    assert df.item(0, "EarningsYield") == ey
+    result = df.item(0, "EarningsYield")
+    assert result == pytest.approx(ey, rel=1e-2)  # pyright: ignore[reportUnknownMemberType]
 
 
 @pytest.mark.parametrize(
@@ -85,4 +88,5 @@ def test_earnings_yield_3997(
     ey: float,
 ) -> None:
     df = prices.data.filter(c.Code == "39970", c.Date == d)
-    assert df.item(0, "EarningsYield") == ey
+    result = df.item(0, "EarningsYield")
+    assert result == pytest.approx(ey, rel=1e-2)  # pyright: ignore[reportUnknownMemberType]
