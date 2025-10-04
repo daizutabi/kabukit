@@ -60,7 +60,7 @@ class Prices(Base):
             Self: `AdjustedIssuedShares`および`AdjustedTreasuryShares`列が
             追加された、新しいPricesオブジェクト。
         """
-        shares = statements.number_of_shares().rename({"Date": "ReportDate"})
+        shares = statements.shares().rename({"Date": "ReportDate"})
 
         adjusted = (
             self.data.join_asof(
@@ -87,6 +87,23 @@ class Prices(Base):
 
         data = self.data.join(adjusted, on=["Date", "Code"], how="left")
 
+        return self.__class__(data)
+
+    def with_equity(self, statements: Statements) -> Self:
+        """時系列の純資産を列として追加する。
+
+        Args:
+            statements (Statements): 財務データを提供する`Statements`オブジェクト。
+
+        Returns:
+            Self: `Equity` 列が追加された、新しいPricesオブジェクト。
+        """
+        data = self.data.join_asof(
+            statements.equity(),
+            on="Date",
+            by="Code",
+            check_sortedness=False,
+        )
         return self.__class__(data)
 
     def with_forecast_profit(self, statements: Statements) -> Self:
@@ -117,23 +134,6 @@ class Prices(Base):
         """
         data = self.data.join_asof(
             statements.forecast_dividend(),
-            on="Date",
-            by="Code",
-            check_sortedness=False,
-        )
-        return self.__class__(data)
-
-    def with_equity(self, statements: Statements) -> Self:
-        """時系列の純資産を列として追加する。
-
-        Args:
-            statements (Statements): 財務データを提供する`Statements`オブジェクト。
-
-        Returns:
-            Self: `Equity` 列が追加された、新しいPricesオブジェクト。
-        """
-        data = self.data.join_asof(
-            statements.equity(),
             on="Date",
             by="Code",
             check_sortedness=False,

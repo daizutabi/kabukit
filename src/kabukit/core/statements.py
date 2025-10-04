@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 class Statements(Base):
-    def number_of_shares(self) -> DataFrame:
+    def shares(self) -> DataFrame:
         """発行済株式数を取得する。"""
         return self.data.filter(
             pl.col("IssuedShares").is_not_null(),
@@ -22,6 +22,16 @@ class Statements(Base):
             "TreasuryShares",
             "AverageOutstandingShares",
         )
+
+    def equity(self) -> DataFrame:
+        """Statementsデータから純資産を抽出する。
+
+        Returns:
+            DataFrame: Date, Code, Equity を含むDataFrame
+        """
+        return self.data.filter(
+            pl.col("Equity").is_not_null(),
+        ).select("Date", "Code", "Equity")
 
     def forecast_profit(self) -> DataFrame:
         """Statementsデータから予想純利益を抽出する。
@@ -76,15 +86,4 @@ class Statements(Base):
             .with_columns(annual_forecast_dividend)
             .filter(pl.col("ForecastDividend").is_not_null())
             .select("Date", "Code", "ForecastDividend")
-        )
-
-    def equity(self) -> DataFrame:
-        """Statementsデータから純資産を抽出する。
-
-        Returns:
-            DataFrame: Date, Code, Equity を含むDataFrame
-        """
-        return (
-            self.data.filter(pl.col("Equity").is_not_null())
-            .select("Date", "Code", "Equity")
         )

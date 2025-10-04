@@ -122,9 +122,9 @@ def test_earnings_per_share_consistency(data: DataFrame) -> None:
         (date(2025, 8, 7), 13032932250),
     ],
 )
-def test_number_of_shares_7203(statements: Statements, d: date, n: float) -> None:
+def test_shares_7203(statements: Statements, d: date, n: float) -> None:
     x = (
-        statements.number_of_shares()
+        statements.shares()
         .filter(c.Code == "72030", c.Date == d)
         .item(0, "AverageOutstandingShares")
     )

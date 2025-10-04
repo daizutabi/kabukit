@@ -4,7 +4,7 @@ from polars.testing import assert_frame_equal
 from kabukit.core.statements import Statements
 
 
-def test_number_of_shares() -> None:
+def test_shares() -> None:
     data = DataFrame(
         {
             "Date": [1, 2],
@@ -16,7 +16,7 @@ def test_number_of_shares() -> None:
         },
     )
 
-    result = Statements(data).number_of_shares()
+    result = Statements(data).shares()
 
     expected = DataFrame(
         {

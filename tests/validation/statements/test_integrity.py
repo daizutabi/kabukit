@@ -337,7 +337,7 @@ def col_shares(request: pytest.FixtureRequest) -> str:
 
 
 @pytest.mark.parametrize("period", ["1Q", "2Q", "3Q", "FY"])
-def test_fin_number_of_shares(fin: DataFrame, period: str, col_shares: str) -> None:
+def test_fin_shares(fin: DataFrame, period: str, col_shares: str) -> None:
     """決算の株式数は、ほぼ100%埋まっている"""
     df = fin.filter(c.TypeOfDocument.str.starts_with(period))
     x = df[col_shares].is_not_null().mean()
@@ -345,7 +345,7 @@ def test_fin_number_of_shares(fin: DataFrame, period: str, col_shares: str) -> N
     assert 0.94 < x <= 1.0  # 割合 1 に近い
 
 
-def test_fin_number_of_shares_other(fin: DataFrame, col_shares: str) -> None:
+def test_fin_shares_other(fin: DataFrame, col_shares: str) -> None:
     """OtherPeriod決算では、株式数は存在しない"""
     df = fin.filter(c.TypeOfDocument.str.starts_with("OtherPeriod"))
     assert df[col_shares].is_null().all()
