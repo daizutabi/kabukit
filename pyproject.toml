@@ -104,5 +104,6 @@ reportExplicitAny = false
 reportImplicitOverride = false
 reportImportCycles = false
 reportIncompatibleVariableOverride = false
+reportPrivateUsage = false
 reportUnusedCallResult = false
 reportUnusedImport = false

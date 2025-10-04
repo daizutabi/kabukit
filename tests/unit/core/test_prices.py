@@ -150,3 +150,111 @@ def test_with_forecast_profit() -> None:
     )
 
     assert_frame_equal(result.data, expected)
+
+
+def test_with_forecast_dividend() -> None:
+    prices_df = DataFrame(
+        {
+            "Date": [
+                date(2023, 4, 1),
+                date(2023, 5, 15),
+                date(2023, 6, 10),
+                date(2023, 3, 10),
+                date(2023, 4, 5),
+            ],
+            "Code": ["A", "A", "A", "B", "B"],
+        },
+    ).sort("Code", "Date")
+
+    statements_df = DataFrame(
+        {
+            "Date": [
+                date(2023, 5, 1),
+                date(2023, 6, 1),
+                date(2023, 4, 1),
+            ],
+            "Code": ["A", "A", "B"],
+            "TypeOfDocument": ["1Q", "1Q", "FY"],
+            "ForecastProfit": [1000.0, 1500.0, None],
+            "ForecastEarningsPerShare": [10.0, 10.0, None],
+            "NextYearForecastProfit": [None, None, 2000.0],
+            "NextYearForecastEarningsPerShare": [None, None, 10.0],
+            "ForecastDividendPerShareAnnual": [5.0, 6.0, None],
+            "NextYearForecastDividendPerShareAnnual": [None, None, 10.0],
+        },
+    )
+
+    prices = Prices(prices_df)
+    statements = Statements(statements_df)
+
+    result = prices.with_forecast_dividend(statements)
+
+    expected = prices_df.with_columns(
+        Series("ForecastDividend", [None, 500.0, 900.0, None, 2000.0]),
+    )
+
+    assert_frame_equal(result.data, expected)
+
+
+def test_with_equity() -> None:
+    prices_df = DataFrame(
+        {
+            "Date": [
+                date(2023, 4, 1),
+                date(2023, 5, 15),
+                date(2023, 6, 10),
+                date(2023, 3, 10),
+                date(2023, 4, 5),
+            ],
+            "Code": ["A", "A", "A", "B", "B"],
+        },
+    )
+
+    statements_df = DataFrame(
+        {
+            "Date": [
+                date(2023, 3, 31),
+                date(2023, 6, 30),
+                date(2023, 3, 31),
+            ],
+            "Code": ["A", "A", "B"],
+            "Equity": [1000.0, 1200.0, 2000.0],
+        },
+    )
+
+    prices = Prices(prices_df)
+    statements = Statements(statements_df)
+
+    result = prices.with_equity(statements)
+
+    expected = prices_df.with_columns(
+        Series("Equity", [1000.0, 1000.0, 1000.0, None, 2000.0], dtype=pl.Float64),
+    )
+
+    assert_frame_equal(result.data, expected)
+
+
+def test_with_market_cap() -> None:
+    prices_df = DataFrame(
+        {
+            "Date": [
+                date(2023, 1, 1),
+                date(2023, 1, 2),
+                date(2023, 1, 3),
+            ],
+            "Code": ["A", "A", "A"],
+            "RawClose": [100.0, 110.0, 120.0],
+            "AdjustedIssuedShares": [1000, 1000, 2000],
+            "AdjustedTreasuryShares": [100, 100, 200],
+        },
+    )
+
+    prices = Prices(prices_df)
+
+    result = prices.with_market_cap()
+
+    expected = prices_df.with_columns(
+        Series("MarketCap", [90000.0, 99000.0, 216000.0]),
+    )
+
+    assert_frame_equal(result.data, expected)

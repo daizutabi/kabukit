@@ -121,37 +121,3 @@ def test_with_date() -> None:
     assert x[2] == date(2025, 1, 10)
     assert x[3] == date(2025, 1, 14)
     assert x[4] == date(2025, 1, 14)
-
-
-def test_join_asof() -> None:
-    from datetime import date
-
-    stmt = DataFrame(
-        {
-            "Date": [
-                date(2025, 2, 3),
-                date(2025, 2, 6),
-            ],
-            "EPS": [1, 2],
-        },
-    )
-
-    price = pl.DataFrame(
-        {
-            "Date": [
-                date(2025, 2, 1),
-                date(2025, 2, 2),
-                date(2025, 2, 3),
-                date(2025, 2, 4),
-                date(2025, 2, 5),
-                date(2025, 2, 6),
-                date(2025, 2, 7),
-                date(2025, 2, 8),
-            ],
-            "Close": [3, 4, 5, 6, 7, 8, 9, 10],
-        },
-    )
-
-    df = price.join_asof(stmt, on="Date", strategy="backward")
-    x = df["EPS"].to_list()
-    assert x == [None, None, 1, 1, 1, 2, 2, 2]

@@ -122,12 +122,24 @@ def test_earnings_per_share_consistency(data: DataFrame) -> None:
         (date(2025, 8, 7), 13032932250),
     ],
 )
-def test_number_of_shares_7203(statements: Statements, d: date, n: float) -> None:
+def test_shares_7203(statements: Statements, d: date, n: float) -> None:
     x = (
-        statements.number_of_shares()
+        statements.shares()
         .filter(c.Code == "72030", c.Date == d)
         .item(0, "AverageOutstandingShares")
     )
+    assert x == n
+
+
+@pytest.mark.parametrize(
+    ("d", "n"),
+    [
+        (date(2023, 2, 9), 28450023000000),
+        (date(2025, 8, 7), 36993052000000),
+    ],
+)
+def test_equity_7203(statements: Statements, d: date, n: float) -> None:
+    x = statements.equity().filter(c.Code == "72030", c.Date == d).item(0, "Equity")
     assert x == n
 
 
@@ -148,3 +160,49 @@ def test_forecast_profit_7203(statements: Statements, d: date, n: float) -> None
         .item(0, "ForecastProfit")
     )
     assert x == n
+
+
+@pytest.mark.parametrize(
+    ("d", "n", "dps"),
+    [
+        (date(2025, 2, 17), 68917988, None),  # FY
+        (date(2025, 5, 13), 68917988, 20),  # 1Q
+        (date(2025, 8, 12), 68965517, 2),  # 2Q
+    ],
+)
+def test_forecast_dividend_3997(
+    statements: Statements,
+    d: date,
+    n: float,
+    dps: float | None,
+) -> None:
+    x = (
+        statements.forecast_dividend()
+        .filter(c.Code == "39970", c.Date == d)
+        .item(0, "ForecastDividend")
+    )
+    assert x == n
+
+    x = statements.data.filter(
+        c.Code == "39970",
+        c.Date == d,
+    ).item(0, "ForecastDividendPerShareAnnual")
+    assert x == dps
+
+
+def test_result_forecast_dividend_3997(statements: Statements) -> None:
+    x = (
+        statements.forecast_dividend()
+        .filter(
+            c.Code == "39970",
+            c.Date == date(2024, 11, 15),
+        )
+        .item(0, "ForecastDividend")
+    )
+    assert x == 69_120_539
+
+    x = statements.data.filter(
+        c.Code == "39970",
+        c.Date == date(2025, 2, 17),
+    ).item(0, "ResultTotalDividendPaidAnnual")
+    assert x == 68_000_000

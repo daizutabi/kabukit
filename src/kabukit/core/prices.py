@@ -60,7 +60,7 @@ class Prices(Base):
             Self: `AdjustedIssuedShares`および`AdjustedTreasuryShares`列が
             追加された、新しいPricesオブジェクト。
         """
-        shares = statements.number_of_shares().rename({"Date": "ReportDate"})
+        shares = statements.shares().rename({"Date": "ReportDate"})
 
         adjusted = (
             self.data.join_asof(
@@ -89,6 +89,46 @@ class Prices(Base):
 
         return self.__class__(data)
 
+    def with_market_cap(self) -> Self:
+        """時価総額を計算し、列として追加する。
+
+        このメソッドは、日々の調整前終値 (`RawClose`) と、調整済みの発行済株式数
+        (`AdjustedIssuedShares`) および自己株式数 (`AdjustedTreasuryShares`)
+        を基に、日次ベースの時価総額を計算します。
+
+        計算式:
+            時価総額 = 調整前終値 * (調整済み発行済株式数 - 調整済み自己株式数)
+
+        Note:
+            このメソッドを呼び出す前に、`with_adjusted_shares()` を
+            実行して、調整済みの株式数列を事前に計算しておく必要があります。
+
+        Returns:
+            Self: `MarketCap` 列が追加された、新しいPricesオブジェクト。
+        """
+        shares = pl.col("AdjustedIssuedShares") - pl.col("AdjustedTreasuryShares")
+        data = self.data.with_columns(
+            (pl.col("RawClose") * shares).round(0).alias("MarketCap"),
+        )
+        return self.__class__(data)
+
+    def with_equity(self, statements: Statements) -> Self:
+        """時系列の純資産を列として追加する。
+
+        Args:
+            statements (Statements): 財務データを提供する`Statements`オブジェクト。
+
+        Returns:
+            Self: `Equity` 列が追加された、新しいPricesオブジェクト。
+        """
+        data = self.data.join_asof(
+            statements.equity(),
+            on="Date",
+            by="Code",
+            check_sortedness=False,
+        )
+        return self.__class__(data)
+
     def with_forecast_profit(self, statements: Statements) -> Self:
         """時系列の予想純利益を列として追加する。
 
@@ -100,6 +140,23 @@ class Prices(Base):
         """
         data = self.data.join_asof(
             statements.forecast_profit(),
+            on="Date",
+            by="Code",
+            check_sortedness=False,
+        )
+        return self.__class__(data)
+
+    def with_forecast_dividend(self, statements: Statements) -> Self:
+        """時系列の予想年間配当総額を列として追加する。
+
+        Args:
+            statements (Statements): 財務データを提供する`Statements`オブジェクト。
+
+        Returns:
+            Self: `ForecastDividend` 列が追加された、新しいPricesオブジェクト。
+        """
+        data = self.data.join_asof(
+            statements.forecast_dividend(),
             on="Date",
             by="Code",
             check_sortedness=False,

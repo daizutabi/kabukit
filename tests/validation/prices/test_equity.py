@@ -14,20 +14,21 @@ from tests.validation.conftest import pytestmark  # noqa: F401
 async def prices(statements: Statements) -> Prices:
     codes = ["7203"]
     data = await fetch("prices", codes)
-    return Prices(data).with_forecast_profit(statements)
+    return Prices(data).with_equity(statements)
 
 
 @pytest.mark.parametrize(
-    ("d", "n"),
+    ("d", "equity"),
     [
-        (date(2025, 5, 7), 4520000000000),
-        (date(2025, 5, 8), 3100000000000),
+        (date(2025, 5, 7), 36856527000000),
+        (date(2025, 5, 8), 36878913000000),
+        (date(2025, 10, 3), 36993052000000),
     ],
 )
-def test_forecast_profit_7203(
+def test_equity_7203(
     prices: Prices,
     d: date,
-    n: float,
+    equity: float,
 ) -> None:
-    x = prices.data.filter(c.Code == "72030", c.Date == d).item(0, "ForecastProfit")
-    assert x == n
+    df = prices.data.filter(c.Code == "72030", c.Date == d)
+    assert df.item(0, "Equity") == equity

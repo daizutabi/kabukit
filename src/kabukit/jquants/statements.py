@@ -12,17 +12,24 @@ if TYPE_CHECKING:
 
 
 def clean(df: DataFrame) -> DataFrame:
+    df = df.select(pl.exclude(r"^.*\(REIT\)$"))
+    return df.pipe(_rename).pipe(_cast)
+
+
+def _rename(df: DataFrame) -> DataFrame:
+    return df.rename(
+        {
+            "LocalCode": "Code",
+            "NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock": "IssuedShares",  # noqa: E501
+            "NumberOfTreasuryStockAtTheEndOfFiscalYear": "TreasuryShares",
+            "AverageNumberOfShares": "AverageOutstandingShares",
+        },
+    )
+
+
+def _cast(df: DataFrame) -> DataFrame:
     return (
-        df.select(pl.exclude(r"^.*\(REIT\)$"))
-        .rename(
-            {
-                "LocalCode": "Code",
-                "NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock": "IssuedShares",  # noqa: E501
-                "NumberOfTreasuryStockAtTheEndOfFiscalYear": "TreasuryShares",
-                "AverageNumberOfShares": "AverageOutstandingShares",
-            },
-        )
-        .with_columns(
+        df.with_columns(
             pl.col("^.*Date$").str.to_date("%Y-%m-%d", strict=False),
             pl.col("DisclosedTime").str.to_time("%H:%M:%S", strict=False),
             pl.col("TypeOfCurrentPeriod").cast(pl.Categorical),
