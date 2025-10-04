@@ -34,28 +34,22 @@ def _(Prices, Statements):
 
 
 @app.cell
-def _(c, statements):
-    statements.data.filter(c.Code == "39970").select(
+def _(c, prices, statements):
+    prices.with_adjusted_shares(statements).with_forecast_profit(statements).filter(
+        c.Code == "39970"
+        # c.Code == "72030"
+    ).data.select(
         "Date",
-        "TypeOfDocument",
-        "Profit",
-        "EarningsPerShare",
-        "AverageOutstandingShares",
-        "ResultDividend"
-        (c.EarningsPerShare * c.AverageOutstandingShares).alias("a"),
+        "RawClose",
+        "AdjustedIssuedShares",
         "ForecastProfit",
-        "ForecastEarningsPerShare",
-        (c.ForecastProfit / c.ForecastEarningsPerShare).alias("b"),
-    )
+        (c.ForecastProfit / (c.AdjustedIssuedShares - c.AdjustedTreasuryShares)).round(2).alias("EPS"),
+    ).with_columns((c.RawClose / c.EPS).round(2).alias("PER"))
     return
 
 
 @app.cell
-def _(c, prices, statements):
-    prices.with_forecast_profit(statements).data.filter(c.Code == "72030").select(
-        "Date",
-        "ForecastProfit",
-    )
+def _():
     return
 
 

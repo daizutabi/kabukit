@@ -23,41 +23,29 @@ def _():
     import polars as pl
     from polars import col as c
     from kabukit import Statements, Prices
-    return Prices, Statements, c, mo
+    return Prices, Statements, c, mo, pl
 
 
 @app.cell
 def _(Prices, Statements):
     statements = Statements.read()
     prices = Prices.read()
-    return (statements,)
+    return prices, statements
 
 
 @app.cell
-def _(c, statements):
-    statements.data.filter(c.Code == "39970").select(
+def _(c, pl, prices, statements):
+    prices.with_adjusted_shares(statements).with_forecast_dividend(statements).filter(
+        c.Code == "39970"
+        # c.Code == "72030"
+    ).data.select(
         "Date",
-        "TypeOfDocument",
-        "ForecastDividendPerShareAnnual",
-        "NextYearForecastDividendPerShareAnnual",
-        (c.ForecastDividendPerShareAnnual * c.ForecastProfit / c.ForecastEarningsPerShare)
-        .round(0)
-        .alias("a"),
-        (
-            c.NextYearForecastDividendPerShareAnnual
-            * c.NextYearForecastProfit
-            / c.NextYearForecastEarningsPerShare
-        )
-        .round(0)
-        .alias("b"),
-        "ResultTotalDividendPaidAnnual",
-    )
-    return
-
-
-@app.cell
-def _(c, statements):
-    statements.forecast_dividend().filter(c.Code == "39970")
+        pl.col("RawClose"),
+        "AdjustedIssuedShares",
+        "ForecastDividend",
+        (c.ForecastDividend / (c.AdjustedIssuedShares - c.AdjustedTreasuryShares)).round(2).alias("DPS"),
+        (c.RawClose * (c.AdjustedIssuedShares - c.AdjustedTreasuryShares*0)).alias("時価総額"),
+    ).with_columns((c.DPS / c.RawClose * 100).alias("配当利回り"))
     return
 
 
