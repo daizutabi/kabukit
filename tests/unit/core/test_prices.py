@@ -283,7 +283,7 @@ def test_with_book_value_yield() -> None:
         ],
     )
 
-    assert_frame_equal(result.data, expected)
+    assert_frame_equal(result.data, expected, check_exact=False, rel_tol=1e-4)
 
 
 def test_with_earnings_yield() -> None:
@@ -304,12 +304,12 @@ def test_with_earnings_yield() -> None:
 
     expected = prices_df.with_columns(
         [
-            Series("EarningsPerShare", [111.11, 111.11]),
-            Series("EarningsYield", [0.0556, 0.0617]),
+            Series("EarningsPerShare", [111.1111, 111.1111]),
+            Series("EarningsYield", [0.055556, 0.061728]),
         ],
     )
 
-    assert_frame_equal(result.data, expected)
+    assert_frame_equal(result.data, expected, check_exact=False, rel_tol=1e-4)
 
 
 @pytest.mark.parametrize(

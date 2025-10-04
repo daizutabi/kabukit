@@ -125,9 +125,7 @@ class Prices(Base):
             Self: `MarketCap` 列が追加された、新しいPricesオブジェクト。
         """
         data = self.data.with_columns(
-            (pl.col("RawClose") * self._outstanding_shares_expr)
-            .round(0)
-            .alias("MarketCap"),
+            (pl.col("RawClose") * self._outstanding_shares_expr).alias("MarketCap"),
         )
 
         return self.__class__(data)
@@ -199,13 +197,13 @@ class Prices(Base):
             新しいPricesオブジェクト。
         """
         data = self.data.with_columns(
-            (pl.col("Equity") / self._outstanding_shares_expr)
-            .round(2)
-            .alias("BookValuePerShare"),
+            (pl.col("Equity") / self._outstanding_shares_expr).alias(
+                "BookValuePerShare",
+            ),
         ).with_columns(
-            (pl.col("BookValuePerShare") / pl.col("RawClose"))
-            .round(4)
-            .alias("BookValueYield"),
+            (pl.col("BookValuePerShare") / pl.col("RawClose")).alias(
+                "BookValueYield",
+            ),
         )
 
         return self.__class__(data)
@@ -223,13 +221,11 @@ class Prices(Base):
             新しいPricesオブジェクト。
         """
         data = self.data.with_columns(
-            (pl.col("ForecastProfit") / self._outstanding_shares_expr)
-            .round(2)
-            .alias("EarningsPerShare"),
+            (pl.col("ForecastProfit") / self._outstanding_shares_expr).alias(
+                "EarningsPerShare",
+            ),
         ).with_columns(
-            (pl.col("EarningsPerShare") / pl.col("RawClose"))
-            .round(4)
-            .alias("EarningsYield"),
+            (pl.col("EarningsPerShare") / pl.col("RawClose")).alias("EarningsYield"),
         )
 
         return self.__class__(data)
