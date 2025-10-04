@@ -150,3 +150,47 @@ def test_with_forecast_profit() -> None:
     )
 
     assert_frame_equal(result.data, expected)
+
+
+def test_with_forecast_dividend() -> None:
+    prices_df = DataFrame(
+        {
+            "Date": [
+                date(2023, 4, 1),
+                date(2023, 5, 15),
+                date(2023, 6, 10),
+                date(2023, 3, 10),
+                date(2023, 4, 5),
+            ],
+            "Code": ["A", "A", "A", "B", "B"],
+        },
+    ).sort("Code", "Date")
+
+    statements_df = DataFrame(
+        {
+            "Date": [
+                date(2023, 5, 1),
+                date(2023, 6, 1),
+                date(2023, 4, 1),
+            ],
+            "Code": ["A", "A", "B"],
+            "TypeOfDocument": ["1Q", "1Q", "FY"],
+            "ForecastProfit": [1000.0, 1500.0, None],
+            "ForecastEarningsPerShare": [10.0, 10.0, None],
+            "NextYearForecastProfit": [None, None, 2000.0],
+            "NextYearForecastEarningsPerShare": [None, None, 10.0],
+            "ForecastDividendPerShareAnnual": [5.0, 6.0, None],
+            "NextYearForecastDividendPerShareAnnual": [None, None, 10.0],
+        },
+    )
+
+    prices = Prices(prices_df)
+    statements = Statements(statements_df)
+
+    result = prices.with_forecast_dividend(statements)
+
+    expected = prices_df.with_columns(
+        pl.Series("ForecastDividend", [None, 500.0, 900.0, None, 2000.0]),
+    )
+
+    assert_frame_equal(result.data, expected)
