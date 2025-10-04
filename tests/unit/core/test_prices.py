@@ -190,7 +190,45 @@ def test_with_forecast_dividend() -> None:
     result = prices.with_forecast_dividend(statements)
 
     expected = prices_df.with_columns(
-        pl.Series("ForecastDividend", [None, 500.0, 900.0, None, 2000.0]),
+        Series("ForecastDividend", [None, 500.0, 900.0, None, 2000.0]),
+    )
+
+    assert_frame_equal(result.data, expected)
+
+
+def test_with_equity() -> None:
+    prices_df = DataFrame(
+        {
+            "Date": [
+                date(2023, 4, 1),
+                date(2023, 5, 15),
+                date(2023, 6, 10),
+                date(2023, 3, 10),
+                date(2023, 4, 5),
+            ],
+            "Code": ["A", "A", "A", "B", "B"],
+        },
+    )
+
+    statements_df = DataFrame(
+        {
+            "Date": [
+                date(2023, 3, 31),
+                date(2023, 6, 30),
+                date(2023, 3, 31),
+            ],
+            "Code": ["A", "A", "B"],
+            "Equity": [1000.0, 1200.0, 2000.0],
+        },
+    )
+
+    prices = Prices(prices_df)
+    statements = Statements(statements_df)
+
+    result = prices.with_equity(statements)
+
+    expected = prices_df.with_columns(
+        Series("Equity", [1000.0, 1000.0, 1000.0, None, 2000.0], dtype=pl.Float64),
     )
 
     assert_frame_equal(result.data, expected)
