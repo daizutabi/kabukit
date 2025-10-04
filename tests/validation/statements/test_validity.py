@@ -117,16 +117,16 @@ def test_earnings_per_share_consistency(data: DataFrame) -> None:
 @pytest.mark.parametrize(
     ("d", "n"),
     [
-        (date(2025, 2, 5), 13314911412),
-        (date(2025, 5, 8), 13252455897),
-        (date(2025, 8, 7), 13032932250),
+        (date(2025, 2, 5), 2699079277),
+        (date(2025, 5, 8), 2746057686),
+        (date(2025, 8, 7), 2761596216),
     ],
 )
 def test_shares_7203(statements: Statements, d: date, n: float) -> None:
     x = (
         statements.shares()
         .filter(c.Code == "72030", c.Date == d)
-        .item(0, "AverageOutstandingShares")
+        .item(0, "TreasuryShares")
     )
     assert x == n
 

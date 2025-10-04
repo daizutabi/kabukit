@@ -121,8 +121,9 @@ class Prices(Base):
             時価総額 = 調整前終値 * (調整済み発行済株式数 - 調整済み自己株式数)
 
         Note:
-            このメソッドを呼び出す前に、`with_adjusted_shares()` を
-            実行して、調整済みの株式数列を事前に計算しておく必要があります。
+            このメソッドを呼び出す前に、`with_adjusted_shares()` あるいは
+            `with_yields()` を実行して、調整済みの株式数列を事前に計算して
+            おく必要があります。
 
         Returns:
             Self: `MarketCap` 列が追加された、新しいPricesオブジェクト。

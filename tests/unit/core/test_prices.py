@@ -419,3 +419,55 @@ def test_methods_raise_key_error_without_adjusted_shares(method_name: str) -> No
 
     with pytest.raises(KeyError, match="必要な列が存在しません"):
         method()
+
+
+def test_with_yields() -> None:
+    prices_df = DataFrame(
+        {
+            "Date": [date(2023, 1, 1)],
+            "Code": ["A"],
+            "RawClose": [1000.0],
+            "AdjustmentFactor": [1.0],
+        },
+    )
+
+    statements_df = DataFrame(
+        {
+            "Date": [date(2023, 1, 1)],
+            "Code": ["A"],
+            "IssuedShares": [1000],
+            "TreasuryShares": [100],
+            "Equity": [900000.0],
+            "ForecastProfit": [90000.0],
+            "ForecastDividend": [45000.0],
+            "TypeOfDocument": ["FY"],
+            "NextYearForecastProfit": [90000.0],
+            "ForecastEarningsPerShare": [100.0],
+            "NextYearForecastEarningsPerShare": [100.0],
+            "ForecastDividendPerShareAnnual": [50.0],
+            "NextYearForecastDividendPerShareAnnual": [50.0],
+        },
+    )
+
+    prices = Prices(prices_df)
+    statements = Statements(statements_df)
+
+    result = prices.with_yields(statements)
+
+    expected_df = prices_df.with_columns(
+        [
+            Series("AdjustedIssuedShares", [1000], dtype=pl.Int64),
+            Series("AdjustedTreasuryShares", [100], dtype=pl.Int64),
+            Series("Equity", [900000.0]),
+            Series("BookValuePerShare", [1000.0]),
+            Series("BookValueYield", [1.0]),
+            Series("ForecastProfit", [90000.0]),
+            Series("EarningsPerShare", [100.0]),
+            Series("EarningsYield", [0.1]),
+            Series("ForecastDividend", [45000.0]),
+            Series("DividendPerShare", [50.0]),
+            Series("DividendYield", [0.05]),
+        ],
+    )
+
+    assert_frame_equal(result.data, expected_df, check_exact=False, rel_tol=1e-4)
