@@ -81,3 +81,26 @@ def test_forecast_dividend() -> None:
     )
 
     assert_frame_equal(result, expected)
+
+
+def test_equity() -> None:
+    data = DataFrame(
+        {
+            "Date": [1, 2, 1],
+            "Code": ["A", "A", "B"],
+            "Equity": [100.0, None, 200.0],
+            "OtherColumn": ["X", "Y", "Z"],
+        },
+    )
+
+    result = Statements(data).equity()
+
+    expected = DataFrame(
+        {
+            "Date": [1, 1],
+            "Code": ["A", "B"],
+            "Equity": [100.0, 200.0],
+        },
+    )
+
+    assert_frame_equal(result.sort("Code"), expected)

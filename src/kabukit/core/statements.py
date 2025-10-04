@@ -77,3 +77,14 @@ class Statements(Base):
             .filter(pl.col("ForecastDividend").is_not_null())
             .select("Date", "Code", "ForecastDividend")
         )
+
+    def equity(self) -> DataFrame:
+        """Statementsデータから純資産を抽出する。
+
+        Returns:
+            DataFrame: Date, Code, Equity を含むDataFrame
+        """
+        return (
+            self.data.filter(pl.col("Equity").is_not_null())
+            .select("Date", "Code", "Equity")
+        )
