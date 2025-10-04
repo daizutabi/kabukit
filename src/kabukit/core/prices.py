@@ -90,6 +90,23 @@ class Prices(Base):
 
         return self.__class__(data)
 
+    @property
+    def _outstanding_shares_expr(self) -> pl.Expr:
+        """調整済み発行済株式数を計算する Polars 式を返す。
+
+        Raises:
+            KeyError: 必要な列が存在しない場合は KeyError を送出する。
+        """
+        required_cols = {"AdjustedIssuedShares", "AdjustedTreasuryShares"}
+
+        if not required_cols.issubset(self.data.columns):
+            missing = required_cols - set(self.data.columns)
+            msg = f"必要な列が存在しません: {missing}。"
+            msg += "事前に .with_adjusted_shares() を呼び出してください。"
+            raise KeyError(msg)
+
+        return pl.col("AdjustedIssuedShares") - pl.col("AdjustedTreasuryShares")
+
     def with_market_cap(self) -> Self:
         """時価総額を計算し、列として追加する。
 
@@ -107,10 +124,10 @@ class Prices(Base):
         Returns:
             Self: `MarketCap` 列が追加された、新しいPricesオブジェクト。
         """
-        shares = pl.col("AdjustedIssuedShares") - pl.col("AdjustedTreasuryShares")
-
         data = self.data.with_columns(
-            (pl.col("RawClose") * shares).round(0).alias("MarketCap"),
+            (pl.col("RawClose") * self._outstanding_shares_expr)
+            .round(0)
+            .alias("MarketCap"),
         )
 
         return self.__class__(data)
@@ -181,14 +198,38 @@ class Prices(Base):
             Self: `BookValuePerShare`, `BookValueYield` 列が追加された、
             新しいPricesオブジェクト。
         """
-        shares = pl.col("AdjustedIssuedShares") - pl.col("AdjustedTreasuryShares")
-
         data = self.data.with_columns(
-            (pl.col("Equity") / shares).round(2).alias("BookValuePerShare"),
+            (pl.col("Equity") / self._outstanding_shares_expr)
+            .round(2)
+            .alias("BookValuePerShare"),
         ).with_columns(
             (pl.col("BookValuePerShare") / pl.col("RawClose"))
             .round(4)
             .alias("BookValueYield"),
+        )
+
+        return self.__class__(data)
+
+    def with_earnings_yield(self) -> Self:
+        """時系列の一株あたり純利益と収益利回り(純利益利回り)を列として追加する。
+
+        Note:
+            このメソッドを呼び出す前に、`with_forecast_profit()` および
+            `with_adjusted_shares()` を実行して、予想純利益および調整済み株式数
+            列を事前に計算しておく必要があります。
+
+        Returns:
+            Self: `EarningsPerShare`, `EarningsYield` 列が追加された、
+            新しいPricesオブジェクト。
+        """
+        data = self.data.with_columns(
+            (pl.col("ForecastProfit") / self._outstanding_shares_expr)
+            .round(2)
+            .alias("EarningsPerShare"),
+        ).with_columns(
+            (pl.col("EarningsPerShare") / pl.col("RawClose"))
+            .round(4)
+            .alias("EarningsYield"),
         )
 
         return self.__class__(data)
