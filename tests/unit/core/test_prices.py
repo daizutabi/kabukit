@@ -232,3 +232,29 @@ def test_with_equity() -> None:
     )
 
     assert_frame_equal(result.data, expected)
+
+
+def test_with_market_cap() -> None:
+    prices_df = DataFrame(
+        {
+            "Date": [
+                date(2023, 1, 1),
+                date(2023, 1, 2),
+                date(2023, 1, 3),
+            ],
+            "Code": ["A", "A", "A"],
+            "RawClose": [100.0, 110.0, 120.0],
+            "AdjustedIssuedShares": [1000, 1000, 2000],
+            "AdjustedTreasuryShares": [100, 100, 200],
+        },
+    )
+
+    prices = Prices(prices_df)
+
+    result = prices.with_market_cap()
+
+    expected = prices_df.with_columns(
+        Series("MarketCap", [90000.0, 99000.0, 216000.0]),
+    )
+
+    assert_frame_equal(result.data, expected)
