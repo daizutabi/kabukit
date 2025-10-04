@@ -148,3 +148,49 @@ def test_forecast_profit_7203(statements: Statements, d: date, n: float) -> None
         .item(0, "ForecastProfit")
     )
     assert x == n
+
+
+@pytest.mark.parametrize(
+    ("d", "n", "dps"),
+    [
+        (date(2025, 2, 17), 68917988, None),  # FY
+        (date(2025, 5, 13), 68917988, 20),  # 1Q
+        (date(2025, 8, 12), 68965517, 2),  # 2Q
+    ],
+)
+def test_forecast_dividend_3997(
+    statements: Statements,
+    d: date,
+    n: float,
+    dps: float | None,
+) -> None:
+    x = (
+        statements.forecast_dividend()
+        .filter(c.Code == "39970", c.Date == d)
+        .item(0, "ForecastDividend")
+    )
+    assert x == n
+
+    x = statements.data.filter(
+        c.Code == "39970",
+        c.Date == d,
+    ).item(0, "ForecastDividendPerShareAnnual")
+    assert x == dps
+
+
+def test_result_forecast_dividend_3997(statements: Statements) -> None:
+    x = (
+        statements.forecast_dividend()
+        .filter(
+            c.Code == "39970",
+            c.Date == date(2024, 11, 15),
+        )
+        .item(0, "ForecastDividend")
+    )
+    assert x == 69_120_539
+
+    x = statements.data.filter(
+        c.Code == "39970",
+        c.Date == date(2025, 2, 17),
+    ).item(0, "ResultTotalDividendPaidAnnual")
+    assert x == 68_000_000

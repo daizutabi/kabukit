@@ -40,11 +40,24 @@ def _(c, statements):
         "TypeOfDocument",
         "ForecastDividendPerShareAnnual",
         "NextYearForecastDividendPerShareAnnual",
-        "AverageOutstandingShares",
-        "ForecastProfit",
-        "ForecastEarningsPerShare",
-        (c.Profit / (c.EarningsPerShare * c.AverageOutstandingShares)).alias("a"),
+        (c.ForecastDividendPerShareAnnual * c.ForecastProfit / c.ForecastEarningsPerShare)
+        .round(0)
+        .alias("a"),
+        (
+            c.NextYearForecastDividendPerShareAnnual
+            * c.NextYearForecastProfit
+            / c.NextYearForecastEarningsPerShare
+        )
+        .round(0)
+        .alias("b"),
+        "ResultTotalDividendPaidAnnual",
     )
+    return
+
+
+@app.cell
+def _(c, statements):
+    statements.forecast_dividend().filter(c.Code == "39970")
     return
 
 
