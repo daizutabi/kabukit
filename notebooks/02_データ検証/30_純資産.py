@@ -39,8 +39,18 @@ def _(c, prices, statements):
         c.Code == "39970"
         # c.Code == "72030"
     ).data.select(
-        "Date", "RawClose", "AdjustedIssuedShares", "Equity", "BookValuePerShare", "BookValueYield"
+        "Date",
+        "RawClose",
+        "AdjustedIssuedShares",
+        "Equity",
+        "BookValuePerShare",
+        "BookValueYield",
     )
+    return
+
+
+@app.cell
+def _():
     return
 
 

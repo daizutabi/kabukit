@@ -23,7 +23,7 @@ def _():
     import polars as pl
     from polars import col as c
     from kabukit import Statements, Prices
-    return Prices, Statements, c, mo, pl
+    return Prices, Statements, c, mo
 
 
 @app.cell
@@ -34,18 +34,20 @@ def _(Prices, Statements):
 
 
 @app.cell
-def _(c, pl, prices, statements):
-    prices.with_adjusted_shares(statements).with_forecast_dividend(statements).filter(
-        c.Code == "39970"
-        # c.Code == "72030"
+def _(c, prices, statements):
+    prices.with_adjusted_shares(statements).with_forecast_dividend(
+        statements
+    ).with_dividend_yield().filter(
+        # c.Code == "39970"
+        c.Code == "72030"
     ).data.select(
         "Date",
-        pl.col("RawClose"),
+        "RawClose",
         "AdjustedIssuedShares",
         "ForecastDividend",
-        (c.ForecastDividend / (c.AdjustedIssuedShares - c.AdjustedTreasuryShares)).round(2).alias("DPS"),
-        (c.RawClose * (c.AdjustedIssuedShares - c.AdjustedTreasuryShares*0)).alias("時価総額"),
-    ).with_columns((c.DPS / c.RawClose * 100).alias("配当利回り"))
+        "DividendPerShare",
+        "DividendYield",
+    )
     return
 
 
