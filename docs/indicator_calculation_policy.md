@@ -20,15 +20,13 @@
 
 3. **基準となる財務データの取得**:
    * 特定した決算情報から、以下の基準値を取得する。
-      * `Equity` (純資産)
-      * `Profit` (実績純利益)
-      * `ForecastProfit` (当期予想純利益, FY決算以外)
-      * `NextYearForecastProfit` (来期予想純利益, FY決算)
-      * `ResultDividendPerShareAnnual` (実績配当)
-      * `ForecastDividendPerShareAnnual` (当期予想配当, FY決算以外)
-      * `NextYearForecastDividendPerShareAnnual` (来期予想配当, FY決算)
       * `IssuedShares` (発行済株式数)
       * `TreasuryShares` (自己株式数)
+      * `Equity` (純資産)
+      * `ForecastProfit` (当期予想純利益, FY決算以外)
+      * `NextYearForecastProfit` (来期予想純利益, FY決算)
+      * `ForecastDividendPerShareAnnual` (当期予想配当, FY決算以外)
+      * `NextYearForecastDividendPerShareAnnual` (来期予想配当, FY決算)
 
 4. **株式数の更新と流通株式数の算出**:
    * `daily_adjusted_shares.md` に記載されているロジックに基づき、日々の株価データに含まれる `AdjustmentFactor` を用いて、`IssuedShares` (発行済株式数) と `TreasuryShares` (自己株式数) を日次で調整する。
@@ -39,71 +37,48 @@
 
 上記「共通の計算前提」で算出されたデータを用いて、各株価指標を計算する。
 
-### 1. 純資産利回り (Book-value Yield)
+### 純資産利回り (Book-value Yield)
 
 企業の資産価値に対する株価の割安度を測る指標。PBRの逆数に相当する。
 
-* **必要なデータ**:
-  * 分子: `Equity` (純資産)
-  * 分母: `流通株式数`、`RawClose`
-* **計算式**:
-  ```
-  純資産利回り = Equity / (流通株式数 × RawClose)
-  ```
+```
+純資産利回り = Equity / (流通株式数 × RawClose)
+```
 
-### 2. 収益利回り (Earnings Yield)
+### 収益利回り (Earnings Yield)
 
-企業の利益創出力を測る指標。PERの逆数に相当する。
-（注: ここでいう「収益」は「純利益」を指します。）
+企業の利益創出力を測る指標。PERの逆数に相当する。収益は予想を用いる。
+（注: ここでいう「収益」は「純利益」を指す。）
 
-* **収益利回りの種類**:
-  * **実績収益利回り**: 実績純利益 (TTM) を用いて計算する。
-  * **予想収益利回り**: 最新の決算情報に基づいて決定される予想純利益を用いて計算する。
+```
+収益利回り = 予想純利益 / (流通株式数 × RawClose)
+```
 
-* **実績純利益 (TTM) の決定方法**:
-  * 収益利回りの計算には、**常に通期の純利益に相当する値**を用いる。
-  * FY決算の場合は `Profit` (当期の実績純利益) を使用する。
-  * FY決算以外 (1Q, 2Q, 3Q) の場合は、過去4四半期の `Profit` を合算して算出する。各四半期の純利益は累積値で提供されるため、`当期累積純利益 - 前期累積純利益` で当該四半期の純利益を算出し、過去4四半期分を合算する。
+ここで、計算対象日 `t` において、以下の条件に基づき、使用する`予想純利益`を決定する。
 
-* **予想純利益の決定方法**:
-  * 計算対象日 `t` において、以下の条件に基づき、使用する予想純利益を決定する。
-    * もし最新の決算情報がFY決算であり、`NextYearForecastProfit` (来期の予想純利益) が存在する場合、**これを使用する**。
-    * そうでなく、もし最新の決算情報がFY決決算以外 (1Q, 2Q, 3Q) であり、`ForecastProfit` (当期の予想純利益) が存在する場合、**これを使用する**。
-    * 上記いずれの予想値も存在しない場合、予想純利益は算出しない。
+* 最新の決算情報がFY決算のとき、`NextYearForecastProfit` (来期の予想純利益) を使用する。
+* 最新の決算情報がFY決決算以外 (1Q, 2Q, 3Q) のとき、`ForecastProfit` (当期の予想純利益) を使用する。
 
-* **計算式**:
-  * **実績収益利回り**:
-    ```
-    実績収益利回り = (実績純利益 (TTM)) / (流通株式数 × RawClose)
-    ```
-  * **予想収益利回り**:
-    ```
-    予想収益利回り = (予想純利益) / (流通株式数 × RawClose)
-    ```
+### 配当利回り (Dividend Yield)
 
-### 3. 配当利回り (Dividend Yield)
+株主への直接還元を測る指標。配当は予想を用いる。
 
-株主への直接還元を測る指標。
+```
+配当利回り = 予想年間配当総額 / (流通株式数 × RawClose)
+```
 
-* **必要なデータ**:
-  * 分子: `年間配当総額`
-  * 分母: `流通株式数`、`RawClose`
-* **年間配当総額の算出方法**:
-  * **実績配当**:
-    * 配当利回りの計算には、**常に通期の配当総額に相当する値**を用いる。
-    * **実績配当総額 (TTM) の決定方法**:
-      * FY決算の場合は `ResultTotalDividendPaidAnnual` を使用する。
-      * FY決算以外 (1Q, 2Q, 3Q) の場合は、直近12ヶ月の一株あたり配当実績 (TTM DPS) を算出し、`流通株式数` を乗じて年間配当総額とする。
-        * TTM DPSは、過去4四半期の `ResultDividendPerShare1stQuarter`, `ResultDividendPerShare2ndQuarter`, `ResultDividendPerShare3rdQuarter`, `ResultDividendPerShareFiscalYearEnd` の該当する値を合算して算出する。
-  * **予想配当**:
-    * `financial_statements_schema.md` に記載の通り、`ForecastTotalDividendPaidAnnual` や `NextYearForecastTotalDividendAnnual` はデータが欠落しているか、カラム自体が存在しない。このため、以下の計算式で算出する。
-      * `年間配当総額 = ForecastDividendPerShareAnnual × 流通株式数`
-      * `年間配当総額 = NextYearForecastDividendPerShareAnnual × 流通株式数`
-      * （注: `ForecastDividendPerShareAnnual` や `NextYearForecastDividendPerShareAnnual` が利用できない場合は、四半期ごとの配当予想を合算するなど、別途ロジックを検討する。）
-* **計算式**:
-  ```
-  配当利回り = 年間配当総額 / (流通株式数 × RawClose)
-  ```
+ここで、計算対象日 `t` において、以下の条件に基づき、使用する`予想年間配当総額`を決定する。
+
+* 最新の決算情報がFY決算のとき、
+
+    `予想年間配当総額 = NextYearForecastDividendPerShareAnnual × (NextYearForecastProfit / NextYearForecastEarningsPerShare)`
+* 最新の決算情報がFY決決算以外 (1Q, 2Q, 3Q) のとき、
+
+    `予想年間配当総額 = ForecastDividendPerShareAnnual × (ForecastProfit / ForecastEarningsPerShare)`
+
+(注1) `financial_statements_schema.md` に記載の通り、`ForecastTotalDividendPaidAnnual` および `NextYearForecastTotalDividendAnnual` はデータが欠落しているか、カラム自体が存在しない。
+
+(注2) 予想の期間中に株式分割などにより株式数が変化することが見込まれるとき、「一株あたり」の算出に用いられる株式数は`AverageOutstandingShares`に一致しない。また、そのような株式数は決算データからは得られない。そのため、予想DPSと予想EPSの算出に用いられる株式数が一致するとの仮定に基づき、上式で計算する。
 
 ## このアプローチの利点
 

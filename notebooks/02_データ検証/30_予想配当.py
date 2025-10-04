@@ -30,14 +30,20 @@ def _():
 def _(Prices, Statements):
     statements = Statements.read()
     prices = Prices.read()
-    return prices, statements
+    return (statements,)
 
 
 @app.cell
-def _(c, prices, statements):
-    prices.with_forecast_profit(statements).data.filter(c.Code == "72030").select(
+def _(c, statements):
+    statements.data.filter(c.Code == "39970").select(
         "Date",
+        "TypeOfDocument",
+        "ForecastDividendPerShareAnnual",
+        "NextYearForecastDividendPerShareAnnual",
+        "AverageOutstandingShares",
         "ForecastProfit",
+        "ForecastEarningsPerShare",
+        (c.Profit / (c.EarningsPerShare * c.AverageOutstandingShares)).alias("a"),
     )
     return
 
