@@ -29,6 +29,7 @@ class Prices(Base):
             )
             .sort("Code", "Date")
         )
+
         return self.__class__(data)
 
     def with_adjusted_shares(self, statements: Statements) -> Self:
@@ -107,9 +108,11 @@ class Prices(Base):
             Self: `MarketCap` 列が追加された、新しいPricesオブジェクト。
         """
         shares = pl.col("AdjustedIssuedShares") - pl.col("AdjustedTreasuryShares")
+
         data = self.data.with_columns(
             (pl.col("RawClose") * shares).round(0).alias("MarketCap"),
         )
+
         return self.__class__(data)
 
     def with_equity(self, statements: Statements) -> Self:
@@ -127,6 +130,7 @@ class Prices(Base):
             by="Code",
             check_sortedness=False,
         )
+
         return self.__class__(data)
 
     def with_forecast_profit(self, statements: Statements) -> Self:
@@ -144,6 +148,7 @@ class Prices(Base):
             by="Code",
             check_sortedness=False,
         )
+
         return self.__class__(data)
 
     def with_forecast_dividend(self, statements: Statements) -> Self:
@@ -161,6 +166,7 @@ class Prices(Base):
             by="Code",
             check_sortedness=False,
         )
+
         return self.__class__(data)
 
     def with_book_value_yield(self) -> Self:
@@ -176,6 +182,7 @@ class Prices(Base):
             新しいPricesオブジェクト。
         """
         shares = pl.col("AdjustedIssuedShares") - pl.col("AdjustedTreasuryShares")
+
         data = self.data.with_columns(
             (pl.col("Equity") / shares).round(2).alias("BookValuePerShare"),
         ).with_columns(
@@ -183,4 +190,5 @@ class Prices(Base):
             .round(4)
             .alias("BookValueYield"),
         )
+
         return self.__class__(data)
