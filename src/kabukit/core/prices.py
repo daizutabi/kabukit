@@ -229,3 +229,25 @@ class Prices(Base):
         )
 
         return self.__class__(data)
+
+    def with_dividend_yield(self) -> Self:
+        """時系列の一株あたり配当金と配当利回りを列として追加する。
+
+        Note:
+            このメソッドを呼び出す前に、`with_forecast_dividend()` および
+            `with_adjusted_shares()` を実行して、予想年間配当総額および
+            調整済み株式数列を事前に計算しておく必要があります。
+
+        Returns:
+            Self: `DividendPerShare`, `DividendYield` 列が追加された、
+            新しいPricesオブジェクト。
+        """
+        data = self.data.with_columns(
+            (pl.col("ForecastDividend") / self._outstanding_shares_expr).alias(
+                "DividendPerShare",
+            ),
+        ).with_columns(
+            (pl.col("DividendPerShare") / pl.col("RawClose")).alias("DividendYield"),
+        )
+
+        return self.__class__(data)
