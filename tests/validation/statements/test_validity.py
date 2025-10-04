@@ -134,6 +134,18 @@ def test_number_of_shares_7203(statements: Statements, d: date, n: float) -> Non
 @pytest.mark.parametrize(
     ("d", "n"),
     [
+        (date(2023, 2, 9), 28450023000000),
+        (date(2025, 8, 7), 36993052000000),
+    ],
+)
+def test_equity_7203(statements: Statements, d: date, n: float) -> None:
+    x = statements.equity().filter(c.Code == "72030", c.Date == d).item(0, "Equity")
+    assert x == n
+
+
+@pytest.mark.parametrize(
+    ("d", "n"),
+    [
         (date(2024, 5, 8), 3570000000000),  # FY
         (date(2024, 8, 1), 3570000000000),  # 1Q
         (date(2024, 11, 6), 3570000000000),  # 2Q
