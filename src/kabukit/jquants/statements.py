@@ -12,12 +12,8 @@ if TYPE_CHECKING:
 
 
 def clean(df: DataFrame) -> DataFrame:
-    return (
-        df.select(pl.exclude(r"^.*\(REIT\)$"))
-        .pipe(_rename)
-        .pipe(_cast)
-        .pipe(_drop_invalid_reports)
-    )
+    df = df.select(pl.exclude(r"^.*\(REIT\)$"))
+    return df.pipe(_rename).pipe(_cast)
 
 
 def _rename(df: DataFrame) -> DataFrame:
@@ -81,54 +77,6 @@ def _cast_bool(df: DataFrame) -> DataFrame:
         .otherwise(None)
         .alias(col)
         for col in columns
-    )
-
-
-def _drop_invalid_reports(df: DataFrame) -> DataFrame:
-    is_financial = pl.col("TypeOfDocument").str.contains("Financial")
-    is_valid = pl.col("TypeOfDocument").str.slice(0, 2) == pl.col("TypeOfCurrentPeriod")
-    is_quarter = pl.col("TypeOfCurrentPeriod").is_in(["1Q", "2Q", "3Q", "FY"])
-
-    return (
-        df.filter(~is_financial | is_valid, is_quarter)
-        .with_columns(
-            (pl.col("CurrentPeriodEndDate") - pl.col("CurrentPeriodStartDate"))
-            .dt.total_days()
-            .alias("CurrentPeriodDays"),
-        )
-        .filter(
-            pl.when(
-                pl.col("TypeOfCurrentPeriod") == "1Q",
-            )
-            .then(
-                (pl.col("CurrentPeriodDays") > 80)
-                & (pl.col("CurrentPeriodDays") < 100),
-            )
-            .when(
-                pl.col("TypeOfCurrentPeriod") == "2Q",
-            )
-            .then(
-                (pl.col("CurrentPeriodDays") > 170)
-                & (pl.col("CurrentPeriodDays") < 190),
-            )
-            .when(
-                pl.col("TypeOfCurrentPeriod") == "3Q",
-            )
-            .then(
-                (pl.col("CurrentPeriodDays") > 260)
-                & (pl.col("CurrentPeriodDays") < 280),
-            )
-            .when(
-                pl.col("TypeOfCurrentPeriod") == "FY",
-            )
-            .then(
-                (pl.col("CurrentPeriodDays") > 350)
-                & (pl.col("CurrentPeriodDays") < 380),
-            ),
-            pl.col("CurrentPeriodStartDate") >= pl.col("CurrentFiscalYearStartDate"),
-            pl.col("CurrentPeriodEndDate") <= pl.col("CurrentFiscalYearEndDate"),
-        )
-        .drop("CurrentPeriodDays")
     )
 
 

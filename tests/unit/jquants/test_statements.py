@@ -8,29 +8,25 @@ from polars import DataFrame
 
 @pytest.fixture
 def df() -> DataFrame:
-    from kabukit.jquants.statements import _cast, _rename
+    from kabukit.jquants.statements import clean
 
-    return (
-        DataFrame(
-            {
-                "DisclosedDate": ["2023-01-01", "2023-01-20", "2023-01-30"],
-                "DisclosedTime": ["09:00", "15:30", "12:00"],
-                "LocalCode": ["1300", "1301", "1302"],
-                "NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock": [  # noqa: E501
-                    "1",
-                    "2",
-                    "3",
-                ],
-                "NumberOfTreasuryStockAtTheEndOfFiscalYear": ["4", "5", "6"],
-                "AverageNumberOfShares": ["7.1", "8.2", "9.3"],
-                "TypeOfCurrentPeriod": ["A", "B", "C"],
-                "RetrospectiveRestatement": ["true", "false", ""],
-                "ForecastProfit": ["1.0", "2.0", ""],
-            },
-        )
-        .pipe(_rename)
-        .pipe(_cast)
-    )
+    return DataFrame(
+        {
+            "DisclosedDate": ["2023-01-01", "2023-01-20", "2023-01-30"],
+            "DisclosedTime": ["09:00", "15:30", "12:00"],
+            "LocalCode": ["1300", "1301", "1302"],
+            "NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock": [  # noqa: E501
+                "1",
+                "2",
+                "3",
+            ],
+            "NumberOfTreasuryStockAtTheEndOfFiscalYear": ["4", "5", "6"],
+            "AverageNumberOfShares": ["7.1", "8.2", "9.3"],
+            "TypeOfCurrentPeriod": ["A", "B", "C"],
+            "RetrospectiveRestatement": ["true", "false", ""],
+            "ForecastProfit": ["1.0", "2.0", ""],
+        },
+    ).pipe(clean)
 
 
 def test_clean_shape(df: DataFrame) -> None:
