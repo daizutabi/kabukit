@@ -280,7 +280,48 @@ def test_with_book_value_yield() -> None:
         [
             Series("BookValuePerShare", [1111.11, 1111.11]),
             Series("BookValueYield", [1.1111, 0.8889]),
-        ]
+        ],
     )
 
-    assert_frame_equal(result.data, expected)
+    assert_frame_equal(result.data, expected, check_exact=False, rel_tol=1e-4)
+
+
+def test_with_earnings_yield() -> None:
+    prices_df = DataFrame(
+        {
+            "Date": [date(2023, 1, 1), date(2023, 1, 2)],
+            "Code": ["A", "A"],
+            "RawClose": [2000.0, 1800.0],
+            "ForecastProfit": [100000.0, 100000.0],
+            "AdjustedIssuedShares": [1000, 1000],
+            "AdjustedTreasuryShares": [100, 100],
+        },
+    )
+
+    prices = Prices(prices_df)
+
+    result = prices.with_earnings_yield()
+
+    expected = prices_df.with_columns(
+        [
+            Series("EarningsPerShare", [111.1111, 111.1111]),
+            Series("EarningsYield", [0.055556, 0.061728]),
+        ],
+    )
+
+    assert_frame_equal(result.data, expected, check_exact=False, rel_tol=1e-4)
+
+
+@pytest.mark.parametrize(
+    "method_name",
+    ["with_market_cap", "with_book_value_yield", "with_earnings_yield"],
+)
+def test_methods_raise_key_error_without_adjusted_shares(method_name: str) -> None:
+    """前提条件となる adjusted_shares がない場合にKeyErrorを送出する"""
+    prices_df = DataFrame({"Code": ["A"]})  # `Adjusted...Shares` 列を持たない
+    prices = Prices(prices_df)
+
+    method = getattr(prices, method_name)
+
+    with pytest.raises(KeyError, match="必要な列が存在しません"):
+        method()

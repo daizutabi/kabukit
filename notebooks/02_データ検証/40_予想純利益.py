@@ -36,8 +36,8 @@ def _(Prices, Statements):
 @app.cell
 def _(c, prices, statements):
     prices.with_adjusted_shares(statements).with_forecast_profit(statements).filter(
-        c.Code == "39970"
-        # c.Code == "72030"
+        # c.Code == "39970"
+        c.Code == "72030"
     ).data.select(
         "Date",
         "RawClose",
@@ -45,6 +45,30 @@ def _(c, prices, statements):
         "ForecastProfit",
         (c.ForecastProfit / (c.AdjustedIssuedShares - c.AdjustedTreasuryShares)).round(2).alias("EPS"),
     ).with_columns((c.RawClose / c.EPS).round(2).alias("PER"))
+    return
+
+
+@app.cell
+def _(c, prices, statements):
+    prices.with_adjusted_shares(statements).with_forecast_profit(
+        statements
+    ).with_earnings_yield().filter(
+        c.Code == "39970"
+        # c.Code == "72030"
+    ).data.select(
+        "Date",
+        "RawClose",
+        "AdjustedIssuedShares",
+        "ForecastProfit",
+        "EarningsPerShare",
+        "EarningsYield",
+    )
+    return
+
+
+@app.cell
+def _():
+    1/0.0093
     return
 
 
