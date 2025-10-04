@@ -312,6 +312,32 @@ def test_with_earnings_yield() -> None:
     assert_frame_equal(result.data, expected, check_exact=False, rel_tol=1e-4)
 
 
+def test_with_dividend_yield() -> None:
+    prices_df = DataFrame(
+        {
+            "Date": [date(2023, 1, 1), date(2023, 1, 2)],
+            "Code": ["A", "A"],
+            "RawClose": [1000.0, 1100.0],
+            "ForecastDividend": [45000.0, 45000.0],
+            "AdjustedIssuedShares": [1000, 1000],
+            "AdjustedTreasuryShares": [100, 100],
+        },
+    )
+
+    prices = Prices(prices_df)
+
+    result = prices.with_dividend_yield()
+
+    expected = prices_df.with_columns(
+        [
+            Series("DividendPerShare", [50.0, 50.0]),
+            Series("DividendYield", [0.05, 0.04545454]),
+        ],
+    )
+
+    assert_frame_equal(result.data, expected, check_exact=False, rel_tol=1e-4)
+
+
 @pytest.mark.parametrize(
     "method_name",
     ["with_market_cap", "with_book_value_yield", "with_earnings_yield"],
