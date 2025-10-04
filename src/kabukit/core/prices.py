@@ -105,3 +105,20 @@ class Prices(Base):
             check_sortedness=False,
         )
         return self.__class__(data)
+
+    def with_forecast_dividend(self, statements: Statements) -> Self:
+        """時系列の予想配当総額を列として追加する。
+
+        Args:
+            statements (Statements): 財務データを提供する`Statements`オブジェクト。
+
+        Returns:
+            Self: `ForecastDividend` 列が追加された、新しいPricesオブジェクト。
+        """
+        data = self.data.join_asof(
+            statements.forecast_dividend(),
+            on="Date",
+            by="Code",
+            check_sortedness=False,
+        )
+        return self.__class__(data)
