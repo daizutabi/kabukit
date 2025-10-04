@@ -8,25 +8,29 @@ from polars import DataFrame
 
 @pytest.fixture
 def df() -> DataFrame:
-    from kabukit.jquants.statements import clean
+    from kabukit.jquants.statements import _cast, _rename
 
-    return DataFrame(
-        {
-            "DisclosedDate": ["2023-01-01", "2023-01-20", "2023-01-30"],
-            "DisclosedTime": ["09:00", "15:30", "12:00"],
-            "LocalCode": ["1300", "1301", "1302"],
-            "NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock": [  # noqa: E501
-                "1",
-                "2",
-                "3",
-            ],
-            "NumberOfTreasuryStockAtTheEndOfFiscalYear": ["4", "5", "6"],
-            "AverageNumberOfShares": ["7.1", "8.2", "9.3"],
-            "TypeOfCurrentPeriod": ["A", "B", "C"],
-            "RetrospectiveRestatement": ["true", "false", ""],
-            "ForecastProfit": ["1.0", "2.0", ""],
-        },
-    ).pipe(clean)
+    return (
+        DataFrame(
+            {
+                "DisclosedDate": ["2023-01-01", "2023-01-20", "2023-01-30"],
+                "DisclosedTime": ["09:00", "15:30", "12:00"],
+                "LocalCode": ["1300", "1301", "1302"],
+                "NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock": [  # noqa: E501
+                    "1",
+                    "2",
+                    "3",
+                ],
+                "NumberOfTreasuryStockAtTheEndOfFiscalYear": ["4", "5", "6"],
+                "AverageNumberOfShares": ["7.1", "8.2", "9.3"],
+                "TypeOfCurrentPeriod": ["A", "B", "C"],
+                "RetrospectiveRestatement": ["true", "false", ""],
+                "ForecastProfit": ["1.0", "2.0", ""],
+            },
+        )
+        .pipe(_rename)
+        .pipe(_cast)
+    )
 
 
 def test_clean_shape(df: DataFrame) -> None:
@@ -121,37 +125,3 @@ def test_with_date() -> None:
     assert x[2] == date(2025, 1, 10)
     assert x[3] == date(2025, 1, 14)
     assert x[4] == date(2025, 1, 14)
-
-
-def test_join_asof() -> None:
-    from datetime import date
-
-    stmt = DataFrame(
-        {
-            "Date": [
-                date(2025, 2, 3),
-                date(2025, 2, 6),
-            ],
-            "EPS": [1, 2],
-        },
-    )
-
-    price = pl.DataFrame(
-        {
-            "Date": [
-                date(2025, 2, 1),
-                date(2025, 2, 2),
-                date(2025, 2, 3),
-                date(2025, 2, 4),
-                date(2025, 2, 5),
-                date(2025, 2, 6),
-                date(2025, 2, 7),
-                date(2025, 2, 8),
-            ],
-            "Close": [3, 4, 5, 6, 7, 8, 9, 10],
-        },
-    )
-
-    df = price.join_asof(stmt, on="Date", strategy="backward")
-    x = df["EPS"].to_list()
-    assert x == [None, None, 1, 1, 1, 2, 2, 2]
