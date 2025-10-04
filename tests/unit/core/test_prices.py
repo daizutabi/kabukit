@@ -280,7 +280,7 @@ def test_with_book_value_yield() -> None:
         [
             Series("BookValuePerShare", [1111.11, 1111.11]),
             Series("BookValueYield", [1.1111, 0.8889]),
-        ]
+        ],
     )
 
     assert_frame_equal(result.data, expected)
