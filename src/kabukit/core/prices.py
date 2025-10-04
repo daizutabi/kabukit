@@ -148,42 +148,6 @@ class Prices(Base):
 
         return self.__class__(data)
 
-    def with_forecast_profit(self, statements: Statements) -> Self:
-        """時系列の予想純利益を列として追加する。
-
-        Args:
-            statements (Statements): 財務データを提供する`Statements`オブジェクト。
-
-        Returns:
-            Self: `ForecastProfit` 列が追加された、新しいPricesオブジェクト。
-        """
-        data = self.data.join_asof(
-            statements.forecast_profit(),
-            on="Date",
-            by="Code",
-            check_sortedness=False,
-        )
-
-        return self.__class__(data)
-
-    def with_forecast_dividend(self, statements: Statements) -> Self:
-        """時系列の予想年間配当総額を列として追加する。
-
-        Args:
-            statements (Statements): 財務データを提供する`Statements`オブジェクト。
-
-        Returns:
-            Self: `ForecastDividend` 列が追加された、新しいPricesオブジェクト。
-        """
-        data = self.data.join_asof(
-            statements.forecast_dividend(),
-            on="Date",
-            by="Code",
-            check_sortedness=False,
-        )
-
-        return self.__class__(data)
-
     def with_book_value_yield(self) -> Self:
         """時系列の一株あたり純資産と純資産利回りを列として追加する。
 
@@ -208,6 +172,25 @@ class Prices(Base):
 
         return self.__class__(data)
 
+
+    def with_forecast_profit(self, statements: Statements) -> Self:
+        """時系列の予想純利益を列として追加する。
+
+        Args:
+            statements (Statements): 財務データを提供する`Statements`オブジェクト。
+
+        Returns:
+            Self: `ForecastProfit` 列が追加された、新しいPricesオブジェクト。
+        """
+        data = self.data.join_asof(
+            statements.forecast_profit(),
+            on="Date",
+            by="Code",
+            check_sortedness=False,
+        )
+
+        return self.__class__(data)
+
     def with_earnings_yield(self) -> Self:
         """時系列の一株あたり純利益と収益利回り(純利益利回り)を列として追加する。
 
@@ -226,6 +209,47 @@ class Prices(Base):
             ),
         ).with_columns(
             (pl.col("EarningsPerShare") / pl.col("RawClose")).alias("EarningsYield"),
+        )
+
+        return self.__class__(data)
+
+
+    def with_forecast_dividend(self, statements: Statements) -> Self:
+        """時系列の予想年間配当総額を列として追加する。
+
+        Args:
+            statements (Statements): 財務データを提供する`Statements`オブジェクト。
+
+        Returns:
+            Self: `ForecastDividend` 列が追加された、新しいPricesオブジェクト。
+        """
+        data = self.data.join_asof(
+            statements.forecast_dividend(),
+            on="Date",
+            by="Code",
+            check_sortedness=False,
+        )
+
+        return self.__class__(data)
+
+    def with_dividend_yield(self) -> Self:
+        """時系列の一株あたり配当金と配当利回りを列として追加する。
+
+        Note:
+            このメソッドを呼び出す前に、`with_forecast_dividend()` および
+            `with_adjusted_shares()` を実行して、予想年間配当総額および
+            調整済み株式数列を事前に計算しておく必要があります。
+
+        Returns:
+            Self: `DividendPerShare`, `DividendYield` 列が追加された、
+            新しいPricesオブジェクト。
+        """
+        data = self.data.with_columns(
+            (pl.col("ForecastDividend") / self._outstanding_shares_expr).alias(
+                "DividendPerShare",
+            ),
+        ).with_columns(
+            (pl.col("DividendPerShare") / pl.col("RawClose")).alias("DividendYield"),
         )
 
         return self.__class__(data)

@@ -112,6 +112,96 @@ def test_with_adjusted_shares() -> None:
     assert_frame_equal(result.data, expected)
 
 
+def test_with_market_cap() -> None:
+    prices_df = DataFrame(
+        {
+            "Date": [
+                date(2023, 1, 1),
+                date(2023, 1, 2),
+                date(2023, 1, 3),
+            ],
+            "Code": ["A", "A", "A"],
+            "RawClose": [100.0, 110.0, 120.0],
+            "AdjustedIssuedShares": [1000, 1000, 2000],
+            "AdjustedTreasuryShares": [100, 100, 200],
+        },
+    )
+
+    prices = Prices(prices_df)
+
+    result = prices.with_market_cap()
+
+    expected = prices_df.with_columns(
+        Series("MarketCap", [90000.0, 99000.0, 216000.0]),
+    )
+
+    assert_frame_equal(result.data, expected)
+
+
+def test_with_equity() -> None:
+    prices_df = DataFrame(
+        {
+            "Date": [
+                date(2023, 4, 1),
+                date(2023, 5, 15),
+                date(2023, 6, 10),
+                date(2023, 3, 10),
+                date(2023, 4, 5),
+            ],
+            "Code": ["A", "A", "A", "B", "B"],
+        },
+    )
+
+    statements_df = DataFrame(
+        {
+            "Date": [
+                date(2023, 3, 31),
+                date(2023, 6, 30),
+                date(2023, 3, 31),
+            ],
+            "Code": ["A", "A", "B"],
+            "Equity": [1000.0, 1200.0, 2000.0],
+        },
+    )
+
+    prices = Prices(prices_df)
+    statements = Statements(statements_df)
+
+    result = prices.with_equity(statements)
+
+    expected = prices_df.with_columns(
+        Series("Equity", [1000.0, 1000.0, 1000.0, None, 2000.0], dtype=pl.Float64),
+    )
+
+    assert_frame_equal(result.data, expected)
+
+
+def test_with_book_value_yield() -> None:
+    prices_df = DataFrame(
+        {
+            "Date": [date(2023, 1, 1), date(2023, 1, 2)],
+            "Code": ["A", "A"],
+            "RawClose": [1000.0, 1250.0],
+            "Equity": [1000000.0, 1000000.0],
+            "AdjustedIssuedShares": [1000, 1000],
+            "AdjustedTreasuryShares": [100, 100],
+        },
+    )
+
+    prices = Prices(prices_df)
+
+    result = prices.with_book_value_yield()
+
+    expected = prices_df.with_columns(
+        [
+            Series("BookValuePerShare", [1111.11, 1111.11]),
+            Series("BookValueYield", [1.1111, 0.8889]),
+        ],
+    )
+
+    assert_frame_equal(result.data, expected, check_exact=False, rel_tol=1e-4)
+
+
 def test_with_forecast_profit() -> None:
     prices_df = DataFrame(
         {
@@ -150,6 +240,32 @@ def test_with_forecast_profit() -> None:
     )
 
     assert_frame_equal(result.data, expected)
+
+
+def test_with_earnings_yield() -> None:
+    prices_df = DataFrame(
+        {
+            "Date": [date(2023, 1, 1), date(2023, 1, 2)],
+            "Code": ["A", "A"],
+            "RawClose": [2000.0, 1800.0],
+            "ForecastProfit": [100000.0, 100000.0],
+            "AdjustedIssuedShares": [1000, 1000],
+            "AdjustedTreasuryShares": [100, 100],
+        },
+    )
+
+    prices = Prices(prices_df)
+
+    result = prices.with_earnings_yield()
+
+    expected = prices_df.with_columns(
+        [
+            Series("EarningsPerShare", [111.1111, 111.1111]),
+            Series("EarningsYield", [0.055556, 0.061728]),
+        ],
+    )
+
+    assert_frame_equal(result.data, expected, check_exact=False, rel_tol=1e-4)
 
 
 def test_with_forecast_dividend() -> None:
@@ -196,77 +312,13 @@ def test_with_forecast_dividend() -> None:
     assert_frame_equal(result.data, expected)
 
 
-def test_with_equity() -> None:
-    prices_df = DataFrame(
-        {
-            "Date": [
-                date(2023, 4, 1),
-                date(2023, 5, 15),
-                date(2023, 6, 10),
-                date(2023, 3, 10),
-                date(2023, 4, 5),
-            ],
-            "Code": ["A", "A", "A", "B", "B"],
-        },
-    )
-
-    statements_df = DataFrame(
-        {
-            "Date": [
-                date(2023, 3, 31),
-                date(2023, 6, 30),
-                date(2023, 3, 31),
-            ],
-            "Code": ["A", "A", "B"],
-            "Equity": [1000.0, 1200.0, 2000.0],
-        },
-    )
-
-    prices = Prices(prices_df)
-    statements = Statements(statements_df)
-
-    result = prices.with_equity(statements)
-
-    expected = prices_df.with_columns(
-        Series("Equity", [1000.0, 1000.0, 1000.0, None, 2000.0], dtype=pl.Float64),
-    )
-
-    assert_frame_equal(result.data, expected)
-
-
-def test_with_market_cap() -> None:
-    prices_df = DataFrame(
-        {
-            "Date": [
-                date(2023, 1, 1),
-                date(2023, 1, 2),
-                date(2023, 1, 3),
-            ],
-            "Code": ["A", "A", "A"],
-            "RawClose": [100.0, 110.0, 120.0],
-            "AdjustedIssuedShares": [1000, 1000, 2000],
-            "AdjustedTreasuryShares": [100, 100, 200],
-        },
-    )
-
-    prices = Prices(prices_df)
-
-    result = prices.with_market_cap()
-
-    expected = prices_df.with_columns(
-        Series("MarketCap", [90000.0, 99000.0, 216000.0]),
-    )
-
-    assert_frame_equal(result.data, expected)
-
-
-def test_with_book_value_yield() -> None:
+def test_with_dividend_yield() -> None:
     prices_df = DataFrame(
         {
             "Date": [date(2023, 1, 1), date(2023, 1, 2)],
             "Code": ["A", "A"],
-            "RawClose": [1000.0, 1250.0],
-            "Equity": [1000000.0, 1000000.0],
+            "RawClose": [1000.0, 1100.0],
+            "ForecastDividend": [45000.0, 45000.0],
             "AdjustedIssuedShares": [1000, 1000],
             "AdjustedTreasuryShares": [100, 100],
         },
@@ -274,38 +326,12 @@ def test_with_book_value_yield() -> None:
 
     prices = Prices(prices_df)
 
-    result = prices.with_book_value_yield()
+    result = prices.with_dividend_yield()
 
     expected = prices_df.with_columns(
         [
-            Series("BookValuePerShare", [1111.11, 1111.11]),
-            Series("BookValueYield", [1.1111, 0.8889]),
-        ],
-    )
-
-    assert_frame_equal(result.data, expected, check_exact=False, rel_tol=1e-4)
-
-
-def test_with_earnings_yield() -> None:
-    prices_df = DataFrame(
-        {
-            "Date": [date(2023, 1, 1), date(2023, 1, 2)],
-            "Code": ["A", "A"],
-            "RawClose": [2000.0, 1800.0],
-            "ForecastProfit": [100000.0, 100000.0],
-            "AdjustedIssuedShares": [1000, 1000],
-            "AdjustedTreasuryShares": [100, 100],
-        },
-    )
-
-    prices = Prices(prices_df)
-
-    result = prices.with_earnings_yield()
-
-    expected = prices_df.with_columns(
-        [
-            Series("EarningsPerShare", [111.1111, 111.1111]),
-            Series("EarningsYield", [0.055556, 0.061728]),
+            Series("DividendPerShare", [50.0, 50.0]),
+            Series("DividendYield", [0.05, 0.04545454]),
         ],
     )
 
