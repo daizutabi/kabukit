@@ -162,3 +162,25 @@ class Prices(Base):
             check_sortedness=False,
         )
         return self.__class__(data)
+
+    def with_book_value_yield(self) -> Self:
+        """時系列の一株あたり純資産と純資産利回りを列として追加する。
+
+        Note:
+            このメソッドを呼び出す前に、`with_equity()` および
+            `with_adjusted_shares()` を実行して、純資産および調整済み株式数
+            列を事前に計算しておく必要があります。
+
+        Returns:
+            Self: `BookValuePerShare`, `BookValueYield` 列が追加された、
+            新しいPricesオブジェクト。
+        """
+        shares = pl.col("AdjustedIssuedShares") - pl.col("AdjustedTreasuryShares")
+        data = self.data.with_columns(
+            (pl.col("Equity") / shares).round(2).alias("BookValuePerShare"),
+        ).with_columns(
+            (pl.col("BookValuePerShare") / pl.col("RawClose"))
+            .round(4)
+            .alias("BookValueYield"),
+        )
+        return self.__class__(data)

@@ -258,3 +258,29 @@ def test_with_market_cap() -> None:
     )
 
     assert_frame_equal(result.data, expected)
+
+
+def test_with_book_value_yield() -> None:
+    prices_df = DataFrame(
+        {
+            "Date": [date(2023, 1, 1), date(2023, 1, 2)],
+            "Code": ["A", "A"],
+            "RawClose": [1000.0, 1250.0],
+            "Equity": [1000000.0, 1000000.0],
+            "AdjustedIssuedShares": [1000, 1000],
+            "AdjustedTreasuryShares": [100, 100],
+        },
+    )
+
+    prices = Prices(prices_df)
+
+    result = prices.with_book_value_yield()
+
+    expected = prices_df.with_columns(
+        [
+            Series("BookValuePerShare", [1111.11, 1111.11]),
+            Series("BookValueYield", [1.1111, 0.8889]),
+        ]
+    )
+
+    assert_frame_equal(result.data, expected)
