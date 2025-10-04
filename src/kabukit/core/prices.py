@@ -61,6 +61,9 @@ class Prices(Base):
             Self: `AdjustedIssuedShares`および`AdjustedTreasuryShares`列が
             追加された、新しいPricesオブジェクト。
         """
+        if "AdjustedIssuedShares" in self.data.columns:
+            return self
+
         shares = statements.shares().rename({"Date": "ReportDate"})
 
         adjusted = (
@@ -139,6 +142,9 @@ class Prices(Base):
         Returns:
             Self: `Equity` 列が追加された、新しいPricesオブジェクト。
         """
+        if "Equity" in self.data.columns:
+            return self
+
         data = self.data.join_asof(
             statements.equity(),
             on="Date",
@@ -172,7 +178,6 @@ class Prices(Base):
 
         return self.__class__(data)
 
-
     def with_forecast_profit(self, statements: Statements) -> Self:
         """時系列の予想純利益を列として追加する。
 
@@ -182,6 +187,9 @@ class Prices(Base):
         Returns:
             Self: `ForecastProfit` 列が追加された、新しいPricesオブジェクト。
         """
+        if "ForecastProfit" in self.data.columns:
+            return self
+
         data = self.data.join_asof(
             statements.forecast_profit(),
             on="Date",
@@ -213,7 +221,6 @@ class Prices(Base):
 
         return self.__class__(data)
 
-
     def with_forecast_dividend(self, statements: Statements) -> Self:
         """時系列の予想年間配当総額を列として追加する。
 
@@ -223,6 +230,9 @@ class Prices(Base):
         Returns:
             Self: `ForecastDividend` 列が追加された、新しいPricesオブジェクト。
         """
+        if "ForecastDividend" in self.data.columns:
+            return self
+
         data = self.data.join_asof(
             statements.forecast_dividend(),
             on="Date",
@@ -253,3 +263,14 @@ class Prices(Base):
         )
 
         return self.__class__(data)
+
+    def with_yields(self, statements: Statements) -> Self:
+        return (
+            self.with_adjusted_shares(statements)
+            .with_equity(statements)
+            .with_book_value_yield()
+            .with_forecast_profit(statements)
+            .with_earnings_yield()
+            .with_forecast_dividend(statements)
+            .with_dividend_yield()
+        )
