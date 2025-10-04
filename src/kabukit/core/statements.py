@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 class Statements(Base):
     def shares(self) -> DataFrame:
-        """発行済株式数を取得する。"""
+        """発行済株式数および自己株式数を取得する。"""
         return self.data.filter(
             pl.col("IssuedShares").is_not_null(),
         ).select(
@@ -20,7 +20,6 @@ class Statements(Base):
             "Code",
             "IssuedShares",
             "TreasuryShares",
-            "AverageOutstandingShares",
         )
 
     def equity(self) -> DataFrame:

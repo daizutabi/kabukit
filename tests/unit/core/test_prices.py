@@ -4,6 +4,7 @@ import polars as pl
 import pytest
 from polars import DataFrame, Series
 from polars.testing import assert_frame_equal
+from pytest_mock import MockerFixture
 
 from kabukit.core.prices import Prices
 from kabukit.core.statements import Statements
@@ -339,6 +340,73 @@ def test_with_dividend_yield() -> None:
 
 
 @pytest.mark.parametrize(
+    ("prices_method_name", "statements_method_name", "statements_return_cols"),
+    [
+        (
+            "with_adjusted_shares",
+            "shares",
+            ["Date", "Code", "IssuedShares", "TreasuryShares"],
+        ),
+        ("with_equity", "equity", ["Date", "Code", "Equity"]),
+        ("with_forecast_profit", "forecast_profit", ["Date", "Code", "ForecastProfit"]),
+        (
+            "with_forecast_dividend",
+            "forecast_dividend",
+            ["Date", "Code", "ForecastDividend"],
+        ),
+    ],
+)
+def test_data_loading_methods_are_idempotent(
+    mocker: MockerFixture,
+    prices_method_name: str,
+    statements_method_name: str,
+    statements_return_cols: list[str],
+) -> None:
+    """データロードメソッドがべき等であることを検証する"""
+    prices_df = DataFrame(
+        {
+            "Date": [date(2023, 1, 1)],
+            "Code": ["A"],
+            "RawClose": [100.0],
+            "AdjustmentFactor": [1.0],
+        },
+    )
+    prices = Prices(prices_df)
+
+    statements = Statements(DataFrame({"Date": [date(2023, 1, 1)], "Code": ["A"]}))
+
+    mock_data = {}
+    for col in statements_return_cols:
+        if col == "Date":
+            mock_data[col] = [date(2023, 1, 1)]
+        elif col == "Code":
+            mock_data[col] = ["A"]
+        else:
+            mock_data[col] = [1.0]  # その他のデータカラムはfloat
+
+    mock_return_df = DataFrame(mock_data)
+
+    mocker.patch.object(
+        statements,
+        statements_method_name,
+        return_value=mock_return_df,
+    )
+    spy = mocker.spy(
+        statements,
+        statements_method_name,
+    )  # モックされたメソッドをスパイする
+
+    method = getattr(prices, prices_method_name)
+    result1 = method(statements)  # 1回目の呼び出し
+    result2 = getattr(result1, prices_method_name)(
+        statements,
+    )  # 1回目の結果に対して2回目の呼び出し
+
+    assert_frame_equal(result1.data, result2.data)
+    assert spy.call_count == 1
+
+
+@pytest.mark.parametrize(
     "method_name",
     ["with_market_cap", "with_book_value_yield", "with_earnings_yield"],
 )
@@ -351,3 +419,55 @@ def test_methods_raise_key_error_without_adjusted_shares(method_name: str) -> No
 
     with pytest.raises(KeyError, match="必要な列が存在しません"):
         method()
+
+
+def test_with_yields() -> None:
+    prices_df = DataFrame(
+        {
+            "Date": [date(2023, 1, 1)],
+            "Code": ["A"],
+            "RawClose": [1000.0],
+            "AdjustmentFactor": [1.0],
+        },
+    )
+
+    statements_df = DataFrame(
+        {
+            "Date": [date(2023, 1, 1)],
+            "Code": ["A"],
+            "IssuedShares": [1000],
+            "TreasuryShares": [100],
+            "Equity": [900000.0],
+            "ForecastProfit": [90000.0],
+            "ForecastDividend": [45000.0],
+            "TypeOfDocument": ["FY"],
+            "NextYearForecastProfit": [90000.0],
+            "ForecastEarningsPerShare": [100.0],
+            "NextYearForecastEarningsPerShare": [100.0],
+            "ForecastDividendPerShareAnnual": [50.0],
+            "NextYearForecastDividendPerShareAnnual": [50.0],
+        },
+    )
+
+    prices = Prices(prices_df)
+    statements = Statements(statements_df)
+
+    result = prices.with_yields(statements)
+
+    expected_df = prices_df.with_columns(
+        [
+            Series("AdjustedIssuedShares", [1000], dtype=pl.Int64),
+            Series("AdjustedTreasuryShares", [100], dtype=pl.Int64),
+            Series("Equity", [900000.0]),
+            Series("BookValuePerShare", [1000.0]),
+            Series("BookValueYield", [1.0]),
+            Series("ForecastProfit", [90000.0]),
+            Series("EarningsPerShare", [100.0]),
+            Series("EarningsYield", [0.1]),
+            Series("ForecastDividend", [45000.0]),
+            Series("DividendPerShare", [50.0]),
+            Series("DividendYield", [0.05]),
+        ],
+    )
+
+    assert_frame_equal(result.data, expected_df, check_exact=False, rel_tol=1e-4)

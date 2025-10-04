@@ -24,7 +24,6 @@ def test_shares() -> None:
             "Code": [3],
             "IssuedShares": [5],
             "TreasuryShares": [7],
-            "AverageOutstandingShares": [9],
         },
     )
 
