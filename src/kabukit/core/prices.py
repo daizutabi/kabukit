@@ -106,7 +106,13 @@ class Prices(Base):
                 .cast(pl.Int64)
                 .name.prefix("Adjusted"),
             )
-            .select("Date", "Code", "AdjustedIssuedShares", "AdjustedTreasuryShares")
+            .select(
+                "Date",
+                "Code",
+                "ReportDate",
+                "AdjustedIssuedShares",
+                "AdjustedTreasuryShares",
+            )
         )
 
         data = self.data.join(adjusted, on=["Date", "Code"], how="left")

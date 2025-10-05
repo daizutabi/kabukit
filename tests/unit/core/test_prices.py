@@ -96,6 +96,18 @@ def test_with_adjusted_shares() -> None:
     expected = prices_df.with_columns(
         [
             Series(
+                "ReportDate",
+                [
+                    date(2023, 3, 31),
+                    date(2023, 6, 30),
+                    date(2023, 6, 30),
+                    None,
+                    date(2023, 4, 30),
+                    date(2023, 4, 30),
+                ],
+                dtype=pl.Date,
+            ),
+            Series(
                 "AdjustedIssuedShares",
                 [1000, 2400, 12000, None, 2000, 1000],
                 dtype=pl.Int64,
@@ -456,6 +468,7 @@ def test_with_yields() -> None:
 
     expected_df = prices_df.with_columns(
         [
+            Series("ReportDate", [date(2023, 1, 1)], dtype=pl.Date),
             Series("AdjustedIssuedShares", [1000], dtype=pl.Int64),
             Series("AdjustedTreasuryShares", [100], dtype=pl.Int64),
             Series("Equity", [900000.0]),
