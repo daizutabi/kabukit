@@ -7,6 +7,7 @@ from unittest.mock import call
 import pytest
 from httpx import HTTPStatusError, Response
 from polars import DataFrame
+from polars.testing import assert_frame_equal
 
 from kabukit.jquants.client import AuthKey, JQuantsClient
 
@@ -376,4 +377,37 @@ async def test_trades_spec_empty(get: AsyncMock, mocker: MockerFixture) -> None:
 
     client = JQuantsClient("test_token")
     df = await client.get_trades_spec()
+    assert df.is_empty()
+
+
+@pytest.mark.asyncio
+async def test_topix(get: AsyncMock, mocker: MockerFixture) -> None:
+    json = {"topix": [{"Date": "2025-01-01", "Open": 100}]}
+    response = Response(200, json=json)
+    get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    client = JQuantsClient("test_token")
+    result = await client.get_topix()
+
+    expected = DataFrame(
+        {
+            "Date": [datetime.date(2025, 1, 1)],
+            "Code": ["TOPIX"],
+            "Open": [100],
+        },
+    )
+
+    assert_frame_equal(result, expected)
+
+
+@pytest.mark.asyncio
+async def test_topix_empty(get: AsyncMock, mocker: MockerFixture) -> None:
+    json: dict[str, list[dict[str, str]]] = {"topix": []}
+    response = Response(200, json=json)
+    get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    client = JQuantsClient("test_token")
+    df = await client.get_topix()
     assert df.is_empty()
