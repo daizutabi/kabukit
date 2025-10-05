@@ -96,6 +96,18 @@ def test_with_adjusted_shares() -> None:
     expected = prices_df.with_columns(
         [
             Series(
+                "ReportDate",
+                [
+                    date(2023, 3, 31),
+                    date(2023, 6, 30),
+                    date(2023, 6, 30),
+                    None,
+                    date(2023, 4, 30),
+                    date(2023, 4, 30),
+                ],
+                dtype=pl.Date,
+            ),
+            Series(
                 "AdjustedIssuedShares",
                 [1000, 2400, 12000, None, 2000, 1000],
                 dtype=pl.Int64,
@@ -456,6 +468,7 @@ def test_with_yields() -> None:
 
     expected_df = prices_df.with_columns(
         [
+            Series("ReportDate", [date(2023, 1, 1)], dtype=pl.Date),
             Series("AdjustedIssuedShares", [1000], dtype=pl.Int64),
             Series("AdjustedTreasuryShares", [100], dtype=pl.Int64),
             Series("Equity", [900000.0]),
@@ -471,3 +484,71 @@ def test_with_yields() -> None:
     )
 
     assert_frame_equal(result.data, expected_df, check_exact=False, rel_tol=1e-4)
+
+
+def test_with_period_stats() -> None:
+    prices_df = DataFrame(
+        {
+            "Date": [date(2023, 1, 1)],
+            "Code": ["A"],
+            "RawClose": [100.0],
+            "Close": [100.0],
+            "AdjustmentFactor": [1.0],
+        },
+    )
+    statements_df = DataFrame(
+        {
+            "Date": [date(2023, 1, 1)],
+            "Code": ["A"],
+            "IssuedShares": [1000],
+            "TreasuryShares": [100],
+            "Equity": [90000.0],
+            "ForecastProfit": [9000.0],
+            "ForecastDividend": [4500.0],
+            "TypeOfDocument": ["FY"],
+            "NextYearForecastProfit": [90000.0],
+            "ForecastEarningsPerShare": [100.0],
+            "NextYearForecastEarningsPerShare": [100.0],
+            "ForecastDividendPerShareAnnual": [50.0],
+            "NextYearForecastDividendPerShareAnnual": [50.0],
+        },
+    )
+
+    prices = Prices(prices_df)
+    statements = Statements(statements_df)
+    processed_prices = prices.with_yields(statements)
+
+    result = processed_prices.with_period_stats()
+
+    expected_df = processed_prices.data.with_columns(
+        [
+            Series("BookValueYield_PeriodOpen", [1.0]),
+            Series("BookValueYield_PeriodHigh", [1.0]),
+            Series("BookValueYield_PeriodLow", [1.0]),
+            Series("BookValueYield_PeriodClose", [1.0]),
+            Series("BookValueYield_PeriodMean", [1.0]),
+            Series("EarningsYield_PeriodOpen", [1.0]),
+            Series("EarningsYield_PeriodHigh", [1.0]),
+            Series("EarningsYield_PeriodLow", [1.0]),
+            Series("EarningsYield_PeriodClose", [1.0]),
+            Series("EarningsYield_PeriodMean", [1.0]),
+            Series("DividendYield_PeriodOpen", [0.5]),
+            Series("DividendYield_PeriodHigh", [0.5]),
+            Series("DividendYield_PeriodLow", [0.5]),
+            Series("DividendYield_PeriodClose", [0.5]),
+            Series("DividendYield_PeriodMean", [0.5]),
+            Series("Close_PeriodOpen", [100.0]),
+            Series("Close_PeriodHigh", [100.0]),
+            Series("Close_PeriodLow", [100.0]),
+            Series("Close_PeriodClose", [100.0]),
+            Series("Close_PeriodMean", [100.0]),
+        ],
+    )
+
+    assert_frame_equal(result.data, expected_df, check_exact=False, rel_tol=1e-4)
+
+
+def test_period_stats_raise_key_error_without_required_columns() -> None:
+    prices = Prices(DataFrame({"Code": ["A"]}))
+    with pytest.raises(KeyError, match="必要な列が存在しません"):
+        prices.with_period_stats()

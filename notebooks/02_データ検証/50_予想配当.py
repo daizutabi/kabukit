@@ -52,6 +52,12 @@ def _(c, prices, statements):
 
 
 @app.cell
+def _(c, prices, statements):
+    prices.with_yields(statements).period_stats().filter(c.Code == "72030")
+    return
+
+
+@app.cell
 def _():
     return
 
