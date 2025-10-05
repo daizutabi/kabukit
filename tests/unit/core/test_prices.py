@@ -546,3 +546,9 @@ def test_with_period_stats() -> None:
     )
 
     assert_frame_equal(result.data, expected_df, check_exact=False, rel_tol=1e-4)
+
+
+def test_period_stats_raise_key_error_without_required_columns() -> None:
+    prices = Prices(DataFrame({"Code": ["A"]}))
+    with pytest.raises(KeyError, match="必要な列が存在しません"):
+        prices.with_period_stats()
