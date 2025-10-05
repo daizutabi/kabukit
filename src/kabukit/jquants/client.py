@@ -12,7 +12,7 @@ from kabukit.core.client import Client
 from kabukit.utils.config import load_dotenv, set_key
 from kabukit.utils.params import get_params
 
-from . import info, prices, statements
+from . import info, prices, statements, topix
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -342,3 +342,32 @@ class JQuantsClient(Client):
             return df
 
         return df.with_columns(pl.col("^.*Date$").str.to_date("%Y-%m-%d", strict=False))
+
+    async def get_topix(
+        self,
+        from_: str | datetime.date | None = None,
+        to: str | datetime.date | None = None,
+    ) -> DataFrame:
+        """日次のTOPIX指数データを取得する。
+
+        Args:
+            from_: 取得期間の開始日。
+            to: 取得期間の終了日。
+
+        Returns:
+            日次のTOPIX指数データを含むPolars DataFrame。
+
+        Raises:
+            HTTPStatusError: APIリクエストが失敗した場合。
+        """
+        params = get_params(from_=from_, to=to)
+
+        url = "/indices/topix"
+        name = "topix"
+
+        dfs = [df async for df in self.iter_pages(url, params, name)]
+        df = pl.concat(dfs)
+        if df.is_empty():
+            return df
+
+        return topix.clean(df)
