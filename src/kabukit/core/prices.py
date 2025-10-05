@@ -337,3 +337,70 @@ class Prices(Base):
             .with_forecast_dividend(statements)
             .with_dividend_yield()
         )
+
+    def with_period_stats(self) -> Self:
+        """各期ごとの各種利回りおよび調整済み終値の統計量を計算し、列として追加する。
+
+        このメソッドは、`Code`と`ReportDate`で定義される各期（決算期間）ごとに、
+        以下の指標の統計量（始値、高値、安値、終値、平均値）を計算し、新しい列として追加します。
+
+        対象指標:
+        *   `BookValueYield` (純資産利回り)
+        *   `EarningsYield` (収益利回り)
+        *   `DividendYield` (配当利回り)
+        *   `Close` (調整済み終値)
+
+        統計量の種類:
+        *   `_PeriodOpen`: 各期の最初の値
+        *   `_PeriodHigh`: 各期の最大値
+        *   `_PeriodLow`: 各期の最小値
+        *   `_PeriodClose`: 各期の最後の値
+        *   `_PeriodMean`: 各期の平均値
+
+        Note:
+            このメソッドを呼び出す前に、対象となる利回りカラムと`Close`、
+            そして`ReportDate`が`self.data`に存在している必要があります。
+            通常、`with_yields()` メソッドを呼び出すことで、これらの前提条件が
+            満たされます。
+
+        Returns:
+            Self: 統計量カラムが追加された、新しいPricesオブジェクト。
+        """
+        # 必要なカラムが存在するかチェック
+        required_cols = {
+            "BookValueYield",
+            "EarningsYield",
+            "DividendYield",
+            "Close",
+            "ReportDate",
+        }
+        if not required_cols.issubset(self.data.columns):
+            missing = required_cols - set(self.data.columns)
+            msg = f"必要な列が存在しません: {missing}。"
+            msg += "事前に `with_yields()` メソッドなどを呼び出してください。"
+            raise KeyError(msg)
+
+        # 統計量を計算するカラムのリスト
+        target_cols = ["BookValueYield", "EarningsYield", "DividendYield", "Close"]
+
+        # 各カラムに対して統計量を計算する式を生成
+        aggs: list[pl.Expr] = []
+        for col in target_cols:
+            aggs.extend(
+                [
+                    pl.col(col).drop_nulls().first().alias(f"{col}_PeriodOpen"),
+                    pl.col(col).max().alias(f"{col}_PeriodHigh"),
+                    pl.col(col).min().alias(f"{col}_PeriodLow"),
+                    pl.col(col).drop_nulls().last().alias(f"{col}_PeriodClose"),
+                    pl.col(col).mean().alias(f"{col}_PeriodMean"),
+                ],
+            )
+
+        # CodeとReportDateでグループ化し、統計量を計算
+        period_stats = self.data.group_by("Code", "ReportDate").agg(aggs)
+
+        # 元のデータに結合
+        # ReportDateは既に存在するので、DateとCodeで結合
+        data = self.data.join(period_stats, on=["Code", "ReportDate"], how="left")
+
+        return self.__class__(data)
