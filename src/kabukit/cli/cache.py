@@ -16,8 +16,6 @@ if TYPE_CHECKING:
 
 app = typer.Typer(add_completion=False, help="キャッシュを管理します。")
 
-console = Console()
-
 
 def add_to_tree(tree: Tree, path: Path) -> None:
     for p in sorted(path.iterdir()):
@@ -31,6 +29,7 @@ def add_to_tree(tree: Tree, path: Path) -> None:
 @app.command()
 def tree() -> None:
     """キャッシュディレクトリのツリー構造を表示します。"""
+    console = Console()
     cache_dir = get_cache_dir()
 
     if not cache_dir.exists():
@@ -45,6 +44,7 @@ def tree() -> None:
 @app.command()
 def clean() -> None:
     """キャッシュディレクトリを削除します。"""
+    console = Console()
     cache_dir = get_cache_dir()
 
     if not cache_dir.exists():
