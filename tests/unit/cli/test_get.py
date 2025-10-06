@@ -207,3 +207,41 @@ def test_get_all_all_codes(
     app_prices.assert_awaited_once_with(None)
     app_list.assert_awaited_once_with()
     app_reports.assert_awaited_once_with()
+
+
+def test_get_statements_interrupt(fetch_all: AsyncMock) -> None:
+    fetch_all.side_effect = KeyboardInterrupt
+
+    result = runner.invoke(app, ["get", "statements"])
+
+    assert result.exit_code == 1
+    assert "中断しました" in result.stdout
+    fetch_all.assert_awaited_once_with("statements", progress=tqdm.asyncio.tqdm)
+
+
+def test_get_list_interrupt(fetch_list: AsyncMock) -> None:
+    fetch_list.side_effect = KeyboardInterrupt
+
+    result = runner.invoke(app, ["get", "list"])
+
+    assert result.exit_code == 1
+    assert "中断しました" in result.stdout
+    fetch_list.assert_awaited_once_with(years=10, progress=tqdm.asyncio.tqdm)
+
+
+def test_get_reports_interrupt(
+    fetch_csv: AsyncMock,
+    List: MagicMock,  # noqa: N803
+    mocker: MockerFixture,
+) -> None:
+    mock_read_instance = mocker.MagicMock()
+    mock_read_instance.data = MOCK_LIST_DF
+    List.read.return_value = mock_read_instance
+    fetch_csv.side_effect = KeyboardInterrupt
+
+    result = runner.invoke(app, ["get", "reports"])
+
+    assert result.exit_code == 1
+    assert "中断しました" in result.stdout
+    doc_ids = fetch_csv.call_args[0][0]
+    assert sorted(doc_ids.to_list()) == ["doc1", "doc2"]

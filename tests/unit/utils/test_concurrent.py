@@ -79,12 +79,13 @@ class MockClient(Client):
 
 @pytest.mark.asyncio
 async def test_stream() -> None:
-    from kabukit.utils.concurrent import Stream
+    from kabukit.utils.concurrent import get_stream
 
-    stream = Stream(MockClient, "data", args=[1, 2, 3])
+    async with MockClient() as client:
+        stream = get_stream(client, "data", args=[1, 2, 3])
 
-    dfs = [df async for df in stream]
-    assert sorted(df["Code"].to_list() for df in dfs) == [[1], [2], [3]]
+        dfs = [df async for df in stream]
+        assert sorted(df["Code"].to_list() for df in dfs) == [[1], [2], [3]]
 
 
 @pytest.mark.asyncio

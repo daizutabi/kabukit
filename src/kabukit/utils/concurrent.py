@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass
+import contextlib
 from typing import TYPE_CHECKING, Any, Protocol
 
 import polars as pl
@@ -48,10 +48,17 @@ async def collect[R](
         async with semaphore:
             return await awaitable
 
-    futures = (run(awaitable) for awaitable in awaitables)
+    tasks = {asyncio.create_task(run(awaitable)) for awaitable in awaitables}
 
-    async for future in asyncio.as_completed(futures):
-        yield await future
+    try:
+        async for future in asyncio.as_completed(tasks):
+            with contextlib.suppress(asyncio.CancelledError):
+                yield await future
+    finally:
+        for task in tasks:
+            task.cancel()
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
 
 
 async def collect_fn[T, R](
@@ -92,19 +99,16 @@ type Callback = Callable[[DataFrame], DataFrame | None]
 type Progress = type[progress_bar[Any] | tqdm[Any]] | _Progress
 
 
-@dataclass
-class Stream:
-    cls: type[Client]
-    resource: str
-    args: list[Any]
-    max_concurrency: int | None = None
+async def get_stream(
+    client: Client,
+    resource: str,
+    args: list[Any],
+    max_concurrency: int | None = None,
+) -> AsyncIterator[DataFrame]:
+    fn = getattr(client, f"get_{resource}")
 
-    async def __aiter__(self) -> AsyncIterator[DataFrame]:
-        async with self.cls() as client:
-            fn = getattr(client, f"get_{self.resource}")
-
-            async for df in collect_fn(fn, self.args, self.max_concurrency):
-                yield df
+    async for df in collect_fn(fn, args, max_concurrency):
+        yield df
 
 
 async def fetch(
@@ -137,13 +141,14 @@ async def fetch(
             すべての情報を含む単一のDataFrame。
     """
     args = list(args)
-    stream = Stream(cls, resource, args, max_concurrency)
+    async with cls() as client:
+        stream = get_stream(client, resource, args, max_concurrency)
 
-    if progress:
-        stream = progress(aiter(stream), total=len(args))
+        if progress:
+            stream = progress(stream, total=len(args))
 
-    if callback:
-        stream = (x if (r := callback(x)) is None else r async for x in stream)
+        if callback:
+            stream = (x if (r := callback(x)) is None else r async for x in stream)
 
-    dfs = [df async for df in stream if not df.is_empty()]
-    return pl.concat(dfs) if dfs else pl.DataFrame()
+        dfs = [df async for df in stream if not df.is_empty()]
+        return pl.concat(dfs) if dfs else pl.DataFrame()
