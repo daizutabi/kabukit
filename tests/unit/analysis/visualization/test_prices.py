@@ -1,15 +1,16 @@
-from typing import cast
-
 import altair as alt
 import polars as pl
 import pytest
 
-from kabukit.analysis.visualization import (
+from kabukit.analysis.visualization.prices import (
     plot_prices,
     plot_prices_candlestick,
     plot_prices_volume,
 )
 from kabukit.core.prices import Prices
+
+# pyright: reportArgumentType=false
+# pyright: reportUnknownMemberType=false
 
 
 @pytest.fixture
@@ -35,20 +36,20 @@ def test_plot_prices(sample_prices: Prices):
 
 def test_plot_prices_unsupported_kind(sample_prices: Prices):
     with pytest.raises(NotImplementedError):
-        plot_prices(sample_prices, kind="line")  # pyright: ignore[reportArgumentType]
+        plot_prices(sample_prices, kind="line")
 
 
 def test_plot_prices_candlestick(sample_prices: Prices):
     chart = plot_prices_candlestick(sample_prices)
     assert isinstance(chart, alt.LayerChart)
     assert len(chart.layer) == 2
-    assert chart.encoding.x.shorthand == "Date:T"  # pyright: ignore[reportUnknownMemberType]
-    assert chart.encoding.y["title"] == "株価"  # pyright: ignore[reportUnknownMemberType]
+    assert chart.encoding.x.shorthand == "Date:T"
+    assert chart.encoding.y["title"] == "株価"
 
 
 def test_plot_prices_volume(sample_prices: Prices):
     chart = plot_prices_volume(sample_prices)
     assert isinstance(chart, alt.Chart)
-    assert chart.mark == "bar"  # pyright: ignore[reportUnknownMemberType]
-    assert chart.encoding.x.shorthand == "Date:T"  # pyright: ignore[reportUnknownMemberType]
-    assert chart.encoding.y.shorthand == "Volume:Q"  # pyright: ignore[reportUnknownMemberType]
+    assert chart.mark == "bar"
+    assert chart.encoding.x.shorthand == "Date:T"
+    assert chart.encoding.y.shorthand == "Volume:Q"
