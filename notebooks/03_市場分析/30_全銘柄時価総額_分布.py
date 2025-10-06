@@ -4,11 +4,12 @@ __generated_with = "0.16.5"
 app = marimo.App(width="medium")
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
-    mo.md("# 3. 全銘柄 時価総額の分布分析")
     mo.md(
         """
+    # 全銘柄 時価総額の分布分析
+
     最新時点での市場の構造を把握します。特に、どのような規模の企業（大型株、中型株、小型株）が
     どれくらいの数存在するのかを理解するために、時価総額の分布を可視化します。
     """
