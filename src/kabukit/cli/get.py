@@ -57,7 +57,12 @@ async def _fetch(
 
     from kabukit.jquants.concurrent import fetch_all
 
-    df = await fetch_all(target, progress=tqdm.asyncio.tqdm, **kwargs)
+    try:
+        df = await fetch_all(target, progress=tqdm.asyncio.tqdm, **kwargs)
+    except KeyboardInterrupt:
+        typer.echo("中断しました。")
+        raise typer.Exit(1) from None
+
     typer.echo(df)
     path = cls(df).write()
     typer.echo(f"全銘柄の{message}を '{path}' に保存しました。")
@@ -100,7 +105,12 @@ async def list_() -> None:
     from kabukit.core.list import List
     from kabukit.edinet.concurrent import fetch_list
 
-    df = await fetch_list(years=10, progress=tqdm.asyncio.tqdm)
+    try:
+        df = await fetch_list(years=10, progress=tqdm.asyncio.tqdm)
+    except (KeyboardInterrupt, RuntimeError):
+        typer.echo("中断しました。")
+        raise typer.Exit(1) from None
+
     typer.echo(df)
     path = List(df).write()
     typer.echo(f"報告書一覧を '{path}' に保存しました。")
@@ -125,7 +135,12 @@ async def reports() -> None:
     lst = df.filter(pl.col("csvFlag"), pl.col("secCode").is_not_null())
     doc_ids = lst["docID"].unique()
 
-    df = await fetch_csv(doc_ids, limit=1000, progress=tqdm.asyncio.tqdm)
+    try:
+        df = await fetch_csv(doc_ids, limit=1000, progress=tqdm.asyncio.tqdm)
+    except (KeyboardInterrupt, RuntimeError):
+        typer.echo("中断しました。")
+        raise typer.Exit(1) from None
+
     typer.echo(df)
     path = Reports(df).write()
     typer.echo(f"報告書を '{path}' に保存しました。")
