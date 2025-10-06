@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from pytest_mock import MockerFixture
@@ -17,6 +18,7 @@ def test_cache_tree_not_exist(mocker: MockerFixture) -> None:
 
 
 def test_cache_tree_exists(mocker: MockerFixture, tmp_path: Path) -> None:
+    mocker.patch.dict(os.environ, {"NO_COLOR": "1"})
     mock_get_cache_dir = mocker.patch("kabukit.cli.cache.get_cache_dir")
     mock_get_cache_dir.return_value = tmp_path
     (tmp_path / "info").mkdir()
