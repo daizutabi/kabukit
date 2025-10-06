@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import dotenv
-from platformdirs import user_config_dir
+from platformdirs import user_cache_dir, user_config_dir
 
 
 def get_dotenv_path() -> Path:
@@ -21,3 +21,7 @@ def set_key(key: str, value: str) -> tuple[bool | None, str, str]:
 def load_dotenv() -> bool:
     dotenv_path = get_dotenv_path()
     return dotenv.load_dotenv(dotenv_path)
+
+
+def get_cache_dir() -> Path:
+    return Path(user_cache_dir("kabukit"))

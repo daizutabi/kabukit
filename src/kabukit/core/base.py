@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 import datetime
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import polars as pl
-from platformdirs import user_cache_dir
+
+from kabukit.utils.config import get_cache_dir
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+    from pathlib import Path
     from typing import Any, Self
 
     from polars import DataFrame
@@ -24,7 +25,7 @@ class Base:
     @classmethod
     def data_dir(cls) -> Path:
         clsname = cls.__name__.lower()
-        return Path(user_cache_dir("kabukit")) / clsname
+        return get_cache_dir() / clsname
 
     def write(self) -> Path:
         data_dir = self.data_dir()
