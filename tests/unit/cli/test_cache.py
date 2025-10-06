@@ -24,7 +24,7 @@ def test_cache_tree_exists(mocker: MockerFixture, tmp_path: Path) -> None:
 
     result = runner.invoke(app, ["cache", "tree"])
     assert result.exit_code == 0
-    assert str(tmp_path) in result.stdout
+    assert str(tmp_path) in result.stdout.replace("\n", "")
     assert "info" in result.stdout
     assert "test.parquet" in result.stdout
 
