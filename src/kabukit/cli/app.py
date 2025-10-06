@@ -5,7 +5,7 @@ from __future__ import annotations
 import typer
 from async_typer import AsyncTyper  # pyright: ignore[reportMissingTypeStubs]
 
-from . import auth, get
+from . import auth, cache, get
 
 app = AsyncTyper(
     add_completion=False,
@@ -13,6 +13,7 @@ app = AsyncTyper(
 )
 app.add_typer(auth.app, name="auth")
 app.add_typer(get.app, name="get")
+app.add_typer(cache.app, name="cache")
 
 
 @app.command()
