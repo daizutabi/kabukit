@@ -22,7 +22,7 @@ def test_cache_tree_exists(mocker: MockerFixture, tmp_path: Path) -> None:
     (tmp_path / "info").mkdir()
     (tmp_path / "info" / "test.parquet").touch()
 
-    result = runner.invoke(app, ["cache", "tree"], env={"NO_COLOR": "1"})
+    result = runner.invoke(app, ["cache", "tree"])
     assert result.exit_code == 0
     assert str(tmp_path) in result.stdout
     assert "info" in result.stdout
@@ -55,7 +55,7 @@ def test_cache_clean_error(mocker: MockerFixture, tmp_path: Path) -> None:
     mock_rmtree = mocker.patch("shutil.rmtree", side_effect=OSError("Test error"))
     (tmp_path / "info").mkdir()
 
-    result = runner.invoke(app, ["cache", "clean"])
+    result = runner.invoke(app, ["cache", "clean"], env={"NO_COLOR": "1"})
     assert result.exit_code == 1
     mock_rmtree.assert_called_once_with(tmp_path)
     assert "エラーが発生しました" in result.stdout

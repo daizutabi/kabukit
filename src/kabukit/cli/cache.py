@@ -20,7 +20,7 @@ app = typer.Typer(add_completion=False, help="キャッシュを管理します�
 def add_to_tree(tree: Tree, path: Path) -> None:
     for p in sorted(path.iterdir()):
         if p.is_dir():
-            branch = tree.add(f"[bold blue]{p.name}[/bold blue]")
+            branch = tree.add(p.name)
             add_to_tree(branch, p)
         else:
             tree.add(p.name)
@@ -29,14 +29,14 @@ def add_to_tree(tree: Tree, path: Path) -> None:
 @app.command()
 def tree() -> None:
     """キャッシュディレクトリのツリー構造を表示します。"""
-    console = Console()
     cache_dir = get_cache_dir()
 
     if not cache_dir.exists():
-        console.print(f"キャッシュディレクトリ '{cache_dir}' は存在しません。")
+        typer.echo(f"キャッシュディレクトリ '{cache_dir}' は存在しません。")
         return
 
-    tree_view = Tree(f"[bold green]{cache_dir}[/bold green]")
+    console = Console()
+    tree_view = Tree(str(cache_dir))
     add_to_tree(tree_view, cache_dir)
     console.print(tree_view)
 
@@ -44,19 +44,18 @@ def tree() -> None:
 @app.command()
 def clean() -> None:
     """キャッシュディレクトリを削除します。"""
-    console = Console()
     cache_dir = get_cache_dir()
 
     if not cache_dir.exists():
-        console.print(f"キャッシュディレクトリ '{cache_dir}' は存在しません。")
+        typer.echo(f"キャッシュディレクトリ '{cache_dir}' は存在しません。")
         return
 
     try:
         shutil.rmtree(cache_dir)
         msg = f"キャッシュディレクトリ '{cache_dir}' を正常にクリーンアップしました。"
-        console.print(msg)
+        typer.echo(msg)
     except OSError:
         msg = f"キャッシュディレクトリ '{cache_dir}' のクリーンアップ中に"
         msg += "エラーが発生しました。"
-        console.print(msg, style="bold red")
+        typer.secho(msg, fg=typer.colors.RED, bold=True)
         raise typer.Exit(1) from None
