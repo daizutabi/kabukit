@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from kabukit.utils import concurrent
 
 from .client import JQuantsClient
-from .info import get_codes
+from .info import get_target_codes
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -80,7 +80,7 @@ async def fetch_all(
             すべての銘柄の財務情報を含む単一のDataFrame。
     """
 
-    codes = await get_codes()
+    codes = await get_target_codes()
     codes = codes[:limit]
 
     return await fetch(
