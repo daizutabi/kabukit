@@ -44,9 +44,20 @@ def client(mocker: MockerFixture) -> MagicMock:
 def get_info(client: MagicMock, mocker: MockerFixture) -> AsyncMock:
     df = DataFrame(
         {
-            "Code": ["1301", "1302", "1303"],
-            "MarketCodeName": ["グロース", "スタンダード", "TOKYO PRO MARKET"],
-            "Sector17CodeName": ["情報・通信業", "その他", "サービス業"],
+            "Code": ["1301", "1302", "1303", "1304"],
+            "MarketCodeName": [
+                "グロース",
+                "スタンダード",
+                "TOKYO PRO MARKET",
+                "グロース",
+            ],
+            "Sector17CodeName": [
+                "情報・通信業",
+                "その他",
+                "サービス業",
+                "情報・通信業",
+            ],
+            "CompanyName": ["A", "B", "C", "A（優先株式）"],  # noqa: RUF001
         },
     )
 
@@ -57,8 +68,8 @@ def get_info(client: MagicMock, mocker: MockerFixture) -> AsyncMock:
 
 @pytest.mark.asyncio
 async def test_get_codes(get_info: AsyncMock) -> None:
-    from kabukit.jquants.info import get_codes
+    from kabukit.jquants.info import get_target_codes
 
-    codes = await get_codes()
+    codes = await get_target_codes()
     get_info.assert_awaited_once()
     assert codes == ["1301"]
