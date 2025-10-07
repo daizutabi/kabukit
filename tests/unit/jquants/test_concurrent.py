@@ -33,10 +33,10 @@ def mock_util_fetch(mocker: MockerFixture) -> AsyncMock:
 
 
 @pytest.fixture
-def mock_get_codes(mocker: MockerFixture) -> AsyncMock:
-    """kabukit.jquants.info.get_codes のモック"""
+def mock_get_target_codes(mocker: MockerFixture) -> AsyncMock:
+    """kabukit.jquants.info.get_target_codes のモック"""
     return mocker.patch(
-        "kabukit.jquants.concurrent.get_codes",
+        "kabukit.jquants.concurrent.get_target_codes",
         new_callable=mocker.AsyncMock,
     )
 
@@ -71,10 +71,13 @@ async def test_fetch(mock_util_fetch: AsyncMock) -> None:
 
 
 @pytest.mark.asyncio
-async def test_fetch_all(mocker: MockerFixture, mock_get_codes: AsyncMock) -> None:
+async def test_fetch_all(
+    mocker: MockerFixture,
+    mock_get_target_codes: AsyncMock,
+) -> None:
     from kabukit.jquants.concurrent import fetch_all
 
-    mock_get_codes.return_value = ["1111", "2222", "3333"]
+    mock_get_target_codes.return_value = ["1111", "2222", "3333"]
     mock_fetch = mocker.patch(
         "kabukit.jquants.concurrent.fetch",
         new_callable=mocker.AsyncMock,
@@ -90,7 +93,7 @@ async def test_fetch_all(mocker: MockerFixture, mock_get_codes: AsyncMock) -> No
     )
 
     assert result.equals(DataFrame({"b": [2]}))
-    mock_get_codes.assert_awaited_once()
+    mock_get_target_codes.assert_awaited_once()
     mock_fetch.assert_awaited_once_with(
         "test_resource",
         ["1111", "2222"],

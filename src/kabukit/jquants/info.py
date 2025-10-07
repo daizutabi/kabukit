@@ -11,10 +11,13 @@ def clean(df: DataFrame) -> DataFrame:
     ).drop("^.+Code$", "CompanyNameEnglish")
 
 
-async def get_codes() -> list[str]:
-    """銘柄コードのリストを返す。
+async def get_target_codes() -> list[str]:
+    """分析対象となる銘柄コードのリストを返す。
 
-    市場「TOKYO PRO MARKET」と業種「その他」を除外した銘柄を対象とする。
+    以下の条件を満たす銘柄は対象外とする。
+    - 市場: TOKYO PRO MARKET
+    - 業種: その他 -- (投資信託など)
+    - 優先株式
     """
     from .client import JQuantsClient
 
@@ -25,6 +28,7 @@ async def get_codes() -> list[str]:
         info.filter(
             pl.col("MarketCodeName") != "TOKYO PRO MARKET",
             pl.col("Sector17CodeName") != "その他",
+            ~pl.col("CompanyName").str.contains("優先株式"),
         )
         .get_column("Code")
         .to_list()

@@ -84,9 +84,17 @@ def test_rename(df: DataFrame) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_codes() -> None:
-    from kabukit.jquants.info import get_codes
+async def test_get_target_codes() -> None:
+    from kabukit.jquants.info import get_target_codes
 
-    codes = await get_codes()
+    codes = await get_target_codes()
     assert "72030" in codes
     assert "99840" in codes
+
+
+@pytest.mark.asyncio
+async def test_get_target_codes_all_ends_with_zero() -> None:
+    from kabukit.jquants.info import get_target_codes
+
+    codes = await get_target_codes()
+    assert all(code.endswith("0") for code in codes)
