@@ -23,33 +23,35 @@ MOCK_PATH = "fake/path.csv"
 
 
 @pytest.fixture
-def jquants_client(mocker: MockerFixture) -> MagicMock:
+def mock_jquants_client(mocker: MockerFixture) -> MagicMock:
     return mocker.patch("kabukit.jquants.client.JQuantsClient").return_value
 
 
 @pytest.fixture
-def get_info(jquants_client: MagicMock, mocker: MockerFixture) -> AsyncMock:
-    get_info = mocker.AsyncMock(return_value=MOCK_DF)
-    jquants_client.__aenter__.return_value.get_info = get_info
-    return get_info
+def mock_get_info(mock_jquants_client: MagicMock, mocker: MockerFixture) -> AsyncMock:
+    mock_get_info = mocker.AsyncMock(return_value=MOCK_DF)
+    mock_jquants_client.__aenter__.return_value.get_info = mock_get_info
+    return mock_get_info
 
 
 @pytest.fixture
-def get_statements(jquants_client: MagicMock, mocker: MockerFixture) -> AsyncMock:
-    get_statements = mocker.AsyncMock(return_value=MOCK_DF)
-    jquants_client.__aenter__.return_value.get_statements = get_statements
-    return get_statements
+def mock_get_statements(
+    mock_jquants_client: MagicMock, mocker: MockerFixture
+) -> AsyncMock:
+    mock_get_statements = mocker.AsyncMock(return_value=MOCK_DF)
+    mock_jquants_client.__aenter__.return_value.get_statements = mock_get_statements
+    return mock_get_statements
 
 
 @pytest.fixture
-def get_prices(jquants_client: MagicMock, mocker: MockerFixture) -> AsyncMock:
-    get_prices = mocker.AsyncMock(return_value=MOCK_DF)
-    jquants_client.__aenter__.return_value.get_prices = get_prices
-    return get_prices
+def mock_get_prices(mock_jquants_client: MagicMock, mocker: MockerFixture) -> AsyncMock:
+    mock_get_prices = mocker.AsyncMock(return_value=MOCK_DF)
+    mock_jquants_client.__aenter__.return_value.get_prices = mock_get_prices
+    return mock_get_prices
 
 
 @pytest.fixture
-def fetch_all(mocker: MockerFixture) -> AsyncMock:
+def mock_fetch_all(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
         "kabukit.jquants.concurrent.fetch_all",
         new_callable=mocker.AsyncMock,
@@ -58,43 +60,43 @@ def fetch_all(mocker: MockerFixture) -> AsyncMock:
 
 
 @pytest.fixture
-def Info(mocker: MockerFixture) -> MagicMock:
+def MockInfo(mocker: MockerFixture) -> MagicMock:
     return mocker.patch("kabukit.core.info.Info")
 
 
 @pytest.fixture
-def info(Info: MagicMock) -> MagicMock:  # noqa: N803
-    info = Info.return_value
-    info.write.return_value = MOCK_PATH
-    return info
+def mock_info(MockInfo: MagicMock) -> MagicMock:  # noqa: N803
+    instance = MockInfo.return_value
+    instance.write.return_value = MOCK_PATH
+    return instance
 
 
 @pytest.fixture
-def Statements(mocker: MockerFixture) -> MagicMock:
+def MockStatements(mocker: MockerFixture) -> MagicMock:
     return mocker.patch("kabukit.core.statements.Statements")
 
 
 @pytest.fixture
-def statements(Statements: MagicMock) -> MagicMock:  # noqa: N803
-    instance = Statements.return_value
+def mock_statements(MockStatements: MagicMock) -> MagicMock:  # noqa: N803
+    instance = MockStatements.return_value
     instance.write.return_value = MOCK_PATH
     return instance
 
 
 @pytest.fixture
-def Prices(mocker: MockerFixture) -> MagicMock:
+def MockPrices(mocker: MockerFixture) -> MagicMock:
     return mocker.patch("kabukit.core.prices.Prices")
 
 
 @pytest.fixture
-def prices(Prices: MagicMock) -> MagicMock:  # noqa: N803
-    instance = Prices.return_value
+def mock_prices(MockPrices: MagicMock) -> MagicMock:  # noqa: N803
+    instance = MockPrices.return_value
     instance.write.return_value = MOCK_PATH
     return instance
 
 
 @pytest.fixture
-def fetch_list(mocker: MockerFixture) -> AsyncMock:
+def mock_fetch_list(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
         "kabukit.edinet.concurrent.fetch_list",
         new_callable=mocker.AsyncMock,
@@ -103,7 +105,7 @@ def fetch_list(mocker: MockerFixture) -> AsyncMock:
 
 
 @pytest.fixture
-def fetch_csv(mocker: MockerFixture) -> AsyncMock:
+def mock_fetch_csv(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
         "kabukit.edinet.concurrent.fetch_csv",
         new_callable=mocker.AsyncMock,
@@ -112,24 +114,24 @@ def fetch_csv(mocker: MockerFixture) -> AsyncMock:
 
 
 @pytest.fixture
-def List(mocker: MockerFixture) -> MagicMock:
+def MockList(mocker: MockerFixture) -> MagicMock:
     return mocker.patch("kabukit.core.list.List")
 
 
 @pytest.fixture
-def list_obj(List: MagicMock) -> MagicMock:  # noqa: N803
-    instance = List.return_value
+def mock_list(MockList: MagicMock) -> MagicMock:  # noqa: N803
+    instance = MockList.return_value
     instance.write.return_value = MOCK_PATH
     return instance
 
 
 @pytest.fixture
-def Reports(mocker: MockerFixture) -> MagicMock:
+def MockReports(mocker: MockerFixture) -> MagicMock:
     return mocker.patch("kabukit.core.reports.Reports")
 
 
 @pytest.fixture
-def reports(Reports: MagicMock) -> MagicMock:  # noqa: N803
-    instance = Reports.return_value
+def mock_reports(MockReports: MagicMock) -> MagicMock:  # noqa: N803
+    instance = MockReports.return_value
     instance.write.return_value = MOCK_PATH
     return instance

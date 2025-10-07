@@ -12,9 +12,9 @@ runner = CliRunner()
 
 
 @pytest.mark.parametrize("command", ["jquants", "j"])
-def test_jquants_success(jquants_client: MagicMock, command: str) -> None:
+def test_jquants_success(mock_jquants_client: MagicMock, command: str) -> None:
     auth = AsyncMock()
-    jquants_client.__aenter__.return_value.auth = auth
+    mock_jquants_client.__aenter__.return_value.auth = auth
     result = runner.invoke(app, ["auth", command], input="t@e.com\n123\n")
     assert result.exit_code == 0
     assert "J-Quantsのリフレッシュトークン・IDトークンを保存しました。" in result.stdout
@@ -22,8 +22,8 @@ def test_jquants_success(jquants_client: MagicMock, command: str) -> None:
 
 
 @pytest.mark.parametrize("command", ["jquants", "j"])
-def test_jquants_error(jquants_client: MagicMock, command: str) -> None:
-    jquants_client.__aenter__.return_value.auth = AsyncMock(
+def test_jquants_error(mock_jquants_client: MagicMock, command: str) -> None:
+    mock_jquants_client.__aenter__.return_value.auth = AsyncMock(
         side_effect=HTTPStatusError(
             "400 Bad Request",
             request=Request("POST", "http://example.com"),
@@ -37,18 +37,18 @@ def test_jquants_error(jquants_client: MagicMock, command: str) -> None:
 
 
 @pytest.fixture
-def set_key(mocker: MockerFixture) -> MagicMock:
+def mock_set_key(mocker: MockerFixture) -> MagicMock:
     return mocker.patch("kabukit.utils.config.set_key")
 
 
 @pytest.mark.parametrize("command", ["edinet", "e"])
-def test_edinet(set_key: MagicMock, command: str) -> None:
+def test_edinet(mock_set_key: MagicMock, command: str) -> None:
     api_key = "my_edinet_api_key"
     result = runner.invoke(app, ["auth", command], input=f"{api_key}\n")
 
     assert result.exit_code == 0
     assert "EDINETのAPIキーを保存しました。" in result.stdout
-    set_key.assert_called_once_with("EDINET_API_KEY", api_key)
+    mock_set_key.assert_called_once_with("EDINET_API_KEY", api_key)
 
 
 def test_show() -> None:
@@ -58,13 +58,13 @@ def test_show() -> None:
 
 
 @pytest.fixture
-def get_dotenv_path(mocker: MockerFixture) -> MagicMock:
+def mock_get_dotenv_path(mocker: MockerFixture) -> MagicMock:
     return mocker.patch("kabukit.utils.config.get_dotenv_path")
 
 
-def test_show_with_config(get_dotenv_path: MagicMock, tmp_path: Path) -> None:
+def test_show_with_config(mock_get_dotenv_path: MagicMock, tmp_path: Path) -> None:
     config_path = tmp_path / ".env"
-    get_dotenv_path.return_value = config_path
+    mock_get_dotenv_path.return_value = config_path
 
     config_content = {
         "JQUANTS_REFRESH_TOKEN": "dummy_refresh_token",
