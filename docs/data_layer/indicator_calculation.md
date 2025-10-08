@@ -76,7 +76,7 @@
 
     `予想年間配当総額 = ForecastDividendPerShareAnnual × (ForecastProfit / ForecastEarningsPerShare)`
 
-(注1) `financial_statements_schema.md` に記載の通り、`ForecastTotalDividendPaidAnnual` および `NextYearForecastTotalDividendAnnual` はデータが欠落しているか、カラム自体が存在しない。
+(注1) `ForecastTotalDividendPaidAnnual` および `NextYearForecastTotalDividendAnnual` はデータが欠落しているか、カラム自体が存在しない。
 
 (注2) 予想の期間中に株式分割などにより株式数が変化することが見込まれるとき、「一株あたり」の算出に用いられる株式数は`AverageOutstandingShares`に一致しない。また、そのような株式数は決算データからは得られない。そのため、予想DPSと予想EPSの算出に用いられる株式数が一致するとの仮定に基づき、上式で計算する。
 

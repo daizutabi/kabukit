@@ -1,4 +1,4 @@
-# Financial Statements Schema
+# J-Quants 財務諸表スキーマ
 
 ## 一覧
 
@@ -60,9 +60,12 @@ FYFinancialStatements    o   o   o   o                    o
 
 ## 配当金総額の算出方法
 
-- 実績値では以下が成り立つ
-  - ResultTotalDividendPaidAnnual = ResultDividendPerShareAnnual * AverageOutstandingShares
-- 予想値では、データが欠落しているので、同様にして、
-  - ForecastTotalDividendPaidAnnual = ForecastDividendPerShareAnnual * AverageOutstandingShares
-  - NextYearForecastTotalDividendPaidAnnual = NextYearForecastDividendPerShareAnnual * AverageOutstandingShares
-  で計算する。
+J-Quants APIから直接取得できる `ForecastTotalDividendPaidAnnual` などの配当金総額の予想値は、データが欠落しているかカラム自体が存在しません。
+
+そのため、`kabukit`では、他の予想値から配当金総額を算出します。
+
+- **実績値**:
+  - `ResultTotalDividendPaidAnnual` は `ResultDividendPerShareAnnual * AverageOutstandingShares` で検証可能です。
+- **予想値**:
+  - 予想1株あたり配当 (`ForecastDividendPerShareAnnual`) と、予想EPSの計算に使われた株式数（`ForecastProfit / ForecastEarningsPerShare` で逆算）を掛け合わせて算出します。
+  - 詳細な計算ロジックと、その背景にある設計思想については、[株価指標の計算方針](indicator_calculation.md)を参照してください。
