@@ -149,32 +149,6 @@ class JQuantsClient(Client):
         self.set_id_token(id_token)
         return self
 
-    async def get_info(
-        self,
-        code: str | None = None,
-        date: str | datetime.date | None = None,
-        *,
-        clean: bool = True,
-    ) -> DataFrame:
-        """銘柄情報を取得する。
-
-        Args:
-            code (str, optional): 情報を取得する銘柄のコード。
-            date (str | datetime.date, optional): 情報を取得する日付。
-            clean (bool, optional): 取得したデータをクリーンアップするかどうか。
-
-        Returns:
-            銘柄情報を含むDataFrame。
-
-        Raises:
-            HTTPStatusError: APIリクエストが失敗した場合。
-        """
-        params = get_params(code=code, date=date)
-        url = "/listed/info"
-        data = await self.get(url, params)
-        df = DataFrame(data["info"])
-        return info.clean(df) if clean else df
-
     async def iter_pages(
         self,
         url: str,
@@ -203,6 +177,32 @@ class JQuantsClient(Client):
                 params["pagination_key"] = data["pagination_key"]
             else:
                 break
+
+    async def get_info(
+        self,
+        code: str | None = None,
+        date: str | datetime.date | None = None,
+        *,
+        clean: bool = True,
+    ) -> DataFrame:
+        """銘柄情報を取得する。
+
+        Args:
+            code (str, optional): 情報を取得する銘柄のコード。
+            date (str | datetime.date, optional): 情報を取得する日付。
+            clean (bool, optional): 取得したデータをクリーンアップするかどうか。
+
+        Returns:
+            銘柄情報を含むDataFrame。
+
+        Raises:
+            HTTPStatusError: APIリクエストが失敗した場合。
+        """
+        params = get_params(code=code, date=date)
+        url = "/listed/info"
+        data = await self.get(url, params)
+        df = DataFrame(data["info"])
+        return info.clean(df) if clean else df
 
     async def get_prices(
         self,
