@@ -36,7 +36,7 @@ def mock_get_info(mock_jquants_client: MagicMock, mocker: MockerFixture) -> Asyn
 
 @pytest.fixture
 def mock_get_statements(
-    mock_jquants_client: MagicMock, mocker: MockerFixture
+    mock_jquants_client: MagicMock, mocker: MockerFixture,
 ) -> AsyncMock:
     mock_get_statements = mocker.AsyncMock(return_value=MOCK_DF)
     mock_jquants_client.__aenter__.return_value.get_statements = mock_get_statements

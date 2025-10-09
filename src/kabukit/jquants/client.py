@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import asyncio
 import datetime
 import os
 from enum import StrEnum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, final
 
 import polars as pl
 from polars import DataFrame
@@ -12,7 +13,7 @@ from kabukit.core.client import Client
 from kabukit.utils.config import load_dotenv, set_key
 from kabukit.utils.params import get_params
 
-from . import info, prices, statements, topix
+from . import calendar, info, prices, statements, topix
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -20,6 +21,26 @@ if TYPE_CHECKING:
 
     from httpx import HTTPStatusError  # noqa: F401
     from httpx._types import QueryParamTypes
+
+
+@final
+class _CalendarCache:
+    def __init__(self) -> None:
+        self._holidays: list[datetime.date] | None = None
+        self._lock = asyncio.Lock()
+
+    async def get_holidays(self, client: JQuantsClient) -> list[datetime.date]:
+        async with self._lock:
+            if self._holidays is None:
+                calendar_df = await client.get_calendar()
+                self._holidays = (
+                    calendar_df.filter(pl.col("IsHoliday")).get_column("Date").to_list()
+                )
+            return self._holidays
+
+
+_calendar_cache_manager = _CalendarCache()
+
 
 API_VERSION = "v1"
 BASE_URL = f"https://api.jquants.com/{API_VERSION}"
@@ -128,32 +149,6 @@ class JQuantsClient(Client):
         self.set_id_token(id_token)
         return self
 
-    async def get_info(
-        self,
-        code: str | None = None,
-        date: str | datetime.date | None = None,
-        *,
-        clean: bool = True,
-    ) -> DataFrame:
-        """銘柄情報を取得する。
-
-        Args:
-            code (str, optional): 情報を取得する銘柄のコード。
-            date (str | datetime.date, optional): 情報を取得する日付。
-            clean (bool, optional): 取得したデータをクリーンアップするかどうか。
-
-        Returns:
-            銘柄情報を含むDataFrame。
-
-        Raises:
-            HTTPStatusError: APIリクエストが失敗した場合。
-        """
-        params = get_params(code=code, date=date)
-        url = "/listed/info"
-        data = await self.get(url, params)
-        df = DataFrame(data["info"])
-        return info.clean(df) if clean else df
-
     async def iter_pages(
         self,
         url: str,
@@ -182,6 +177,32 @@ class JQuantsClient(Client):
                 params["pagination_key"] = data["pagination_key"]
             else:
                 break
+
+    async def get_info(
+        self,
+        code: str | None = None,
+        date: str | datetime.date | None = None,
+        *,
+        clean: bool = True,
+    ) -> DataFrame:
+        """銘柄情報を取得する。
+
+        Args:
+            code (str, optional): 情報を取得する銘柄のコード。
+            date (str | datetime.date, optional): 情報を取得する日付。
+            clean (bool, optional): 取得したデータをクリーンアップするかどうか。
+
+        Returns:
+            銘柄情報を含むDataFrame。
+
+        Raises:
+            HTTPStatusError: APIリクエストが失敗した場合。
+        """
+        params = get_params(code=code, date=date)
+        url = "/listed/info"
+        data = await self.get(url, params)
+        df = DataFrame(data["info"])
+        return info.clean(df) if clean else df
 
     async def get_prices(
         self,
@@ -291,7 +312,11 @@ class JQuantsClient(Client):
 
         df = statements.clean(df)
 
-        return statements.with_date(df) if with_date else df
+        if not with_date:
+            return df
+
+        holidays = await _calendar_cache_manager.get_holidays(self)
+        return statements.with_date(df, holidays=holidays)
 
     async def get_announcement(self) -> DataFrame:
         """翌日発表予定の決算情報を取得する。
@@ -310,7 +335,7 @@ class JQuantsClient(Client):
         if df.is_empty():
             return df
 
-        return df.with_columns(pl.col("Date").str.to_date("%Y-%m-%d", strict=False))
+        return df.with_columns(pl.col("Date").str.to_date("%Y-%m-%d"))
 
     async def get_trades_spec(
         self,
@@ -341,7 +366,7 @@ class JQuantsClient(Client):
         if df.is_empty():
             return df
 
-        return df.with_columns(pl.col("^.*Date$").str.to_date("%Y-%m-%d", strict=False))
+        return df.with_columns(pl.col("^.*Date$").str.to_date("%Y-%m-%d"))
 
     async def get_topix(
         self,
@@ -371,3 +396,38 @@ class JQuantsClient(Client):
             return df
 
         return topix.clean(df)
+
+    async def get_calendar(
+        self,
+        holidaydivision: str | None = None,
+        from_: str | datetime.date | None = None,
+        to: str | datetime.date | None = None,
+    ) -> DataFrame:
+        """東証およびOSEにおける営業日、休業日、ならびにOSEにおける祝日取引の有無の情報を取得する。
+
+        Args:
+            holidaydivision: 祝日区分。
+                - 非営業日: "0"
+                - 営業日: "1"
+                - 東証半日立会日: "2"
+                - 非営業日(祝日取引あり): "3"
+            from_: 取得期間の開始日。
+            to: 取得期間の終了日。
+
+        Returns:
+            営業日・非営業日データを含むPolars DataFrame。
+
+        Raises:
+            HTTPStatusError: APIリクエストが失敗した場合。
+        """
+        params = get_params(holidaydivision=holidaydivision, from_=from_, to=to)
+
+        url = "/markets/trading_calendar"
+        name = "trading_calendar"
+
+        dfs = [df async for df in self.iter_pages(url, params, name)]
+        df = pl.concat(dfs)
+        if df.is_empty():
+            return df
+
+        return calendar.clean(df)

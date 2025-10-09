@@ -1,9 +1,124 @@
+from __future__ import annotations
+
 import datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import polars as pl
 import pytest
+from httpx import Response
 from polars import DataFrame
+
+from kabukit.jquants.client import JQuantsClient
+
+if TYPE_CHECKING:
+    from unittest.mock import AsyncMock
+
+    from pytest_mock import MockerFixture
+
+
+@pytest.mark.asyncio
+async def test_get(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+    json = {"statements": [{"Profit": 100}, {"Profit": 200}]}
+    response = Response(200, json=json)
+    mock_get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    client = JQuantsClient("test_token")
+    df = await client.get_statements("123", clean=False)
+    assert df["Profit"].to_list() == [100, 200]
+
+
+@pytest.mark.asyncio
+async def test_empty(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+    json: dict[str, list[dict[str, str]]] = {"statements": []}
+    response = Response(200, json=json)
+    mock_get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    client = JQuantsClient("test_token")
+    df = await client.get_statements("123")
+    assert df.is_empty()
+
+
+@pytest.mark.asyncio
+async def test_error(client: JQuantsClient) -> None:
+    with pytest.raises(ValueError, match="codeまたはdate"):
+        await client.get_statements()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("clean_flag", "with_date_flag", "clean_called", "with_date_called"),
+    [
+        (True, True, True, True),
+        (True, False, True, False),
+        (False, True, False, False),
+        (False, False, False, False),
+    ],
+)
+async def test_get_flags(
+    mock_get: AsyncMock,
+    mocker: MockerFixture,
+    clean_flag: bool,
+    with_date_flag: bool,
+    clean_called: bool,
+    with_date_called: bool,
+) -> None:
+    """Test the clean and with_date flags in get_statements."""
+
+    def get_side_effect(url: str, params: dict[str, Any] | None = None) -> Response:  # noqa: ARG001  # pyright: ignore[reportUnusedParameter]
+        if "statements" in url:
+            json = {
+                "statements": [
+                    {"LocalCode": "7203", "DisclosedDate": "2023-01-05"},
+                ],
+            }
+            response = Response(200, json=json)
+        elif "trading_calendar" in url:
+            json = {
+                "trading_calendar": [
+                    {"Date": "2023-01-03", "HolidayDivision": "0"},
+                ],
+            }
+            response = Response(200, json=json)
+        else:
+            response = Response(404)
+        response.raise_for_status = mocker.MagicMock()
+        return response
+
+    mock_get.side_effect = get_side_effect
+
+    mock_clean = mocker.patch(
+        "kabukit.jquants.statements.clean",
+        return_value=DataFrame(
+            {
+                "Code": ["7203"],
+                "DisclosedDate": [datetime.date(2023, 1, 5)],
+                "DisclosedTime": [datetime.time(9, 0)],
+            },
+        ),
+    )
+    mock_with_date = mocker.patch(
+        "kabukit.jquants.statements.with_date",
+        return_value=DataFrame({"Date": [datetime.date(2023, 1, 1)]}),
+    )
+
+    client = JQuantsClient("test_token")
+    await client.get_statements(
+        code="7203",
+        clean=clean_flag,
+        with_date=with_date_flag,
+    )
+
+    if clean_called:
+        mock_clean.assert_called_once()
+    else:
+        mock_clean.assert_not_called()
+
+    if with_date_called:
+        mock_with_date.assert_called_once()
+    else:
+        mock_with_date.assert_not_called()
 
 
 @pytest.fixture
@@ -69,25 +184,6 @@ def test_clean(df: DataFrame, column: str, values: list[Any]) -> None:
     assert df[column].to_list() == values
 
 
-def test_holidays() -> None:
-    from kabukit.jquants.statements import get_holidays
-
-    holidays = get_holidays(n=5)
-    year = datetime.datetime.now().year  # noqa: DTZ005
-    assert holidays[0].year == year - 5
-    assert holidays[0].month == 1
-    assert holidays[0].day == 1
-
-
-def test_holidays_year() -> None:
-    from kabukit.jquants.statements import get_holidays
-
-    holidays = get_holidays(2000, 5)
-    assert holidays[0].year == 1995
-    assert holidays[0].month == 1
-    assert holidays[0].day == 1
-
-
 def test_with_date() -> None:
     from datetime import date, time
 
@@ -113,7 +209,16 @@ def test_with_date() -> None:
         },
     )
 
-    df = with_date(df, 2025)
+    holidays = [
+        date(2025, 1, 1),
+        date(2025, 1, 4),
+        date(2025, 1, 5),
+        date(2025, 1, 11),
+        date(2025, 1, 12),
+        date(2025, 1, 13),
+    ]
+
+    df = with_date(df, holidays=holidays)
     assert df.columns == ["Date", "DisclosedDate", "DisclosedTime", "EPS"]
     x = df["Date"].to_list()
     assert x[0] == date(2025, 1, 6)

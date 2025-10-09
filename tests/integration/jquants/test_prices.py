@@ -1,3 +1,5 @@
+import datetime
+
 import polars as pl
 import pytest
 import pytest_asyncio
@@ -6,6 +8,63 @@ from polars import DataFrame
 from kabukit.jquants.client import JQuantsClient
 
 pytestmark = pytest.mark.integration
+
+
+@pytest.mark.asyncio
+async def test_code(client: JQuantsClient) -> None:
+    df = await client.get_prices(code="7203")
+    assert df.width == 16
+
+
+@pytest.mark.asyncio
+async def test_date(client: JQuantsClient) -> None:
+    df = await client.get_prices(date="2025-08-29")
+    assert df.height > 4000
+    assert df.height == df["Code"].n_unique()
+
+
+@pytest.mark.asyncio
+async def test_empty(client: JQuantsClient) -> None:
+    df = await client.get_prices(date="2025-08-30")
+    assert df.shape == (0, 0)
+
+
+@pytest.mark.asyncio
+async def test_from_to(client: JQuantsClient) -> None:
+    df = await client.get_prices(code="7203", from_="2025-08-16", to="2025-08-25")
+    assert df.height == 6
+    assert df.item(0, "Date") == datetime.date(2025, 8, 18)
+    assert df.item(5, "Date") == datetime.date(2025, 8, 25)
+
+
+@pytest.mark.asyncio
+async def test_from(client: JQuantsClient) -> None:
+    df = await client.get_prices(code="7203", from_="2025-08-16")
+    assert df.item(0, "Date") == datetime.date(2025, 8, 18)
+
+
+@pytest.mark.asyncio
+async def test_to(client: JQuantsClient) -> None:
+    df = await client.get_prices(code="7203", to="2025-08-16")
+    assert df.item(-1, "Date") == datetime.date(2025, 8, 15)
+
+
+@pytest.mark.asyncio
+async def test_without_code(client: JQuantsClient) -> None:
+    df = await client.get_prices()
+    assert df.height > 3000
+
+
+@pytest.mark.asyncio
+async def test_latest_available_prices(client: JQuantsClient) -> None:
+    df = await client.get_latest_available_prices()
+    assert df.height > 3000
+
+
+@pytest.mark.asyncio
+async def test_latest_available_prices_empty(client: JQuantsClient) -> None:
+    df = await client.get_latest_available_prices(0)
+    assert df.is_empty()
 
 
 @pytest_asyncio.fixture(scope="module")

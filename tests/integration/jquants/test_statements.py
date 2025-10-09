@@ -8,15 +8,28 @@ from kabukit.jquants.client import JQuantsClient
 pytestmark = pytest.mark.integration
 
 
+@pytest.mark.asyncio
+async def test_code(client: JQuantsClient) -> None:
+    df = await client.get_statements(code="7203")
+    assert df.width == 105
+
+
+@pytest.mark.asyncio
+async def test_date(client: JQuantsClient) -> None:
+    df = await client.get_statements(date="2025-08-29")
+    assert df.height == 18
+
+
+@pytest.mark.asyncio
+async def test_empty(client: JQuantsClient) -> None:
+    df = await client.get_statements(date="2025-08-30")
+    assert df.shape == (0, 0)
+
+
 @pytest_asyncio.fixture(scope="module")
-async def client():
+async def df():
     async with JQuantsClient() as client:
-        yield client
-
-
-@pytest_asyncio.fixture(scope="module")
-async def df(client: JQuantsClient):
-    yield await client.get_statements(date="20250627")
+        yield await client.get_statements(date="20250627")
 
 
 def test_width(df: DataFrame) -> None:
@@ -59,12 +72,10 @@ def test_rename(df: DataFrame) -> None:
     assert df_renamed.columns == [c.value for c in StatementColumns]
 
 
-@pytest_asyncio.fixture(scope="module")
-async def df_7203(client: JQuantsClient):
-    yield await client.get_statements("7203")  # Toyota
-
-
+@pytest.mark.asyncio
 @pytest.mark.parametrize("prefix", ["1Q", "2Q", "3Q", "FY"])
-def test_column_names(df_7203: DataFrame, prefix: str) -> None:
+async def test_column_names(prefix: str) -> None:
+    async with JQuantsClient() as client:
+        df = await client.get_statements("7203")  # Toyota
     name = f"{prefix}FinancialStatements_Consolidated_IFRS"
-    assert name in df_7203["TypeOfDocument"]
+    assert name in df["TypeOfDocument"]

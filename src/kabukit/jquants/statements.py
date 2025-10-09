@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 import datetime
-from functools import cache
 from typing import TYPE_CHECKING
 
-import holidays
 import polars as pl
 
 if TYPE_CHECKING:
@@ -80,17 +78,7 @@ def _cast_bool(df: DataFrame) -> DataFrame:
     )
 
 
-@cache
-def get_holidays(year: int | None = None, n: int = 10) -> list[datetime.date]:
-    """指定した過去年数の日本の祝日を取得する。"""
-    if year is None:
-        year = datetime.datetime.now().year  # noqa: DTZ005
-
-    dates = holidays.country_holidays("JP", years=range(year - n, year + 1))
-    return sorted(dates.keys())
-
-
-def with_date(df: DataFrame, year: int | None = None) -> DataFrame:
+def with_date(df: DataFrame, holidays: list[datetime.date]) -> DataFrame:
     """`Date`列を追加する。
 
     開示日が休日のとき、あるいは、開示時刻が15時以降の場合、Dateを開示日の翌営業日に設定する。
@@ -98,8 +86,6 @@ def with_date(df: DataFrame, year: int | None = None) -> DataFrame:
     is_after_hours = pl.col("DisclosedTime").is_null() | (
         pl.col("DisclosedTime") > datetime.time(15, 0)
     )
-
-    holidays = get_holidays(year=year)
 
     return df.select(
         pl.when(is_after_hours)
