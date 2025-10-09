@@ -13,7 +13,7 @@ from kabukit.core.client import Client
 from kabukit.utils.config import load_dotenv, set_key
 from kabukit.utils.params import get_params
 
-from . import calender, info, prices, statements, topix
+from . import calendar, info, prices, statements, topix
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -430,4 +430,4 @@ class JQuantsClient(Client):
         if df.is_empty():
             return df
 
-        return calender.clean(df)
+        return calendar.clean(df)
