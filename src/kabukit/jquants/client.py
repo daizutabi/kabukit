@@ -12,7 +12,7 @@ from kabukit.core.client import Client
 from kabukit.utils.config import load_dotenv, set_key
 from kabukit.utils.params import get_params
 
-from . import info, prices, statements, topix
+from . import calender, info, prices, statements, topix
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -310,7 +310,7 @@ class JQuantsClient(Client):
         if df.is_empty():
             return df
 
-        return df.with_columns(pl.col("Date").str.to_date("%Y-%m-%d", strict=False))
+        return df.with_columns(pl.col("Date").str.to_date("%Y-%m-%d"))
 
     async def get_trades_spec(
         self,
@@ -341,7 +341,7 @@ class JQuantsClient(Client):
         if df.is_empty():
             return df
 
-        return df.with_columns(pl.col("^.*Date$").str.to_date("%Y-%m-%d", strict=False))
+        return df.with_columns(pl.col("^.*Date$").str.to_date("%Y-%m-%d"))
 
     async def get_topix(
         self,
@@ -371,3 +371,38 @@ class JQuantsClient(Client):
             return df
 
         return topix.clean(df)
+
+    async def get_calendar(
+        self,
+        holidaydivision: str | None = None,
+        from_: str | datetime.date | None = None,
+        to: str | datetime.date | None = None,
+    ) -> DataFrame:
+        """東証およびOSEにおける営業日、休業日、ならびにOSEにおける祝日取引の有無の情報を取得する。
+
+        Args:
+            holidaydivision: 祝日区分。
+                - 非営業日: "0"
+                - 営業日: "1"
+                - 東証半日立会日: "2"
+                - 非営業日(祝日取引あり): "3"
+            from_: 取得期間の開始日。
+            to: 取得期間の終了日。
+
+        Returns:
+            営業日・非営業日データを含むPolars DataFrame。
+
+        Raises:
+            HTTPStatusError: APIリクエストが失敗した場合。
+        """
+        params = get_params(holidaydivision=holidaydivision, from_=from_, to=to)
+
+        url = "/markets/trading_calendar"
+        name = "trading_calendar"
+
+        dfs = [df async for df in self.iter_pages(url, params, name)]
+        df = pl.concat(dfs)
+        if df.is_empty():
+            return df
+
+        return calender.clean(df)
