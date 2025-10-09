@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import asyncio
 import datetime
 import os
 from enum import StrEnum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, final
 
 import polars as pl
 from polars import DataFrame
@@ -20,6 +21,26 @@ if TYPE_CHECKING:
 
     from httpx import HTTPStatusError  # noqa: F401
     from httpx._types import QueryParamTypes
+
+
+@final
+class _CalendarCache:
+    def __init__(self) -> None:
+        self._holidays: list[datetime.date] | None = None
+        self._lock = asyncio.Lock()
+
+    async def get_holidays(self, client: JQuantsClient) -> list[datetime.date]:
+        async with self._lock:
+            if self._holidays is None:
+                calendar_df = await client.get_calendar()
+                self._holidays = (
+                    calendar_df.filter(pl.col("IsHoliday")).get_column("Date").to_list()
+                )
+            return self._holidays
+
+
+_calendar_cache_manager = _CalendarCache()
+
 
 API_VERSION = "v1"
 BASE_URL = f"https://api.jquants.com/{API_VERSION}"
@@ -291,7 +312,11 @@ class JQuantsClient(Client):
 
         df = statements.clean(df)
 
-        return statements.with_date(df) if with_date else df
+        if not with_date:
+            return df
+
+        holidays = await _calendar_cache_manager.get_holidays(self)
+        return statements.with_date(df, holidays=holidays)
 
     async def get_announcement(self) -> DataFrame:
         """翌日発表予定の決算情報を取得する。
