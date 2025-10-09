@@ -10,6 +10,26 @@ from kabukit.jquants.client import JQuantsClient
 pytestmark = pytest.mark.integration
 
 
+@pytest.mark.asyncio
+async def test_date(client: JQuantsClient) -> None:
+    today = datetime.date.today()  # noqa: DTZ011
+    date = today - datetime.timedelta(weeks=12)
+    df = await client.get_info(date=date)
+    assert df.height > 4000
+    df_date = df.item(0, "Date")
+    assert isinstance(df_date, datetime.date)
+    assert (df_date - date).days <= 7
+
+
+@pytest.mark.asyncio
+async def test_code(client: JQuantsClient) -> None:
+    df = await client.get_info(code="7203")
+    assert df.height == 1
+    name = df.item(0, "CompanyName")
+    assert isinstance(name, str)
+    assert "トヨタ" in name
+
+
 @pytest_asyncio.fixture(scope="module")
 async def df():
     async with JQuantsClient() as client:
