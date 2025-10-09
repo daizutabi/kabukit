@@ -1,4 +1,3 @@
-import datetime
 from typing import Any
 
 import polars as pl
@@ -69,25 +68,6 @@ def test_clean(df: DataFrame, column: str, values: list[Any]) -> None:
     assert df[column].to_list() == values
 
 
-def test_holidays() -> None:
-    from kabukit.jquants.statements import get_holidays
-
-    holidays = get_holidays(n=5)
-    year = datetime.datetime.now().year  # noqa: DTZ005
-    assert holidays[0].year == year - 5
-    assert holidays[0].month == 1
-    assert holidays[0].day == 1
-
-
-def test_holidays_year() -> None:
-    from kabukit.jquants.statements import get_holidays
-
-    holidays = get_holidays(2000, 5)
-    assert holidays[0].year == 1995
-    assert holidays[0].month == 1
-    assert holidays[0].day == 1
-
-
 def test_with_date() -> None:
     from datetime import date, time
 
@@ -113,7 +93,16 @@ def test_with_date() -> None:
         },
     )
 
-    df = with_date(df, 2025)
+    holidays = [
+        date(2025, 1, 1),
+        date(2025, 1, 4),
+        date(2025, 1, 5),
+        date(2025, 1, 11),
+        date(2025, 1, 12),
+        date(2025, 1, 13),
+    ]
+
+    df = with_date(df, holidays=holidays)
     assert df.columns == ["Date", "DisclosedDate", "DisclosedTime", "EPS"]
     x = df["Date"].to_list()
     assert x[0] == date(2025, 1, 6)

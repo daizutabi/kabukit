@@ -12,7 +12,8 @@ from polars.testing import assert_frame_equal
 from kabukit.jquants.client import AuthKey, JQuantsClient
 
 if TYPE_CHECKING:
-    from unittest.mock import AsyncMock, MagicMock
+    from typing import Any
+    from unittest.mock import AsyncMock
 
     from pytest_mock import MockerFixture
 
@@ -28,44 +29,25 @@ def test_set_id_token_none(mocker: MockerFixture) -> None:
     assert client.client.headers["Authorization"] == "Bearer def"
 
 
-@pytest.fixture
-def async_client(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("kabukit.core.client.AsyncClient").return_value
-
-
-@pytest.fixture
-def post(async_client: MagicMock, mocker: MockerFixture) -> AsyncMock:
-    post = mocker.AsyncMock()
-    async_client.post = post
-    return post
-
-
-@pytest.fixture
-def get(async_client: MagicMock, mocker: MockerFixture) -> AsyncMock:
-    get = mocker.AsyncMock()
-    async_client.get = get
-    return get
-
-
 @pytest.mark.asyncio
-async def test_post_success(post: AsyncMock, mocker: MockerFixture) -> None:
+async def test_post_success(mock_post: AsyncMock, mocker: MockerFixture) -> None:
     json = {"message": "success"}
     expected_response = Response(200, json=json)
-    post.return_value = expected_response
+    mock_post.return_value = expected_response
     expected_response.raise_for_status = mocker.MagicMock()
 
     client = JQuantsClient("test_token")
     response = await client.post("test/path", json={"key": "value"})
 
     assert response == json
-    post.assert_awaited_once_with("test/path", json={"key": "value"})
+    mock_post.assert_awaited_once_with("test/path", json={"key": "value"})
     expected_response.raise_for_status.assert_called_once()
 
 
 @pytest.mark.asyncio
-async def test_post_failure(post: AsyncMock, mocker: MockerFixture) -> None:
+async def test_post_failure(mock_post: AsyncMock, mocker: MockerFixture) -> None:
     error_response = Response(400)
-    post.return_value = error_response
+    mock_post.return_value = error_response
     error_response.raise_for_status = mocker.MagicMock(
         side_effect=HTTPStatusError(
             "Bad Request",
@@ -83,24 +65,24 @@ async def test_post_failure(post: AsyncMock, mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_success(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"message": "success"}
     expected_response = Response(200, json=json)
-    get.return_value = expected_response
+    mock_get.return_value = expected_response
     expected_response.raise_for_status = mocker.MagicMock()
 
     client = JQuantsClient("test_token")
     response = await client.get("test/path", params={"a": "b"})
 
     assert response == json
-    get.assert_awaited_once_with("test/path", params={"a": "b"})
+    mock_get.assert_awaited_once_with("test/path", params={"a": "b"})
     expected_response.raise_for_status.assert_called_once()
 
 
 @pytest.mark.asyncio
-async def test_get_failure(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_failure(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     error_response = Response(400)
-    get.return_value = error_response
+    mock_get.return_value = error_response
     error_response.raise_for_status = mocker.MagicMock(
         side_effect=HTTPStatusError(
             "Bad Request",
@@ -118,7 +100,10 @@ async def test_get_failure(get: AsyncMock, mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_auth_successful_no_save(post: AsyncMock, mocker: MockerFixture) -> None:
+async def test_auth_successful_no_save(
+    mock_post: AsyncMock,
+    mocker: MockerFixture,
+) -> None:
     """Test successful authentication without saving tokens."""
     responses = [
         Response(200, json={"refreshToken": "test_refresh_token"}),
@@ -126,19 +111,19 @@ async def test_auth_successful_no_save(post: AsyncMock, mocker: MockerFixture) -
     ]
     for r in responses:
         r.raise_for_status = mocker.MagicMock()
-    post.side_effect = responses
+    mock_post.side_effect = responses
 
     mock_set_key = mocker.patch("kabukit.jquants.client.set_key")
 
     client = JQuantsClient()
     await client.auth("test@example.com", "password", save=False)
 
-    assert post.call_count == 2
-    post.assert_any_call(
+    assert mock_post.call_count == 2
+    mock_post.assert_any_call(
         "/token/auth_user",
         json={"mailaddress": "test@example.com", "password": "password"},
     )
-    post.assert_any_call(
+    mock_post.assert_any_call(
         "/token/auth_refresh?refreshtoken=test_refresh_token",
         json=None,
     )
@@ -147,7 +132,7 @@ async def test_auth_successful_no_save(post: AsyncMock, mocker: MockerFixture) -
 
 @pytest.mark.asyncio
 async def test_auth_successful_with_save(
-    post: AsyncMock,
+    mock_post: AsyncMock,
     mocker: MockerFixture,
 ) -> None:
     """Test successful authentication with saving tokens."""
@@ -157,14 +142,14 @@ async def test_auth_successful_with_save(
     ]
     for r in responses:
         r.raise_for_status = mocker.MagicMock()
-    post.side_effect = responses
+    mock_post.side_effect = responses
 
     mock_set_key = mocker.patch("kabukit.jquants.client.set_key")
 
     client = JQuantsClient()
     await client.auth("test@example.com", "password", save=True)
 
-    assert post.call_count == 2
+    assert mock_post.call_count == 2
     mock_set_key.assert_has_calls(
         [
             call(AuthKey.REFRESH_TOKEN, "test_refresh_token"),
@@ -175,10 +160,10 @@ async def test_auth_successful_with_save(
 
 
 @pytest.mark.asyncio
-async def test_get_info(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_info(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"info": [{"Date": "2023-01-01", "Code": "7203"}]}
     response = Response(200, json=json)
-    get.return_value = response
+    mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
     client = JQuantsClient("test_token")
@@ -188,7 +173,7 @@ async def test_get_info(get: AsyncMock, mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_iter_pages(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_iter_pages(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     def side_effect(_url: str, params: dict[str, str]) -> Response:
         if "pagination_key" not in params:
             response = Response(
@@ -206,7 +191,7 @@ async def test_iter_pages(get: AsyncMock, mocker: MockerFixture) -> None:
         response.raise_for_status = mocker.MagicMock()
         return response
 
-    get.side_effect = side_effect
+    mock_get.side_effect = side_effect
 
     client = JQuantsClient("test_token")
     dfs = [df async for df in client.iter_pages("/test", {}, "info")]
@@ -215,10 +200,10 @@ async def test_iter_pages(get: AsyncMock, mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_prices(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_prices(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"daily_quotes": [{"Open": 100}, {"Open": 200}]}
     response = Response(200, json=json)
-    get.return_value = response
+    mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
     client = JQuantsClient("test_token")
@@ -231,10 +216,10 @@ async def test_prices(get: AsyncMock, mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_prices_empty(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_prices_empty(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json: dict[str, list[dict[str, str]]] = {"daily_quotes": []}
     response = Response(200, json=json)
-    get.return_value = response
+    mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
     client = JQuantsClient("test_token")
@@ -251,10 +236,10 @@ async def test_prices_error(client: JQuantsClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_statements(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_statements(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"statements": [{"Profit": 100}, {"Profit": 200}]}
     response = Response(200, json=json)
-    get.return_value = response
+    mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
     client = JQuantsClient("test_token")
@@ -263,10 +248,10 @@ async def test_statements(get: AsyncMock, mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_statements_empty(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_statements_empty(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json: dict[str, list[dict[str, str]]] = {"statements": []}
     response = Response(200, json=json)
-    get.return_value = response
+    mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
     client = JQuantsClient("test_token")
@@ -291,7 +276,7 @@ async def test_statements_error(client: JQuantsClient) -> None:
     ],
 )
 async def test_get_statements_flags(
-    get: AsyncMock,
+    mock_get: AsyncMock,
     mocker: MockerFixture,
     clean_flag: bool,
     with_date_flag: bool,
@@ -299,15 +284,38 @@ async def test_get_statements_flags(
     with_date_called: bool,
 ) -> None:
     """Test the clean and with_date flags in get_statements."""
-    # 1. Mock the API response
-    json = {"statements": [{"LocalCode": "7203"}]}
-    response = Response(200, json=json)
-    get.return_value = response
-    response.raise_for_status = mocker.MagicMock()
+
+    def get_side_effect(url: str, params: dict[str, Any] | None = None) -> Response:  # noqa: ARG001  # pyright: ignore[reportUnusedParameter]
+        if "statements" in url:
+            json = {
+                "statements": [
+                    {"LocalCode": "7203", "DisclosedDate": "2023-01-05"},
+                ],
+            }
+            response = Response(200, json=json)
+        elif "trading_calendar" in url:
+            json = {
+                "trading_calendar": [
+                    {"Date": "2023-01-03", "HolidayDivision": "0"},
+                ],
+            }
+            response = Response(200, json=json)
+        else:
+            response = Response(404)
+        response.raise_for_status = mocker.MagicMock()
+        return response
+
+    mock_get.side_effect = get_side_effect
 
     mock_clean = mocker.patch(
         "kabukit.jquants.statements.clean",
-        return_value=DataFrame({"Code": ["7203"]}),
+        return_value=DataFrame(
+            {
+                "Code": ["7203"],
+                "DisclosedDate": [datetime.date(2023, 1, 5)],
+                "DisclosedTime": [datetime.time(9, 0)],
+            },
+        ),
     )
     mock_with_date = mocker.patch(
         "kabukit.jquants.statements.with_date",
@@ -333,10 +341,10 @@ async def test_get_statements_flags(
 
 
 @pytest.mark.asyncio
-async def test_announcement(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_announcement(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"announcement": [{"Date": "2025-01-01"}]}
     response = Response(200, json=json)
-    get.return_value = response
+    mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
     client = JQuantsClient("test_token")
@@ -345,10 +353,10 @@ async def test_announcement(get: AsyncMock, mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_announcement_empty(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_announcement_empty(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json: dict[str, list[dict[str, str]]] = {"announcement": []}
     response = Response(200, json=json)
-    get.return_value = response
+    mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
     client = JQuantsClient("test_token")
@@ -357,10 +365,10 @@ async def test_announcement_empty(get: AsyncMock, mocker: MockerFixture) -> None
 
 
 @pytest.mark.asyncio
-async def test_trades_spec(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_trades_spec(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"trades_spec": [{"Date": "2025-01-01"}]}
     response = Response(200, json=json)
-    get.return_value = response
+    mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
     client = JQuantsClient("test_token")
@@ -369,10 +377,10 @@ async def test_trades_spec(get: AsyncMock, mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_trades_spec_empty(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_trades_spec_empty(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json: dict[str, list[dict[str, str]]] = {"trades_spec": []}
     response = Response(200, json=json)
-    get.return_value = response
+    mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
     client = JQuantsClient("test_token")
@@ -381,10 +389,10 @@ async def test_trades_spec_empty(get: AsyncMock, mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_topix(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_topix(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"topix": [{"Date": "2025-01-01", "Open": 100}]}
     response = Response(200, json=json)
-    get.return_value = response
+    mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
     client = JQuantsClient("test_token")
@@ -402,10 +410,10 @@ async def test_topix(get: AsyncMock, mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_topix_empty(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_topix_empty(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json: dict[str, list[dict[str, str]]] = {"topix": []}
     response = Response(200, json=json)
-    get.return_value = response
+    mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
     client = JQuantsClient("test_token")
