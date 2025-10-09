@@ -32,10 +32,9 @@ class _CalendarCache:
     async def get_holidays(self, client: JQuantsClient) -> list[datetime.date]:
         async with self._lock:
             if self._holidays is None:
-                calendar_df = await client.get_calendar()
-                self._holidays = (
-                    calendar_df.filter(pl.col("IsHoliday")).get_column("Date").to_list()
-                )
+                df = await client.get_calendar()
+                holidays = df.filter(pl.col("IsHoliday"))["Date"]
+                self._holidays = holidays.to_list()
             return self._holidays
 
 
