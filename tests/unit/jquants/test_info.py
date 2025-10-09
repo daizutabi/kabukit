@@ -4,12 +4,28 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 import pytest
+from httpx import Response
 from polars import DataFrame
+
+from kabukit.jquants.client import JQuantsClient
 
 if TYPE_CHECKING:
     from unittest.mock import AsyncMock, MagicMock
 
     from pytest_mock import MockerFixture
+
+
+@pytest.mark.asyncio
+async def test_get(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+    json = {"info": [{"Date": "2023-01-01", "Code": "7203"}]}
+    response = Response(200, json=json)
+    mock_get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    client = JQuantsClient("test_token")
+    df = await client.get_info(clean=False)
+    assert df["Date"].to_list() == ["2023-01-01"]
+    assert df["Code"].to_list() == ["7203"]
 
 
 def test_clean() -> None:

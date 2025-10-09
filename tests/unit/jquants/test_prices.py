@@ -1,10 +1,54 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import polars as pl
 import pytest
+from httpx import Response
 from polars import DataFrame
+
+from kabukit.jquants.client import JQuantsClient
+
+if TYPE_CHECKING:
+    from unittest.mock import AsyncMock
+
+    from pytest_mock import MockerFixture
+
+
+@pytest.mark.asyncio
+async def test_get(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+    json = {"daily_quotes": [{"Open": 100}, {"Open": 200}]}
+    response = Response(200, json=json)
+    mock_get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    client = JQuantsClient("test_token")
+    df = await client.get_prices("123", clean=False)
+    assert df["Open"].to_list() == [100, 200]
+    df = await client.get_latest_available_prices(clean=False)
+    assert df["Open"].to_list() == [100, 200]
+    df = await client.get_prices(clean=False)
+    assert df["Open"].to_list() == [100, 200]
+
+
+@pytest.mark.asyncio
+async def test_empty(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+    json: dict[str, list[dict[str, str]]] = {"daily_quotes": []}
+    response = Response(200, json=json)
+    mock_get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    client = JQuantsClient("test_token")
+    df = await client.get_prices("123")
+    assert df.is_empty()
+    df = await client.get_latest_available_prices()
+    assert df.is_empty()
+
+
+@pytest.mark.asyncio
+async def test_error(client: JQuantsClient) -> None:
+    with pytest.raises(ValueError, match="dateとfrom/toの"):
+        await client.get_prices(code="7203", date="2025-08-18", to="2025-08-16")
 
 
 @pytest.fixture
