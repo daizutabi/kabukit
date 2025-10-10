@@ -36,7 +36,7 @@ def test_plot_prices(sample_prices: Prices):
 
 def test_plot_prices_unsupported_kind(sample_prices: Prices):
     with pytest.raises(NotImplementedError):
-        plot_prices(sample_prices, kind="line")
+        plot_prices(sample_prices, kind="line")  # ty: ignore[invalid-argument-type]
 
 
 def test_plot_prices_candlestick(sample_prices: Prices):
