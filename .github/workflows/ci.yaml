@@ -38,8 +38,8 @@ jobs:
         run: uv sync
       - name: Ruff check
         run: uvx ruff check
-      # - name: Type check (ty)
-      #   run: uvx ty check
+      - name: Type check (ty)
+        run: uvx ty check
       - name: Type check (basedpyright)
         run: uvx basedpyright src
       - name: Run tests
