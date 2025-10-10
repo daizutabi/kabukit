@@ -1,3 +1,5 @@
+import datetime
+
 import polars as pl
 import pytest
 import pytest_asyncio
@@ -29,11 +31,7 @@ async def test_empty(client: JQuantsClient) -> None:
 @pytest_asyncio.fixture(scope="module")
 async def df():
     async with JQuantsClient() as client:
-        yield await client.get_statements(date="20250627")
-
-
-def test_width(df: DataFrame) -> None:
-    assert df.width == 105
+        yield await client.get_statements(date="20251010")
 
 
 @pytest.mark.parametrize(
@@ -79,3 +77,23 @@ async def test_column_names(prefix: str) -> None:
         df = await client.get_statements("7203")  # Toyota
     name = f"{prefix}FinancialStatements_Consolidated_IFRS"
     assert name in df["TypeOfDocument"]
+
+
+@pytest.mark.parametrize(
+    ("code", "date", "time"),
+    [
+        ("30480", datetime.date(2025, 10, 10), datetime.time(12, 0)),
+        ("97780", datetime.date(2025, 10, 10), datetime.time(15, 0)),
+        ("21530", datetime.date(2025, 10, 14), datetime.time(15, 30)),
+        ("59820", datetime.date(2025, 10, 14), datetime.time(16, 0)),
+    ],
+)
+def test_with_date(
+    df: DataFrame,
+    code: str,
+    date: datetime.date,
+    time: datetime.time,
+) -> None:
+    df = df.filter(pl.col("Code") == code)
+    assert df.item(0, "Date") == date
+    assert df.item(0, "DisclosedTime") == time

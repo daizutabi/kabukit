@@ -201,7 +201,7 @@ def test_with_date() -> None:
             "DisclosedTime": [
                 time(9, 0),
                 time(16, 0),
-                time(9, 0),
+                time(15, 15),
                 time(15, 30),
                 None,
             ],
