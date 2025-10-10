@@ -7,11 +7,13 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import datetime
+
+    import altair as alt
     import marimo as mo
     import polars as pl
-    import altair as alt
-    from kabukit import JQuantsClient
     from polars import col as c
+
+    from kabukit import JQuantsClient
     return JQuantsClient, mo
 
 
@@ -30,14 +32,13 @@ async def _(client):
 
 @app.cell
 def _(df, mo):
-    from kabukit.analysis.visualization import plot_prices
     from kabukit import Prices
+    from kabukit.analysis.visualization import plot_prices
 
     prices = Prices(df).truncate("1mo")
     chart = plot_prices(prices)
 
     mo.ui.altair_chart(chart)
-    return
 
 
 @app.cell

@@ -305,4 +305,3 @@ async def test_get_fails_after_retries(get: AsyncMock) -> None:
         await client.get("test/path", params={})
 
     assert get.call_count == 3
-

@@ -1,0 +1,20 @@
+ci:
+  skip: [ty]
+
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.0
+    hooks:
+      - id: ruff-check
+        pass_filenames: false
+  - repo: https://github.com/DetachHead/basedpyright-prek-mirror
+    rev: 1.31.6
+    hooks:
+      - id: basedpyright
+        pass_filenames: false
+  - repo: local
+    hooks:
+      - id: ty
+        name: ty check
+        entry: uvx ty check . --ignore unresolved-import
+        language: python

@@ -150,5 +150,5 @@ async def fetch(
         if callback:
             stream = (x if (r := callback(x)) is None else r async for x in stream)
 
-        dfs = [df async for df in stream if not df.is_empty()]
+        dfs = [df async for df in stream if not df.is_empty()]  # ty: ignore[not-iterable]
         return pl.concat(dfs) if dfs else pl.DataFrame()
