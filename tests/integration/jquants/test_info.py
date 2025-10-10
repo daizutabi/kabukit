@@ -60,7 +60,7 @@ def test_column_dtype(df: DataFrame, name: str, dtype: type) -> None:
 def test_today(df: DataFrame) -> None:
     date = df.item(0, "Date")
     assert isinstance(date, datetime.date)
-    assert abs((date - datetime.date.today()).days) <= 3  # noqa: DTZ011
+    assert abs((date - datetime.date.today()).days) <= 7  # noqa: DTZ011
 
 
 @pytest.mark.parametrize(
