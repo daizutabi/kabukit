@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+from zoneinfo import ZoneInfo
 
 
 def get_dates(days: int | None = None, years: int | None = None) -> list[datetime.date]:
@@ -11,7 +12,7 @@ def get_dates(days: int | None = None, years: int | None = None) -> list[datetim
         years (int | None): 過去years年の日付リストを取得する。
             daysが指定されている場合は無視される。
     """
-    end_date = datetime.date.today()  # noqa: DTZ011
+    end_date = datetime.datetime.now(ZoneInfo("Asia/Tokyo")).date()
 
     if days is not None:
         start_date = end_date - datetime.timedelta(days=days)

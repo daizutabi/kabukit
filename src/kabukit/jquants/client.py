@@ -5,6 +5,7 @@ import datetime
 import os
 from enum import StrEnum
 from typing import TYPE_CHECKING, final
+from zoneinfo import ZoneInfo
 
 import polars as pl
 from polars import DataFrame
@@ -260,7 +261,7 @@ class JQuantsClient(Client):
         clean: bool = True,
     ) -> DataFrame:
         """直近利用可能な日付の株価を取得する。"""
-        today = datetime.date.today()  # noqa: DTZ011
+        today = datetime.datetime.now(ZoneInfo("Asia/Tokyo")).date()
 
         for days in range(num_days):
             date = today - datetime.timedelta(days)
