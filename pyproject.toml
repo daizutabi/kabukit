@@ -99,7 +99,7 @@ ignore = [
 [tool.ruff.format]
 exclude = ["schema.py"]
 
-[tool.basedpyright]
+[tool.pyright]
 include = ["src", "tests"]
 reportAny = false
 reportExplicitAny = false
