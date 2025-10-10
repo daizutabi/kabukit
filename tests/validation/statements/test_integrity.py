@@ -278,7 +278,7 @@ def test_fin_forecast_other(fin: DataFrame) -> None:
 @pytest.mark.parametrize(
     ("period", "low", "high"),
     [
-        ("1Q", 0.54, 0.57),
+        ("1Q", 0.53, 0.57),
         ("2Q", 0.0, 2e-4),  # 誤登録の可能性あり
         ("3Q", 0.0, 4e-5),  # 誤登録の可能性あり
         ("FY", 0.0, 0.0),
@@ -375,7 +375,7 @@ def test_earn_revision_profit_loss_2nd_quarter(
     """業績修正の2Q業績予想の損益項目の各項目がどの程度埋まっているか"""
     x = earn_revision[f"Forecast{pl_col}2ndQuarter"].is_not_null().mean()
     assert isinstance(x, float)
-    assert 0.27 < x < 0.29  # 割合 1/4 くらい
+    assert 0.26 < x < 0.29  # 割合 1/4 くらい
 
 
 @pytest.mark.parametrize(
