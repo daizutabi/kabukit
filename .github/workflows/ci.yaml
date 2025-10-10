@@ -38,7 +38,7 @@ jobs:
         run: uv sync
       - name: Check pre-commit hooks are up-to-date
         run: |
-          pre-commit autoupdate
+          uv run pre-commit autoupdate
           git diff --exit-code .pre-commit-config.yaml
       - name: Run pre-commit hooks
         run: uv run pre-commit run --all-files
