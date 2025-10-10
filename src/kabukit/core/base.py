@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 from typing import TYPE_CHECKING
+from zoneinfo import ZoneInfo
 
 import polars as pl
 
@@ -30,7 +31,7 @@ class Base:
     def write(self) -> Path:
         data_dir = self.data_dir()
         data_dir.mkdir(parents=True, exist_ok=True)
-        path = datetime.datetime.today().strftime("%Y%m%d")  # noqa: DTZ002
+        path = datetime.datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y%m%d")
         filename = data_dir / f"{path}.parquet"
         self.data.write_parquet(filename)
         return filename

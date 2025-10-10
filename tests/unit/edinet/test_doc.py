@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from zoneinfo import ZoneInfo
 
 import polars as pl
 import pytest
@@ -43,8 +44,8 @@ def test_clean_list_date_time(df: DataFrame, d: str | date) -> None:
     assert x[0] == date(2025, 9, 19)
     assert x[1] == date(2025, 9, 19)
     x = df["submitDateTime"].to_list()
-    assert x[0] == datetime(2025, 9, 19, 15, 0)  # noqa: DTZ001
-    assert x[1] == datetime(2025, 9, 22, 9, 30)  # noqa: DTZ001
+    assert x[0] == datetime(2025, 9, 19, 15, 0, tzinfo=ZoneInfo("Asia/Tokyo"))
+    assert x[1] == datetime(2025, 9, 22, 9, 30, tzinfo=ZoneInfo("Asia/Tokyo"))
 
 
 def test_clean_list_date_time_null() -> None:
@@ -77,7 +78,10 @@ def test_clean_list_ope_datetime(df: DataFrame) -> None:
     from kabukit.edinet.doc import clean_list
 
     df = clean_list(df, "2025-09-19")
-    assert df["opeDateTime"].to_list() == [datetime(2025, 9, 30, 15, 0), None]  # noqa: DTZ001
+    assert df["opeDateTime"].to_list() == [
+        datetime(2025, 9, 30, 15, 0, tzinfo=ZoneInfo("Asia/Tokyo")),
+        None,
+    ]
 
 
 def test_clean_csv() -> None:

@@ -1,5 +1,6 @@
 import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import polars as pl
 import pytest
@@ -35,7 +36,12 @@ def test_data_dir(mocker: MockerFixture, cls: type[Base], name: str) -> None:
 
 def test_write(mocker: MockerFixture, data: DataFrame, tmp_path: Path) -> None:
     mock_datetime = mocker.patch("kabukit.core.base.datetime")
-    mock_datetime.datetime.today.return_value = datetime.datetime(2023, 10, 27)  # noqa: DTZ001
+    mock_datetime.datetime.now.return_value = datetime.datetime(
+        2023,
+        10,
+        27,
+        tzinfo=ZoneInfo("Asia/Tokyo"),
+    )
 
     mocker.patch.object(Base, "data_dir", return_value=tmp_path)
     path = Base(data).write()

@@ -1,4 +1,5 @@
 import datetime
+from zoneinfo import ZoneInfo
 
 import polars as pl
 import pytest
@@ -12,7 +13,7 @@ pytestmark = pytest.mark.integration
 
 @pytest.mark.asyncio
 async def test_date(client: JQuantsClient) -> None:
-    today = datetime.date.today()  # noqa: DTZ011
+    today = datetime.datetime.now(ZoneInfo("Asia/Tokyo")).date()
     date = today - datetime.timedelta(weeks=12)
     df = await client.get_info(date=date)
     assert df.height > 4000
@@ -60,7 +61,8 @@ def test_column_dtype(df: DataFrame, name: str, dtype: type) -> None:
 def test_today(df: DataFrame) -> None:
     date = df.item(0, "Date")
     assert isinstance(date, datetime.date)
-    assert abs((date - datetime.date.today()).days) <= 7  # noqa: DTZ011
+    today = datetime.datetime.now(ZoneInfo("Asia/Tokyo")).date()
+    assert abs((date - today).days) <= 7
 
 
 @pytest.mark.parametrize(
