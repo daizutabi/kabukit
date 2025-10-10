@@ -6,7 +6,9 @@ import zipfile
 from enum import StrEnum
 from typing import TYPE_CHECKING
 
+import httpx
 from polars import DataFrame
+from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
 
 from kabukit.core.client import Client
 from kabukit.utils.config import load_dotenv
@@ -22,6 +24,11 @@ if TYPE_CHECKING:
 
 API_VERSION = "v2"
 BASE_URL = f"https://api.edinet-fsa.go.jp/api/{API_VERSION}"
+
+
+def is_retryable(e: BaseException) -> bool:
+    """Return True if the exception is a retryable network error."""
+    return isinstance(e, (httpx.ConnectTimeout, httpx.ReadTimeout, httpx.ConnectError))
 
 
 class AuthKey(StrEnum):
@@ -43,6 +50,12 @@ class EdinetClient(Client):
         if api_key:
             self.client.params = {"Subscription-Key": api_key}
 
+    @retry(
+        reraise=True,
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        retry=retry_if_exception(is_retryable),
+    )
     async def get(self, url: str, params: QueryParamTypes) -> Response:
         resp = await self.client.get(url, params=params)
         resp.raise_for_status()
