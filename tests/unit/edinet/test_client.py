@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 import pytest
-from httpx import HTTPStatusError, Response
+from httpx import ConnectTimeout, HTTPStatusError, Response
 from polars.testing import assert_frame_equal
 
 from kabukit.edinet.client import AuthKey, EdinetClient
@@ -275,3 +275,34 @@ async def test_get_csv_no_csv_in_zip(get: AsyncMock, mocker: MockerFixture) -> N
     msg = "CSV is not available."
     with pytest.raises(ValueError, match=msg):
         await client.get_csv("S100TEST")
+
+
+@pytest.mark.asyncio
+async def test_get_retries_on_failure(get: AsyncMock, mocker: MockerFixture) -> None:
+    """Test that the get method retries on retryable failures."""
+    error = ConnectTimeout("Connection timed out")
+    success_response = Response(200, json={"message": "success"})
+    success_response.raise_for_status = mocker.MagicMock()
+
+    get.side_effect = [error, error, success_response]
+
+    client = EdinetClient("test_key")
+    response = await client.get("test/path", params={})
+
+    assert response == success_response
+    assert get.call_count == 3
+
+
+@pytest.mark.asyncio
+async def test_get_fails_after_retries(get: AsyncMock) -> None:
+    """Test that the get method fails after exhausting all retries."""
+    error = ConnectTimeout("Connection timed out")
+    get.side_effect = [error, error, error]
+
+    client = EdinetClient("test_key")
+
+    with pytest.raises(ConnectTimeout):
+        await client.get("test/path", params={})
+
+    assert get.call_count == 3
+
