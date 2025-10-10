@@ -36,12 +36,12 @@ jobs:
         run: pip install uv
       - name: Install the project
         run: uv sync
-      - name: Ruff check
-        run: uvx ruff check
-      # - name: Type check (ty)
-      #   run: uvx ty check
-      - name: Type check (basedpyright)
-        run: uvx basedpyright src
+      - name: Check pre-commit hooks are up-to-date
+        run: |
+          uv run pre-commit autoupdate
+          git diff --exit-code .pre-commit-config.yaml
+      - name: Run pre-commit hooks
+        run: uv run pre-commit run --all-files
       - name: Run tests
         run: uv run pytest -v --junitxml=junit.xml -m "not integration and not validation"
       - name: Upload Codecov Results
