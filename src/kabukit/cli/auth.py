@@ -24,7 +24,7 @@ async def auth_jquants(mailaddress: str, password: str) -> None:
             typer.echo("認証に失敗しました。")
             raise Exit(1) from None
 
-    typer.echo("J-Quantsのリフレッシュトークン・IDトークンを保存しました。")
+    typer.echo("J-QuantsのIDトークンを保存しました。")
 
 
 Mailaddress = Annotated[
