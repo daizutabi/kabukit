@@ -55,9 +55,11 @@ dependencies = [
 kabu = "kabukit.cli.app:app"
 
 [project.urls]
+Changelog = "https://github.com/daizutabi/kabukit/releases"
 Documentation = "https://daizutabi.github.io/kabukit/"
-Source = "https://github.com/daizutabi/kabukit"
+Homepage = "https://daizutabi.github.io/kabukit/"
 Issues = "https://github.com/daizutabi/kabukit/issues"
+Source = "https://github.com/daizutabi/kabukit"
 
 [dependency-groups]
 dev = [
