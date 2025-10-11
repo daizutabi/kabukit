@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "kabukit"
-version = "0.7.2"
+version = "0.7.3"
 description = "A Python toolkit for Japanese financial market data, supporting J-Quants and EDINET APIs."
 readme = "README.md"
 license = { file = "LICENSE" }
