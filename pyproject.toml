@@ -65,8 +65,7 @@ Source = "https://github.com/daizutabi/kabukit"
 dev = [
   "altair @ git+https://github.com/vega/altair.git@main",
   "basedpyright>=1.31.6",
-  "marimo[lsp]>=0.16.5",
-  "numpy>=2.3.3",
+  "marimo[lsp,mcp]>=0.16.5",
   "pre-commit>=4.3.0",
   "pytest-asyncio>=1.2.0",
   "pytest-clarity>=1.0.1",
@@ -79,7 +78,7 @@ dev = [
   "vegafusion>=2.0.3",
   "vl-convert-python>=1.8.0",
 ]
-docs = ["mkapi>=4.4", "mkdocs-marimo", "mkdocs-material"]
+docs = ["mkapi>=4.5", "mkdocs-typer>=0.0.3", "mkdocs-material>=9.6.21"]
 
 [tool.pytest.ini_options]
 addopts = ["--cov=kabukit", "--cov-report=lcov:lcov.info", "--doctest-modules"]
