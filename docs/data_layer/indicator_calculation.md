@@ -20,13 +20,13 @@
 
 3. **基準となる財務データの取得**:
    * 特定した決算情報から、以下の基準値を取得する。
-      * `IssuedShares` (発行済株式数)
-      * `TreasuryShares` (自己株式数)
-      * `Equity` (純資産)
-      * `ForecastProfit` (当期予想純利益, FY決算以外)
-      * `NextYearForecastProfit` (来期予想純利益, FY決算)
-      * `ForecastDividendPerShareAnnual` (当期予想配当, FY決算以外)
-      * `NextYearForecastDividendPerShareAnnual` (来期予想配当, FY決算)
+     * `IssuedShares` (発行済株式数)
+     * `TreasuryShares` (自己株式数)
+     * `Equity` (純資産)
+     * `ForecastProfit` (当期予想純利益, FY決算以外)
+     * `NextYearForecastProfit` (来期予想純利益, FY決算)
+     * `ForecastDividendPerShareAnnual` (当期予想配当, FY決算以外)
+     * `NextYearForecastDividendPerShareAnnual` (来期予想配当, FY決算)
 
 4. **株式数の更新と流通株式数の算出**:
    * `daily_adjusted_shares.md` に記載されているロジックに基づき、日々の株価データに含まれる `AdjustmentFactor` を用いて、`IssuedShares` (発行済株式数) と `TreasuryShares` (自己株式数) を日次で調整する。
@@ -41,7 +41,7 @@
 
 企業の資産価値に対する株価の割安度を測る指標。PBRの逆数に相当する。
 
-```
+```text
 純資産利回り = Equity / (流通株式数 × RawClose)
 ```
 
@@ -50,7 +50,7 @@
 企業の利益創出力を測る指標。PERの逆数に相当する。収益は予想を用いる。
 （注: ここでいう「収益」は「純利益」を指す。）
 
-```
+```text
 収益利回り = 予想純利益 / (流通株式数 × RawClose)
 ```
 
@@ -63,7 +63,7 @@
 
 株主への直接還元を測る指標。配当は予想を用いる。
 
-```
+```text
 配当利回り = 予想年間配当総額 / (流通株式数 × RawClose)
 ```
 
