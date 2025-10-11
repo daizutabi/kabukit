@@ -8,12 +8,34 @@ version = "0.7.2"
 description = "A Python toolkit for Japanese financial market data, supporting J-Quants and EDINET APIs."
 readme = "README.md"
 license = { file = "LICENSE" }
+keywords = [
+  "J-Quants",
+  "EDINET",
+  "financial data",
+  "stock market",
+  "investment",
+  "toolkit",
+  "finance",
+  "trading",
+  "data analysis",
+  "polars",
+]
 authors = [{ name = "daizutabi", email = "daizutabi@gmail.com" }]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
+  "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Financial and Insurance Industry",
+  "Intended Audience :: Science/Research",
+  "Topic :: Office/Business :: Financial",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Scientific/Engineering :: Information Analysis",
+  "Topic :: Utilities",
 ]
 requires-python = ">=3.13"
 dependencies = [
