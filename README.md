@@ -28,7 +28,7 @@ kabukitは、 [J-Quants](https://jpx-jquants.com/) および [EDINET](https://di
 
 #### J-Quants
 
-J-Quants APIを利用するにはユーザー登録が必要です。`auth jquants` サブコマンドを使い、登録したメールアドレスとパスワードで認証し、IDトークンを取得します。IDトークンはユーザーの設定ディレクトリに保存されます。
+J-Quants APIを利用するには、事前にユーザー登録が必要です。`auth jquants` サブコマンドを使い、登録したメールアドレスとパスワードで認証し、IDトークンを取得します。IDトークンはユーザーの設定ディレクトリに保存されます。
 
 ```bash
 ❯ kabu auth jquants
@@ -39,7 +39,7 @@ J-QuantsのIDトークンを保存しました。
 
 #### EDINET
 
-EDINET APIを利用するには、事前にAPIキーの取得が必要です。取得したAPIキーを `auth edinet` サブコマンドで保存します。
+EDINET APIを利用するには、事前にAPIキーの取得が必要です。`auth edinet` サブコマンド使い、取得したAPIキーをユーザーの設定ディレクトリに保存します。
 
 ```bash
 ❯ kabu auth edinet
