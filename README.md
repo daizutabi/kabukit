@@ -115,15 +115,15 @@ shape: (165_891, 105)
 > kabu cache tree
 /home/your_name/.cache/kabukit
 ├── info
-│   └── 20251011.parquet
+│   └── 20251011.parquet (63.8 KB)
 ├── list
-│   └── 20251011.parquet
+│   └── 20251011.parquet (10.2 MB)
 ├── prices
-│   └── 20251011.parquet
+│   └── 20251011.parquet (175.7 MB)
 ├── reports
-│   └── 20251011.parquet
+│   └── 20251011.parquet (713.4 KB)
 └── statements
-    └── 20251011.parquet
+    └── 20251011.parquet (12.5 MB)
 ```
 
 キャッシュデータは、`cache clean` サブコマンドで消去できます。
