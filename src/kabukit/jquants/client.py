@@ -143,7 +143,6 @@ class JQuantsClient(Client):
         id_token = data["idToken"]
 
         if save:
-            set_key(AuthKey.REFRESH_TOKEN, refresh_token)
             set_key(AuthKey.ID_TOKEN, id_token)
 
         self.set_id_token(id_token)

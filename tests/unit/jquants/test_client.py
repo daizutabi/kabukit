@@ -146,13 +146,7 @@ async def test_auth_successful_with_save(
     await client.auth("test@example.com", "password", save=True)
 
     assert mock_post.call_count == 2
-    mock_set_key.assert_has_calls(
-        [
-            call(AuthKey.REFRESH_TOKEN, "test_refresh_token"),
-            call(AuthKey.ID_TOKEN, "test_id_token"),
-        ],
-        any_order=True,
-    )
+    mock_set_key.assert_has_calls([call(AuthKey.ID_TOKEN, "test_id_token")])
 
 
 @pytest.mark.asyncio

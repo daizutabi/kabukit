@@ -17,7 +17,7 @@ def test_jquants_success(mock_jquants_client: MagicMock, command: str) -> None:
     mock_jquants_client.__aenter__.return_value.auth = auth
     result = runner.invoke(app, ["auth", command], input="t@e.com\n123\n")
     assert result.exit_code == 0
-    assert "J-Quantsのリフレッシュトークン・IDトークンを保存しました。" in result.stdout
+    assert "J-QuantsのIDトークンを保存しました。" in result.stdout
     auth.assert_awaited_once_with("t@e.com", "123", save=True)
 
 
