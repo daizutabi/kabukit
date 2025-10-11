@@ -130,7 +130,7 @@ shape: (165_891, 105)
 
 ## ノートブックから使う
 
-kabukitは、コマンドラインだけでなく、PythonコードからもAPIとして利用できます。JQuantsClientはhttpxを使って非同期でデータを取得するため、Jupyterやmarimoのような非同期処理を直接扱えるノートブック環境と非常に相性が良いです。
+kabukitは、コマンドラインだけでなく、PythonコードからもAPIとして利用できます。JQuantsClientはhttpxを使って非同期でデータを取得するため、[Jupyter](https://jupyter.org/) や [marimo](https://marimo.io/) のような非同期処理を直接扱えるノートブック環境と非常に相性が良いです。
 
 ### データ取得
 
