@@ -23,7 +23,9 @@ def add_to_tree(tree: Tree, path: Path) -> None:
             branch = tree.add(p.name)
             add_to_tree(branch, p)
         else:
-            tree.add(p.name)
+            size = p.stat().st_size
+            formatted_size = format_size(size)
+            tree.add(f"{p.name} ({formatted_size})")
 
 
 @app.command()
@@ -59,3 +61,13 @@ def clean() -> None:
         msg += "エラーが発生しました。"
         typer.secho(msg, fg=typer.colors.RED, bold=True)
         raise typer.Exit(1) from None
+
+
+def format_size(size_in_bytes: int) -> str:
+    if size_in_bytes < 1024:
+        return f"{size_in_bytes} B"
+
+    if size_in_bytes < 1024 * 1024:
+        return f"{size_in_bytes / 1024:.1f} KB"
+
+    return f"{size_in_bytes / (1024 * 1024):.1f} MB"

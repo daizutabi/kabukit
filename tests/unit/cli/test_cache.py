@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import pytest
 from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
@@ -59,3 +60,19 @@ def test_cache_clean_error(mocker: MockerFixture, tmp_path: Path) -> None:
     assert result.exit_code == 1
     mock_rmtree.assert_called_once_with(tmp_path)
     assert "エラーが発生しました" in result.stdout
+
+
+@pytest.mark.parametrize(
+    ("size", "expected"),
+    [
+        (100, "100 B"),
+        (2048, "2.0 KB"),
+        (5000, "4.9 KB"),
+        (5 * 1024**2, "5.0 MB"),
+        (312 * 1024**2, "312.0 MB"),
+    ],
+)
+def test_format_size(size: int, expected: str) -> None:
+    from kabukit.cli.cache import format_size
+
+    assert format_size(size) == expected
