@@ -133,6 +133,59 @@ shape: (165_891, 105)
 
 `kabukit`はPythonモジュールとしてAPIを提供します。[Jupyter](https://jupyter.org/) や [marimo](https://marimo.io/) のノートブックから使用できます。
 
+### データ取得
+
+J-Quantsの例を示します。まず、`JQuantsClient`のインスタンスを作成します。事前に、コマンドラインで認証を済ませてください。
+
+```python
+from kabukit import JQuantsClient
+
+client = JQuantsClient()
+```
+
+#### 銘柄情報
+
+```python
+info = await client.get_info("7203")
+```
+
+#### 財務情報
+
+```python
+statements = await client.get_statements("7203")
+```
+
+#### 株価情報
+
+```python
+prices = await client.get_prices("7203")
+```
+
+#### 全銘柄のデータ一括取得
+
+`fetch_all`関数を使うと、全銘柄のデータを一度に取得できます。marimoノートブックを使っていてば、プログレスバーを簡単に表示できます。財務情報の場合は以下の通りです。
+
+```python
+import marimo as mo
+from kabukit.jquants import fetch_all
+
+statements = await fetch_all("statements", progress=mo.status.progress_bar)
+```
+
+株価情報の場合は、上記の `"statements"` を `"prices"` に変更してください。
+
+### キャッシュデータの利用
+
+コマンドラインで事前に保存しておいたキャッシュデータを再利用できます。ノートブックの起動ごとに、APIアクセスを行ってデータをダウンロードする必要がなくなります。
+
+```python
+from kabukit import Info, Statements, Prices
+
+# data属性で、Polars DataFrameを取得できます。
+info = Info.read().data
+statements = Statements.read().data
+prices = Prices.read().data
+```
 
 <!-- Badges -->
 
