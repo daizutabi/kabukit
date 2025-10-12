@@ -41,6 +41,7 @@ theme:
     - search.suggest
 plugins:
   - search
+  - markdown-exec
   - mkapi:
       debug: true
   - mkdocs-nbsync:
