@@ -8,11 +8,11 @@ A Python toolkit for Japanese financial market data, supporting J-Quants and EDI
 [![Coverage Status][codecov-image]][codecov-link]
 [![Documentation Status][docs-image]][docs-link]
 
-kabukitは、高速なデータ処理ライブラリである [Polars](https://pola.rs/) と、モダンな非同期HTTPクライアントである [httpx](https://www.python-httpx.org/) を基盤として構築されており、パフォーマンスを重視しています。
+kabukit は、高速なデータ処理ライブラリである [Polars](https://pola.rs/) と、モダンな非同期 HTTP クライアントである [httpx](https://www.python-httpx.org/) を基盤として構築されており、パフォーマンスを重視しています。
 
 ## インストール
 
-`uv` または `pip` を使って、[Python Package Index (PyPI)](https://pypi.org/) からインストールします。Pythonバージョンは3.13以上が必要です。
+`uv` または `pip` を使って、[Python Package Index (PyPI)](https://pypi.org/) からインストールします。Python バージョンは 3.13 以上が必要です。
 
 ```bash
 uv pip install kabukit
@@ -20,7 +20,7 @@ uv pip install kabukit
 
 ## コマンドラインから使う
 
-kabukitは、 [J-Quants](https://jpx-jquants.com/) および [EDINET](https://disclosure2.edinet-fsa.go.jp/) からデータを取得するための便利なコマンドラインインターフェース（CLI）を提供します。
+kabukit は、 [J-Quants](https://jpx-jquants.com/) および [EDINET](https://disclosure2.edinet-fsa.go.jp/) からデータを取得するための便利なコマンドラインインターフェース（CLI）を提供します。
 
 コマンド名は `kabu` です。
 
@@ -28,23 +28,23 @@ kabukitは、 [J-Quants](https://jpx-jquants.com/) および [EDINET](https://di
 
 #### J-Quants
 
-J-Quants APIを利用するには、事前にユーザー登録が必要です。`auth jquants` サブコマンドを使い、登録したメールアドレスとパスワードで認証し、IDトークンを取得します。IDトークンはユーザーの設定ディレクトリに保存されます。
+J-Quants API を利用するには、事前にユーザー登録が必要です。`auth jquants` サブコマンドを使い、登録したメールアドレスとパスワードで認証し、ID トークンを取得します。ID トークンはユーザーの設定ディレクトリに保存されます。
 
 ```bash
 ❯ kabu auth jquants
 Mailaddress: your_email@example.com
 Password: your_password
-J-QuantsのIDトークンを保存しました。
+J-Quants の ID トークンを保存しました。
 ```
 
 #### EDINET
 
-EDINET APIを利用するには、事前にAPIキーの取得が必要です。`auth edinet` サブコマンド使い、取得したAPIキーをユーザーの設定ディレクトリに保存します。
+EDINET API を利用するには、事前に API キーの取得が必要です。`auth edinet` サブコマンド使い、取得した API キーをユーザーの設定ディレクトリに保存します。
 
 ```bash
 ❯ kabu auth edinet
 Api key: your_api_key
-EDINETのAPIキーを保存しました。
+EDINET の API キーを保存しました。
 ```
 
 #### 認証データで確認
@@ -60,7 +60,7 @@ EDINET_API_KEY: ******
 
 ### データ取得
 
-`get` サブコマンドは、J-QuantsおよびEDINETから各種データを取得します。以下に、一例を示します。
+`get` サブコマンドは、J-Quants および EDINET から各種データを取得します。以下に、一例を示します。
 
 #### 銘柄情報
 
@@ -94,7 +94,7 @@ shape: (2_444, 16)
 
 #### 全銘柄のデータ一括取得
 
-各コマンドで銘柄コードを省力すると、全銘柄のデータを一度に取得できます。財務情報の場合は以下の通りです。
+各コマンドで銘柄コードを省略すると、全銘柄のデータを一度に取得できます。財務情報の場合は以下の通りです。
 
 ```bash
 > kabu get statements
@@ -130,11 +130,11 @@ shape: (165_891, 105)
 
 ## ノートブックから使う
 
-kabukitは、コマンドラインだけでなく、PythonコードからもAPIとして利用できます。httpxを使って非同期でデータを取得するため、[Jupyter](https://jupyter.org/) や [marimo](https://marimo.io/) のような非同期処理を直接扱えるノートブック環境と非常に相性が良いです。
+kabukit は、コマンドラインだけでなく、Python コードからも API として利用できます。httpx を使って非同期でデータを取得するため、[Jupyter](https://jupyter.org/) や [marimo](https://marimo.io/) のような非同期処理を直接扱えるノートブック環境と非常に相性が良いです。
 
 ### データ取得
 
-J-Quantsの例を示します。まず、`JQuantsClient`のインスタンスを作成します。事前に、コマンドラインで認証を済ませてください。
+J-Quants の例を示します。まず、`JQuantsClient` のインスタンスを作成します。事前に、コマンドラインで認証を済ませてください。
 
 ```python
 from kabukit import JQuantsClient
@@ -162,7 +162,7 @@ prices = await client.get_prices("7203")
 
 #### 全銘柄のデータ一括取得
 
-`fetch_all`関数を使うと、全銘柄のデータを一度に取得できます。marimoノートブックを使っていれば、プログレスバーを簡単に表示できます。財務情報の場合は以下の通りです。
+`fetch_all` 関数を使うと、全銘柄のデータを一度に取得できます。marimo ノートブックを使っていれば、プログレスバーを簡単に表示できます。財務情報の場合は以下の通りです。
 
 ```python
 import marimo as mo
@@ -175,12 +175,12 @@ statements = await fetch_all("statements", progress=mo.status.progress_bar)
 
 ### キャッシュデータの利用
 
-コマンドラインで事前に保存しておいたキャッシュデータを再利用できます。ノートブックの起動ごとに、APIアクセスを行ってデータをダウンロードする必要がなくなります。
+コマンドラインで事前に保存しておいたキャッシュデータを再利用できます。ノートブックの起動ごとに、API アクセスを行ってデータをダウンロードする必要がなくなります。
 
 ```python
 from kabukit import Info, Statements, Prices
 
-# data属性で、Polars DataFrameを取得できます。
+# `data` 属性で、Polars DataFrame を取得できます。
 info = Info.read().data
 statements = Statements.read().data
 prices = Prices.read().data

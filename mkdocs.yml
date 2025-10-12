@@ -1,11 +1,12 @@
 site_name: Kabukit
 site_url: https://daizutabi.github.io/kabukit/
-site_description: A Python toolkit for Japanese financial market data, supporting J-Quants and EDINET APIs.
+site_description: 日本の株式投資分析を、もっと手軽に、もっと速く。J-QuantsとEDINETのデータを、コマンドラインやPythonコードから快適に扱うためのモダンなツールキットです。
 site_author: daizutabi
 repo_url: https://github.com/daizutabi/kabukit/
 repo_name: daizutabi/kabukit
 edit_uri: edit/main/docs/
 theme:
+  logo: logo.svg
   name: material
   font:
     text: Fira Sans
@@ -42,12 +43,15 @@ plugins:
   - search
   - mkapi:
       debug: true
+  - mkdocs-nbsync:
+      src_dir: ../notebooks
   # - marimo:
   #     enabled: true
   #     display_code: true
 markdown_extensions:
   - admonition
   - attr_list
+  - cjk_autojoin
   - def_list
   - md_in_html
   - mkdocs-typer
@@ -67,6 +71,9 @@ markdown_extensions:
       custom_checkbox: true
 nav:
   - "はじめに": "index.md"
+  - "利用ガイド":
+      - "J-Quants": "guides/jquants.md"
+      - "EDINET": "guides/edinet.md"
   - "コンセプト":
       - "概要": "concept/index.md"
       - "コア指標": "concept/core_indicators.md"
@@ -84,3 +91,5 @@ nav:
       - "実践的な注意点": "data_layer/practical_notes.md"
   - "CLI Reference": "cli_reference.md"
   - "API Reference": "$api/kabukit.***"
+extra_css:
+  - css/kabukit.css
