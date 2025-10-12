@@ -120,32 +120,36 @@ def mock_cli_documents(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch("kabukit.cli.get.documents", new_callable=AsyncMock)
 
 
+@pytest.mark.parametrize("quiet", [[], ["-q"], ["--quiet"]])
 def test_get_all_single_code(
     mock_cli_info: AsyncMock,
     mock_cli_statements: AsyncMock,
     mock_cli_prices: AsyncMock,
+    quiet: list[str],
 ) -> None:
-    result = runner.invoke(app, ["get", "all", MOCK_CODE])
+    result = runner.invoke(app, ["get", "all", MOCK_CODE, *quiet])
 
     assert result.exit_code == 0
     mock_cli_info.assert_awaited_once_with(MOCK_CODE)
-    mock_cli_statements.assert_awaited_once_with(MOCK_CODE)
-    mock_cli_prices.assert_awaited_once_with(MOCK_CODE)
+    mock_cli_statements.assert_awaited_once_with(MOCK_CODE, quiet=bool(quiet))
+    mock_cli_prices.assert_awaited_once_with(MOCK_CODE, quiet=bool(quiet))
 
 
+@pytest.mark.parametrize("quiet", [[], ["-q"], ["--quiet"]])
 def test_get_all_all_codes(
     mock_cli_info: AsyncMock,
     mock_cli_statements: AsyncMock,
     mock_cli_prices: AsyncMock,
     mock_cli_documents: AsyncMock,
+    quiet: list[str],
 ) -> None:
-    result = runner.invoke(app, ["get", "all"])
+    result = runner.invoke(app, ["get", "all", *quiet])
 
     assert result.exit_code == 0
     mock_cli_info.assert_awaited_once_with(None)
-    mock_cli_statements.assert_awaited_once_with(None)
-    mock_cli_prices.assert_awaited_once_with(None)
-    mock_cli_documents.assert_awaited_once_with()
+    mock_cli_statements.assert_awaited_once_with(None, quiet=bool(quiet))
+    mock_cli_prices.assert_awaited_once_with(None, quiet=bool(quiet))
+    mock_cli_documents.assert_awaited_once_with(quiet=bool(quiet))
 
 
 def test_get_statements_interrupt(mock_fetch_all: AsyncMock) -> None:

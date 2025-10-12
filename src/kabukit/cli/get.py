@@ -23,7 +23,7 @@ Code = Annotated[
 ]
 Quiet = Annotated[
     bool,
-    Option("--quiet", "-q", help="プログレスバーを表示しません。", is_flag=True),
+    Option("--quiet", "-q", help="プログレスバーを表示しません。"),
 ]
 
 
