@@ -18,3 +18,7 @@
   color: gray;
   text-align: center;
 }
+
+.dataframe tbody td {
+  text-align: center;
+}
