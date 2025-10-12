@@ -111,7 +111,7 @@ async def get_stream(
         yield df
 
 
-async def fetch(
+async def get(
     cls: type[Client],
     resource: str,
     args: Iterable[Any],
@@ -141,6 +141,7 @@ async def fetch(
             すべての情報を含む単一のDataFrame。
     """
     args = list(args)
+
     async with cls() as client:
         stream = get_stream(client, resource, args, max_concurrency)
 

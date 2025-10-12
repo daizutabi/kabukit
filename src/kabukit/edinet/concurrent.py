@@ -42,7 +42,7 @@ async def fetch(
         DataFrame:
             すべての銘柄の財務情報を含む単一のDataFrame。
     """
-    return await concurrent.fetch(
+    return await concurrent.get(
         EdinetClient,
         resource,
         args,
