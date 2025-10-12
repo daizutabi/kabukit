@@ -1,4 +1,4 @@
-# J-Quants API 利用ガイド
+# J-Quants API の使い方
 
 kabukit は、[httpx](https://www.python-httpx.org/) を使った非同期設計になっており、
 [Jupyter](https://jupyter.org/) や [marimo](https://marimo.io/) のような
