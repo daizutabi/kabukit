@@ -54,7 +54,7 @@ def test_edinet(mock_set_key: MagicMock, command: str) -> None:
 def test_show() -> None:
     result = runner.invoke(app, ["auth", "show"])
     assert result.exit_code == 0
-    assert "Configuration file: " in result.stdout
+    assert "設定ファイル: " in result.stdout
 
 
 @pytest.fixture
@@ -77,6 +77,6 @@ def test_show_with_config(mock_get_dotenv_path: MagicMock, tmp_path: Path) -> No
     result = runner.invoke(app, ["auth", "show"])
 
     assert result.exit_code == 0
-    assert f"Configuration file: {config_path}" in result.stdout
+    assert f"設定ファイル: {config_path}" in result.stdout
     for key, value in config_content.items():
         assert f"{key}: {value}" in result.stdout

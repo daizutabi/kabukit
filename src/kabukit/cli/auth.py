@@ -78,7 +78,7 @@ def show() -> None:
     from kabukit.utils.config import get_dotenv_path
 
     path = get_dotenv_path()
-    typer.echo(f"Configuration file: {path}")
+    typer.echo(f"設定ファイル: {path}")
 
     if path.exists():
         config = dotenv_values(path)
