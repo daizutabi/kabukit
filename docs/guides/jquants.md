@@ -57,17 +57,21 @@ client = JQuantsClient()
 
 ```python exec="1" source="material-block"
 df = await client.get_info("7203")
-df.select("Date", "Code", "CompanyName").tail()
+df.select("Date", "Code", "CompanyName")
 ```
 
 戻り値のカラムは、J-Quants API の
 [データ項目概要](https://jpx.gitbook.io/j-quants-ja/api-reference/listed_info#dta)
 に対応します。
 
-引数を省略すると、全企業企業の情報を取得できます。
+引数を省略すると、全企業の情報を取得できます。
 
 ```python exec="1" source="material-block"
 df = await client.get_info()
+df.select("Date", "Code", "CompanyName").tail()
+```
+
+```python exec="1" source="material-block"
 df.shape
 ```
 
@@ -87,7 +91,7 @@ df.select("DisclosedDate", "Code", "TypeOfDocument", "Profit").tail()
 戻り値のカラムは、J-Quants API の
 [データ項目概要](https://jpx.gitbook.io/j-quants-ja/api-reference/statements#dta)
 に対応します。
-ただし、分析を行いやすくするために、以下の変更を行っています。
+ただし、分析を行いやすくするために、株式数に関して以下の変更を行っています。
 
 - 期末発行済株式数（自己株式を含む）
     - （変更前）NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock
@@ -132,25 +136,20 @@ df.select("Date", "Code", "Open", "High", "Low", "Close", "Volume").tail()
 戻り値のカラムは、J-Quants API の
 [データ項目概要](https://jpx.gitbook.io/j-quants-ja/api-reference/daily_quotes#dta)
 に対応します。
-ただし、分析を行いやすくするために、以下の変更を行っています。
+ただし、分析を行いやすくするために、株価などの調整に関して以下の変更を行っています。
 
-<table border="1" class="dataframe">
-<thead>
-<tr><th>J-Quants API</th><th>kabukit</th><th>説明</th></tr>
-</thead>
-<tbody>
-<tr><td>Open</td><td>RawOpen</td><td>始値（調整前）</td></tr>
-<tr><td>High</td><td>RawHigh</td><td>高値（調整前）</td></tr>
-<tr><td>Low</td><td>RawLow</td><td>安値（調整前）</td></tr>
-<tr><td>Close</td><td>RawClose</td><td>終値（調整前）</td></tr>
-<tr><td>Volume</td><td>RawVolume</td><td>取引高（調整前）</td></tr>
-<tr><td>AdjustmentOpen</td><td>Open</td><td>調整済み始値</td></tr>
-<tr><td>AdjustmentHigh</td><td>High</td><td>調整済み高値</td></tr>
-<tr><td>AdjustmentLow</td><td>Low</td><td>調整済み安値</td></tr>
-<tr><td>AdjustmentClose</td><td>Close</td><td>調整済み終値</td></tr>
-<tr><td>AdjustmentVolume</td><td>Volume</td><td>調整済み取引高</td></tr>
-</tbody>
-</table>
+| J-Quants API | kabukit | 説明 |
+| :--: | :--: | :--: |
+| Open | RawOpen | 始値（調整前） |
+| High | RawHigh | 高値（調整前） |
+| Low | RawLow | 安値（調整前） |
+| Close | RawClose | 終値（調整前） |
+| Volume | RawVolume | 取引高（調整前） |
+| AdjustmentOpen | Open | 調整済み始値 |
+| AdjustmentHigh | High | 調整済み高値 |
+| AdjustmentLow | Low | 調整済み安値 |
+| AdjustmentClose | Close | 調整済み終値 |
+| AdjustmentVolume | Volume | 調整済み取引高 |
 
 引数に日付を指定すると、該当する取引日の情報をまとめて取得できます。
 
