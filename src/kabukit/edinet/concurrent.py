@@ -90,7 +90,7 @@ async def fetch_documents(
         progress=progress,
         callback=callback,
     )
-    return df.sort("Date")
+    return df.sort("Date", "Code")
 
 
 async def fetch_csv(

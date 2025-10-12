@@ -35,7 +35,8 @@ def clean_documents(df: DataFrame, date: str | datetime.date) -> DataFrame:
             pl.col("^.+Flag$").cast(pl.Int8).cast(pl.Boolean),
             pl.col("^.+Code$").cast(pl.String),
         )
-        .select("Date", pl.exclude("Date"))
+        .rename({"secCode": "Code"})
+        .select("Date", "Code", pl.exclude("Date", "Code"))
     )
 
 

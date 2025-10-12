@@ -12,6 +12,7 @@ def df() -> DataFrame:
         {
             "csvFlag": ["1", "0"],
             "pdfFlag": ["1", "0"],
+            "secCode": ["10000", "20000"],
             "submitDateTime": ["2025-09-19 15:00", "2025-09-22 09:30"],
             "periodStart": ["aa", "2025-09-15"],
             "periodEnd": ["2025-09-30", ""],
@@ -26,6 +27,7 @@ def test_clean_documents_columns(df: DataFrame) -> None:
     df = clean_documents(df, "2025-09-19")
     assert df.columns == [
         "Date",
+        "Code",
         "csvFlag",
         "pdfFlag",
         "submitDateTime",
@@ -51,7 +53,13 @@ def test_clean_documents_date_time(df: DataFrame, d: str | date) -> None:
 def test_clean_documents_date_time_null() -> None:
     from kabukit.edinet.doc import clean_documents
 
-    df = DataFrame({"submitDateTime": ["", None], "opeDateTime": ["", ""]})
+    df = DataFrame(
+        {
+            "submitDateTime": ["", None],
+            "opeDateTime": ["", ""],
+            "secCode": ["10000", "20000"],
+        },
+    )
 
     df = clean_documents(df, "2025-09-19")
     assert df["submitDateTime"].to_list() == [None, None]
