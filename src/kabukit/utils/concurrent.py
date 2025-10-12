@@ -51,7 +51,7 @@ async def collect[R](
     tasks = {asyncio.create_task(run(awaitable)) for awaitable in awaitables}
 
     try:
-        async for future in asyncio.as_completed(tasks):
+        for future in asyncio.as_completed(tasks):  # async for (python 3.13+)
             with contextlib.suppress(asyncio.CancelledError):
                 yield await future
     finally:

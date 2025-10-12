@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 async def sleep(seconds: list[float]):
     x = (asyncio.sleep(s, s) for s in seconds)
     y = asyncio.as_completed(x)
-    async for i in y:
+    for i in y:  # async for (python 3.13+)
         yield await i
 
 

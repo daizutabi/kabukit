@@ -15,7 +15,7 @@ kabukit は、 [J-Quants API](https://jpx-jquants.com/) および [EDINET API](h
 
 ## インストール
 
-`pip` または `uv` を使ってインストールします。Python バージョンは 3.13 以上が必要です。
+`pip` または `uv` を使ってインストールします。Python バージョンは 3.12 以上が必要です。
 
 ```bash
 pip install kabukit
