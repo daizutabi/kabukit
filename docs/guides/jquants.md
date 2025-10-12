@@ -1,4 +1,4 @@
-# J-Quants 利用ガイド
+# J-Quants API 利用ガイド
 
 kabukit は、[httpx](https://www.python-httpx.org/) を使った非同期設計になっており、
 [Jupyter](https://jupyter.org/) や [marimo](https://marimo.io/) のような
@@ -8,7 +8,7 @@ kabukit は、[httpx](https://www.python-httpx.org/) を使った非同期設計
 
 ## 認証
 
-API を利用するには、事前にコマンドラインで J-Quants の認証情報を設定しておく必要があります。
+API を利用するには、事前にコマンドラインで J-Quants API の認証情報を設定しておく必要があります。
 
 ```bash
 > kabu auth jquants

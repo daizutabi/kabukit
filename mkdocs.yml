@@ -73,8 +73,8 @@ nav:
   - はじめに: index.md
   - 利用ガイド:
       - CLI: guides/cli.md
-      - J-Quants: guides/jquants.md
-      - EDINET: guides/edinet.md
+      - J-Quants API: guides/jquants.md
+      - EDINET API: guides/edinet.md
   # - "コンセプト":
   #     - "概要": "concept/index.md"
   #     - "コア指標": "concept/core_indicators.md"
