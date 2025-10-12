@@ -3,11 +3,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated, Any
 
 import typer
-from async_typer import AsyncTyper  # pyright: ignore[reportMissingTypeStubs]
-from typer import Argument
+from async_typer import AsyncTyper
+from typer import Argument, Option
 
 if TYPE_CHECKING:
     from kabukit.core.base import Base
+
+# pyright: reportMissingTypeStubs=false
+# pyright: reportUnknownMemberType=false
 
 app = AsyncTyper(
     add_completion=False,
@@ -18,9 +21,13 @@ Code = Annotated[
     str | None,
     Argument(help="銘柄コード。指定しない場合は全銘柄の情報を取得します。"),
 ]
+Quiet = Annotated[
+    bool,
+    Option("--quiet", "-q", help="プログレスバーを表示しません。"),
+]
 
 
-@app.async_command()  # pyright: ignore[reportUnknownMemberType]
+@app.async_command()
 async def info(code: Code = None) -> None:
     """上場銘柄一覧を取得します。"""
     from kabukit.core.info import Info
@@ -42,6 +49,8 @@ async def _fetch(
     cls: type[Base],
     fetch_func_name: str,
     message: str,
+    *,
+    quiet: bool = False,
     **kwargs: Any,
 ) -> None:
     """財務情報・株価情報を取得するための共通処理"""
@@ -57,8 +66,10 @@ async def _fetch(
 
     from kabukit.jquants.concurrent import fetch_all
 
+    progress = None if quiet else tqdm.asyncio.tqdm
+
     try:
-        df = await fetch_all(target, progress=tqdm.asyncio.tqdm, **kwargs)
+        df = await fetch_all(target, progress=progress, **kwargs)
     except KeyboardInterrupt:
         typer.echo("中断しました。")
         raise typer.Exit(1) from None
@@ -68,8 +79,8 @@ async def _fetch(
     typer.echo(f"全銘柄の{message}を '{path}' に保存しました。")
 
 
-@app.async_command()  # pyright: ignore[reportUnknownMemberType]
-async def statements(code: Code = None) -> None:
+@app.async_command()
+async def statements(code: Code = None, *, quiet: Quiet = False) -> None:
     """財務情報を取得します。"""
     from kabukit.core.statements import Statements
 
@@ -79,12 +90,13 @@ async def statements(code: Code = None) -> None:
         cls=Statements,
         fetch_func_name="get_statements",
         message="財務情報",
+        quiet=quiet,
     )
 
 
-@app.async_command()  # pyright: ignore[reportUnknownMemberType]
-async def prices(code: Code = None) -> None:
-    """株価を取得します。"""
+@app.async_command()
+async def prices(code: Code = None, *, quiet: Quiet = False) -> None:
+    """株価情報を取得します。"""
     from kabukit.core.prices import Prices
 
     await _fetch(
@@ -93,77 +105,47 @@ async def prices(code: Code = None) -> None:
         cls=Prices,
         fetch_func_name="get_prices",
         message="株価情報",
+        quiet=quiet,
         max_concurrency=8,
     )
 
 
-@app.async_command(name="list")  # pyright: ignore[reportUnknownMemberType]
-async def list_() -> None:
-    """報告書一覧を取得します。"""
+@app.async_command()
+async def documents(*, quiet: Quiet = False) -> None:
+    """書類一覧を取得します。"""
     import tqdm.asyncio
 
-    from kabukit.core.list import List
-    from kabukit.edinet.concurrent import fetch_list
+    from kabukit.core.documents import Documents
+    from kabukit.edinet.concurrent import fetch_documents
+
+    progress = None if quiet else tqdm.asyncio.tqdm
 
     try:
-        df = await fetch_list(years=10, progress=tqdm.asyncio.tqdm)
+        df = await fetch_documents(years=10, progress=progress)
     except (KeyboardInterrupt, RuntimeError):
         typer.echo("中断しました。")
         raise typer.Exit(1) from None
 
     typer.echo(df)
-    path = List(df).write()
-    typer.echo(f"報告書一覧を '{path}' に保存しました。")
+    path = Documents(df).write()
+    typer.echo(f"書類一覧を '{path}' に保存しました。")
 
 
-@app.async_command()  # pyright: ignore[reportUnknownMemberType]
-async def reports() -> None:
-    """報告書を取得します。"""
-    import polars as pl
-    import tqdm.asyncio
-
-    from kabukit.core.list import List
-    from kabukit.core.reports import Reports
-    from kabukit.edinet.concurrent import fetch_csv
-
-    try:
-        df = List.read().data
-    except FileNotFoundError:
-        await list_()
-        df = List.read().data
-
-    lst = df.filter(pl.col("csvFlag"), pl.col("secCode").is_not_null())
-    doc_ids = lst["docID"].unique()
-
-    try:
-        df = await fetch_csv(doc_ids, limit=1000, progress=tqdm.asyncio.tqdm)
-    except (KeyboardInterrupt, RuntimeError):
-        typer.echo("中断しました。")
-        raise typer.Exit(1) from None
-
-    typer.echo(df)
-    path = Reports(df).write()
-    typer.echo(f"報告書を '{path}' に保存しました。")
-
-
-@app.async_command(name="all")  # pyright: ignore[reportUnknownMemberType]
-async def all_(code: Code = None) -> None:
-    """上場銘柄一覧、財務情報、株価、報告書を連続して取得します。"""
+@app.async_command(name="all")
+async def all_(code: Code = None, *, quiet: Quiet = False) -> None:
+    """上場銘柄一覧、財務情報、株価情報、書類一覧を連続して取得します。"""
     typer.echo("上場銘柄一覧を取得します。")
     await info(code)
 
     typer.echo("---")
     typer.echo("財務情報を取得します。")
-    await statements(code)
+    await statements(code, quiet=quiet)
 
     typer.echo("---")
-    typer.echo("株価を取得します。")
-    await prices(code)
+    typer.echo("株価情報を取得します。")
+    await prices(code, quiet=quiet)
 
     if code is None:
         typer.echo("---")
-        typer.echo("報告書一覧を取得します。")
-        await list_()
-        typer.echo("---")
-        typer.echo("報告書を取得します。")
-        await reports()
+        typer.echo("書類一覧を取得します。")
+        await documents(quiet=quiet)

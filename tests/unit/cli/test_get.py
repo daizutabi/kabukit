@@ -7,7 +7,7 @@ from typer.testing import CliRunner
 
 from kabukit.cli.app import app
 
-from .conftest import MOCK_CODE, MOCK_DF, MOCK_LIST_DF, MOCK_PATH
+from .conftest import MOCK_CODE, MOCK_DF, MOCK_PATH
 
 runner = CliRunner()
 
@@ -85,73 +85,19 @@ def test_get_prices_all_codes(
     assert f"全銘柄の株価情報を '{MOCK_PATH}' に保存しました。" in result.stdout
 
 
-def test_get_list(
-    mock_fetch_list: AsyncMock,
-    MockList: MagicMock,  # noqa: N803
-    mock_list: MagicMock,
+def test_get_documents(
+    mock_fetch_documents: AsyncMock,
+    MockDocuments: MagicMock,  # noqa: N803
+    mock_documents: MagicMock,
 ) -> None:
-    result = runner.invoke(app, ["get", "list"])
+    result = runner.invoke(app, ["get", "documents"])
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
-    mock_fetch_list.assert_awaited_once_with(years=10, progress=tqdm.asyncio.tqdm)
-    MockList.assert_called_once_with(MOCK_DF)
-    mock_list.write.assert_called_once()
-    assert f"報告書一覧を '{MOCK_PATH}' に保存しました。" in result.stdout
-
-
-def test_get_reports(
-    mock_fetch_csv: AsyncMock,
-    MockReports: MagicMock,  # noqa: N803
-    mock_reports: MagicMock,
-    MockList: MagicMock,  # noqa: N803
-    mocker: MockerFixture,
-) -> None:
-    mock_read_instance = mocker.MagicMock()
-    mock_read_instance.data = MOCK_LIST_DF
-    MockList.read.return_value = mock_read_instance
-
-    result = runner.invoke(app, ["get", "reports"])
-
-    assert result.exit_code == 0
-    assert str(MOCK_DF) in result.stdout
-
-    doc_ids = mock_fetch_csv.call_args[0][0]
-    assert sorted(doc_ids.to_list()) == ["doc1", "doc2"]
-
-    MockReports.assert_called_once_with(MOCK_DF)
-    mock_reports.write.assert_called_once()
-    assert f"報告書を '{MOCK_PATH}' に保存しました。" in result.stdout
-
-
-def test_get_reports_file_not_found(
-    mocker: MockerFixture,
-    MockList: MagicMock,  # noqa: N803
-    mock_cli_list: AsyncMock,
-    mock_fetch_csv: AsyncMock,
-    MockReports: MagicMock,  # noqa: N803
-    mock_reports: MagicMock,
-) -> None:
-    mock_read_instance = mocker.MagicMock()
-    mock_read_instance.data = MOCK_LIST_DF
-    MockList.read.side_effect = [
-        FileNotFoundError,
-        mock_read_instance,
-    ]
-
-    result = runner.invoke(app, ["get", "reports"])
-
-    assert result.exit_code == 0
-    mock_cli_list.assert_awaited_once_with()
-
-    assert MockList.read.call_count == 2
-
-    doc_ids = mock_fetch_csv.call_args[0][0]
-    assert sorted(doc_ids.to_list()) == ["doc1", "doc2"]
-
-    MockReports.assert_called_once_with(MOCK_DF)
-    mock_reports.write.assert_called_once()
-    assert f"報告書を '{MOCK_PATH}' に保存しました。" in result.stdout
+    mock_fetch_documents.assert_awaited_once_with(years=10, progress=tqdm.asyncio.tqdm)
+    MockDocuments.assert_called_once_with(MOCK_DF)
+    mock_documents.write.assert_called_once()
+    assert f"書類一覧を '{MOCK_PATH}' に保存しました。" in result.stdout
 
 
 @pytest.fixture
@@ -170,43 +116,40 @@ def mock_cli_prices(mocker: MockerFixture) -> AsyncMock:
 
 
 @pytest.fixture
-def mock_cli_list(mocker: MockerFixture) -> AsyncMock:
-    return mocker.patch("kabukit.cli.get.list_", new_callable=AsyncMock)
+def mock_cli_documents(mocker: MockerFixture) -> AsyncMock:
+    return mocker.patch("kabukit.cli.get.documents", new_callable=AsyncMock)
 
 
-@pytest.fixture
-def mock_cli_reports(mocker: MockerFixture) -> AsyncMock:
-    return mocker.patch("kabukit.cli.get.reports", new_callable=AsyncMock)
-
-
+@pytest.mark.parametrize("quiet", [[], ["-q"], ["--quiet"]])
 def test_get_all_single_code(
     mock_cli_info: AsyncMock,
     mock_cli_statements: AsyncMock,
     mock_cli_prices: AsyncMock,
+    quiet: list[str],
 ) -> None:
-    result = runner.invoke(app, ["get", "all", MOCK_CODE])
+    result = runner.invoke(app, ["get", "all", MOCK_CODE, *quiet])
 
     assert result.exit_code == 0
     mock_cli_info.assert_awaited_once_with(MOCK_CODE)
-    mock_cli_statements.assert_awaited_once_with(MOCK_CODE)
-    mock_cli_prices.assert_awaited_once_with(MOCK_CODE)
+    mock_cli_statements.assert_awaited_once_with(MOCK_CODE, quiet=bool(quiet))
+    mock_cli_prices.assert_awaited_once_with(MOCK_CODE, quiet=bool(quiet))
 
 
+@pytest.mark.parametrize("quiet", [[], ["-q"], ["--quiet"]])
 def test_get_all_all_codes(
     mock_cli_info: AsyncMock,
     mock_cli_statements: AsyncMock,
     mock_cli_prices: AsyncMock,
-    mock_cli_list: AsyncMock,
-    mock_cli_reports: AsyncMock,
+    mock_cli_documents: AsyncMock,
+    quiet: list[str],
 ) -> None:
-    result = runner.invoke(app, ["get", "all"])
+    result = runner.invoke(app, ["get", "all", *quiet])
 
     assert result.exit_code == 0
     mock_cli_info.assert_awaited_once_with(None)
-    mock_cli_statements.assert_awaited_once_with(None)
-    mock_cli_prices.assert_awaited_once_with(None)
-    mock_cli_list.assert_awaited_once_with()
-    mock_cli_reports.assert_awaited_once_with()
+    mock_cli_statements.assert_awaited_once_with(None, quiet=bool(quiet))
+    mock_cli_prices.assert_awaited_once_with(None, quiet=bool(quiet))
+    mock_cli_documents.assert_awaited_once_with(quiet=bool(quiet))
 
 
 def test_get_statements_interrupt(mock_fetch_all: AsyncMock) -> None:
@@ -219,29 +162,11 @@ def test_get_statements_interrupt(mock_fetch_all: AsyncMock) -> None:
     mock_fetch_all.assert_awaited_once_with("statements", progress=tqdm.asyncio.tqdm)
 
 
-def test_get_list_interrupt(mock_fetch_list: AsyncMock) -> None:
-    mock_fetch_list.side_effect = KeyboardInterrupt
+def test_get_documents_interrupt(mock_fetch_documents: AsyncMock) -> None:
+    mock_fetch_documents.side_effect = KeyboardInterrupt
 
-    result = runner.invoke(app, ["get", "list"])
-
-    assert result.exit_code == 1
-    assert "中断しました" in result.stdout
-    mock_fetch_list.assert_awaited_once_with(years=10, progress=tqdm.asyncio.tqdm)
-
-
-def test_get_reports_interrupt(
-    mock_fetch_csv: AsyncMock,
-    MockList: MagicMock,  # noqa: N803
-    mocker: MockerFixture,
-) -> None:
-    mock_read_instance = mocker.MagicMock()
-    mock_read_instance.data = MOCK_LIST_DF
-    MockList.read.return_value = mock_read_instance
-    mock_fetch_csv.side_effect = KeyboardInterrupt
-
-    result = runner.invoke(app, ["get", "reports"])
+    result = runner.invoke(app, ["get", "documents"])
 
     assert result.exit_code == 1
     assert "中断しました" in result.stdout
-    doc_ids = mock_fetch_csv.call_args[0][0]
-    assert sorted(doc_ids.to_list()) == ["doc1", "doc2"]
+    mock_fetch_documents.assert_awaited_once_with(years=10, progress=tqdm.asyncio.tqdm)

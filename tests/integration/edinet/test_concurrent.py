@@ -8,7 +8,7 @@ pytestmark = pytest.mark.integration
 async def test_fetch() -> None:
     from kabukit.edinet.concurrent import fetch
 
-    df = await fetch("list", ["2025-09-09", "2025-09-19", "2025-09-22"])
+    df = await fetch("documents", ["2025-09-09", "2025-09-19", "2025-09-22"])
     assert df.shape == (1231, 30)
     assert df["Date"].n_unique() == 3
     assert df["docID"].n_unique() == 1229  # 重複あり
@@ -20,10 +20,10 @@ def callback(df: DataFrame) -> DataFrame:
 
 
 @pytest.mark.asyncio
-async def test_fetch_list() -> None:
-    from kabukit.edinet.concurrent import fetch_list
+async def test_fetch_documents() -> None:
+    from kabukit.edinet.concurrent import fetch_documents
 
-    df = await fetch_list(7, limit=6, callback=callback)
+    df = await fetch_documents(7, limit=6, callback=callback)
     assert df.width == 30
 
 
@@ -31,7 +31,7 @@ async def test_fetch_list() -> None:
 async def test_fetch_csv() -> None:
     from kabukit.edinet.concurrent import fetch, fetch_csv
 
-    df = await fetch("list", ["2025-09-09", "2025-09-19", "2025-09-22"])
+    df = await fetch("documents", ["2025-09-09", "2025-09-19", "2025-09-22"])
     doc_ids = df.filter(csvFlag=True).get_column("docID").sort()
     df = await fetch_csv(doc_ids, limit=10, callback=callback)
     assert df["docID"].n_unique() == 10

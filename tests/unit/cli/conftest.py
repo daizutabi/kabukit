@@ -11,13 +11,6 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
 MOCK_DF = DataFrame({"A": [1, 2], "B": [3, 4]})
-MOCK_LIST_DF = DataFrame(
-    {
-        "docID": ["doc1", "doc2", "doc3", "doc4"],
-        "secCode": ["1111", "2222", None, "4444"],
-        "csvFlag": [True, True, True, False],
-    },
-)
 MOCK_CODE = "1234"
 MOCK_PATH = "fake/path.csv"
 
@@ -97,9 +90,9 @@ def mock_prices(MockPrices: MagicMock) -> MagicMock:  # noqa: N803
 
 
 @pytest.fixture
-def mock_fetch_list(mocker: MockerFixture) -> AsyncMock:
+def mock_fetch_documents(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.edinet.concurrent.fetch_list",
+        "kabukit.edinet.concurrent.fetch_documents",
         new_callable=mocker.AsyncMock,
         return_value=MOCK_DF,
     )
@@ -115,24 +108,12 @@ def mock_fetch_csv(mocker: MockerFixture) -> AsyncMock:
 
 
 @pytest.fixture
-def MockList(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("kabukit.core.list.List")
+def MockDocuments(mocker: MockerFixture) -> MagicMock:
+    return mocker.patch("kabukit.core.documents.Documents")
 
 
 @pytest.fixture
-def mock_list(MockList: MagicMock) -> MagicMock:  # noqa: N803
-    instance = MockList.return_value
-    instance.write.return_value = MOCK_PATH
-    return instance
-
-
-@pytest.fixture
-def MockReports(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("kabukit.core.reports.Reports")
-
-
-@pytest.fixture
-def mock_reports(MockReports: MagicMock) -> MagicMock:  # noqa: N803
-    instance = MockReports.return_value
+def mock_documents(MockDocuments: MagicMock) -> MagicMock:  # noqa: N803
+    instance = MockDocuments.return_value
     instance.write.return_value = MOCK_PATH
     return instance

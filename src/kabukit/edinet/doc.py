@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from polars import DataFrame
 
 
-def clean_list(df: DataFrame, date: str | datetime.date) -> DataFrame:
+def clean_documents(df: DataFrame, date: str | datetime.date) -> DataFrame:
     if isinstance(date, str):
         date = (
             datetime.datetime.strptime(date, "%Y-%m-%d")
@@ -35,7 +35,8 @@ def clean_list(df: DataFrame, date: str | datetime.date) -> DataFrame:
             pl.col("^.+Flag$").cast(pl.Int8).cast(pl.Boolean),
             pl.col("^.+Code$").cast(pl.String),
         )
-        .select("Date", pl.exclude("Date"))
+        .rename({"secCode": "Code"})
+        .select("Date", "Code", pl.exclude("Date", "Code"))
     )
 
 
