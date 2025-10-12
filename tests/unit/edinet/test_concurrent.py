@@ -25,19 +25,18 @@ def dummy_callback(df: DataFrame) -> DataFrame:
 
 
 @pytest.fixture
-def mock_util_fetch(mocker: MockerFixture) -> AsyncMock:
-    """kabukit.utils.concurrent.fetch のモック"""
+def mock_utils_get(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.utils.concurrent.fetch",
+        "kabukit.utils.concurrent.get",
         new_callable=mocker.AsyncMock,
     )
 
 
 @pytest.mark.asyncio
-async def test_fetch(mock_util_fetch: AsyncMock) -> None:
+async def test_get(mock_utils_get: AsyncMock) -> None:
     from kabukit.edinet.concurrent import fetch
 
-    mock_util_fetch.return_value = DataFrame({"a": [1]})
+    mock_utils_get.return_value = DataFrame({"a": [1]})
 
     result = await fetch(
         "test_resource",
@@ -48,7 +47,7 @@ async def test_fetch(mock_util_fetch: AsyncMock) -> None:
     )
 
     assert result.equals(DataFrame({"a": [1]}))
-    mock_util_fetch.assert_awaited_once_with(
+    mock_utils_get.assert_awaited_once_with(
         EdinetClient,
         "test_resource",
         ["arg1", "arg2"],

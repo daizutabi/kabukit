@@ -24,17 +24,15 @@ def dummy_callback(df: DataFrame) -> DataFrame:
 
 
 @pytest.fixture
-def mock_util_fetch(mocker: MockerFixture) -> AsyncMock:
-    """kabukit.utils.concurrent.fetch のモック"""
+def mock_utils_get(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.utils.concurrent.fetch",
+        "kabukit.utils.concurrent.get",
         new_callable=mocker.AsyncMock,
     )
 
 
 @pytest.fixture
 def mock_get_target_codes(mocker: MockerFixture) -> AsyncMock:
-    """kabukit.jquants.info.get_target_codes のモック"""
     return mocker.patch(
         "kabukit.jquants.concurrent.get_target_codes",
         new_callable=mocker.AsyncMock,
@@ -42,10 +40,10 @@ def mock_get_target_codes(mocker: MockerFixture) -> AsyncMock:
 
 
 @pytest.mark.asyncio
-async def test_fetch(mock_util_fetch: AsyncMock) -> None:
+async def test_get(mock_utils_get: AsyncMock) -> None:
     from kabukit.jquants.concurrent import fetch
 
-    mock_util_fetch.return_value = DataFrame(
+    mock_utils_get.return_value = DataFrame(
         {"Date": [4, 3, 2, 1], "Code": ["a", "b", "b", "a"]},
     )
 
@@ -60,7 +58,7 @@ async def test_fetch(mock_util_fetch: AsyncMock) -> None:
     expected = DataFrame({"Date": [1, 4, 2, 3], "Code": ["a", "a", "b", "b"]})
     assert result.equals(expected)
 
-    mock_util_fetch.assert_awaited_once_with(
+    mock_utils_get.assert_awaited_once_with(
         JQuantsClient,
         "test_resource",
         ["1234", "5678"],
@@ -71,7 +69,7 @@ async def test_fetch(mock_util_fetch: AsyncMock) -> None:
 
 
 @pytest.mark.asyncio
-async def test_fetch_all(
+async def test_get_all(
     mocker: MockerFixture,
     mock_get_target_codes: AsyncMock,
 ) -> None:
