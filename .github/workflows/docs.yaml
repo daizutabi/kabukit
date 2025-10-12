@@ -42,6 +42,6 @@ jobs:
           key: data-${{ runner.os }}-${{ hashFiles('**/uv.lock') }}
       - name: Get data if cache not found
         if: steps.cache-data.outputs.cache-hit != 'true'
-        run: uv run kabu get all
+        run: uv run kabu get all -q
       - name: Deploy documentation
         run: uv run mkdocs gh-deploy --force

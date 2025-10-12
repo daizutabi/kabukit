@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Annotated, Any
 
 import typer
 from async_typer import AsyncTyper
-from typer import Argument
+from typer import Argument, Option
 
 if TYPE_CHECKING:
     from kabukit.core.base import Base
@@ -20,6 +20,10 @@ app = AsyncTyper(
 Code = Annotated[
     str | None,
     Argument(help="銘柄コード。指定しない場合は全銘柄の情報を取得します。"),
+]
+Quiet = Annotated[
+    bool,
+    Option("--quiet", "-q", help="プログレスバーを表示しません。", is_flag=True),
 ]
 
 
@@ -45,6 +49,8 @@ async def _fetch(
     cls: type[Base],
     fetch_func_name: str,
     message: str,
+    *,
+    quiet: bool = False,
     **kwargs: Any,
 ) -> None:
     """財務情報・株価情報を取得するための共通処理"""
@@ -60,8 +66,10 @@ async def _fetch(
 
     from kabukit.jquants.concurrent import fetch_all
 
+    progress = None if quiet else tqdm.asyncio.tqdm
+
     try:
-        df = await fetch_all(target, progress=tqdm.asyncio.tqdm, **kwargs)
+        df = await fetch_all(target, progress=progress, **kwargs)
     except KeyboardInterrupt:
         typer.echo("中断しました。")
         raise typer.Exit(1) from None
@@ -72,7 +80,7 @@ async def _fetch(
 
 
 @app.async_command()
-async def statements(code: Code = None) -> None:
+async def statements(code: Code = None, *, quiet: Quiet = False) -> None:
     """財務情報を取得します。"""
     from kabukit.core.statements import Statements
 
@@ -82,11 +90,12 @@ async def statements(code: Code = None) -> None:
         cls=Statements,
         fetch_func_name="get_statements",
         message="財務情報",
+        quiet=quiet,
     )
 
 
 @app.async_command()
-async def prices(code: Code = None) -> None:
+async def prices(code: Code = None, *, quiet: Quiet = False) -> None:
     """株価情報を取得します。"""
     from kabukit.core.prices import Prices
 
@@ -96,20 +105,23 @@ async def prices(code: Code = None) -> None:
         cls=Prices,
         fetch_func_name="get_prices",
         message="株価情報",
+        quiet=quiet,
         max_concurrency=8,
     )
 
 
 @app.async_command()
-async def documents() -> None:
+async def documents(*, quiet: Quiet = False) -> None:
     """書類一覧を取得します。"""
     import tqdm.asyncio
 
     from kabukit.core.documents import Documents
     from kabukit.edinet.concurrent import fetch_documents
 
+    progress = None if quiet else tqdm.asyncio.tqdm
+
     try:
-        df = await fetch_documents(years=10, progress=tqdm.asyncio.tqdm)
+        df = await fetch_documents(years=10, progress=progress)
     except (KeyboardInterrupt, RuntimeError):
         typer.echo("中断しました。")
         raise typer.Exit(1) from None
@@ -120,20 +132,20 @@ async def documents() -> None:
 
 
 @app.async_command(name="all")
-async def all_(code: Code = None) -> None:
+async def all_(code: Code = None, *, quiet: Quiet = False) -> None:
     """上場銘柄一覧、財務情報、株価情報、書類一覧を連続して取得します。"""
     typer.echo("上場銘柄一覧を取得します。")
     await info(code)
 
     typer.echo("---")
     typer.echo("財務情報を取得します。")
-    await statements(code)
+    await statements(code, quiet=quiet)
 
     typer.echo("---")
     typer.echo("株価情報を取得します。")
-    await prices(code)
+    await prices(code, quiet=quiet)
 
     if code is None:
         typer.echo("---")
         typer.echo("書類一覧を取得します。")
-        await documents()
+        await documents(quiet=quiet)
