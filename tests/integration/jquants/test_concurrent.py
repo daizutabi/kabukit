@@ -15,16 +15,16 @@ def callback(df: DataFrame) -> None:
 
 
 @pytest.mark.asyncio
-async def test_fetch(resource: str) -> None:
-    from kabukit.jquants.concurrent import fetch
+async def test_get(resource: str) -> None:
+    from kabukit.jquants.concurrent import get
 
-    df = await fetch(resource, ["7203", "6758"], progress=mo.status.progress_bar)
+    df = await get(resource, ["7203", "6758"], progress=mo.status.progress_bar)
     assert sorted(df["Code"].unique()) == ["67580", "72030"]
 
 
 @pytest.mark.asyncio
-async def test_fetch_all(resource: str) -> None:
-    from kabukit.jquants.concurrent import fetch_all
+async def test_get_all(resource: str) -> None:
+    from kabukit.jquants.concurrent import get_all
 
-    df = await fetch_all(resource, limit=3, callback=callback)
+    df = await get_all(resource, limit=3, callback=callback)
     assert df["Code"].n_unique() == 3

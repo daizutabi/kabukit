@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from kabukit.utils.concurrent import Callback, Progress
 
 
-async def fetch(
+async def get(
     resource: str,
     codes: Iterable[str],
     /,
@@ -52,7 +52,7 @@ async def fetch(
     return data.sort("Code", "Date")
 
 
-async def fetch_all(
+async def get_all(
     resource: str,
     /,
     limit: int | None = None,
@@ -83,7 +83,7 @@ async def fetch_all(
     codes = await get_target_codes()
     codes = codes[:limit]
 
-    return await fetch(
+    return await get(
         resource,
         codes,
         max_concurrency=max_concurrency,

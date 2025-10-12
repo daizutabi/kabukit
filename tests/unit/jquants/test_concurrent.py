@@ -41,13 +41,13 @@ def mock_get_target_codes(mocker: MockerFixture) -> AsyncMock:
 
 @pytest.mark.asyncio
 async def test_get(mock_utils_get: AsyncMock) -> None:
-    from kabukit.jquants.concurrent import fetch
+    from kabukit.jquants.concurrent import get
 
     mock_utils_get.return_value = DataFrame(
         {"Date": [4, 3, 2, 1], "Code": ["a", "b", "b", "a"]},
     )
 
-    result = await fetch(
+    result = await get(
         "test_resource",
         ["1234", "5678"],
         max_concurrency=10,
@@ -73,16 +73,16 @@ async def test_get_all(
     mocker: MockerFixture,
     mock_get_target_codes: AsyncMock,
 ) -> None:
-    from kabukit.jquants.concurrent import fetch_all
+    from kabukit.jquants.concurrent import get_all
 
     mock_get_target_codes.return_value = ["1111", "2222", "3333"]
     mock_fetch = mocker.patch(
-        "kabukit.jquants.concurrent.fetch",
+        "kabukit.jquants.concurrent.get",
         new_callable=mocker.AsyncMock,
     )
     mock_fetch.return_value = DataFrame({"b": [2]})
 
-    result = await fetch_all(
+    result = await get_all(
         "test_resource",
         limit=2,
         max_concurrency=5,
