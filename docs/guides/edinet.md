@@ -45,7 +45,7 @@ client = EdinetClient()
 
 ```python exec="1" source="material-block"
 df = await client.get_documents("2025-10-10")
-df.select("Date", "docID", "secCode", "filerName", "pdfFlag", "csvFlag").tail()
+df.select("Date", "Code", "docID", "filerName", "pdfFlag", "csvFlag").tail()
 ```
 
 ```python exec="1" source="material-block"
