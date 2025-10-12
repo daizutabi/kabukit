@@ -70,26 +70,27 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
 nav:
-  - "はじめに": "index.md"
-  - "利用ガイド":
-      - "J-Quants": "guides/jquants.md"
-      - "EDINET": "guides/edinet.md"
-  - "コンセプト":
-      - "概要": "concept/index.md"
-      - "コア指標": "concept/core_indicators.md"
-  - "ワークフロー":
-      - "全体像": "workflow/index.md"
-      - "フェーズ1: 市場概観": "workflow/01_market_overview.md"
-      - "フェーズ2: モデル構築": "workflow/02_model_building.md"
-      - "フェーズ3: スクリーニング": "workflow/03_screening.md"
-      - "フェーズ4: 定性的深掘り": "workflow/04_deep_dive.md"
-  - "データ層":
-      - "概要": "data_layer/index.md"
-      - "指標計算ポリシー": "data_layer/indicator_calculation.md"
-      - "調整済み株式数": "data_layer/adjusted_shares.md"
-      - "J-Quants スキーマ": "data_layer/jquants_schema.md"
-      - "実践的な注意点": "data_layer/practical_notes.md"
-  - "CLI Reference": "cli_reference.md"
-  - "API Reference": "$api/kabukit.***"
+  - はじめに: index.md
+  - 利用ガイド:
+      - CLI: guides/cli.md
+      - J-Quants: guides/jquants.md
+      - EDINET: guides/edinet.md
+  # - "コンセプト":
+  #     - "概要": "concept/index.md"
+  #     - "コア指標": "concept/core_indicators.md"
+  # - "ワークフロー":
+  #     - "全体像": "workflow/index.md"
+  #     - "フェーズ1: 市場概観": "workflow/01_market_overview.md"
+  #     - "フェーズ2: モデル構築": "workflow/02_model_building.md"
+  #     - "フェーズ3: スクリーニング": "workflow/03_screening.md"
+  #     - "フェーズ4: 定性的深掘り": "workflow/04_deep_dive.md"
+  # - "データ層":
+  #     - "概要": "data_layer/index.md"
+  #     - "指標計算ポリシー": "data_layer/indicator_calculation.md"
+  #     - "調整済み株式数": "data_layer/adjusted_shares.md"
+  #     - "J-Quants スキーマ": "data_layer/jquants_schema.md"
+  #     - "実践的な注意点": "data_layer/practical_notes.md"
+  - CLI: cli_reference.md
+  - API: $api/kabukit.***
 extra_css:
   - css/kabukit.css
