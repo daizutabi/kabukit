@@ -80,6 +80,7 @@ dev = [
 ]
 docs = [
   "ipykernel>=6.30.1",
+  "markdown-exec>=1.11.0",
   "mkapi>=4.5",
   "mkdocs-material>=9.6.21",
   "mkdocs-nbsync>=0.1.5",
