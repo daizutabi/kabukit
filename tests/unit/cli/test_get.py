@@ -130,7 +130,7 @@ def test_get_all_single_code(
     result = runner.invoke(app, ["get", "all", MOCK_CODE, *quiet])
 
     assert result.exit_code == 0
-    mock_cli_info.assert_awaited_once_with(MOCK_CODE)
+    mock_cli_info.assert_awaited_once_with(MOCK_CODE, quiet=bool(quiet))
     mock_cli_statements.assert_awaited_once_with(MOCK_CODE, quiet=bool(quiet))
     mock_cli_prices.assert_awaited_once_with(MOCK_CODE, quiet=bool(quiet))
 
@@ -146,7 +146,7 @@ def test_get_all_all_codes(
     result = runner.invoke(app, ["get", "all", *quiet])
 
     assert result.exit_code == 0
-    mock_cli_info.assert_awaited_once_with(None)
+    mock_cli_info.assert_awaited_once_with(None, quiet=bool(quiet))
     mock_cli_statements.assert_awaited_once_with(None, quiet=bool(quiet))
     mock_cli_prices.assert_awaited_once_with(None, quiet=bool(quiet))
     mock_cli_documents.assert_awaited_once_with(quiet=bool(quiet))

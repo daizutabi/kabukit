@@ -28,7 +28,7 @@ Quiet = Annotated[
 
 
 @app.async_command()
-async def info(code: Code = None) -> None:
+async def info(code: Code = None, *, quiet: Quiet = False) -> None:
     """上場銘柄一覧を取得します。"""
     from kabukit.core.info import Info
     from kabukit.jquants.client import JQuantsClient
@@ -36,7 +36,8 @@ async def info(code: Code = None) -> None:
     async with JQuantsClient() as client:
         df = await client.get_info(code)
 
-    typer.echo(df)
+    if code or not quiet:
+        typer.echo(df)
 
     if code is None:
         path = Info(df).write()
@@ -74,7 +75,9 @@ async def _fetch(
         typer.echo("中断しました。")
         raise typer.Exit(1) from None
 
-    typer.echo(df)
+    if not quiet:
+        typer.echo(df)
+
     path = cls(df).write()
     typer.echo(f"全銘柄の{message}を '{path}' に保存しました。")
 
@@ -126,7 +129,9 @@ async def documents(*, quiet: Quiet = False) -> None:
         typer.echo("中断しました。")
         raise typer.Exit(1) from None
 
-    typer.echo(df)
+    if not quiet:
+        typer.echo(df)
+
     path = Documents(df).write()
     typer.echo(f"書類一覧を '{path}' に保存しました。")
 
@@ -135,7 +140,7 @@ async def documents(*, quiet: Quiet = False) -> None:
 async def all_(code: Code = None, *, quiet: Quiet = False) -> None:
     """上場銘柄一覧、財務情報、株価情報、書類一覧を連続して取得します。"""
     typer.echo("上場銘柄一覧を取得します。")
-    await info(code)
+    await info(code, quiet=quiet)
 
     typer.echo("---")
     typer.echo("財務情報を取得します。")
