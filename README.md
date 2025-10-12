@@ -25,9 +25,16 @@ pip install kabukit
 
 kabukit は、 [J-Quants API](https://jpx-jquants.com/) および [EDINET API](https://disclosure2dl.edinet-fsa.go.jp/guide/static/disclosure/WZEK0110.html) からデータを取得するための便利なコマンドラインインターフェース（CLI）を提供します。
 
+詳しい使い方は、[**コマンドラインインターフェースの使い方**](https://daizutabi.github.io/kabukit/guides/cli/)を参照してください。
+
 ## ノートブックから使う
 
 kabukit は、コマンドラインだけでなく、Python コードからも API として利用できます。httpx を使って非同期でデータを取得するため、[Jupyter](https://jupyter.org/) や [marimo](https://marimo.io/) のような非同期処理を直接扱えるノートブック環境と非常に相性が良いです。
+
+具体的な使い方は、以下の利用ガイドを参照してください。
+
+- [**J-Quants API 利用ガイド**](https://daizutabi.github.io/kabukit/guides/jquants/)
+- [**EDINET API 利用ガイド**](https://daizutabi.github.io/kabukit/guides/edinet/)
 
 <!-- Badges -->
 
