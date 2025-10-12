@@ -11,7 +11,9 @@ kabukit は、[httpx](https://www.python-httpx.org/) を使った非同期設計
 API を利用するには、事前にコマンドラインで EDINET API の認証情報を設定しておく必要があります。
 
 ```bash
-kabu auth edinet
+$ kabu auth edinet
+Api key: my_api_key
+EDINETのAPIキーを保存しました。
 ```
 
 ## クライアントの使い方

@@ -1,11 +1,11 @@
-.dataframe th,
-.dataframe td {
+th,
+td {
   font-size: 80%;
   padding-left: 4px;
   padding-right: 4px;
 }
 
-.dataframe thead th {
+thead th {
   font-weight: bold;
   text-align: center;
 }
@@ -14,11 +14,11 @@
   border-bottom: 1px solid rgba(128, 128, 128, 0.2);
 }
 
-.dataframe thead td {
+thead td {
   color: gray;
   text-align: center;
 }
 
-.dataframe tbody td {
+tbody td {
   text-align: center;
 }

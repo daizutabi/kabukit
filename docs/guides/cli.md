@@ -22,8 +22,8 @@ ID トークンはユーザーの設定ディレクトリに保存されます�
 
 ```bash
 $ kabu auth jquants
-Mailaddress: your_email@example.com
-Password: your_password
+Mailaddress: my_email@example.com
+Password: my_password
 J-QuantsのIDトークンを保存しました。
 ```
 
@@ -33,7 +33,7 @@ EDINET API を利用するには、事前に API キーの取得が必要です�
 
 ```bash
 $ kabu auth edinet
-Api key: your_api_key
+Api key: my_api_key
 EDINETのAPIキーを保存しました。
 ```
 
@@ -43,7 +43,7 @@ EDINETのAPIキーを保存しました。
 
 ```bash
 $ kabu auth show
-設定ファイル: /home/your_name/.config/kabukit/.env
+設定ファイル: /home/my_name/.config/kabukit/.env
 JQUANTS_ID_TOKEN: ******
 EDINET_API_KEY: ******
 ```
@@ -101,5 +101,5 @@ $ kabu cache tree
 
 ```bash
 $ kabu cache clean
-キャッシュディレクトリ '/home/your_name/.cache/kabukit' を正常にクリーンアップしました。
+キャッシュディレクトリ '/home/my_name/.cache/kabukit' を正常にクリーンアップしました。
 ```
