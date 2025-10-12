@@ -66,7 +66,7 @@ def mock_get_dates(mocker: MockerFixture) -> MagicMock:
 
 @pytest.mark.asyncio
 async def test_fetch_list(mocker: MockerFixture, mock_get_dates: MagicMock) -> None:
-    from kabukit.edinet.concurrent import fetch_list
+    from kabukit.edinet.concurrent import fetch_documents
 
     mock_get_dates.return_value = [
         datetime.date(2023, 1, 3),
@@ -79,7 +79,7 @@ async def test_fetch_list(mocker: MockerFixture, mock_get_dates: MagicMock) -> N
     )
     mock_fetch.return_value = DataFrame({"Date": [2]})
 
-    result = await fetch_list(
+    result = await fetch_documents(
         days=3,
         limit=2,
         max_concurrency=5,
@@ -90,7 +90,7 @@ async def test_fetch_list(mocker: MockerFixture, mock_get_dates: MagicMock) -> N
     assert result.equals(DataFrame({"Date": [2]}))
     mock_get_dates.assert_called_once_with(days=3, years=None)
     mock_fetch.assert_awaited_once_with(
-        "list",
+        "documents",
         [datetime.date(2023, 1, 3), datetime.date(2023, 1, 2)],
         max_concurrency=5,
         progress=dummy_progress,

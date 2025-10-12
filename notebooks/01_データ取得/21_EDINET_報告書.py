@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.16.2"
+__generated_with = "0.16.5"
 app = marimo.App(width="medium", sql_output="polars")
 
 
@@ -8,9 +8,9 @@ app = marimo.App(width="medium", sql_output="polars")
 def _():
     import marimo as mo
     import polars as pl
-    from kabukit import List, EdinetClient
+    from kabukit import Documents, EdinetClient
     from kabukit.edinet import fetch_csv
-    return EdinetClient, List, fetch_csv, mo, pl
+    return Documents, EdinetClient, fetch_csv, mo, pl
 
 
 @app.cell
@@ -29,9 +29,9 @@ def _(mo):
 
 
 @app.cell
-async def _(List, button, fetch_csv, mo, pl):
+async def _(Documents, button, fetch_csv, mo, pl):
     if button.value:
-        lst = List.read().data.filter(pl.col("csvFlag"), pl.col("secCode").is_not_null())
+        lst = Documents.read().data.filter(pl.col("csvFlag"), pl.col("secCode").is_not_null())
         doc_ids = lst["docID"].unique()
         x = await fetch_csv(doc_ids, limit=100, progress=mo.status.progress_bar)
         mo.output.append(x)

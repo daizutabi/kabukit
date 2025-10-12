@@ -52,7 +52,7 @@ async def fetch(
     )
 
 
-async def fetch_list(
+async def fetch_documents(
     days: int | None = None,
     years: int | None = None,
     limit: int | None = None,
@@ -60,11 +60,11 @@ async def fetch_list(
     progress: Progress | None = None,
     callback: Callback | None = None,
 ) -> DataFrame:
-    """過去days日またはyears年の文書一覧を取得し、単一のDataFrameにまとめて返す。
+    """過去 days 日または years 年の文書一覧を取得し、単一の DataFrame にまとめて返す。
 
     Args:
-        days (int | None): 過去days日の日付リストを取得する。
-        years (int | None): 過去years年の日付リストを取得する。
+        days (int | None): 過去 days 日の日付リストを取得する。
+        years (int | None): 過去 years 年の日付リストを取得する。
             daysが指定されている場合は無視される。
         max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
             指定しないときはデフォルト値が使用される。
@@ -84,7 +84,7 @@ async def fetch_list(
         dates = dates[:limit]
 
     df = await fetch(
-        "list",
+        "documents",
         dates,
         max_concurrency=max_concurrency,
         progress=progress,
