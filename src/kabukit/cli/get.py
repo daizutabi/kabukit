@@ -84,7 +84,7 @@ async def statements(code: Code = None) -> None:
 
 @app.async_command()  # pyright: ignore[reportUnknownMemberType]
 async def prices(code: Code = None) -> None:
-    """株価を取得します。"""
+    """株価情報を取得します。"""
     from kabukit.core.prices import Prices
 
     await _fetch(
@@ -118,7 +118,7 @@ async def documents() -> None:
 
 @app.async_command(name="all")  # pyright: ignore[reportUnknownMemberType]
 async def all_(code: Code = None) -> None:
-    """上場銘柄一覧、財務情報、株価、書類一覧を連続して取得します。"""
+    """上場銘柄一覧、財務情報、株価情報、書類一覧を連続して取得します。"""
     typer.echo("上場銘柄一覧を取得します。")
     await info(code)
 
@@ -127,7 +127,7 @@ async def all_(code: Code = None) -> None:
     await statements(code)
 
     typer.echo("---")
-    typer.echo("株価を取得します。")
+    typer.echo("株価情報を取得します。")
     await prices(code)
 
     if code is None:
