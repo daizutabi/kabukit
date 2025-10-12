@@ -25,6 +25,7 @@ classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
   "License :: OSI Approved :: MIT License",
@@ -37,7 +38,7 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Information Analysis",
   "Topic :: Utilities",
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
   "async-typer>=0.1.10",
   "httpx>=0.28.1",
@@ -103,7 +104,7 @@ skip_covered = true
 
 [tool.ruff]
 line-length = 88
-target-version = "py313"
+target-version = "py312"
 include = ["src/**/*.py", "tests/**/*.py"]
 
 [tool.ruff.lint]
