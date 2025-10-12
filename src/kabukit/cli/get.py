@@ -119,12 +119,12 @@ async def documents(*, quiet: Quiet = False) -> None:
     import tqdm.asyncio
 
     from kabukit.core.documents import Documents
-    from kabukit.edinet.concurrent import fetch_documents
+    from kabukit.edinet.concurrent import get_documents
 
     progress = None if quiet else tqdm.asyncio.tqdm
 
     try:
-        df = await fetch_documents(years=10, progress=progress)
+        df = await get_documents(years=10, progress=progress)
     except (KeyboardInterrupt, RuntimeError):
         typer.echo("中断しました。")
         raise typer.Exit(1) from None
