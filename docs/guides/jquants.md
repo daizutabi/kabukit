@@ -11,10 +11,10 @@ kabukit は、[httpx](https://www.python-httpx.org/) を使った非同期設計
 API を利用するには、事前にコマンドラインで J-Quants API の認証情報を設定しておく必要があります。
 
 ```bash
-> kabu auth jquants
-Mailaddress: your_email@example.com
-Password: your_password
-J-Quants の ID トークンを保存しました。
+$ kabu auth jquants
+Mailaddress: my_email@example.com
+Password: my_password
+J-QuantsのIDトークンを保存しました。
 ```
 
 ## クライアントの使い方
