@@ -3,11 +3,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated, Any
 
 import typer
-from async_typer import AsyncTyper  # pyright: ignore[reportMissingTypeStubs]
+from async_typer import AsyncTyper
 from typer import Argument
 
 if TYPE_CHECKING:
     from kabukit.core.base import Base
+
+# pyright: reportMissingTypeStubs=false
+# pyright: reportUnknownMemberType=false
 
 app = AsyncTyper(
     add_completion=False,
@@ -20,7 +23,7 @@ Code = Annotated[
 ]
 
 
-@app.async_command()  # pyright: ignore[reportUnknownMemberType]
+@app.async_command()
 async def info(code: Code = None) -> None:
     """上場銘柄一覧を取得します。"""
     from kabukit.core.info import Info
@@ -68,7 +71,7 @@ async def _fetch(
     typer.echo(f"全銘柄の{message}を '{path}' に保存しました。")
 
 
-@app.async_command()  # pyright: ignore[reportUnknownMemberType]
+@app.async_command()
 async def statements(code: Code = None) -> None:
     """財務情報を取得します。"""
     from kabukit.core.statements import Statements
@@ -82,7 +85,7 @@ async def statements(code: Code = None) -> None:
     )
 
 
-@app.async_command()  # pyright: ignore[reportUnknownMemberType]
+@app.async_command()
 async def prices(code: Code = None) -> None:
     """株価情報を取得します。"""
     from kabukit.core.prices import Prices
@@ -97,7 +100,7 @@ async def prices(code: Code = None) -> None:
     )
 
 
-@app.async_command()  # pyright: ignore[reportUnknownMemberType]
+@app.async_command()
 async def documents() -> None:
     """書類一覧を取得します。"""
     import tqdm.asyncio
@@ -116,7 +119,7 @@ async def documents() -> None:
     typer.echo(f"書類一覧を '{path}' に保存しました。")
 
 
-@app.async_command(name="all")  # pyright: ignore[reportUnknownMemberType]
+@app.async_command(name="all")
 async def all_(code: Code = None) -> None:
     """上場銘柄一覧、財務情報、株価情報、書類一覧を連続して取得します。"""
     typer.echo("上場銘柄一覧を取得します。")
