@@ -3,19 +3,19 @@
 kabukit は、[J-Quants API](https://jpx-jquants.com/)
 および
 [EDINET API](https://disclosure2dl.edinet-fsa.go.jp/guide/static/disclosure/WZEK0110.html)
-からデータを取得するための便利なコマンドラインインターフェース（CLI）を提供します。
+からデータを取得するための、
+便利なコマンドラインインターフェース（CLI）を提供します。
 
 コマンド名は `kabu` です。
-
-```console exec="on" source="console" width="80"
-$ kabu --help
-```
 
 ## 認証
 
 ### J-Quants API
 
-J-Quants API を利用するには、事前にユーザー登録が必要です。
+J-Quants API を利用するには、事前に
+[ユーザー登録](https://jpx-jquants.com/auth/signup/?lang=ja)
+が必要です。
+
 `auth jquants` サブコマンドを使い、登録したメールアドレスとパスワードで認証して、
 ID トークンを取得します。
 ID トークンはユーザーの設定ディレクトリに保存されます。
@@ -29,7 +29,11 @@ J-QuantsのIDトークンを保存しました。
 
 ### EDINET API
 
-EDINET API を利用するには、事前に API キーの取得が必要です。`auth edinet` サブコマンド使い、取得した API キーをユーザーの設定ディレクトリに保存します。
+EDINET API を利用するには、事前に
+[API キーの取得](https://disclosure2dl.edinet-fsa.go.jp/guide/static/disclosure/download/ESE140206.pdf)
+が必要です。
+
+`auth edinet` サブコマンド使い、取得した API キーをユーザーの設定ディレクトリに保存します。
 
 ```bash
 $ kabu auth edinet
@@ -52,36 +56,77 @@ EDINET_API_KEY: ******
 
 `get` サブコマンドは、J-Quants API および EDINET API から各種データを取得します。
 
-### J-Quants API
+### 上場銘柄一覧 (`info`)
 
-#### 上場銘柄一覧
+`get info`サブコマンドを使います。
+
+銘柄コードを指定すると、指定した銘柄の最新情報を取得できます。
 
 ```console exec="on" source="console"
 $ kabu get info 7203
 ```
 
-#### 財務情報
+銘柄コードを省略すると、全銘柄の最新情報を一度に取得できます。
+
+```console exec="on" source="console"
+$ kabu get info
+```
+
+銘柄コードを省略したときに限り、
+取得した上場銘柄一覧はキャッシュディレクトリに自動で保存されます。
+
+### 財務情報
+
+`get statements`サブコマンドを使います。
+
+銘柄コードを指定すると、指定した銘柄の財務情報を取得できます。
 
 ```console exec="on" source="console"
 $ kabu get statements 7203
 ```
 
-#### 株価情報
+銘柄コードを省略すると、全銘柄の財務情報を一度に取得できます。
+
+```bash
+$ kabu get statements
+100%|███████████████████████████████████████| 3787/3787 [01:28<00:00, 42.61it/s]
+shape: (165_891, 105)
+(略)
+```
+
+銘柄コードを省略したときに限り、
+取得した財務情報はキャッシュディレクトリに自動で保存されます。
+
+### 株価情報
+
+`get prices`サブコマンドを使います。
+
+銘柄コードを指定すると、指定した銘柄の全期間分の株価情報を取得できます。
 
 ```console exec="on" source="console"
 $ kabu get prices 7203
 ```
 
-#### 全銘柄のデータ一括取得
-
-各コマンドで銘柄コードを省略すると、全銘柄のデータを一度に取得できます。財務情報の場合は以下の通りです。
-
 ```bash
-$ kabu get statements
-100%|██████████████████████████████| 3787/3787 [01:18<00:00, 48.24it/s]
-shape: (165_891, 105)
+$ kabu get prices
+100%|████████████████████████████████████████████| 3787/3787 [12:33<00:00,  5.02it/s]
+shape: (8_128_217, 16)
 (略)
 ```
+
+### 書類一覧
+
+EDINET APIを使い、提出書類の一覧を取得します。
+`get entries`サブコマンドを使います。
+
+```bash
+$ kabu get entries
+100%|██████████████████████████████████████| 3653/3653 [00:42<00:00, 86.47it/s]
+shape: (896_632, 30)
+(略)
+```
+
+### 全銘柄・全データの一括取得
 
 `get all` サブコマンドを使うと、全銘柄の各種データを一度に取得できます。
 
