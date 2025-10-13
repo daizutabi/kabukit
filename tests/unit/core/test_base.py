@@ -8,7 +8,7 @@ from polars import DataFrame
 from polars.testing import assert_frame_equal
 from pytest_mock import MockerFixture
 
-from kabukit.core.base import Base
+from kabukit.core.base import Base, get_filename
 
 
 @pytest.fixture
@@ -82,3 +82,27 @@ def test_read_file_not_found(mocker: MockerFixture, tmp_path: Path) -> None:
 def test_filter(data: DataFrame) -> None:
     expected = DataFrame({"A": [1], "B": ["x"]})
     assert_frame_equal(Base(data).filter(pl.col("A") == 1).data, expected)
+
+
+def test_get_filename_with_absolute_path(tmp_path: Path) -> None:
+    other_dir = tmp_path / "other_dir"
+    other_dir.mkdir()
+    abs_path_file = other_dir / "abs_file.parquet"
+    abs_path_file.touch()
+
+    data_dir = tmp_path / "data_dir"
+    data_dir.mkdir()
+
+    result = get_filename(abs_path_file, data_dir)
+
+    assert result == abs_path_file
+
+
+def test_get_filename_with_nonexistent_absolute_path(tmp_path: Path) -> None:
+    non_existent_path = tmp_path / "other_dir" / "non_existent.parquet"
+
+    data_dir = tmp_path / "data_dir"
+    data_dir.mkdir()
+
+    with pytest.raises(FileNotFoundError, match=f"File not found: {non_existent_path}"):
+        get_filename(non_existent_path, data_dir)
