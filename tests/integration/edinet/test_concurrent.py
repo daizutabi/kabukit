@@ -2,6 +2,7 @@ from datetime import date
 
 import pytest
 from polars import DataFrame
+from polars.testing import assert_frame_equal
 
 pytestmark = pytest.mark.integration
 
@@ -41,6 +42,18 @@ async def test_get_entries_sigle_date() -> None:
 
 
 @pytest.mark.asyncio
+async def test_get_entries_invalid_date() -> None:
+    from kabukit.edinet.concurrent import get_entries
+
+    df = await get_entries(["2000-01-01", "2025-10-09"])
+    df2 = await get_entries("2025-10-09")
+    assert_frame_equal(df, df2)
+
+    df3 = await get_entries("2000-01-01")
+    assert df3.is_empty()
+
+
+@pytest.mark.asyncio
 async def test_get_entries_without_dates() -> None:
     from kabukit.edinet.concurrent import get_entries
 
@@ -49,13 +62,27 @@ async def test_get_entries_without_dates() -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_documents() -> None:
+async def test_get_documents_csv() -> None:
     from kabukit.edinet.concurrent import get_documents, get_entries
 
     df = await get_entries(["2025-09-09", "2025-09-19", "2025-09-22"])
     doc_ids = df.filter(csvFlag=True).get_column("docID").sort()
     df = await get_documents(doc_ids, limit=10, callback=callback)
     assert df["docID"].n_unique() == 10
+
+
+@pytest.mark.asyncio
+async def test_get_documents_pdf() -> None:
+    from kabukit.edinet.concurrent import get_documents, get_entries
+
+    df = await get_entries("2025-09-09")
+    doc_ids = df.filter(pdfFlag=True).get_column("docID").to_list()
+    df = await get_documents(doc_ids, limit=2, pdf=True)
+    assert df.shape == (2, 2)
+    for i in range(2):
+        pdf = df.item(i, "pdf")
+        assert isinstance(pdf, bytes)
+        assert pdf.startswith(b"%PDF-")
 
 
 @pytest.mark.asyncio
@@ -71,14 +98,8 @@ async def test_get_documents_single_doc_id() -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_documents_pdf() -> None:
-    from kabukit.edinet.concurrent import get_documents, get_entries
+async def test_get_documents_invalid_id_raises_error() -> None:
+    from kabukit.edinet.concurrent import get_documents
 
-    df = await get_entries("2025-09-09")
-    doc_ids = df.filter(pdfFlag=True).get_column("docID").to_list()
-    df = await get_documents(doc_ids, limit=2, pdf=True)
-    assert df.shape == (2, 2)
-    for i in range(2):
-        pdf = df.item(i, "pdf")
-        assert isinstance(pdf, bytes)
-        assert pdf.startswith(b"%PDF-")
+    with pytest.raises(ValueError, match="ZIP is not available"):
+        await get_documents("E00000")

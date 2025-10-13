@@ -167,6 +167,20 @@ async def test_get_entries_single_date(
 
 
 @pytest.mark.asyncio
+async def test_get_entries_invalid_date(mocker: MockerFixture) -> None:
+    from kabukit.edinet.concurrent import get_entries
+
+    mock_get = mocker.patch(
+        "kabukit.edinet.concurrent.get",
+        new_callable=mocker.AsyncMock,
+    )
+    mock_get.return_value = DataFrame()
+
+    result = await get_entries("2025-10-10")
+    assert result.is_empty()
+
+
+@pytest.mark.asyncio
 async def test_get_documents_csv(mocker: MockerFixture) -> None:
     from kabukit.edinet.concurrent import get_documents
 

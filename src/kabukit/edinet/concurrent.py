@@ -101,6 +101,10 @@ async def get_entries(
         progress=progress,
         callback=callback,
     )
+
+    if df.is_empty():
+        return df
+
     return df.sort("Code", "Date")
 
 

@@ -311,3 +311,39 @@ async def test_get_fails_after_retries(get: AsyncMock) -> None:
         await client.get("test/path", params={})
 
     assert get.call_count == 3
+
+
+@pytest.mark.asyncio
+async def test_get_document_calls_get_csv_by_default(mocker: MockerFixture) -> None:
+    client = EdinetClient("test_key")
+    mock_get_csv = mocker.patch.object(client, "get_csv", new_callable=mocker.AsyncMock)
+    mock_get_pdf = mocker.patch.object(client, "get_pdf", new_callable=mocker.AsyncMock)
+
+    expected_df = DataFrame({"col": ["csv_data"]})
+    mock_get_csv.return_value = expected_df
+
+    doc_id = "S100TEST"
+    df = await client.get_document(doc_id)
+
+    assert_frame_equal(df, expected_df)
+    mock_get_csv.assert_awaited_once_with(doc_id)
+    mock_get_pdf.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_get_document_calls_get_pdf_when_pdf_is_true(
+    mocker: MockerFixture,
+) -> None:
+    client = EdinetClient("test_key")
+    mock_get_csv = mocker.patch.object(client, "get_csv", new_callable=mocker.AsyncMock)
+    mock_get_pdf = mocker.patch.object(client, "get_pdf", new_callable=mocker.AsyncMock)
+
+    expected_df = DataFrame({"col": ["pdf_data"]})
+    mock_get_pdf.return_value = expected_df
+
+    doc_id = "S100TEST"
+    df = await client.get_document(doc_id, pdf=True)
+
+    assert_frame_equal(df, expected_df)
+    mock_get_pdf.assert_awaited_once_with(doc_id)
+    mock_get_csv.assert_not_awaited()
