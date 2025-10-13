@@ -50,7 +50,11 @@ def test_write(mocker: MockerFixture, data: DataFrame, tmp_path: Path) -> None:
     assert_frame_equal(pl.read_parquet(path), data)
 
 
-def test_read(mocker: MockerFixture, data: DataFrame, tmp_path: Path) -> None:
+def test_init_from_cache(
+    mocker: MockerFixture,
+    data: DataFrame,
+    tmp_path: Path,
+) -> None:
     path1 = tmp_path / "20231026.parquet"
     path2 = tmp_path / "20231027.parquet"
     df1 = DataFrame({"A": [1]})
@@ -59,24 +63,27 @@ def test_read(mocker: MockerFixture, data: DataFrame, tmp_path: Path) -> None:
     df2.write_parquet(path2)
 
     mocker.patch.object(Base, "data_dir", return_value=tmp_path)
-    base = Base.read()
+    base = Base()
     assert isinstance(base, Base)
     assert_frame_equal(base.data, df2)
 
-    base = Base.read(path="20231026.parquet")
+    base = Base(path="20231026.parquet")
     assert isinstance(base, Base)
     assert_frame_equal(base.data, df1)
 
     mocker.patch.object(Derived, "data_dir", return_value=tmp_path)
-    derived = Derived.read()
+    derived = Derived()
     assert isinstance(derived, Derived)
     assert_frame_equal(derived.data, df2)
 
 
-def test_read_file_not_found(mocker: MockerFixture, tmp_path: Path) -> None:
+def test_init_from_cache_file_not_found(
+    mocker: MockerFixture,
+    tmp_path: Path,
+) -> None:
     mocker.patch.object(Base, "data_dir", return_value=tmp_path)
     with pytest.raises(FileNotFoundError, match="No data found in"):
-        Base.read()
+        Base()
 
 
 def test_filter(data: DataFrame) -> None:

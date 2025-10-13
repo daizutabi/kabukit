@@ -3,7 +3,7 @@ import pytest
 from kabukit.core.statements import Statements
 
 try:
-    _statements = Statements.read()
+    _statements = Statements()
 except FileNotFoundError:
     _statements = None
 

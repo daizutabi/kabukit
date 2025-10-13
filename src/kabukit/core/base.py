@@ -47,9 +47,6 @@ class Base:
         self.data.write_parquet(filename)
         return filename
 
-    @classmethod
-    def read(cls, path: str | None = None) -> Self:
-        return cls(path=path)
 
     def filter(
         self,
