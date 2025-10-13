@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.asyncio
-async def test_get(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_prices(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"daily_quotes": [{"Open": 100}, {"Open": 200}]}
     response = Response(200, json=json)
     mock_get.return_value = response

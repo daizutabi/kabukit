@@ -1,7 +1,6 @@
 import polars as pl
 import pytest
 import pytest_asyncio
-from polars import DataFrame
 
 from kabukit.core.prices import Prices
 from kabukit.jquants.client import JQuantsClient
@@ -26,16 +25,3 @@ def test_prices_data(prices: Prices) -> None:
 def test_adjustment_factor(prices: Prices) -> None:
     df = prices.data.filter(pl.col("AdjustmentFactor") != 1)
     assert df.height == 4
-
-
-@pytest_asyncio.fixture(scope="module")
-async def stmts():
-    async with JQuantsClient() as client:
-        yield await client.get_statements("6200")
-
-
-def test_statements(stmts: DataFrame) -> None:
-    assert not stmts.is_empty()
-    assert "Date" in stmts.columns
-    assert "Code" in stmts.columns
-    assert stmts["Code"].unique().to_list() == ["62000"]

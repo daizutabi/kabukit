@@ -108,13 +108,13 @@ def test_get_entries_with_date(
     mock_get_entries: AsyncMock,
     MockEntries: MagicMock,  # noqa: N803
 ) -> None:
-    mock_date = "2023-01-01"
-    result = runner.invoke(app, ["get", "entries", mock_date])
+    MOCK_DATE = "2023-01-01"  # noqa: N806
+    result = runner.invoke(app, ["get", "entries", MOCK_DATE])
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
     mock_get_entries.assert_awaited_once_with(
-        mock_date,
+        MOCK_DATE,
         years=10,
         progress=None,
     )

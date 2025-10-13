@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.asyncio
-async def test_get(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_info(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"info": [{"Date": "2023-01-01", "Code": "7203"}]}
     response = Response(200, json=json)
     mock_get.return_value = response
@@ -83,7 +83,7 @@ def get_info(client: MagicMock, mocker: MockerFixture) -> AsyncMock:
 
 
 @pytest.mark.asyncio
-async def test_get_codes(get_info: AsyncMock) -> None:
+async def test_get_target_codes(get_info: AsyncMock) -> None:
     from kabukit.jquants.info import get_target_codes
 
     codes = await get_target_codes()
