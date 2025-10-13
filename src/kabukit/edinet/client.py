@@ -14,7 +14,7 @@ from kabukit.core.client import Client
 from kabukit.utils.config import load_dotenv
 from kabukit.utils.params import get_params
 
-from .doc import clean_csv, clean_documents, read_csv
+from .doc import clean_csv, clean_entries, clean_pdf, read_csv
 
 if TYPE_CHECKING:
     import datetime
@@ -81,7 +81,7 @@ class EdinetClient(Client):
 
         return metadata["resultset"]["count"]
 
-    async def get_documents(self, date: str | datetime.date) -> DataFrame:
+    async def get_entries(self, date: str | datetime.date) -> DataFrame:
         """書類一覧 API を使い、特定の日付の提出書類一覧を取得する。
 
         Args:
@@ -102,22 +102,22 @@ class EdinetClient(Client):
         if df.is_empty():
             return df
 
-        return clean_documents(df, date)
+        return clean_entries(df, date)
 
-    async def get_document(self, doc_id: str, doc_type: int) -> Response:
+    async def get_response(self, doc_id: str, doc_type: int) -> Response:
         params = get_params(type=doc_type)
         return await self.get(f"/documents/{doc_id}", params)
 
-    async def get_pdf(self, doc_id: str) -> bytes:
-        resp = await self.get_document(doc_id, doc_type=2)
+    async def get_pdf(self, doc_id: str) -> DataFrame:
+        resp = await self.get_response(doc_id, doc_type=2)
         if resp.headers["content-type"] == "application/pdf":
-            return resp.content
+            return clean_pdf(resp.content, doc_id)
 
         msg = "PDF is not available."
         raise ValueError(msg)
 
     async def get_zip(self, doc_id: str, doc_type: int) -> bytes:
-        resp = await self.get_document(doc_id, doc_type=doc_type)
+        resp = await self.get_response(doc_id, doc_type=doc_type)
         if resp.headers["content-type"] == "application/octet-stream":
             return resp.content
 
@@ -137,3 +137,9 @@ class EdinetClient(Client):
 
         msg = "CSV is not available."
         raise ValueError(msg)
+
+    async def get_document(self, doc_id: str, *, pdf: bool = False) -> DataFrame:
+        if pdf:
+            return await self.get_pdf(doc_id)
+
+        return await self.get_csv(doc_id)

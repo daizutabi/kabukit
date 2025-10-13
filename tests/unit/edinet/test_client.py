@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 import polars as pl
 import pytest
 from httpx import ConnectTimeout, HTTPStatusError, Response
+from polars import DataFrame
 from polars.testing import assert_frame_equal
 
 from kabukit.edinet.client import AuthKey, EdinetClient
@@ -113,13 +114,13 @@ async def test_get_documents_success(get: AsyncMock, mocker: MockerFixture) -> N
     get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
-    mock_clean_documents = mocker.patch("kabukit.edinet.client.clean_documents")
+    mock_clean_documents = mocker.patch("kabukit.edinet.client.clean_entries")
     expected_df = pl.DataFrame(results)
     mock_clean_documents.return_value = expected_df
 
     client = EdinetClient("test_key")
     date = "2023-10-26"
-    df = await client.get_documents(date)
+    df = await client.get_entries(date)
 
     assert_frame_equal(df, expected_df)
     get.assert_awaited_once_with(
@@ -137,7 +138,7 @@ async def test_get_documents_no_results(get: AsyncMock, mocker: MockerFixture) -
     response.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
-    df = await client.get_documents("2023-10-26")
+    df = await client.get_entries("2023-10-26")
 
     assert df.is_empty()
 
@@ -153,19 +154,19 @@ async def test_get_documents_empty_results(
     response.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
-    df = await client.get_documents("2023-10-26")
+    df = await client.get_entries("2023-10-26")
 
     assert df.is_empty()
 
 
 @pytest.mark.asyncio
-async def test_get_document(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_response(get: AsyncMock, mocker: MockerFixture) -> None:
     expected_response = Response(200, content=b"file content")
     get.return_value = expected_response
     get.return_value.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
-    response = await client.get_document("S100TEST", doc_type=1)
+    response = await client.get_response("S100TEST", doc_type=1)
 
     assert response == expected_response
     get.assert_awaited_once_with("/documents/S100TEST", params={"type": 1})
@@ -181,9 +182,11 @@ async def test_get_pdf_success(get: AsyncMock, mocker: MockerFixture) -> None:
     get.return_value.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
-    content = await client.get_pdf("S100TEST")
+    df = await client.get_pdf("S100TEST")
 
-    assert content == b"pdf content"
+    expected = DataFrame({"docID": ["S100TEST"], "pdf": [b"pdf content"]})
+
+    assert_frame_equal(df, expected)
     get.assert_awaited_once_with("/documents/S100TEST", params={"type": 2})
 
 
@@ -308,3 +311,39 @@ async def test_get_fails_after_retries(get: AsyncMock) -> None:
         await client.get("test/path", params={})
 
     assert get.call_count == 3
+
+
+@pytest.mark.asyncio
+async def test_get_document_calls_get_csv_by_default(mocker: MockerFixture) -> None:
+    client = EdinetClient("test_key")
+    mock_get_csv = mocker.patch.object(client, "get_csv", new_callable=mocker.AsyncMock)
+    mock_get_pdf = mocker.patch.object(client, "get_pdf", new_callable=mocker.AsyncMock)
+
+    expected_df = DataFrame({"col": ["csv_data"]})
+    mock_get_csv.return_value = expected_df
+
+    doc_id = "S100TEST"
+    df = await client.get_document(doc_id)
+
+    assert_frame_equal(df, expected_df)
+    mock_get_csv.assert_awaited_once_with(doc_id)
+    mock_get_pdf.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_get_document_calls_get_pdf_when_pdf_is_true(
+    mocker: MockerFixture,
+) -> None:
+    client = EdinetClient("test_key")
+    mock_get_csv = mocker.patch.object(client, "get_csv", new_callable=mocker.AsyncMock)
+    mock_get_pdf = mocker.patch.object(client, "get_pdf", new_callable=mocker.AsyncMock)
+
+    expected_df = DataFrame({"col": ["pdf_data"]})
+    mock_get_pdf.return_value = expected_df
+
+    doc_id = "S100TEST"
+    df = await client.get_document(doc_id, pdf=True)
+
+    assert_frame_equal(df, expected_df)
+    mock_get_pdf.assert_awaited_once_with(doc_id)
+    mock_get_csv.assert_not_awaited()

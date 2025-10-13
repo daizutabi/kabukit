@@ -114,17 +114,17 @@ async def prices(code: Code = None, *, quiet: Quiet = False) -> None:
 
 
 @app.async_command()
-async def documents(*, quiet: Quiet = False) -> None:
+async def entries(*, quiet: Quiet = False) -> None:
     """書類一覧を取得します。"""
     import tqdm.asyncio
 
-    from kabukit.core.documents import Documents
-    from kabukit.edinet.concurrent import get_documents
+    from kabukit.core.entries import Entries
+    from kabukit.edinet.concurrent import get_entries
 
     progress = None if quiet else tqdm.asyncio.tqdm
 
     try:
-        df = await get_documents(years=10, progress=progress)
+        df = await get_entries(years=10, progress=progress)
     except (KeyboardInterrupt, RuntimeError):
         typer.echo("中断しました。")
         raise typer.Exit(1) from None
@@ -132,7 +132,7 @@ async def documents(*, quiet: Quiet = False) -> None:
     if not quiet:
         typer.echo(df)
 
-    path = Documents(df).write()
+    path = Entries(df).write()
     typer.echo(f"書類一覧を '{path}' に保存しました。")
 
 
@@ -153,4 +153,4 @@ async def all_(code: Code = None, *, quiet: Quiet = False) -> None:
     if code is None:
         typer.echo("---")
         typer.echo("書類一覧を取得します。")
-        await documents(quiet=quiet)
+        await entries(quiet=quiet)

@@ -21,10 +21,10 @@ def df() -> DataFrame:
     )
 
 
-def test_clean_documents_columns(df: DataFrame) -> None:
-    from kabukit.edinet.doc import clean_documents
+def test_clean_entries_columns(df: DataFrame) -> None:
+    from kabukit.edinet.doc import clean_entries
 
-    df = clean_documents(df, "2025-09-19")
+    df = clean_entries(df, "2025-09-19")
     assert df.columns == [
         "Date",
         "Code",
@@ -38,10 +38,10 @@ def test_clean_documents_columns(df: DataFrame) -> None:
 
 
 @pytest.mark.parametrize("d", ["2025-09-19", date(2025, 9, 19)])
-def test_clean_documents_date_time(df: DataFrame, d: str | date) -> None:
-    from kabukit.edinet.doc import clean_documents
+def test_clean_entries_date_time(df: DataFrame, d: str | date) -> None:
+    from kabukit.edinet.doc import clean_entries
 
-    df = clean_documents(df, d)
+    df = clean_entries(df, d)
     x = df["Date"].to_list()
     assert x[0] == date(2025, 9, 19)
     assert x[1] == date(2025, 9, 19)
@@ -50,8 +50,8 @@ def test_clean_documents_date_time(df: DataFrame, d: str | date) -> None:
     assert x[1] == datetime(2025, 9, 22, 9, 30, tzinfo=ZoneInfo("Asia/Tokyo"))
 
 
-def test_clean_documents_date_time_null() -> None:
-    from kabukit.edinet.doc import clean_documents
+def test_clean_entries_date_time_null() -> None:
+    from kabukit.edinet.doc import clean_entries
 
     df = DataFrame(
         {
@@ -61,35 +61,44 @@ def test_clean_documents_date_time_null() -> None:
         },
     )
 
-    df = clean_documents(df, "2025-09-19")
+    df = clean_entries(df, "2025-09-19")
     assert df["submitDateTime"].to_list() == [None, None]
     assert df["opeDateTime"].dtype == pl.Datetime
 
 
-def test_clean_documents_flag(df: DataFrame) -> None:
-    from kabukit.edinet.doc import clean_documents
+def test_clean_entries_flag(df: DataFrame) -> None:
+    from kabukit.edinet.doc import clean_entries
 
-    df = clean_documents(df, "2025-09-19")
+    df = clean_entries(df, "2025-09-19")
     assert df["csvFlag"].to_list() == [True, False]
     assert df["pdfFlag"].to_list() == [True, False]
 
 
-def test_clean_documents_period(df: DataFrame) -> None:
-    from kabukit.edinet.doc import clean_documents
+def test_clean_entries_period(df: DataFrame) -> None:
+    from kabukit.edinet.doc import clean_entries
 
-    df = clean_documents(df, "2025-09-19")
+    df = clean_entries(df, "2025-09-19")
     assert df["periodStart"].to_list() == [None, date(2025, 9, 15)]
     assert df["periodEnd"].to_list() == [date(2025, 9, 30), None]
 
 
-def test_clean_documents_ope_datetime(df: DataFrame) -> None:
-    from kabukit.edinet.doc import clean_documents
+def test_clean_entries_ope_datetime(df: DataFrame) -> None:
+    from kabukit.edinet.doc import clean_entries
 
-    df = clean_documents(df, "2025-09-19")
+    df = clean_entries(df, "2025-09-19")
     assert df["opeDateTime"].to_list() == [
         datetime(2025, 9, 30, 15, 0, tzinfo=ZoneInfo("Asia/Tokyo")),
         None,
     ]
+
+
+def test_clean_pdf() -> None:
+    from kabukit.edinet.doc import clean_pdf
+
+    df = clean_pdf(b"abc", "abc")
+    assert df.columns == ["docID", "pdf"]
+    assert df["docID"].to_list() == ["abc"]
+    assert df["pdf"].to_list() == [b"abc"]
 
 
 def test_clean_csv() -> None:

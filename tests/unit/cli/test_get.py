@@ -85,18 +85,18 @@ def test_get_prices_all_codes(
     assert f"全銘柄の株価情報を '{MOCK_PATH}' に保存しました。" in result.stdout
 
 
-def test_get_documents(
-    mock_get_documents: AsyncMock,
-    MockDocuments: MagicMock,  # noqa: N803
-    mock_documents: MagicMock,
+def test_get_entries(
+    mock_get_entries: AsyncMock,
+    MockEntries: MagicMock,  # noqa: N803
+    mock_entries: MagicMock,
 ) -> None:
-    result = runner.invoke(app, ["get", "documents"])
+    result = runner.invoke(app, ["get", "entries"])
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
-    mock_get_documents.assert_awaited_once_with(years=10, progress=tqdm.asyncio.tqdm)
-    MockDocuments.assert_called_once_with(MOCK_DF)
-    mock_documents.write.assert_called_once()
+    mock_get_entries.assert_awaited_once_with(years=10, progress=tqdm.asyncio.tqdm)
+    MockEntries.assert_called_once_with(MOCK_DF)
+    mock_entries.write.assert_called_once()
     assert f"書類一覧を '{MOCK_PATH}' に保存しました。" in result.stdout
 
 
@@ -116,8 +116,8 @@ def mock_cli_prices(mocker: MockerFixture) -> AsyncMock:
 
 
 @pytest.fixture
-def mock_cli_documents(mocker: MockerFixture) -> AsyncMock:
-    return mocker.patch("kabukit.cli.get.documents", new_callable=AsyncMock)
+def mock_cli_entries(mocker: MockerFixture) -> AsyncMock:
+    return mocker.patch("kabukit.cli.get.entries", new_callable=AsyncMock)
 
 
 @pytest.mark.parametrize("quiet", [[], ["-q"], ["--quiet"]])
@@ -140,7 +140,7 @@ def test_get_all_all_codes(
     mock_cli_info: AsyncMock,
     mock_cli_statements: AsyncMock,
     mock_cli_prices: AsyncMock,
-    mock_cli_documents: AsyncMock,
+    mock_cli_entries: AsyncMock,
     quiet: list[str],
 ) -> None:
     result = runner.invoke(app, ["get", "all", *quiet])
@@ -149,7 +149,7 @@ def test_get_all_all_codes(
     mock_cli_info.assert_awaited_once_with(None, quiet=bool(quiet))
     mock_cli_statements.assert_awaited_once_with(None, quiet=bool(quiet))
     mock_cli_prices.assert_awaited_once_with(None, quiet=bool(quiet))
-    mock_cli_documents.assert_awaited_once_with(quiet=bool(quiet))
+    mock_cli_entries.assert_awaited_once_with(quiet=bool(quiet))
 
 
 def test_get_statements_interrupt(mock_get: AsyncMock) -> None:
@@ -162,11 +162,11 @@ def test_get_statements_interrupt(mock_get: AsyncMock) -> None:
     mock_get.assert_awaited_once_with("statements", progress=tqdm.asyncio.tqdm)
 
 
-def test_get_documents_interrupt(mock_get_documents: AsyncMock) -> None:
-    mock_get_documents.side_effect = KeyboardInterrupt
+def test_get_entries_interrupt(mock_get_entries: AsyncMock) -> None:
+    mock_get_entries.side_effect = KeyboardInterrupt
 
-    result = runner.invoke(app, ["get", "documents"])
+    result = runner.invoke(app, ["get", "entries"])
 
     assert result.exit_code == 1
     assert "中断しました" in result.stdout
-    mock_get_documents.assert_awaited_once_with(years=10, progress=tqdm.asyncio.tqdm)
+    mock_get_entries.assert_awaited_once_with(years=10, progress=tqdm.asyncio.tqdm)

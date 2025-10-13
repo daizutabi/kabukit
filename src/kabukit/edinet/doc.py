@@ -1,16 +1,13 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
 import polars as pl
-
-if TYPE_CHECKING:
-    from polars import DataFrame
+from polars import DataFrame
 
 
-def clean_documents(df: DataFrame, date: str | datetime.date) -> DataFrame:
+def clean_entries(df: DataFrame, date: str | datetime.date) -> DataFrame:
     if isinstance(date, str):
         date = (
             datetime.datetime.strptime(date, "%Y-%m-%d")
@@ -38,6 +35,10 @@ def clean_documents(df: DataFrame, date: str | datetime.date) -> DataFrame:
         .rename({"secCode": "Code"})
         .select("Date", "Code", pl.exclude("Date", "Code"))
     )
+
+
+def clean_pdf(content: bytes, doc_id: str) -> DataFrame:
+    return DataFrame({"docID": [doc_id], "pdf": [content]})
 
 
 def read_csv(data: bytes) -> DataFrame:
