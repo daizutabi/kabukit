@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 app = AsyncTyper(
     add_completion=False,
-    help="J-Quantsからデータを取得します。",
+    help="J-QuantsまたはEDINETからデータを取得します。",
 )
 
 Code = Annotated[
