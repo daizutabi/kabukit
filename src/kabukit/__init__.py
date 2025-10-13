@@ -6,6 +6,7 @@ from .edinet.client import EdinetClient
 from .edinet.concurrent import get_csv, get_documents
 from .jquants.client import JQuantsClient
 from .jquants.concurrent import get_prices, get_statements
+from .jquants.info import get_info, get_target_codes
 
 __all__ = [
     "Documents",
@@ -16,6 +17,8 @@ __all__ = [
     "Statements",
     "get_csv",
     "get_documents",
+    "get_info",
     "get_prices",
     "get_statements",
+    "get_target_codes",
 ]

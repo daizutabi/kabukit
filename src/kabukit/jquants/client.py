@@ -184,7 +184,7 @@ class JQuantsClient(Client):
         *,
         clean: bool = True,
     ) -> DataFrame:
-        """銘柄情報を取得する。
+        """上場銘柄一覧銘を取得する。
 
         Args:
             code (str, optional): 情報を取得する銘柄のコード。

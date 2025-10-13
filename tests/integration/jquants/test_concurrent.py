@@ -23,6 +23,14 @@ async def test_get(resource: str) -> None:
 
 
 @pytest.mark.asyncio
+async def test_get_with_single_code(resource: str) -> None:
+    from kabukit.jquants.concurrent import get
+
+    df = await get(resource, "7203")
+    assert df["Code"].unique().to_list() == ["72030"]
+
+
+@pytest.mark.asyncio
 async def test_get_without_codes(resource: str) -> None:
     from kabukit.jquants.concurrent import get
 

@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 async def get(
     resource: str,
-    codes: Iterable[str] | None = None,
+    codes: Iterable[str] | str | None = None,
     /,
     limit: int | None = None,
     max_concurrency: int | None = None,
@@ -29,7 +29,7 @@ async def get(
     Args:
         resource (str): 取得するデータの種類。JQuantsClientのメソッド名から"get_"を
             除いたものを指定する。
-        codes (Iterable[str] | None): 取得対象の銘柄コードのリスト。
+        codes (Iterable[str] | str | None): 取得対象の銘柄コードのリスト。
             指定しないときはすべての銘柄が対象となる。
         limit (int | None, optional): 取得する銘柄数の上限。
             指定しないときはすべての銘柄が対象となる。
@@ -47,6 +47,8 @@ async def get(
     """
     if codes is None:
         codes = await get_target_codes()
+    elif isinstance(codes, str):
+        codes = [codes]
 
     data = await concurrent.get(
         JQuantsClient,
@@ -61,7 +63,7 @@ async def get(
 
 
 async def get_statements(
-    codes: Iterable[str] | None = None,
+    codes: Iterable[str] | str | None = None,
     /,
     limit: int | None = None,
     max_concurrency: int = 12,
@@ -71,7 +73,7 @@ async def get_statements(
     """四半期毎の決算短信サマリーおよび業績・配当の修正に関する開示情報を取得する。
 
     Args:
-        codes (Iterable[str] | None): 財務情報を取得する銘柄のコード。
+        codes (Iterable[str] | str | None): 財務情報を取得する銘柄のコード。
             Noneが指定された場合、全銘柄が対象となる。
         limit (int | None, optional): 取得する銘柄数の上限。
             指定しないときはすべての銘柄が対象となる。
@@ -100,7 +102,7 @@ async def get_statements(
 
 
 async def get_prices(
-    codes: Iterable[str] | None = None,
+    codes: Iterable[str] | str | None = None,
     /,
     limit: int | None = None,
     max_concurrency: int = 8,
@@ -112,7 +114,7 @@ async def get_prices(
     株価は分割・併合を考慮した調整済み株価（小数点第２位四捨五入）と調整前の株価を取得できる。
 
     Args:
-        codes (Iterable[str] | None): 財務情報を取得する銘柄のコード。
+        codes (Iterable[str] | str | None): 財務情報を取得する銘柄のコード。
             Noneが指定された場合、全銘柄が対象となる。
         limit (int | None, optional): 取得する銘柄数の上限。
             指定しないときはすべての銘柄が対象となる。
