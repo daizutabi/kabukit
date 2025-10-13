@@ -9,8 +9,6 @@ import typer
 from rich.console import Console
 from rich.tree import Tree
 
-from kabukit.utils.config import get_cache_dir
-
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -31,6 +29,8 @@ def add_to_tree(tree: Tree, path: Path) -> None:
 @app.command()
 def tree() -> None:
     """キャッシュディレクトリのツリー構造を表示します。"""
+    from kabukit.utils.config import get_cache_dir
+
     cache_dir = get_cache_dir()
 
     if not cache_dir.exists():
@@ -46,6 +46,8 @@ def tree() -> None:
 @app.command()
 def clean() -> None:
     """キャッシュディレクトリを削除します。"""
+    from kabukit.utils.config import get_cache_dir
+
     cache_dir = get_cache_dir()
 
     if not cache_dir.exists():

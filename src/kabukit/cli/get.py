@@ -12,6 +12,18 @@ if TYPE_CHECKING:
 # pyright: reportMissingTypeStubs=false
 # pyright: reportUnknownMemberType=false
 
+
+def set_table() -> None:
+    import polars as pl
+
+    pl.Config.set_tbl_rows(5)
+    pl.Config.set_tbl_cols(6)
+    pl.Config.set_tbl_hide_dtype_separator()
+
+
+set_table()
+
+
 app = AsyncTyper(
     add_completion=False,
     help="J-QuantsまたはEDINETからデータを取得します。",
