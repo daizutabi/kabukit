@@ -9,8 +9,8 @@ def _():
     import marimo as mo
     import polars as pl
     from kabukit import Documents, EdinetClient
-    from kabukit.edinet import fetch_csv
-    return Documents, EdinetClient, fetch_csv, mo, pl
+    from kabukit.edinet import get_csv
+    return Documents, EdinetClient, get_csv, mo, pl
 
 
 @app.cell
@@ -29,11 +29,11 @@ def _(mo):
 
 
 @app.cell
-async def _(Documents, button, fetch_csv, mo, pl):
+async def _(Documents, button, get_csv, mo, pl):
     if button.value:
-        lst = Documents.read().data.filter(pl.col("csvFlag"), pl.col("secCode").is_not_null())
+        lst = Documents.read().data.filter(pl.col("Code").is_not_null(), pl.col("csvFlag"))
         doc_ids = lst["docID"].unique()
-        x = await fetch_csv(doc_ids, limit=100, progress=mo.status.progress_bar)
+        x = await get_csv(doc_ids, limit=100, progress=mo.status.progress_bar)
         mo.output.append(x)
     return
 

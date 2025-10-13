@@ -9,8 +9,8 @@ def _():
     import marimo as mo
 
     from kabukit import EdinetClient
-    from kabukit.edinet import fetch_documents
-    return EdinetClient, fetch_documents, mo
+    from kabukit.edinet import get_documents
+    return EdinetClient, get_documents, mo
 
 
 @app.cell
@@ -29,10 +29,9 @@ def _(mo):
 
 
 @app.cell
-async def _(button, fetch_documents, mo):
+async def _(button, get_documents, mo):
     if button.value:
-        lst = await fetch_documents(years=10, progress=mo.status.progress_bar)
-        mo.output.append(lst.sort("Date"))
+        await get_documents(years=1, progress=mo.status.progress_bar)
     return
 
 
