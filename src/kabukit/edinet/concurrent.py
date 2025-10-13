@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 from typing import TYPE_CHECKING
 
 from kabukit.utils import concurrent
@@ -8,7 +9,6 @@ from kabukit.utils.date import get_dates
 from .client import EdinetClient
 
 if TYPE_CHECKING:
-    import datetime
     from collections.abc import Iterable
 
     from polars import DataFrame
@@ -20,6 +20,7 @@ async def get(
     resource: str,
     args: Iterable[str | datetime.date],
     /,
+    limit: int | None = None,
     max_concurrency: int | None = None,
     progress: Progress | None = None,
     callback: Callback | None = None,
@@ -30,6 +31,8 @@ async def get(
         resource (str): 取得するデータの種類。EdinetClientのメソッド名から"get_"を
             除いたものを指定する。
         args (Iterable[str | datetime.date]): 取得対象の引数のリスト。
+        limit (int | None, optional): 取得数の上限。
+            指定しないときはすべてを取得する。
         max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
             指定しないときはデフォルト値が使用される。
         progress (Progress | None, optional): 進捗表示のための関数。
@@ -46,6 +49,7 @@ async def get(
         EdinetClient,
         resource,
         args,
+        limit=limit,
         max_concurrency=max_concurrency,
         progress=progress,
         callback=callback,
@@ -53,6 +57,8 @@ async def get(
 
 
 async def get_documents(
+    dates: Iterable[datetime.date | str] | datetime.date | str | None = None,
+    /,
     days: int | None = None,
     years: int | None = None,
     limit: int | None = None,
@@ -78,23 +84,24 @@ async def get_documents(
         DataFrame:
             文書一覧を含む単一のDataFrame。
     """
-    dates = get_dates(days=days, years=years)
-
-    if limit is not None:
-        dates = dates[:limit]
+    if dates is None:
+        dates = get_dates(days=days, years=years)
+    elif isinstance(dates, (str, datetime.date)):
+        dates = [dates]
 
     df = await get(
         "documents",
         dates,
+        limit=limit,
         max_concurrency=max_concurrency,
         progress=progress,
         callback=callback,
     )
-    return df.sort("Date", "Code")
+    return df.sort("Code", "Date")
 
 
 async def get_csv(
-    doc_ids: Iterable[str],
+    doc_ids: Iterable[str] | str,
     /,
     limit: int | None = None,
     max_concurrency: int | None = None,
@@ -104,7 +111,7 @@ async def get_csv(
     """文書をCSV形式で取得し、単一のDataFrameにまとめて返す。
 
     Args:
-        doc_ids (Iterable[str]): 取得対象の文書IDのリスト。
+        doc_ids (Iterable[str] | str): 取得対象の文書IDのリスト。
         max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
             指定しないときはデフォルト値が使用される。
         progress (Progress | None, optional): 進捗表示のための関数。
@@ -117,14 +124,13 @@ async def get_csv(
         DataFrame:
             文書含む単一のDataFrame。
     """
-    doc_ids = list(doc_ids)
-
-    if limit is not None:
-        doc_ids = doc_ids[:limit]
+    if isinstance(doc_ids, str):
+        doc_ids = [doc_ids]
 
     df = await get(
         "csv",
         doc_ids,
+        limit=limit,
         max_concurrency=max_concurrency,
         progress=progress,
         callback=callback,
