@@ -134,8 +134,8 @@ async def test_get_entries_single_date(
 
 
 @pytest.mark.asyncio
-async def test_get_csv(mocker: MockerFixture) -> None:
-    from kabukit.edinet.concurrent import get_csv
+async def test_documents(mocker: MockerFixture) -> None:
+    from kabukit.edinet.concurrent import get_documents
 
     mock_get = mocker.patch(
         "kabukit.edinet.concurrent.get",
@@ -143,7 +143,7 @@ async def test_get_csv(mocker: MockerFixture) -> None:
     )
     mock_get.return_value = DataFrame({"docID": [3]})
 
-    result = await get_csv(
+    result = await get_documents(
         ["doc1", "doc2", "doc3"],
         limit=2,
         max_concurrency=5,
@@ -163,8 +163,8 @@ async def test_get_csv(mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_csv_single_doc_id(mocker: MockerFixture) -> None:
-    from kabukit.edinet.concurrent import get_csv
+async def test_get_documents_single_doc_id(mocker: MockerFixture) -> None:
+    from kabukit.edinet.concurrent import get_documents
 
     mock_get = mocker.patch(
         "kabukit.edinet.concurrent.get",
@@ -172,7 +172,7 @@ async def test_get_csv_single_doc_id(mocker: MockerFixture) -> None:
     )
     mock_get.return_value = DataFrame({"docID": [3]})
 
-    result = await get_csv("doc1")
+    result = await get_documents("doc1")
 
     assert result.equals(DataFrame({"docID": [3]}))
     mock_get.assert_awaited_once_with(

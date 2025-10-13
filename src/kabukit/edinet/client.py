@@ -138,7 +138,7 @@ class EdinetClient(Client):
         msg = "CSV is not available."
         raise ValueError(msg)
 
-    async def get_documents(self, doc_id: str, *, pdf: bool = False) -> DataFrame:
+    async def get_document(self, doc_id: str, *, pdf: bool = False) -> DataFrame:
         if pdf:
             return await self.get_pdf(doc_id)
 
