@@ -44,11 +44,11 @@ async def info(code: Code = None, *, quiet: Quiet = False) -> None:
         typer.echo(f"全銘柄の情報を '{path}' に保存しました。")
 
 
-async def _fetch(
+async def _get(
     code: str | None,
     target: str,
     cls: type[Base],
-    fetch_func_name: str,
+    method: str,
     message: str,
     *,
     quiet: bool = False,
@@ -59,7 +59,7 @@ async def _fetch(
 
     if code is not None:
         async with JQuantsClient() as client:
-            df = await getattr(client, fetch_func_name)(code)
+            df = await getattr(client, method)(code)
         typer.echo(df)
         return
 
@@ -87,11 +87,11 @@ async def statements(code: Code = None, *, quiet: Quiet = False) -> None:
     """財務情報を取得します。"""
     from kabukit.core.statements import Statements
 
-    await _fetch(
+    await _get(
         code=code,
         target="statements",
         cls=Statements,
-        fetch_func_name="get_statements",
+        method="get_statements",
         message="財務情報",
         quiet=quiet,
     )
@@ -102,11 +102,11 @@ async def prices(code: Code = None, *, quiet: Quiet = False) -> None:
     """株価情報を取得します。"""
     from kabukit.core.prices import Prices
 
-    await _fetch(
+    await _get(
         code=code,
         target="prices",
         cls=Prices,
-        fetch_func_name="get_prices",
+        method="get_prices",
         message="株価情報",
         quiet=quiet,
         max_concurrency=8,

@@ -76,11 +76,11 @@ async def test_get_all(
     from kabukit.jquants.concurrent import get_all
 
     mock_get_target_codes.return_value = ["1111", "2222", "3333"]
-    mock_fetch = mocker.patch(
+    mock_get = mocker.patch(
         "kabukit.jquants.concurrent.get",
         new_callable=mocker.AsyncMock,
     )
-    mock_fetch.return_value = DataFrame({"b": [2]})
+    mock_get.return_value = DataFrame({"b": [2]})
 
     result = await get_all(
         "test_resource",
@@ -92,7 +92,7 @@ async def test_get_all(
 
     assert result.equals(DataFrame({"b": [2]}))
     mock_get_target_codes.assert_awaited_once()
-    mock_fetch.assert_awaited_once_with(
+    mock_get.assert_awaited_once_with(
         "test_resource",
         ["1111", "2222"],
         max_concurrency=5,

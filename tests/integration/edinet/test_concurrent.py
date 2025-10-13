@@ -5,7 +5,7 @@ pytestmark = pytest.mark.integration
 
 
 @pytest.mark.asyncio
-async def test_fetch() -> None:
+async def test_get() -> None:
     from kabukit.edinet.concurrent import get
 
     df = await get("documents", ["2025-09-09", "2025-09-19", "2025-09-22"])
@@ -20,7 +20,7 @@ def callback(df: DataFrame) -> DataFrame:
 
 
 @pytest.mark.asyncio
-async def test_fetch_documents() -> None:
+async def test_get_documents() -> None:
     from kabukit.edinet.concurrent import get_documents
 
     df = await get_documents(7, limit=6, callback=callback)
@@ -28,7 +28,7 @@ async def test_fetch_documents() -> None:
 
 
 @pytest.mark.asyncio
-async def test_fetch_csv() -> None:
+async def test_get_csv() -> None:
     from kabukit.edinet.concurrent import get, get_csv
 
     df = await get("documents", ["2025-09-09", "2025-09-19", "2025-09-22"])
