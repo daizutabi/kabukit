@@ -46,7 +46,10 @@ async def test_documents_holiday(client: EdinetClient) -> None:
 
 @pytest.mark.asyncio
 async def test_pdf(client: EdinetClient) -> None:
-    assert await client.get_pdf("S100WKHJ")
+    df = await client.get_pdf("S100WKHJ")
+    content = df.item(0, "pdf")
+    assert isinstance(content, bytes)
+    assert content.startswith(b"%PDF-")
 
 
 @pytest.mark.asyncio

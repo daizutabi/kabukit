@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 import polars as pl
 import pytest
 from httpx import ConnectTimeout, HTTPStatusError, Response
+from polars import DataFrame
 from polars.testing import assert_frame_equal
 
 from kabukit.edinet.client import AuthKey, EdinetClient
@@ -181,9 +182,11 @@ async def test_get_pdf_success(get: AsyncMock, mocker: MockerFixture) -> None:
     get.return_value.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
-    content = await client.get_pdf("S100TEST")
+    df = await client.get_pdf("S100TEST")
 
-    assert content == b"pdf content"
+    expected = DataFrame({"docID": ["S100TEST"], "pdf": [b"pdf content"]})
+
+    assert_frame_equal(df, expected)
     get.assert_awaited_once_with("/documents/S100TEST", params={"type": 2})
 
 

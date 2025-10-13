@@ -14,7 +14,7 @@ from kabukit.core.client import Client
 from kabukit.utils.config import load_dotenv
 from kabukit.utils.params import get_params
 
-from .doc import clean_csv, clean_entries, read_csv
+from .doc import clean_csv, clean_entries, clean_pdf, read_csv
 
 if TYPE_CHECKING:
     import datetime
@@ -108,10 +108,10 @@ class EdinetClient(Client):
         params = get_params(type=doc_type)
         return await self.get(f"/documents/{doc_id}", params)
 
-    async def get_pdf(self, doc_id: str) -> bytes:
+    async def get_pdf(self, doc_id: str) -> DataFrame:
         resp = await self.get_document(doc_id, doc_type=2)
         if resp.headers["content-type"] == "application/pdf":
-            return resp.content
+            return clean_pdf(resp.content, doc_id)
 
         msg = "PDF is not available."
         raise ValueError(msg)

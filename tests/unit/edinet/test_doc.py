@@ -92,6 +92,15 @@ def test_clean_entries_ope_datetime(df: DataFrame) -> None:
     ]
 
 
+def test_clean_pdf() -> None:
+    from kabukit.edinet.doc import clean_pdf
+
+    df = clean_pdf(b"abc", "abc")
+    assert df.columns == ["docID", "pdf"]
+    assert df["docID"].to_list() == ["abc"]
+    assert df["pdf"].to_list() == [b"abc"]
+
+
 def test_clean_csv() -> None:
     from kabukit.edinet.doc import clean_csv
 
