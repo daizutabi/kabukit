@@ -104,12 +104,12 @@ class EdinetClient(Client):
 
         return clean_entries(df, date)
 
-    async def get_document(self, doc_id: str, doc_type: int) -> Response:
+    async def get_response(self, doc_id: str, doc_type: int) -> Response:
         params = get_params(type=doc_type)
         return await self.get(f"/documents/{doc_id}", params)
 
     async def get_pdf(self, doc_id: str) -> DataFrame:
-        resp = await self.get_document(doc_id, doc_type=2)
+        resp = await self.get_response(doc_id, doc_type=2)
         if resp.headers["content-type"] == "application/pdf":
             return clean_pdf(resp.content, doc_id)
 
@@ -117,7 +117,7 @@ class EdinetClient(Client):
         raise ValueError(msg)
 
     async def get_zip(self, doc_id: str, doc_type: int) -> bytes:
-        resp = await self.get_document(doc_id, doc_type=doc_type)
+        resp = await self.get_response(doc_id, doc_type=doc_type)
         if resp.headers["content-type"] == "application/octet-stream":
             return resp.content
 
@@ -137,3 +137,9 @@ class EdinetClient(Client):
 
         msg = "CSV is not available."
         raise ValueError(msg)
+
+    async def get_documents(self, doc_id: str, *, pdf: bool = False) -> DataFrame:
+        if pdf:
+            return await self.get_pdf(doc_id)
+
+        return await self.get_csv(doc_id)

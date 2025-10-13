@@ -160,13 +160,13 @@ async def test_get_documents_empty_results(
 
 
 @pytest.mark.asyncio
-async def test_get_document(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_response(get: AsyncMock, mocker: MockerFixture) -> None:
     expected_response = Response(200, content=b"file content")
     get.return_value = expected_response
     get.return_value.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
-    response = await client.get_document("S100TEST", doc_type=1)
+    response = await client.get_response("S100TEST", doc_type=1)
 
     assert response == expected_response
     get.assert_awaited_once_with("/documents/S100TEST", params={"type": 1})
