@@ -26,7 +26,7 @@ async def test_count_status_not_200(client: EdinetClient) -> None:
 @pytest.mark.asyncio
 async def test_documents(client: EdinetClient) -> None:
     count = await client.get_count("2025-09-04")
-    df = await client.get_documents("2025-09-04")
+    df = await client.get_entries("2025-09-04")
     assert df.shape == (count, 30)
     assert df.columns[0] == "Date"
     assert df["Date"].dtype == pl.Date
@@ -34,13 +34,13 @@ async def test_documents(client: EdinetClient) -> None:
 
 @pytest.mark.asyncio
 async def test_documents_zero(client: EdinetClient) -> None:
-    df = await client.get_documents("1000-01-01")
+    df = await client.get_entries("1000-01-01")
     assert df.shape == (0, 0)
 
 
 @pytest.mark.asyncio
 async def test_documents_holiday(client: EdinetClient) -> None:
-    df = await client.get_documents("2025-09-23")
+    df = await client.get_entries("2025-09-23")
     assert df.shape == (0, 0)
 
 
@@ -77,7 +77,7 @@ async def test_csv(client: EdinetClient) -> None:
 @pytest_asyncio.fixture(scope="module")
 async def df():
     client = EdinetClient()
-    yield await client.get_documents("2025-06-27")
+    yield await client.get_entries("2025-06-27")
     await client.aclose()
 
 

@@ -113,13 +113,13 @@ async def test_get_documents_success(get: AsyncMock, mocker: MockerFixture) -> N
     get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
-    mock_clean_documents = mocker.patch("kabukit.edinet.client.clean_documents")
+    mock_clean_documents = mocker.patch("kabukit.edinet.client.clean_entries")
     expected_df = pl.DataFrame(results)
     mock_clean_documents.return_value = expected_df
 
     client = EdinetClient("test_key")
     date = "2023-10-26"
-    df = await client.get_documents(date)
+    df = await client.get_entries(date)
 
     assert_frame_equal(df, expected_df)
     get.assert_awaited_once_with(
@@ -137,7 +137,7 @@ async def test_get_documents_no_results(get: AsyncMock, mocker: MockerFixture) -
     response.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
-    df = await client.get_documents("2023-10-26")
+    df = await client.get_entries("2023-10-26")
 
     assert df.is_empty()
 
@@ -153,7 +153,7 @@ async def test_get_documents_empty_results(
     response.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
-    df = await client.get_documents("2023-10-26")
+    df = await client.get_entries("2023-10-26")
 
     assert df.is_empty()
 

@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from polars import DataFrame
 
 
-def clean_documents(df: DataFrame, date: str | datetime.date) -> DataFrame:
+def clean_entries(df: DataFrame, date: str | datetime.date) -> DataFrame:
     if isinstance(date, str):
         date = (
             datetime.datetime.strptime(date, "%Y-%m-%d")

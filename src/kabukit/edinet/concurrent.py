@@ -56,7 +56,7 @@ async def get(
     )
 
 
-async def get_documents(
+async def get_entries(
     dates: Iterable[datetime.date | str] | datetime.date | str | None = None,
     /,
     days: int | None = None,
@@ -90,7 +90,7 @@ async def get_documents(
         dates = [dates]
 
     df = await get(
-        "documents",
+        "entries",
         dates,
         limit=limit,
         max_concurrency=max_concurrency,

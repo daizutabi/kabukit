@@ -90,9 +90,9 @@ def mock_prices(MockPrices: MagicMock) -> MagicMock:  # noqa: N803
 
 
 @pytest.fixture
-def mock_get_documents(mocker: MockerFixture) -> AsyncMock:
+def mock_get_entries(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.edinet.concurrent.get_documents",
+        "kabukit.edinet.concurrent.get_entries",
         new_callable=mocker.AsyncMock,
         return_value=MOCK_DF,
     )
@@ -108,12 +108,12 @@ def mock_get_csv(mocker: MockerFixture) -> AsyncMock:
 
 
 @pytest.fixture
-def MockDocuments(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("kabukit.core.documents.Documents")
+def MockEntries(mocker: MockerFixture) -> MagicMock:
+    return mocker.patch("kabukit.core.entries.Entries")
 
 
 @pytest.fixture
-def mock_documents(MockDocuments: MagicMock) -> MagicMock:  # noqa: N803
-    instance = MockDocuments.return_value
+def mock_entries(MockEntries: MagicMock) -> MagicMock:  # noqa: N803
+    instance = MockEntries.return_value
     instance.write.return_value = MOCK_PATH
     return instance

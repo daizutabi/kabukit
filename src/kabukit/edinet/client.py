@@ -14,7 +14,7 @@ from kabukit.core.client import Client
 from kabukit.utils.config import load_dotenv
 from kabukit.utils.params import get_params
 
-from .doc import clean_csv, clean_documents, read_csv
+from .doc import clean_csv, clean_entries, read_csv
 
 if TYPE_CHECKING:
     import datetime
@@ -81,7 +81,7 @@ class EdinetClient(Client):
 
         return metadata["resultset"]["count"]
 
-    async def get_documents(self, date: str | datetime.date) -> DataFrame:
+    async def get_entries(self, date: str | datetime.date) -> DataFrame:
         """書類一覧 API を使い、特定の日付の提出書類一覧を取得する。
 
         Args:
@@ -102,7 +102,7 @@ class EdinetClient(Client):
         if df.is_empty():
             return df
 
-        return clean_documents(df, date)
+        return clean_entries(df, date)
 
     async def get_document(self, doc_id: str, doc_type: int) -> Response:
         params = get_params(type=doc_type)

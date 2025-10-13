@@ -11,7 +11,7 @@ def clean(df: DataFrame) -> DataFrame:
     ).drop("^.+Code$", "CompanyNameEnglish")
 
 
-async def get_info() -> DataFrame:
+async def get_info(code: str | None = None, /) -> DataFrame:
     """上場銘柄一覧銘を取得する。
 
     Returns:
@@ -23,7 +23,7 @@ async def get_info() -> DataFrame:
     from .client import JQuantsClient
 
     async with JQuantsClient() as client:
-        return await client.get_info()
+        return await client.get_info(code)
 
 
 async def get_target_codes() -> list[str]:

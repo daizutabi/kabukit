@@ -10,7 +10,7 @@ pytestmark = pytest.mark.integration
 async def test_get() -> None:
     from kabukit.edinet.concurrent import get
 
-    df = await get("documents", ["2025-09-09", "2025-09-19", "2025-09-22"])
+    df = await get("entries", ["2025-09-09", "2025-09-19", "2025-09-22"])
     assert df.shape == (1231, 30)
     assert df["Date"].n_unique() == 3
     assert df["docID"].n_unique() == 1229  # 重複あり
@@ -23,18 +23,18 @@ def callback(df: DataFrame) -> DataFrame:
 
 @pytest.mark.asyncio
 async def test_get_documents_dates() -> None:
-    from kabukit.edinet.concurrent import get_documents
+    from kabukit.edinet.concurrent import get_entries
 
-    df = await get_documents(["2025-10-09", "2025-10-10"])
+    df = await get_entries(["2025-10-09", "2025-10-10"])
     expected = [date(2025, 10, 9), date(2025, 10, 10)]
     assert sorted(df["Date"].unique().to_list()) == expected
 
 
 @pytest.mark.asyncio
 async def test_get_documents_sigle_date() -> None:
-    from kabukit.edinet.concurrent import get_documents
+    from kabukit.edinet.concurrent import get_entries
 
-    df = await get_documents("2025-10-09")
+    df = await get_entries("2025-10-09")
     dates = df["Date"].unique().to_list()
     assert len(dates) == 1
     assert dates[0] == date(2025, 10, 9)
@@ -42,9 +42,9 @@ async def test_get_documents_sigle_date() -> None:
 
 @pytest.mark.asyncio
 async def test_get_documents_without_dates() -> None:
-    from kabukit.edinet.concurrent import get_documents
+    from kabukit.edinet.concurrent import get_entries
 
-    df = await get_documents(days=7, limit=6, callback=callback)
+    df = await get_entries(days=7, limit=6, callback=callback)
     assert df.width == 30
 
 
@@ -52,7 +52,7 @@ async def test_get_documents_without_dates() -> None:
 async def test_get_csv() -> None:
     from kabukit.edinet.concurrent import get, get_csv
 
-    df = await get("documents", ["2025-09-09", "2025-09-19", "2025-09-22"])
+    df = await get("entries", ["2025-09-09", "2025-09-19", "2025-09-22"])
     doc_ids = df.filter(csvFlag=True).get_column("docID").sort()
     df = await get_csv(doc_ids, limit=10, callback=callback)
     assert df["docID"].n_unique() == 10
@@ -60,9 +60,9 @@ async def test_get_csv() -> None:
 
 @pytest.mark.asyncio
 async def test_get_csv_single_doc_id() -> None:
-    from kabukit.edinet.concurrent import get_csv, get_documents
+    from kabukit.edinet.concurrent import get_csv, get_entries
 
-    df = await get_documents("2025-09-09")
+    df = await get_entries("2025-09-09")
     doc_id = df.filter(csvFlag=True).get_column("docID").first()
     assert isinstance(doc_id, str)
     df = await get_csv(doc_id)
