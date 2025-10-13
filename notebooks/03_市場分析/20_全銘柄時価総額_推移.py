@@ -30,8 +30,8 @@ def _():
 @app.cell
 async def _(JQuantsClient, Prices, Statements):
     # 各種データを読み込む
-    prices_raw = Prices.read()
-    statements = Statements.read()
+    prices_raw = Prices()
+    statements = Statements()
     async with JQuantsClient() as client:
         topix_df = await client.get_topix()
     return prices_raw, statements, topix_df

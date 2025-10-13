@@ -8,15 +8,14 @@ app = marimo.App(width="medium", sql_output="polars")
 def _():
     import marimo as mo
     import polars as pl
-    from kabukit import Documents, EdinetClient
-    from kabukit.edinet import get_csv
-    return Documents, EdinetClient, get_csv, mo, pl
+    from kabukit import EdinetClient, get_documents, Entries
+    return EdinetClient, Entries, get_documents, mo, pl
 
 
 @app.cell
 async def _(EdinetClient):
     async with EdinetClient() as client:
-        df = await client.get_csv("S100WQ4C")
+        df = await client.get_document("S100WQ4C")
     df
     return
 
@@ -29,11 +28,11 @@ def _(mo):
 
 
 @app.cell
-async def _(Documents, button, get_csv, mo, pl):
+async def _(Entries, button, get_documents, mo, pl):
     if button.value:
-        lst = Documents.read().data.filter(pl.col("Code").is_not_null(), pl.col("csvFlag"))
+        lst = Entries().data.filter(pl.col("Code").is_not_null(), pl.col("csvFlag"))
         doc_ids = lst["docID"].unique()
-        x = await get_csv(doc_ids, limit=100, progress=mo.status.progress_bar)
+        x = await get_documents(doc_ids, limit=100, progress=mo.status.progress_bar)
         mo.output.append(x)
     return
 
