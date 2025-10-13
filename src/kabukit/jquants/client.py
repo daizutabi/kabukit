@@ -54,14 +54,13 @@ class AuthKey(StrEnum):
 
 
 class JQuantsClient(Client):
-    """J-Quants APIと対話するためのクライアント。
+    """J-Quants APIと非同期に対話するためのクライアント。
 
-    API認証トークン（リフレッシュトークンおよびIDトークン）を管理し、
-    各種J-Quants APIエンドポイントへアクセスするメソッドを提供する。
-    トークンは設定ファイルから読み込まれ、またファイルに保存される。
+    `httpx.AsyncClient` をラップし、認証トークンの管理、ページネーションの
+    自動処理、APIレスポンスの `polars.DataFrame` への変換などを行う。
 
     Attributes:
-        client: APIリクエストを行うための `AsyncClient` インスタンス。
+        client (httpx.AsyncClient): APIリクエストを行うための非同期HTTPクライアント。
     """
 
     def __init__(self, id_token: str | None = None) -> None:
@@ -69,13 +68,11 @@ class JQuantsClient(Client):
         self.set_id_token(id_token)
 
     def set_id_token(self, id_token: str | None = None) -> None:
-        """IDトークンをヘッダーに設定する。
+        """HTTPヘッダーにIDトークンを設定する。
 
         Args:
-            id_token (str | None, optional): 設定するIDトークン。
-                Noneの場合、環境変数から読み込む。
+            id_token: 設定するIDトークン。Noneの場合、環境変数から読み込む。
         """
-
         if id_token is None:
             load_dotenv()
             id_token = os.environ.get(AuthKey.ID_TOKEN)
@@ -94,7 +91,7 @@ class JQuantsClient(Client):
             APIからのJSONレスポンス。
 
         Raises:
-            HTTPStatusError: APIリクエストが失敗した場合。
+            HTTPStatusError: APIリクエストがHTTPエラーステータスを返した場合。
         """
         resp = await self.client.post(url, json=json)
         resp.raise_for_status()
@@ -104,14 +101,14 @@ class JQuantsClient(Client):
         """指定されたURLにGETリクエストを送信する。
 
         Args:
-            url (str): GETリクエストのURLパス。
-            params (QueryParamTypes | None, optional): リクエストのクエリパラメータ。
+            url: GETリクエストのURLパス。
+            params: リクエストのクエリパラメータ。
 
         Returns:
             APIからのJSONレスポンス。
 
         Raises:
-            HTTPStatusError: APIリクエストが失敗した場合。
+            HTTPStatusError: APIリクエストがHTTPエラーステータスを返した場合。
         """
         resp = await self.client.get(url, params=params)
         resp.raise_for_status()
@@ -124,15 +121,18 @@ class JQuantsClient(Client):
         *,
         save: bool = False,
     ) -> Self:
-        """認証を行い、トークンを保存する。
+        """メールアドレスとパスワードで認証し、IDトークンを設定する。
 
         Args:
-            mailaddress (str): J-Quantsに登録したメールアドレス。
-            password (str): J-Quantsのパスワード。
-            save (bool, optional): トークンを環境変数に保存するかどうか。
+            mailaddress: J-Quantsに登録したメールアドレス。
+            password: J-Quantsのパスワード。
+            save: 取得したIDトークンを環境変数ファイルに保存するかどうか。
+
+        Returns:
+            認証が完了したクライアント自身のインスタンス。
 
         Raises:
-            HTTPStatusError: APIリクエストが失敗した場合。
+            HTTPStatusError: 認証APIリクエストが失敗した場合。
         """
         json_data = {"mailaddress": mailaddress, "password": password}
         data = await self.post("/token/auth_user", json=json_data)
@@ -154,15 +154,18 @@ class JQuantsClient(Client):
         params: dict[str, Any] | None,
         name: str,
     ) -> AsyncIterator[DataFrame]:
-        """ページ分割されたAPIレスポンスを反復処理する。
+        """ページ分割されたAPIレスポンスを非同期に反復処理する。
+
+        J-Quants APIのページネーション仕様（`pagination_key`）に対応し、
+        複数ページにまたがるデータを自動的に取得する。
 
         Args:
-            url (str): APIエンドポイントのベースURL。
-            params (dict[str, Any]): クエリパラメータの辞書。
-            name (str): アイテムのリストを含むJSONレスポンスのキー。
+            url: APIエンドポイントのURLパス。
+            params: クエリパラメータの辞書。
+            name: アイテムのリストを含むJSONレスポンスのキー。
 
         Yields:
-            データの各ページに対応するDataFrame。
+            pl.DataFrame: データの各ページに対応するDataFrame。
 
         Raises:
             HTTPStatusError: APIリクエストが失敗した場合。
@@ -184,15 +187,15 @@ class JQuantsClient(Client):
         *,
         clean: bool = True,
     ) -> DataFrame:
-        """上場銘柄一覧銘を取得する。
+        """上場銘柄一覧を取得する (listed/info)。
 
         Args:
-            code (str, optional): 情報を取得する銘柄のコード。
-            date (str | datetime.date, optional): 情報を取得する日付。
-            clean (bool, optional): 取得したデータをクリーンアップするかどうか。
+            code: 情報を取得する銘柄コード (例: "86970")。
+            date: 情報を取得する日付 (例: "2025-10-01")。
+            clean: 取得したデータを整形するかどうか。
 
         Returns:
-            銘柄情報を含むDataFrame。
+            pl.DataFrame: 銘柄情報を含むDataFrame。
 
         Raises:
             HTTPStatusError: APIリクエストが失敗した場合。
@@ -211,24 +214,23 @@ class JQuantsClient(Client):
         clean: bool = True,
         with_date: bool = True,
     ) -> DataFrame:
-        """四半期毎の決算短信サマリーおよび業績・配当の修正に関する開示情報を取得する。
+        """財務情報を取得する (fins/statements)。
 
         Args:
-            code (str, optional): 財務情報を取得する銘柄のコード。
-            date (str | datetime.date, optional): 財務情報を取得する日付。
-            clean (bool, optional): 取得したデータをクリーンアップするかどうか。
-            with_date (bool, optional): クリーンアップ後に営業日ベースで開示日の翌日を
-                計算して`Date`列を追加するかどうか。
+            code: 財務情報を取得する銘柄コード。
+            date: 財務情報を取得する日付。
+            clean: 取得したデータを整形するかどうか。
+            with_date: 整形後に営業日ベースの開示翌日(`Date`列)を追加するかどうか。
 
         Returns:
-            財務情報を含むDataFrame。
+            pl.DataFrame: 財務情報を含むDataFrame。
 
         Raises:
             ValueError: `code`と`date`が両方とも指定されない場合。
             HTTPStatusError: APIリクエストが失敗した場合。
         """
         if not code and not date:
-            msg = "codeまたはdateのどちらかを指定する必要があります。"
+            msg = "codeまたはdateのどちらかを指定する必要がある。"
             raise ValueError(msg)
 
         params = get_params(code=code, date=date)
@@ -258,32 +260,27 @@ class JQuantsClient(Client):
         *,
         clean: bool = True,
     ) -> DataFrame:
-        """日々の株価四本値を取得する。
-
-        株価は分割・併合を考慮した調整済み株価（小数点第２位四捨五入）と調整前の株価を取得できる。
+        """日々の株価四本値を取得する (prices/daily_quotes)。
 
         Args:
-            code (str, optional): 株価を取得する銘柄のコード。
-            date (str | datetime.date, optional): 株価を取得する日付。
-                `from_`または`to`とは併用不可。
-            from_ (str | datetime.date, optional): 取得期間の開始日。
-                `date`とは併用不可。
-            to (str | datetime.date, optional): 取得期間の終了日。
-                `date`とは併用不可。
-            clean (bool, optional): 取得したデータをクリーンアップするかどうか。
+            code: 株価を取得する銘柄コード。
+            date: 株価を取得する日付。`from_`または`to`とは併用不可。
+            from_: 取得期間の開始日。`date`とは併用不可。
+            to: 取得期間の終了日。`date`とは併用不可。
+            clean: 取得したデータを整形するかどうか。
 
         Returns:
-            日々の株価四本値を含むDataFrame。
+            pl.DataFrame: 日々の株価四本値を含むDataFrame。
 
         Raises:
-            ValueError: `date`と`from_`/`to`の両方が指定された場合。
+            ValueError: `date`と`from_`/`to`が同時に指定された場合。
             HTTPStatusError: APIリクエストが失敗した場合。
         """
         if not date and not code:
             return await self.get_latest_available_prices(clean=clean)
 
         if date and (from_ or to):
-            msg = "dateとfrom/toの両方を指定することはできません。"
+            msg = "dateとfrom/toを同時に指定することはできない。"
             raise ValueError(msg)
 
         params = get_params(code=code, date=date, from_=from_, to=to)
@@ -305,7 +302,19 @@ class JQuantsClient(Client):
         *,
         clean: bool = True,
     ) -> DataFrame:
-        """直近利用可能な日付の株価を取得する。"""
+        """直近利用可能な日付の株価を取得する。
+
+        `get_prices` のためのフォールバック処理。今日から過去`num_days`の範囲で
+        データが存在する最初の日の全銘柄データを返す。
+
+        Args:
+            num_days: 遡って検索する最大日数。
+            clean: 取得したデータを整形するかどうか。
+
+        Returns:
+            pl.DataFrame: データが見つかった場合はその日の株価DataFrame、
+            見つからない場合は空のDataFrame。
+        """
         today = datetime.datetime.now(ZoneInfo("Asia/Tokyo")).date()
 
         for days in range(num_days):
@@ -318,10 +327,10 @@ class JQuantsClient(Client):
         return DataFrame()
 
     async def get_announcement(self) -> DataFrame:
-        """翌日発表予定の決算情報を取得する。
+        """翌日発表予定の決算情報を取得する (fins/announcement)。
 
         Returns:
-            開示情報を含むPolars DataFrame。
+            pl.DataFrame: 翌日発表予定の決算開示情報を含むDataFrame。
 
         Raises:
             HTTPStatusError: APIリクエストが失敗した場合。
@@ -342,15 +351,15 @@ class JQuantsClient(Client):
         from_: str | datetime.date | None = None,
         to: str | datetime.date | None = None,
     ) -> DataFrame:
-        """投資部門別の情報を取得する。
+        """投資部門別売買状況を取得する (markets/trades_spec)。
 
         Args:
-            section: 絞り込み対象のセクション。
+            section: 絞り込み対象のセクション (例: "TSE")。
             from_: 取得期間の開始日。
             to: 取得期間の終了日。
 
         Returns:
-            投資部門別の情報を含むPolars DataFrame。
+            pl.DataFrame: 投資部門別売買状況を含むDataFrame。
 
         Raises:
             HTTPStatusError: APIリクエストが失敗した場合。
@@ -372,14 +381,14 @@ class JQuantsClient(Client):
         from_: str | datetime.date | None = None,
         to: str | datetime.date | None = None,
     ) -> DataFrame:
-        """日次のTOPIX指数データを取得する。
+        """TOPIXの時系列データを取得する (indices/topix)。
 
         Args:
             from_: 取得期間の開始日。
             to: 取得期間の終了日。
 
         Returns:
-            日次のTOPIX指数データを含むPolars DataFrame。
+            pl.DataFrame: 日次のTOPIX指数データを含むDataFrame。
 
         Raises:
             HTTPStatusError: APIリクエストが失敗した場合。
@@ -402,19 +411,15 @@ class JQuantsClient(Client):
         from_: str | datetime.date | None = None,
         to: str | datetime.date | None = None,
     ) -> DataFrame:
-        """東証およびOSEにおける営業日、休業日、ならびにOSEにおける祝日取引の有無の情報を取得する。
+        """市場の営業日カレンダーを取得する (markets/trading_calendar)。
 
         Args:
-            holidaydivision: 祝日区分。
-                - 非営業日: "0"
-                - 営業日: "1"
-                - 東証半日立会日: "2"
-                - 非営業日(祝日取引あり): "3"
+            holidaydivision: 祝日区分 ("0":非営業日, "1":営業日など)。
             from_: 取得期間の開始日。
             to: 取得期間の終了日。
 
         Returns:
-            営業日・非営業日データを含むPolars DataFrame。
+            pl.DataFrame: 市場の営業日・休業日データを含むDataFrame。
 
         Raises:
             HTTPStatusError: APIリクエストが失敗した場合。
