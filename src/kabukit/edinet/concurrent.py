@@ -20,6 +20,7 @@ async def get(
     resource: str,
     args: Iterable[str | datetime.date],
     /,
+    limit: int | None = None,
     max_concurrency: int | None = None,
     progress: Progress | None = None,
     callback: Callback | None = None,
@@ -30,6 +31,8 @@ async def get(
         resource (str): 取得するデータの種類。EdinetClientのメソッド名から"get_"を
             除いたものを指定する。
         args (Iterable[str | datetime.date]): 取得対象の引数のリスト。
+        limit (int | None, optional): 取得数の上限。
+            指定しないときはすべてを取得する。
         max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
             指定しないときはデフォルト値が使用される。
         progress (Progress | None, optional): 進捗表示のための関数。
@@ -46,6 +49,7 @@ async def get(
         EdinetClient,
         resource,
         args,
+        limit=limit,
         max_concurrency=max_concurrency,
         progress=progress,
         callback=callback,
@@ -53,6 +57,8 @@ async def get(
 
 
 async def get_documents(
+    dates: Iterable[datetime.date | str] | datetime.date | str | None = None,
+    /,
     days: int | None = None,
     years: int | None = None,
     limit: int | None = None,

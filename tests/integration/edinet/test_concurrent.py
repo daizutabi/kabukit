@@ -23,7 +23,7 @@ def callback(df: DataFrame) -> DataFrame:
 async def test_get_documents() -> None:
     from kabukit.edinet.concurrent import get_documents
 
-    df = await get_documents(7, limit=6, callback=callback)
+    df = await get_documents(days=7, limit=6, callback=callback)
     assert df.width == 30
 
 
