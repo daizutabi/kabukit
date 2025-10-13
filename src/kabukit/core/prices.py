@@ -16,23 +16,34 @@ if TYPE_CHECKING:
 
 
 class Prices(Base):
+    """日次株価データを保持し、各種指標を計算するためのメソッドを提供する。
+
+    このクラスは、Polars DataFrameを内部で利用して、J-Quants APIなどから
+    取得した株価の時系列データを格納する。
+    株式分割などを考慮した調整や、財務データと連携した各種利回り指標の計算、
+    時価総額の算出といった、分析に不可欠なデータ加工機能を提供する。
+
+    Attributes:
+        data (pl.DataFrame): 株価の時系列データ。
+    """
+
     def truncate(self, every: str | timedelta | Expr) -> Self:
         """時系列データを指定された頻度で集計し、切り詰める。
 
-        このメソッドは、日次などの時系列データを指定された頻度（例: 月次、週次）で
-        集計し、新しい時間軸に切り詰めます。集計方法は以下の通りです。
+        日次などの時系列データを指定された頻度（例: 月次、週次）で集計し、
+        新しい時間軸に切り詰める。集計方法は以下の通りである。
 
-        *   `Open`: 各期間の最初の`Open`値
-        *   `High`: 各期間の最大`High`値
-        *   `Low`: 各期間の最小`Low`値
-        *   `Close`: 各期間の最後の`Close`値
-        *   `Volume`: 各期間の`Volume`の合計
-        *   `TurnoverValue`: 各期間の`TurnoverValue`の合計
+        - `Open`: 各期間の最初の`Open`値
+        - `High`: 各期間の最大`High`値
+        - `Low`: 各期間の最小`Low`値
+        - `Close`: 各期間の最後の`Close`値
+        - `Volume`: 各期間の`Volume`の合計
+        - `TurnoverValue`: 各期間の`TurnoverValue`の合計
 
         Args:
-            every (str | timedelta | Expr): 切り詰める頻度を指定します。
-                例: "1d" (日次), "1mo" (月次), `timedelta`オブジェクト,
-                または Polars の `Expr` オブジェクト。
+            every (str | timedelta | Expr):
+                切り詰める頻度。"1d" (日次), "1mo" (月次),
+                `timedelta`オブジェクト, または Polars の `Expr` オブジェクト。
 
         Returns:
             Self: 指定された頻度で切り詰められた新しいPricesオブジェクト。
@@ -55,31 +66,23 @@ class Prices(Base):
     def with_adjusted_shares(self, statements: Statements) -> Self:
         """日次の調整済み株式数を計算し、列として追加する。
 
-        決算短信で報告される株式数（例：発行済株式総数）は、四半期ごとなど
-        特定の日付のデータです。一方で、株式分割や併合は日々発生し、株式数を
-        変動させます。
-        このメソッドは、直近の決算で報告された株式数を、日々の調整係数
-        (`AdjustmentFactor`) を用いて補正し、日次ベースの時系列データとして
-        提供します。これにより、日々の時価総額計算などが正確に行えるようになります。
+        決算短信で報告される株式数は四半期ごとのデータだが、株式分割や併合は
+        日々発生する。このメソッドは、直近の決算で報告された株式数を、
+        日々の調整係数 (`AdjustmentFactor`) を用いて補正し、日次ベースの
+        時系列データとして提供する。
 
-        具体的には、`statements`から`IssuedShares`（発行済株式総数）と
-        `TreasuryShares`（自己株式数）を取得し、それぞれを調整します。
-        計算結果は、元の列名との混同を避けるため、接頭辞`Adjusted`を付与した
-        新しい列（`AdjustedIssuedShares`, `AdjustedTreasuryShares`）として
-        追加されます。
+        `statements`から`IssuedShares`と`TreasuryShares`を取得し、
+        `AdjustedIssuedShares`, `AdjustedTreasuryShares`列として追加する。
+
+        Note:
+            計算は、決算発表間の株式数変動が株式分割・併合にのみ起因すると
+            仮定する。期中の増資や自己株式取得などは考慮されない。
 
         Args:
             statements (Statements): 財務データを提供する`Statements`オブジェクト。
 
         Returns:
-            Self: `AdjustedIssuedShares`および`AdjustedTreasuryShares`列が
-            追加された、新しいPricesオブジェクト。
-
-        Note:
-            この計算は、決算発表間の株式数の変動が、株式分割・併合
-            （`AdjustmentFactor`）にのみ起因すると仮定しています。
-            期中に行われる増資や自己株式取得など、`AdjustmentFactor`に
-            反映されないイベントによる株式数の変動は考慮されません。
+            Self: 調整済み株式数列が追加された、新しいPricesオブジェクト。
         """
         if "AdjustedIssuedShares" in self.data.columns:
             return self
@@ -123,15 +126,18 @@ class Prices(Base):
     def _outstanding_shares_expr(self) -> pl.Expr:
         """調整済み発行済株式数を計算する Polars 式を返す。
 
+        Returns:
+            pl.Expr: 調整済み発行済株式数を計算する Polars 式。
+
         Raises:
-            KeyError: 必要な列が存在しない場合は KeyError を送出する。
+            KeyError: 必要な列が存在しない場合に送出される。
         """
         required_cols = {"AdjustedIssuedShares", "AdjustedTreasuryShares"}
 
         if not required_cols.issubset(self.data.columns):
             missing = required_cols - set(self.data.columns)
             msg = f"必要な列が存在しません: {missing}。"
-            msg += "事前に .with_adjusted_shares() を呼び出してください。"
+            msg += "事前に .with_adjusted_shares() を呼び出す必要があります。"
             raise KeyError(msg)
 
         return pl.col("AdjustedIssuedShares") - pl.col("AdjustedTreasuryShares")
@@ -139,9 +145,8 @@ class Prices(Base):
     def with_market_cap(self) -> Self:
         """時価総額を計算し、列として追加する。
 
-        このメソッドは、日々の調整前終値 (`RawClose`) と、調整済みの発行済株式数
-        (`AdjustedIssuedShares`) および自己株式数 (`AdjustedTreasuryShares`)
-        を基に、日次ベースの時価総額を計算します。
+        日々の調整前終値 (`RawClose`) と、調整済みの発行済株式数を基に、
+        日次ベースの時価総額を計算する。
 
         計算式:
             時価総額 = 調整前終値 * (調整済み発行済株式数 - 調整済み自己株式数)
@@ -149,10 +154,10 @@ class Prices(Base):
         Returns:
             Self: `MarketCap` 列が追加された、新しいPricesオブジェクト。
 
-        Note:
-            このメソッドを呼び出す前に、`with_adjusted_shares()` あるいは
-            `with_yields()` を実行して、調整済みの株式数列を事前に計算して
-            おく必要があります。
+        Raises:
+            KeyError:
+                調整済み株式数列が存在しない場合。
+                事前に `with_adjusted_shares()` を呼び出す必要がある。
         """
         data = self.data.with_columns(
             (pl.col("RawClose") * self._outstanding_shares_expr).alias("MarketCap"),
@@ -185,17 +190,18 @@ class Prices(Base):
         """時系列の一株あたり純資産と純資産利回りを列として追加する。
 
         計算式:
-            一株あたり純資産 = 純資産 / (調整済み発行済株式数 - 調整済み自己株式数)
-            純資産利回り = 一株あたり純資産 / 調整前終値
+            BPS = 純資産 / (調整済み発行済株式数 - 調整済み自己株式数)
+            純資産利回り = BPS / 調整前終値
 
         Returns:
             Self: `BookValuePerShare`, `BookValueYield` 列が追加された、
             新しいPricesオブジェクト。
 
-        Note:
-            このメソッドを呼び出す前に、`with_equity()` および
-            `with_adjusted_shares()` を実行して、純資産および調整済み株式数
-            列を事前に計算しておく必要があります。
+        Raises:
+            KeyError:
+                純資産または調整済み株式数列が存在しない場合。
+                事前に `with_equity()` と `with_adjusted_shares()` を
+                呼び出す必要がある。
         """
         data = self.data.with_columns(
             (pl.col("Equity") / self._outstanding_shares_expr).alias(
@@ -231,20 +237,21 @@ class Prices(Base):
         return self.__class__(data)
 
     def with_earnings_yield(self) -> Self:
-        """時系列の一株あたり純利益と収益利回り(純利益利回り)を列として追加する。
+        """時系列の一株あたり純利益と収益利回りを列として追加する。
 
         計算式:
-            一株あたり純利益 = 予想純利益 / (調整済み発行済株式数 - 調整済み自己株式数)
-            収益利回り = 一株あたり純利益 / 調整前終値
+            EPS = 予想純利益 / (調整済み発行済株式数 - 調整済み自己株式数)
+            収益利回り = EPS / 調整前終値
 
         Returns:
             Self: `EarningsPerShare`, `EarningsYield` 列が追加された、
             新しいPricesオブジェクト。
 
-        Note:
-            このメソッドを呼び出す前に、`with_forecast_profit()` および
-            `with_adjusted_shares()` を実行して、予想純利益および調整済み株式数
-            列を事前に計算しておく必要があります。
+        Raises:
+            KeyError:
+                予想純利益または調整済み株式数列が存在しない場合。
+                事前に `with_forecast_profit()` と `with_adjusted_shares()`
+                を呼び出す必要がある。
         """
         data = self.data.with_columns(
             (pl.col("ForecastProfit") / self._outstanding_shares_expr).alias(
@@ -281,18 +288,19 @@ class Prices(Base):
         """時系列の一株あたり配当金と配当利回りを列として追加する。
 
         計算式:
-            一株あたり配当金 = 予想年間配当総額 / (調整済み発行済株式数 - 調整済み自己株式数)
-            配当利回り = 一株あたり配当金 / 調整前終値
+            DPS = 予想年間配当総額 / (調整済み発行済株式数 - 調整済み自己株式数)
+            配当利回り = DPS / 調整前終値
 
         Returns:
             Self: `DividendPerShare`, `DividendYield` 列が追加された、
             新しいPricesオブジェクト。
 
-        Note:
-            このメソッドを呼び出す前に、`with_forecast_dividend()` および
-            `with_adjusted_shares()` を実行して、予想年間配当総額および調整済み株式数
-            列を事前に計算しておく必要があります。
-        """  # noqa: E501
+        Raises:
+            KeyError:
+                予想配当または調整済み株式数列が存在しない場合。
+                事前に `with_forecast_dividend()` と `with_adjusted_shares()`
+                を呼び出す必要がある。
+        """
         data = self.data.with_columns(
             (pl.col("ForecastDividend") / self._outstanding_shares_expr).alias(
                 "DividendPerShare",
@@ -306,27 +314,20 @@ class Prices(Base):
     def with_yields(self, statements: Statements) -> Self:
         """すべての利回り関連指標を計算し、列として追加する。
 
-        このメソッドは、以下の利回り関連指標をまとめて計算し、DataFrameに
-        追加するコンビニエンスメソッドです。
+        以下の利回り関連指標をまとめて計算するコンビニエンスメソッドである。
+        - 純資産利回り (`BookValueYield`)
+        - 収益利回り (`EarningsYield`)
+        - 配当利回り (`DividendYield`)
 
-        *   純資産利回り (`BookValueYield`)
-        *   収益利回り (`EarningsYield`)
-        *   配当利回り (`DividendYield`)
-
-        内部で `with_adjusted_shares()`, `with_equity()`,
-        `with_book_value_yield()`, `with_forecast_profit()`,
-        `with_earnings_yield()`, `with_forecast_dividend()`,
-        `with_dividend_yield()` を呼び出します。
+        内部で `with_adjusted_shares()` や `with_equity()` などを呼び出す。
         これらのメソッドはべき等であるため、重複して呼び出されても
-        無駄な計算は行われません。
+        無駄な計算は行われない。
 
         Args:
             statements (Statements): 財務データを提供する`Statements`オブジェクト。
 
         Returns:
-            Self: `BookValuePerShare`, `BookValueYield`, `EarningsPerShare`,
-            `EarningsYield`, `DividendPerShare`, `DividendYield` 列が追加された、
-            新しいPricesオブジェクト。
+            Self: 各種利回り指標の列が追加された、新しいPricesオブジェクト。
         """
         return (
             self.with_adjusted_shares(statements)
@@ -339,33 +340,24 @@ class Prices(Base):
         )
 
     def period_stats(self) -> DataFrame:
-        """各期ごとの各種利回りおよび調整済み終値の統計量を計算し、DataFrameを返す。
+        """各期ごとの各種利回りおよび調整済み終値の統計量を計算する。
 
-        このメソッドは、`Code`と`ReportDate`で定義される各期（決算期間）ごとに、
-        以下の指標の統計量（始値、高値、安値、終値、平均値）を計算し、新しいDataFrameを
-        返します。
+        `Code`と`ReportDate`で定義される各期（決算期間）ごとに、
+        各種指標の統計量（始値, 高値, 安値, 終値, 平均値）を計算する。
 
         対象指標:
-        *   `BookValueYield` (純資産利回り)
-        *   `EarningsYield` (収益利回り)
-        *   `DividendYield` (配当利回り)
-        *   `Close` (調整済み終値)
-
-        統計量の種類:
-        *   `_PeriodOpen`: 各期の最初の値
-        *   `_PeriodHigh`: 各期の最大値
-        *   `_PeriodLow`: 各期の最小値
-        *   `_PeriodClose`: 各期の最後の値
-        *   `_PeriodMean`: 各期の平均値
-
-        Note:
-            このメソッドを呼び出す前に、対象となる利回りカラムと`Close`、
-            そして`ReportDate`が`self.data`に存在している必要があります。
-            通常、`with_yields()` メソッドを呼び出すことで、これらの前提条件が
-            満たされます。
+        - `BookValueYield` (純資産利回り)
+        - `EarningsYield` (収益利回り)
+        - `DividendYield` (配当利回り)
+        - `Close` (調整済み終値)
 
         Returns:
-            DataFrame: 統計量カラムが追加された、新しいDataFrameオブジェクト。
+            DataFrame: 各期ごとの統計量を持つ新しいDataFrameオブジェクト。
+
+        Raises:
+            KeyError:
+                計算に必要な列が存在しない場合。
+                事前に `with_yields()` を呼び出す必要がある。
         """
         # 必要なカラムが存在するかチェック
         required_cols = {
@@ -401,32 +393,18 @@ class Prices(Base):
         return self.data.group_by("Code", "ReportDate", maintain_order=True).agg(aggs)
 
     def with_period_stats(self) -> Self:
-        """各期ごとの各種利回りおよび調整済み終値の統計量を計算し、列として追加する。
+        """各期ごとの各種利回りおよび調整済み終値の統計量を列として追加する。
 
-        このメソッドは、`Code`と`ReportDate`で定義される各期（決算期間）ごとに、
-        以下の指標の統計量（始値、高値、安値、終値、平均値）を計算し、新しい列として追加します。
-
-        対象指標:
-        *   `BookValueYield` (純資産利回り)
-        *   `EarningsYield` (収益利回り)
-        *   `DividendYield` (配当利回り)
-        *   `Close` (調整済み終値)
-
-        統計量の種類:
-        *   `_PeriodOpen`: 各期の最初の値
-        *   `_PeriodHigh`: 各期の最大値
-        *   `_PeriodLow`: 各期の最小値
-        *   `_PeriodClose`: 各期の最後の値
-        *   `_PeriodMean`: 各期の平均値
-
-        Note:
-            このメソッドを呼び出す前に、対象となる利回りカラムと`Close`、
-            そして`ReportDate`が`self.data`に存在している必要があります。
-            通常、`with_yields()` メソッドを呼び出すことで、これらの前提条件が
-            満たされます。
+        `period_stats()` メソッドで計算された各期の統計量を、元のDataFrameの
+        各行に対応させて追加する。
 
         Returns:
-            Self: 統計量カラムが追加された、新しいPricesオブジェクト。
+            Self: 各期の統計量カラムが追加された、新しいPricesオブジェクト。
+
+        Raises:
+            KeyError:
+                計算に必要な列が存在しない場合。
+                事前に `with_yields()` を呼び出す必要がある。
         """
         stats = self.period_stats()
         data = self.data.join(stats, on=["Code", "ReportDate"], how="left")

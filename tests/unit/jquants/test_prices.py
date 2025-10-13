@@ -47,7 +47,7 @@ async def test_empty(mock_get: AsyncMock, mocker: MockerFixture) -> None:
 
 @pytest.mark.asyncio
 async def test_error(client: JQuantsClient) -> None:
-    with pytest.raises(ValueError, match="dateとfrom/toの"):
+    with pytest.raises(ValueError, match="dateとfrom/to"):
         await client.get_prices(code="7203", date="2025-08-18", to="2025-08-16")
 
 
