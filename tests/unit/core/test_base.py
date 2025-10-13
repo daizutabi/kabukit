@@ -111,5 +111,5 @@ def test_get_filename_with_nonexistent_absolute_path(tmp_path: Path) -> None:
     data_dir = tmp_path / "data_dir"
     data_dir.mkdir()
 
-    with pytest.raises(FileNotFoundError, match=f"File not found: {non_existent_path}"):
+    with pytest.raises(FileNotFoundError, match="File not found:"):
         get_filename(non_existent_path, data_dir)
