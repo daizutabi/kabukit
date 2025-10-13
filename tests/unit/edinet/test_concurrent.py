@@ -64,7 +64,7 @@ def mock_get_dates(mocker: MockerFixture) -> MagicMock:
 
 
 @pytest.mark.asyncio
-async def test_get_entries(
+async def test_get_entries_days(
     mocker: MockerFixture,
     mock_get_dates: MagicMock,
 ) -> None:
@@ -106,6 +106,39 @@ async def test_get_entries(
 
 
 @pytest.mark.asyncio
+async def test_get_entries_years(
+    mocker: MockerFixture,
+    mock_get_dates: MagicMock,
+) -> None:
+    from kabukit.edinet.concurrent import get_entries
+
+    mock_get_dates.return_value = [
+        datetime.date(2023, 1, 1),
+        datetime.date(2022, 1, 1),
+    ]
+    mock_get = mocker.patch(
+        "kabukit.edinet.concurrent.get",
+        new_callable=mocker.AsyncMock,
+    )
+    mock_get.return_value = DataFrame({"Date": [1], "Code": ["10000"]})
+
+    await get_entries(years=2)
+
+    mock_get_dates.assert_called_once_with(days=None, years=2)
+    mock_get.assert_awaited_once_with(
+        "entries",
+        [
+            datetime.date(2023, 1, 1),
+            datetime.date(2022, 1, 1),
+        ],
+        limit=None,
+        max_concurrency=None,
+        progress=None,
+        callback=None,
+    )
+
+
+@pytest.mark.asyncio
 async def test_get_entries_single_date(
     mocker: MockerFixture,
     mock_get_dates: MagicMock,
@@ -134,7 +167,7 @@ async def test_get_entries_single_date(
 
 
 @pytest.mark.asyncio
-async def test_documents(mocker: MockerFixture) -> None:
+async def test_get_documents_csv(mocker: MockerFixture) -> None:
     from kabukit.edinet.concurrent import get_documents
 
     mock_get = mocker.patch(
@@ -159,6 +192,28 @@ async def test_documents(mocker: MockerFixture) -> None:
         max_concurrency=5,
         progress=dummy_progress,
         callback=dummy_callback,
+    )
+
+
+@pytest.mark.asyncio
+async def test_get_documents_pdf(mocker: MockerFixture) -> None:
+    from kabukit.edinet.concurrent import get_documents
+
+    mock_get = mocker.patch(
+        "kabukit.edinet.concurrent.get",
+        new_callable=mocker.AsyncMock,
+    )
+    mock_get.return_value = DataFrame({"docID": [1]})
+
+    await get_documents(["doc1", "doc2"], pdf=True)
+
+    mock_get.assert_awaited_once_with(
+        "pdf",
+        ["doc1", "doc2"],
+        limit=None,
+        max_concurrency=None,
+        progress=None,
+        callback=None,
     )
 
 
