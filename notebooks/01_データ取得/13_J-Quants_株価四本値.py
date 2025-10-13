@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.16.2"
+__generated_with = "0.16.5"
 app = marimo.App(width="medium")
 
 
@@ -20,8 +20,8 @@ def _(mo):
 def _():
     import marimo as mo
     from kabukit import JQuantsClient
-    from kabukit.jquants import fetch_all, rename
-    return JQuantsClient, fetch_all, mo, rename
+    from kabukit.jquants import get_prices, rename
+    return JQuantsClient, get_prices, mo, rename
 
 
 @app.cell
@@ -40,9 +40,9 @@ def _(mo):
 
 
 @app.cell
-async def _(button, fetch_all, mo):
+async def _(button, get_prices, mo):
     if button.value:
-        await fetch_all("prices", limit=30, max_concurrency=8, progress=mo.status.progress_bar)
+        await get_prices(limit=30, progress=mo.status.progress_bar)
     return
 
 

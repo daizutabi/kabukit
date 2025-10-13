@@ -15,16 +15,72 @@ def callback(df: DataFrame) -> None:
 
 
 @pytest.mark.asyncio
-async def test_fetch(resource: str) -> None:
-    from kabukit.jquants.concurrent import fetch
+async def test_get(resource: str) -> None:
+    from kabukit.jquants.concurrent import get
 
-    df = await fetch(resource, ["7203", "6758"], progress=mo.status.progress_bar)
+    df = await get(resource, ["7203", "6758"], progress=mo.status.progress_bar)
     assert sorted(df["Code"].unique()) == ["67580", "72030"]
 
 
 @pytest.mark.asyncio
-async def test_fetch_all(resource: str) -> None:
-    from kabukit.jquants.concurrent import fetch_all
+async def test_get_with_single_code(resource: str) -> None:
+    from kabukit.jquants.concurrent import get
 
-    df = await fetch_all(resource, limit=3, callback=callback)
+    df = await get(resource, "7203")
+    assert df["Code"].unique().to_list() == ["72030"]
+
+
+@pytest.mark.asyncio
+async def test_get_without_codes(resource: str) -> None:
+    from kabukit.jquants.concurrent import get
+
+    df = await get(resource, limit=3, callback=callback)
+    assert df["Code"].n_unique() == 3
+
+
+@pytest.mark.asyncio
+async def test_get_statements() -> None:
+    from kabukit.jquants.concurrent import get_statements
+
+    df = await get_statements(["7203", "6758"])
+    assert sorted(df["Code"].unique()) == ["67580", "72030"]
+
+
+@pytest.mark.asyncio
+async def test_get_statements_with_limit() -> None:
+    from kabukit.jquants.concurrent import get_statements
+
+    df = await get_statements(["7203", "6758"], limit=1)
+    assert df["Code"].unique().to_list() == ["72030"]
+
+
+@pytest.mark.asyncio
+async def test_get_statements_without_codes() -> None:
+    from kabukit.jquants.concurrent import get_statements
+
+    df = await get_statements(limit=3)
+    assert df["Code"].n_unique() == 3
+
+
+@pytest.mark.asyncio
+async def test_get_prices() -> None:
+    from kabukit.jquants.concurrent import get_prices
+
+    df = await get_prices(["7203", "6758"])
+    assert sorted(df["Code"].unique()) == ["67580", "72030"]
+
+
+@pytest.mark.asyncio
+async def test_get_prices_with_limit() -> None:
+    from kabukit.jquants.concurrent import get_prices
+
+    df = await get_prices(["7203", "6758"], limit=1)
+    assert df["Code"].unique().to_list() == ["72030"]
+
+
+@pytest.mark.asyncio
+async def test_get_prices_without_codes() -> None:
+    from kabukit.jquants.concurrent import get_prices
+
+    df = await get_prices(limit=3)
     assert df["Code"].n_unique() == 3

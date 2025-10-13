@@ -52,7 +52,7 @@ def test_get_info_all_codes(
 
 
 def test_get_statements_all_codes(
-    mock_fetch_all: AsyncMock,
+    mock_get: AsyncMock,
     MockStatements: MagicMock,  # noqa: N803
     mock_statements: MagicMock,
 ) -> None:
@@ -60,14 +60,14 @@ def test_get_statements_all_codes(
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
-    mock_fetch_all.assert_awaited_once_with("statements", progress=tqdm.asyncio.tqdm)
+    mock_get.assert_awaited_once_with("statements", progress=tqdm.asyncio.tqdm)
     MockStatements.assert_called_once_with(MOCK_DF)
     mock_statements.write.assert_called_once()
     assert f"全銘柄の財務情報を '{MOCK_PATH}' に保存しました。" in result.stdout
 
 
 def test_get_prices_all_codes(
-    mock_fetch_all: AsyncMock,
+    mock_get: AsyncMock,
     MockPrices: MagicMock,  # noqa: N803
     mock_prices: MagicMock,
 ) -> None:
@@ -75,7 +75,7 @@ def test_get_prices_all_codes(
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
-    mock_fetch_all.assert_awaited_once_with(
+    mock_get.assert_awaited_once_with(
         "prices",
         max_concurrency=8,
         progress=tqdm.asyncio.tqdm,
@@ -86,7 +86,7 @@ def test_get_prices_all_codes(
 
 
 def test_get_documents(
-    mock_fetch_documents: AsyncMock,
+    mock_get_documents: AsyncMock,
     MockDocuments: MagicMock,  # noqa: N803
     mock_documents: MagicMock,
 ) -> None:
@@ -94,7 +94,7 @@ def test_get_documents(
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
-    mock_fetch_documents.assert_awaited_once_with(years=10, progress=tqdm.asyncio.tqdm)
+    mock_get_documents.assert_awaited_once_with(years=10, progress=tqdm.asyncio.tqdm)
     MockDocuments.assert_called_once_with(MOCK_DF)
     mock_documents.write.assert_called_once()
     assert f"書類一覧を '{MOCK_PATH}' に保存しました。" in result.stdout
@@ -152,21 +152,21 @@ def test_get_all_all_codes(
     mock_cli_documents.assert_awaited_once_with(quiet=bool(quiet))
 
 
-def test_get_statements_interrupt(mock_fetch_all: AsyncMock) -> None:
-    mock_fetch_all.side_effect = KeyboardInterrupt
+def test_get_statements_interrupt(mock_get: AsyncMock) -> None:
+    mock_get.side_effect = KeyboardInterrupt
 
     result = runner.invoke(app, ["get", "statements"])
 
     assert result.exit_code == 1
     assert "中断しました" in result.stdout
-    mock_fetch_all.assert_awaited_once_with("statements", progress=tqdm.asyncio.tqdm)
+    mock_get.assert_awaited_once_with("statements", progress=tqdm.asyncio.tqdm)
 
 
-def test_get_documents_interrupt(mock_fetch_documents: AsyncMock) -> None:
-    mock_fetch_documents.side_effect = KeyboardInterrupt
+def test_get_documents_interrupt(mock_get_documents: AsyncMock) -> None:
+    mock_get_documents.side_effect = KeyboardInterrupt
 
     result = runner.invoke(app, ["get", "documents"])
 
     assert result.exit_code == 1
     assert "中断しました" in result.stdout
-    mock_fetch_documents.assert_awaited_once_with(years=10, progress=tqdm.asyncio.tqdm)
+    mock_get_documents.assert_awaited_once_with(years=10, progress=tqdm.asyncio.tqdm)

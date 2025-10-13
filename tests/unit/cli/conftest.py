@@ -45,9 +45,9 @@ def mock_get_prices(mock_jquants_client: MagicMock, mocker: MockerFixture) -> As
 
 
 @pytest.fixture
-def mock_fetch_all(mocker: MockerFixture) -> AsyncMock:
+def mock_get(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.jquants.concurrent.fetch_all",
+        "kabukit.jquants.concurrent.get",
         new_callable=mocker.AsyncMock,
         return_value=MOCK_DF,
     )
@@ -90,18 +90,18 @@ def mock_prices(MockPrices: MagicMock) -> MagicMock:  # noqa: N803
 
 
 @pytest.fixture
-def mock_fetch_documents(mocker: MockerFixture) -> AsyncMock:
+def mock_get_documents(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.edinet.concurrent.fetch_documents",
+        "kabukit.edinet.concurrent.get_documents",
         new_callable=mocker.AsyncMock,
         return_value=MOCK_DF,
     )
 
 
 @pytest.fixture
-def mock_fetch_csv(mocker: MockerFixture) -> AsyncMock:
+def mock_get_csv(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.edinet.concurrent.fetch_csv",
+        "kabukit.edinet.concurrent.get_csv",
         new_callable=mocker.AsyncMock,
         return_value=MOCK_DF,
     )

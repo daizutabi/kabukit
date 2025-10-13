@@ -7,14 +7,14 @@ from polars import col as c
 
 from kabukit.core.prices import Prices
 from kabukit.core.statements import Statements
-from kabukit.jquants.concurrent import fetch
+from kabukit.jquants.concurrent import get
 from tests.validation.conftest import pytestmark  # noqa: F401
 
 
 @pytest_asyncio.fixture(scope="module")
 async def data(statements: Statements) -> DataFrame:
     codes = ["7203"]  # トヨタのみ
-    data = await fetch("prices", codes)
+    data = await get("prices", codes)
     return Prices(data).with_yields(statements).period_stats()
 
 

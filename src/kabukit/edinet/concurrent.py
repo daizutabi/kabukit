@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from kabukit.utils.concurrent import Callback, Progress
 
 
-async def fetch(
+async def get(
     resource: str,
     args: Iterable[str | datetime.date],
     /,
@@ -42,7 +42,7 @@ async def fetch(
         DataFrame:
             すべての銘柄の財務情報を含む単一のDataFrame。
     """
-    return await concurrent.fetch(
+    return await concurrent.get(
         EdinetClient,
         resource,
         args,
@@ -52,7 +52,7 @@ async def fetch(
     )
 
 
-async def fetch_documents(
+async def get_documents(
     days: int | None = None,
     years: int | None = None,
     limit: int | None = None,
@@ -83,7 +83,7 @@ async def fetch_documents(
     if limit is not None:
         dates = dates[:limit]
 
-    df = await fetch(
+    df = await get(
         "documents",
         dates,
         max_concurrency=max_concurrency,
@@ -93,7 +93,7 @@ async def fetch_documents(
     return df.sort("Date", "Code")
 
 
-async def fetch_csv(
+async def get_csv(
     doc_ids: Iterable[str],
     /,
     limit: int | None = None,
@@ -122,7 +122,7 @@ async def fetch_csv(
     if limit is not None:
         doc_ids = doc_ids[:limit]
 
-    df = await fetch(
+    df = await get(
         "csv",
         doc_ids,
         max_concurrency=max_concurrency,

@@ -11,6 +11,21 @@ def clean(df: DataFrame) -> DataFrame:
     ).drop("^.+Code$", "CompanyNameEnglish")
 
 
+async def get_info() -> DataFrame:
+    """上場銘柄一覧銘を取得する。
+
+    Returns:
+        銘柄情報を含むDataFrame。
+
+    Raises:
+        HTTPStatusError: APIリクエストが失敗した場合。
+    """
+    from .client import JQuantsClient
+
+    async with JQuantsClient() as client:
+        return await client.get_info()
+
+
 async def get_target_codes() -> list[str]:
     """分析対象となる銘柄コードのリストを返す。
 
@@ -20,10 +35,7 @@ async def get_target_codes() -> list[str]:
     - 業種: その他 -- (投資信託など)
     - 優先株式
     """
-    from .client import JQuantsClient
-
-    async with JQuantsClient() as client:
-        info = await client.get_info()
+    info = await get_info()
 
     return (
         info.filter(

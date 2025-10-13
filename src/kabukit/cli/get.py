@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 app = AsyncTyper(
     add_completion=False,
-    help="J-Quantsからデータを取得します。",
+    help="J-QuantsまたはEDINETからデータを取得します。",
 )
 
 Code = Annotated[
@@ -44,11 +44,11 @@ async def info(code: Code = None, *, quiet: Quiet = False) -> None:
         typer.echo(f"全銘柄の情報を '{path}' に保存しました。")
 
 
-async def _fetch(
+async def _get(
     code: str | None,
     target: str,
     cls: type[Base],
-    fetch_func_name: str,
+    method: str,
     message: str,
     *,
     quiet: bool = False,
@@ -59,18 +59,18 @@ async def _fetch(
 
     if code is not None:
         async with JQuantsClient() as client:
-            df = await getattr(client, fetch_func_name)(code)
+            df = await getattr(client, method)(code)
         typer.echo(df)
         return
 
     import tqdm.asyncio
 
-    from kabukit.jquants.concurrent import fetch_all
+    from kabukit.jquants.concurrent import get
 
     progress = None if quiet else tqdm.asyncio.tqdm
 
     try:
-        df = await fetch_all(target, progress=progress, **kwargs)
+        df = await get(target, progress=progress, **kwargs)
     except KeyboardInterrupt:
         typer.echo("中断しました。")
         raise typer.Exit(1) from None
@@ -87,11 +87,11 @@ async def statements(code: Code = None, *, quiet: Quiet = False) -> None:
     """財務情報を取得します。"""
     from kabukit.core.statements import Statements
 
-    await _fetch(
+    await _get(
         code=code,
         target="statements",
         cls=Statements,
-        fetch_func_name="get_statements",
+        method="get_statements",
         message="財務情報",
         quiet=quiet,
     )
@@ -102,11 +102,11 @@ async def prices(code: Code = None, *, quiet: Quiet = False) -> None:
     """株価情報を取得します。"""
     from kabukit.core.prices import Prices
 
-    await _fetch(
+    await _get(
         code=code,
         target="prices",
         cls=Prices,
-        fetch_func_name="get_prices",
+        method="get_prices",
         message="株価情報",
         quiet=quiet,
         max_concurrency=8,
@@ -119,12 +119,12 @@ async def documents(*, quiet: Quiet = False) -> None:
     import tqdm.asyncio
 
     from kabukit.core.documents import Documents
-    from kabukit.edinet.concurrent import fetch_documents
+    from kabukit.edinet.concurrent import get_documents
 
     progress = None if quiet else tqdm.asyncio.tqdm
 
     try:
-        df = await fetch_documents(years=10, progress=progress)
+        df = await get_documents(years=10, progress=progress)
     except (KeyboardInterrupt, RuntimeError):
         typer.echo("中断しました。")
         raise typer.Exit(1) from None

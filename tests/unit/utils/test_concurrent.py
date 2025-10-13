@@ -89,10 +89,10 @@ async def test_stream() -> None:
 
 
 @pytest.mark.asyncio
-async def test_fetch() -> None:
-    from kabukit.utils.concurrent import fetch
+async def test_get() -> None:
+    from kabukit.utils.concurrent import get
 
-    df = await fetch(MockClient, "data", [1, 2, 3], max_concurrency=2)
+    df = await get(MockClient, "data", [1, 2, 3], max_concurrency=2)
     assert df["Code"].sort().to_list() == [1, 2, 3]
 
 
@@ -105,10 +105,10 @@ async def progress(
 
 
 @pytest.mark.asyncio
-async def test_fetch_progress() -> None:
-    from kabukit.utils.concurrent import fetch
+async def test_get_progress() -> None:
+    from kabukit.utils.concurrent import get
 
-    df = await fetch(MockClient, "data", [1, 2, 3], progress=progress)
+    df = await get(MockClient, "data", [1, 2, 3], progress=progress)
     assert df["Code"].sort().to_list() == [3, 6, 9]
 
 
@@ -117,8 +117,16 @@ def callback(df: DataFrame) -> DataFrame:
 
 
 @pytest.mark.asyncio
-async def test_fetch_callback() -> None:
-    from kabukit.utils.concurrent import fetch
+async def test_get_callback() -> None:
+    from kabukit.utils.concurrent import get
 
-    df = await fetch(MockClient, "data", [1, 2, 3], callback=callback)
+    df = await get(MockClient, "data", [1, 2, 3], callback=callback)
     assert df["Code"].sort().to_list() == [10, 20, 30]
+
+
+@pytest.mark.asyncio
+async def test_get_with_limit() -> None:
+    from kabukit.utils.concurrent import get
+
+    df = await get(MockClient, "data", range(10), limit=3, max_concurrency=2)
+    assert df["Code"].sort().to_list() == [0, 1, 2]
