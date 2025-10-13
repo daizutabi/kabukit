@@ -29,8 +29,8 @@ def _():
 @app.cell
 def _(Prices, Statements, pl):
     # データを読み込み、最新日付の時価総額を計算
-    prices_raw = Prices.read()
-    statements = Statements.read()
+    prices_raw = Prices()
+    statements = Statements()
 
     latest_market_cap_df = (
         prices_raw.with_adjusted_shares(statements)

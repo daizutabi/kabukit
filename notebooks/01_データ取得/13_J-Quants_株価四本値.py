@@ -20,15 +20,15 @@ def _(mo):
 def _():
     import marimo as mo
     from kabukit import JQuantsClient
-    from kabukit.jquants import get_prices, rename
-    return JQuantsClient, get_prices, mo, rename
+    from kabukit import get_prices
+    return JQuantsClient, get_prices, mo
 
 
 @app.cell
-async def _(JQuantsClient, rename):
+async def _(JQuantsClient):
     async with JQuantsClient() as client:
         df = await client.get_prices("3671")
-    rename(df)
+    df
     return
 
 
@@ -43,11 +43,6 @@ def _(mo):
 async def _(button, get_prices, mo):
     if button.value:
         await get_prices(limit=30, progress=mo.status.progress_bar)
-    return
-
-
-@app.cell
-def _():
     return
 
 

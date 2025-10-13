@@ -22,15 +22,15 @@ def _(mo):
 def _():
     import marimo as mo
     from kabukit import JQuantsClient
-    from kabukit.jquants import get_statements, rename
-    return JQuantsClient, get_statements, mo, rename
+    from kabukit import get_statements
+    return JQuantsClient, get_statements, mo
 
 
 @app.cell
-async def _(JQuantsClient, rename):
+async def _(JQuantsClient):
     async with JQuantsClient() as client:
         df = await client.get_statements("1301")
-    rename(df)
+    df
     return
 
 

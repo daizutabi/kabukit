@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.asyncio
-async def test_get(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_topix(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"topix": [{"Date": "2025-01-01", "Open": 100}]}
     response = Response(200, json=json)
     mock_get.return_value = response

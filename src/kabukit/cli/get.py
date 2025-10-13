@@ -12,6 +12,18 @@ if TYPE_CHECKING:
 # pyright: reportMissingTypeStubs=false
 # pyright: reportUnknownMemberType=false
 
+
+def set_table() -> None:
+    import polars as pl
+
+    pl.Config.set_tbl_rows(5)
+    pl.Config.set_tbl_cols(6)
+    pl.Config.set_tbl_hide_dtype_separator()
+
+
+set_table()
+
+
 app = AsyncTyper(
     add_completion=False,
     help="J-QuantsまたはEDINETからデータを取得します。",
@@ -20,6 +32,10 @@ app = AsyncTyper(
 Code = Annotated[
     str | None,
     Argument(help="銘柄コード。指定しない場合は全銘柄の情報を取得します。"),
+]
+Date = Annotated[
+    str | None,
+    Argument(help="取得する日付。指定しない場合は全期間の情報を取得します。"),
 ]
 Quiet = Annotated[
     bool,
@@ -114,17 +130,17 @@ async def prices(code: Code = None, *, quiet: Quiet = False) -> None:
 
 
 @app.async_command()
-async def entries(*, quiet: Quiet = False) -> None:
+async def entries(date: Date = None, *, quiet: Quiet = False) -> None:
     """書類一覧を取得します。"""
     import tqdm.asyncio
 
     from kabukit.core.entries import Entries
     from kabukit.edinet.concurrent import get_entries
 
-    progress = None if quiet else tqdm.asyncio.tqdm
+    progress = None if date or quiet else tqdm.asyncio.tqdm
 
     try:
-        df = await get_entries(years=10, progress=progress)
+        df = await get_entries(date, years=10, progress=progress)
     except (KeyboardInterrupt, RuntimeError):
         typer.echo("中断しました。")
         raise typer.Exit(1) from None
@@ -132,8 +148,9 @@ async def entries(*, quiet: Quiet = False) -> None:
     if not quiet:
         typer.echo(df)
 
-    path = Entries(df).write()
-    typer.echo(f"書類一覧を '{path}' に保存しました。")
+    if not date:
+        path = Entries(df).write()
+        typer.echo(f"書類一覧を '{path}' に保存しました。")
 
 
 @app.async_command(name="all")

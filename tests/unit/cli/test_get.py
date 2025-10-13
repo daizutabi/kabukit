@@ -94,10 +94,31 @@ def test_get_entries(
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
-    mock_get_entries.assert_awaited_once_with(years=10, progress=tqdm.asyncio.tqdm)
+    mock_get_entries.assert_awaited_once_with(
+        None,
+        years=10,
+        progress=tqdm.asyncio.tqdm,
+    )
     MockEntries.assert_called_once_with(MOCK_DF)
     mock_entries.write.assert_called_once()
     assert f"書類一覧を '{MOCK_PATH}' に保存しました。" in result.stdout
+
+
+def test_get_entries_with_date(
+    mock_get_entries: AsyncMock,
+    MockEntries: MagicMock,  # noqa: N803
+) -> None:
+    MOCK_DATE = "2023-01-01"  # noqa: N806
+    result = runner.invoke(app, ["get", "entries", MOCK_DATE])
+
+    assert result.exit_code == 0
+    assert str(MOCK_DF) in result.stdout
+    mock_get_entries.assert_awaited_once_with(
+        MOCK_DATE,
+        years=10,
+        progress=None,
+    )
+    MockEntries.assert_not_called()
 
 
 @pytest.fixture
@@ -169,4 +190,8 @@ def test_get_entries_interrupt(mock_get_entries: AsyncMock) -> None:
 
     assert result.exit_code == 1
     assert "中断しました" in result.stdout
-    mock_get_entries.assert_awaited_once_with(years=10, progress=tqdm.asyncio.tqdm)
+    mock_get_entries.assert_awaited_once_with(
+        None,
+        years=10,
+        progress=tqdm.asyncio.tqdm,
+    )

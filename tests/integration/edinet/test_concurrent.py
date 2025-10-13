@@ -32,7 +32,7 @@ async def test_get_entries_dates() -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_entries_sigle_date() -> None:
+async def test_get_entries_single_date() -> None:
     from kabukit.edinet.concurrent import get_entries
 
     df = await get_entries("2025-10-09")

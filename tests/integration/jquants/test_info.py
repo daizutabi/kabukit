@@ -73,7 +73,7 @@ def test_today(df: DataFrame) -> None:
         ("MarketCodeName", 5),
     ],
 )
-def test_sector17(df: DataFrame, name: str, n: int) -> None:
+def test_categorical_column_uniqueness(df: DataFrame, name: str, n: int) -> None:
     assert df[name].n_unique() == n
 
 

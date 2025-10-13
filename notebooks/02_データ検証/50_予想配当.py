@@ -28,8 +28,8 @@ def _():
 
 @app.cell
 def _(Prices, Statements):
-    statements = Statements.read()
-    prices = Prices.read()
+    statements = Statements()
+    prices = Prices()
     return prices, statements
 
 

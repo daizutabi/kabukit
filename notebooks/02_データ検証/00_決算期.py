@@ -28,13 +28,13 @@ def _():
 
 @app.cell
 def _(Statements):
-    Statements.read().data
+    Statements().data
     return
 
 
 @app.cell
 def _(Statements, c, pl):
-    Statements.read().data.filter(
+    Statements().data.filter(
         ~c.TypeOfDocument.str.contains("Financial")
         | (c.TypeOfDocument.str.slice(0, 2) == c.TypeOfCurrentPeriod),
         c.TypeOfCurrentPeriod.is_in(["1Q", "2Q", "3Q", "FY"]),

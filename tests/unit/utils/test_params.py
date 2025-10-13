@@ -11,7 +11,7 @@ def test_iter_items() -> None:
     assert from_ == ("from", "2023-01-01")
 
 
-def test_get_items() -> None:
+def test_get_params() -> None:
     from kabukit.utils.params import get_params
 
     params = get_params(a=1, b=None, c="c", d=b"d", from_=date(2023, 1, 1))
