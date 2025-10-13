@@ -105,3 +105,56 @@ async def test_get_without_codes(
         progress=dummy_progress,
         callback=dummy_callback,
     )
+
+
+@pytest.mark.asyncio
+async def test_get_statements(mocker: MockerFixture) -> None:
+    from kabukit.jquants.concurrent import get_statements
+
+    mock_get = mocker.patch(
+        "kabukit.jquants.concurrent.get",
+        new_callable=mocker.AsyncMock,
+    )
+
+    await get_statements(
+        ["1111", "2222"],
+        limit=10,
+        progress=dummy_progress,  # pyright: ignore[reportArgumentType]
+        callback=dummy_callback,
+    )
+
+    mock_get.assert_awaited_once_with(
+        "statements",
+        ["1111", "2222"],
+        limit=10,
+        max_concurrency=12,  # get_statements のデフォルト値
+        progress=dummy_progress,
+        callback=dummy_callback,
+    )
+
+
+@pytest.mark.asyncio
+async def test_get_prices(mocker: MockerFixture) -> None:
+    from kabukit.jquants.concurrent import get_prices
+
+    mock_get = mocker.patch(
+        "kabukit.jquants.concurrent.get",
+        new_callable=mocker.AsyncMock,
+    )
+
+    await get_prices(
+        ["3333", "4444"],
+        limit=5,
+        max_concurrency=20,  # デフォルト(8)を上書き
+        progress=dummy_progress,  # pyright: ignore[reportArgumentType]
+        callback=dummy_callback,
+    )
+
+    mock_get.assert_awaited_once_with(
+        "prices",
+        ["3333", "4444"],
+        limit=5,
+        max_concurrency=20,  # 上書きされた値
+        progress=dummy_progress,
+        callback=dummy_callback,
+    )
