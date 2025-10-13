@@ -203,6 +203,52 @@ class JQuantsClient(Client):
         df = DataFrame(data["info"])
         return info.clean(df) if clean else df
 
+    async def get_statements(
+        self,
+        code: str | None = None,
+        date: str | datetime.date | None = None,
+        *,
+        clean: bool = True,
+        with_date: bool = True,
+    ) -> DataFrame:
+        """四半期毎の決算短信サマリーおよび業績・配当の修正に関する開示情報を取得する。
+
+        Args:
+            code (str, optional): 財務情報を取得する銘柄のコード。
+            date (str | datetime.date, optional): 財務情報を取得する日付。
+            clean (bool, optional): 取得したデータをクリーンアップするかどうか。
+            with_date (bool, optional): クリーンアップ後に営業日ベースで開示日の翌日を
+                計算して`Date`列を追加するかどうか。
+
+        Returns:
+            財務情報を含むDataFrame。
+
+        Raises:
+            ValueError: `code`と`date`が両方とも指定されない場合。
+            HTTPStatusError: APIリクエストが失敗した場合。
+        """
+        if not code and not date:
+            msg = "codeまたはdateのどちらかを指定する必要があります。"
+            raise ValueError(msg)
+
+        params = get_params(code=code, date=date)
+        url = "/fins/statements"
+        name = "statements"
+
+        dfs = [df async for df in self.iter_pages(url, params, name)]
+        df = pl.concat(dfs)
+
+        if df.is_empty() or not clean:
+            return df
+
+        df = statements.clean(df)
+
+        if not with_date:
+            return df
+
+        holidays = await _calendar_cache_manager.get_holidays(self)
+        return statements.with_date(df, holidays=holidays)
+
     async def get_prices(
         self,
         code: str | None = None,
@@ -270,52 +316,6 @@ class JQuantsClient(Client):
                 return df
 
         return DataFrame()
-
-    async def get_statements(
-        self,
-        code: str | None = None,
-        date: str | datetime.date | None = None,
-        *,
-        clean: bool = True,
-        with_date: bool = True,
-    ) -> DataFrame:
-        """四半期毎の決算短信サマリーおよび業績・配当の修正に関する開示情報を取得する。
-
-        Args:
-            code (str, optional): 財務情報を取得する銘柄のコード。
-            date (str | datetime.date, optional): 財務情報を取得する日付。
-            clean (bool, optional): 取得したデータをクリーンアップするかどうか。
-            with_date (bool, optional): クリーンアップ後に営業日ベースで開示日の翌日を
-                計算して`Date`列を追加するかどうか。
-
-        Returns:
-            財務情報を含むDataFrame。
-
-        Raises:
-            ValueError: `code`と`date`が両方とも指定されない場合。
-            HTTPStatusError: APIリクエストが失敗した場合。
-        """
-        if not code and not date:
-            msg = "codeまたはdateのどちらかを指定する必要があります。"
-            raise ValueError(msg)
-
-        params = get_params(code=code, date=date)
-        url = "/fins/statements"
-        name = "statements"
-
-        dfs = [df async for df in self.iter_pages(url, params, name)]
-        df = pl.concat(dfs)
-
-        if df.is_empty() or not clean:
-            return df
-
-        df = statements.clean(df)
-
-        if not with_date:
-            return df
-
-        holidays = await _calendar_cache_manager.get_holidays(self)
-        return statements.with_date(df, holidays=holidays)
 
     async def get_announcement(self) -> DataFrame:
         """翌日発表予定の決算情報を取得する。
