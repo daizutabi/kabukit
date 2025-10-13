@@ -51,6 +51,7 @@ async def test_get(mock_utils_get: AsyncMock) -> None:
         EdinetClient,
         "test_resource",
         ["arg1", "arg2"],
+        limit=None,
         max_concurrency=10,
         progress=dummy_progress,
         callback=dummy_callback,
@@ -59,7 +60,6 @@ async def test_get(mock_utils_get: AsyncMock) -> None:
 
 @pytest.fixture
 def mock_get_dates(mocker: MockerFixture) -> MagicMock:
-    """kabukit.edinet.concurrent.get_dates のモック"""
     return mocker.patch("kabukit.edinet.concurrent.get_dates")
 
 
@@ -93,7 +93,12 @@ async def test_get_documents(
     mock_get_dates.assert_called_once_with(days=3, years=None)
     mock_get.assert_awaited_once_with(
         "documents",
-        [datetime.date(2023, 1, 3), datetime.date(2023, 1, 2)],
+        [
+            datetime.date(2023, 1, 3),
+            datetime.date(2023, 1, 2),
+            datetime.date(2023, 1, 1),
+        ],
+        limit=2,
         max_concurrency=5,
         progress=dummy_progress,
         callback=dummy_callback,
@@ -121,7 +126,8 @@ async def test_get_csv(mocker: MockerFixture) -> None:
     assert result.equals(DataFrame({"docID": [3]}))
     mock_get.assert_awaited_once_with(
         "csv",
-        ["doc1", "doc2"],
+        ["doc1", "doc2", "doc3"],
+        limit=2,
         max_concurrency=5,
         progress=dummy_progress,
         callback=dummy_callback,
