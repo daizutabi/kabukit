@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+from itertools import islice
 from typing import TYPE_CHECKING, Any, Protocol
 
 import polars as pl
@@ -116,6 +117,7 @@ async def get(
     resource: str,
     args: Iterable[Any],
     /,
+    limit: int | None = None,
     max_concurrency: int | None = None,
     progress: Progress | None = None,
     callback: Callback | None = None,
@@ -128,6 +130,7 @@ async def get(
         resource (str): 取得するデータの種類。Clientのメソッド名から"get_"を
             除いたものを指定する。
         args (Iterable[Any]): 取得対象の引数のリスト。
+        limit (int | None, optional): 取得数する上限。
         max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
             指定しないときはデフォルト値が使用される。
         progress (Progress | None, optional): 進捗表示のための関数。
@@ -140,7 +143,7 @@ async def get(
         DataFrame:
             すべての情報を含む単一のDataFrame。
     """
-    args = list(args)
+    args = list(islice(args, limit))
 
     async with cls() as client:
         stream = get_stream(client, resource, args, max_concurrency)

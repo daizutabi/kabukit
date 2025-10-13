@@ -45,9 +45,9 @@ def mock_get_prices(mock_jquants_client: MagicMock, mocker: MockerFixture) -> As
 
 
 @pytest.fixture
-def mock_get_all(mocker: MockerFixture) -> AsyncMock:
+def mock_get(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.jquants.concurrent.get_all",
+        "kabukit.jquants.concurrent.get",
         new_callable=mocker.AsyncMock,
         return_value=MOCK_DF,
     )

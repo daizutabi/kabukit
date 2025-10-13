@@ -1,4 +1,4 @@
-from .concurrent import get, get_all
+from .concurrent import get
 from .schema import rename
 
-__all__ = ["get", "get_all", "rename"]
+__all__ = ["get", "rename"]

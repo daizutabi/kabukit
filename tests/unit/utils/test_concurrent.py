@@ -122,3 +122,11 @@ async def test_get_callback() -> None:
 
     df = await get(MockClient, "data", [1, 2, 3], callback=callback)
     assert df["Code"].sort().to_list() == [10, 20, 30]
+
+
+@pytest.mark.asyncio
+async def test_get_with_limit() -> None:
+    from kabukit.utils.concurrent import get
+
+    df = await get(MockClient, "data", range(10), limit=3, max_concurrency=2)
+    assert df["Code"].sort().to_list() == [0, 1, 2]

@@ -65,12 +65,12 @@ async def _get(
 
     import tqdm.asyncio
 
-    from kabukit.jquants.concurrent import get_all
+    from kabukit.jquants.concurrent import get
 
     progress = None if quiet else tqdm.asyncio.tqdm
 
     try:
-        df = await get_all(target, progress=progress, **kwargs)
+        df = await get(target, progress=progress, **kwargs)
     except KeyboardInterrupt:
         typer.echo("中断しました。")
         raise typer.Exit(1) from None

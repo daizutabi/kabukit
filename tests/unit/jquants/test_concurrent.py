@@ -62,6 +62,7 @@ async def test_get(mock_utils_get: AsyncMock) -> None:
         JQuantsClient,
         "test_resource",
         ["1234", "5678"],
+        limit=None,
         max_concurrency=10,
         progress=dummy_progress,
         callback=dummy_callback,
@@ -69,32 +70,37 @@ async def test_get(mock_utils_get: AsyncMock) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_all(
-    mocker: MockerFixture,
+async def test_get_without_codes(
+    mock_utils_get: AsyncMock,
     mock_get_target_codes: AsyncMock,
 ) -> None:
-    from kabukit.jquants.concurrent import get_all
+    from kabukit.jquants.concurrent import get
 
     mock_get_target_codes.return_value = ["1111", "2222", "3333"]
-    mock_get = mocker.patch(
-        "kabukit.jquants.concurrent.get",
-        new_callable=mocker.AsyncMock,
+    # get() は .sort("Code", "Date") を行うので、モックの戻り値にもカラムが必要
+    mock_utils_get.return_value = DataFrame(
+        {"Date": [1], "Code": ["c"], "b": [2]},
     )
-    mock_get.return_value = DataFrame({"b": [2]})
 
-    result = await get_all(
+    result = await get(
         "test_resource",
+        None,  # codes=None を明示的に渡す
         limit=2,
         max_concurrency=5,
         progress=dummy_progress,  # pyright: ignore[reportArgumentType]
         callback=dummy_callback,
     )
 
-    assert result.equals(DataFrame({"b": [2]}))
+    # ソート後の結果を期待値とする
+    expected = DataFrame({"Date": [1], "Code": ["c"], "b": [2]})
+    assert result.equals(expected)
+
     mock_get_target_codes.assert_awaited_once()
-    mock_get.assert_awaited_once_with(
+    mock_utils_get.assert_awaited_once_with(
+        JQuantsClient,
         "test_resource",
-        ["1111", "2222"],
+        ["1111", "2222", "3333"],  # get_target_codes の結果が渡される
+        limit=2,
         max_concurrency=5,
         progress=dummy_progress,
         callback=dummy_callback,

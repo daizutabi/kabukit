@@ -73,7 +73,7 @@ def get_info(client: MagicMock, mocker: MockerFixture) -> AsyncMock:
                 "サービス業",
                 "情報・通信業",
             ],
-            "CompanyName": ["A", "B", "C", "A（優先株式）"],  # noqa: RUF001
+            "CompanyName": ["A", "B", "C", "A（優先株式）"],
         },
     )
 

@@ -23,8 +23,8 @@ async def test_get(resource: str) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_all(resource: str) -> None:
-    from kabukit.jquants.concurrent import get_all
+async def test_get_without_codes(resource: str) -> None:
+    from kabukit.jquants.concurrent import get
 
-    df = await get_all(resource, limit=3, callback=callback)
+    df = await get(resource, limit=3, callback=callback)
     assert df["Code"].n_unique() == 3
