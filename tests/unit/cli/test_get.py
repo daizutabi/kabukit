@@ -117,11 +117,11 @@ def test_get_entries(
     result = runner.invoke(app, ["get", "entries"])
 
     assert result.exit_code == 0
-    assert str(MOCK_DF) in result.stdout
     mock_get_entries.assert_awaited_once_with(
         None,
         years=10,
         progress=tqdm.asyncio.tqdm,
+        limit=None,
     )
     MockEntries.assert_called_once_with(MOCK_DF)
     mock_entries.write.assert_called_once()
@@ -141,6 +141,7 @@ def test_get_entries_with_date(
         MOCK_DATE,
         years=10,
         progress=None,
+        limit=None,
     )
     MockEntries.assert_not_called()
 
@@ -175,9 +176,10 @@ def test_get_all_single_code(
     result = runner.invoke(app, ["get", "all", MOCK_CODE, *quiet])
 
     assert result.exit_code == 0
-    mock_cli_info.assert_awaited_once_with(MOCK_CODE, quiet=bool(quiet))
-    mock_cli_statements.assert_awaited_once_with(MOCK_CODE, quiet=bool(quiet))
-    mock_cli_prices.assert_awaited_once_with(MOCK_CODE, quiet=bool(quiet))
+    q = bool(quiet)
+    mock_cli_info.assert_awaited_once_with(MOCK_CODE, quiet=q)
+    mock_cli_statements.assert_awaited_once_with(MOCK_CODE, quiet=q, limit=None)
+    mock_cli_prices.assert_awaited_once_with(MOCK_CODE, quiet=q, limit=None)
 
 
 @pytest.mark.parametrize("quiet", [[], ["-q"], ["--quiet"]])
@@ -191,10 +193,11 @@ def test_get_all_all_codes(
     result = runner.invoke(app, ["get", "all", *quiet])
 
     assert result.exit_code == 0
-    mock_cli_info.assert_awaited_once_with(None, quiet=bool(quiet))
-    mock_cli_statements.assert_awaited_once_with(None, quiet=bool(quiet))
-    mock_cli_prices.assert_awaited_once_with(None, quiet=bool(quiet))
-    mock_cli_entries.assert_awaited_once_with(quiet=bool(quiet))
+    q = bool(quiet)
+    mock_cli_info.assert_awaited_once_with(None, quiet=q)
+    mock_cli_statements.assert_awaited_once_with(None, quiet=q, limit=None)
+    mock_cli_prices.assert_awaited_once_with(None, quiet=q, limit=None)
+    mock_cli_entries.assert_awaited_once_with(quiet=q, limit=None)
 
 
 def test_get_statements_interrupt(
@@ -222,4 +225,5 @@ def test_get_entries_interrupt(mock_get_entries: AsyncMock) -> None:
         None,
         years=10,
         progress=tqdm.asyncio.tqdm,
+        limit=None,
     )

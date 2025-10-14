@@ -62,7 +62,10 @@ async def info(code: Code = None, *, quiet: Quiet = False) -> None:
 
 @app.async_command()
 async def statements(
-    code: Code = None, *, quiet: Quiet = False, limit: Limit = None
+    code: Code = None,
+    *,
+    quiet: Quiet = False,
+    limit: Limit = None,
 ) -> None:
     """財務情報を取得します。"""
     import tqdm.asyncio
@@ -88,7 +91,10 @@ async def statements(
 
 @app.async_command()
 async def prices(
-    code: Code = None, *, quiet: Quiet = False, limit: Limit = None
+    code: Code = None,
+    *,
+    quiet: Quiet = False,
+    limit: Limit = None,
 ) -> None:
     """株価情報を取得します。"""
     import tqdm.asyncio
@@ -113,7 +119,12 @@ async def prices(
 
 
 @app.async_command()
-async def entries(date: Date = None, *, quiet: Quiet = False) -> None:
+async def entries(
+    date: Date = None,
+    *,
+    quiet: Quiet = False,
+    limit: Limit = None,
+) -> None:
     """書類一覧を取得します。"""
     import tqdm.asyncio
 
@@ -123,7 +134,7 @@ async def entries(date: Date = None, *, quiet: Quiet = False) -> None:
     progress = None if date or quiet else tqdm.asyncio.tqdm
 
     try:
-        df = await get_entries(date, years=10, progress=progress)
+        df = await get_entries(date, years=10, progress=progress, limit=limit)
     except (KeyboardInterrupt, RuntimeError):
         typer.echo("中断しました。")
         raise typer.Exit(1) from None
@@ -137,20 +148,20 @@ async def entries(date: Date = None, *, quiet: Quiet = False) -> None:
 
 
 @app.async_command(name="all")
-async def all_(code: Code = None, *, quiet: Quiet = False) -> None:
+async def all_(code: Code = None, *, quiet: Quiet = False, limit: Limit = None) -> None:
     """上場銘柄一覧、財務情報、株価情報、書類一覧を連続して取得します。"""
     typer.echo("上場銘柄一覧を取得します。")
     await info(code, quiet=quiet)
 
     typer.echo("---")
     typer.echo("財務情報を取得します。")
-    await statements(code, quiet=quiet)
+    await statements(code, quiet=quiet, limit=limit)
 
     typer.echo("---")
     typer.echo("株価情報を取得します。")
-    await prices(code, quiet=quiet)
+    await prices(code, quiet=quiet, limit=limit)
 
     if code is None:
         typer.echo("---")
         typer.echo("書類一覧を取得します。")
-        await entries(quiet=quiet)
+        await entries(quiet=quiet, limit=limit)
