@@ -17,26 +17,27 @@ pytestmark = pytest.mark.integration
 runner = CliRunner()
 
 
-def test_auth_edinet(mock_dotenv_path: Path) -> None:
-    result = runner.invoke(app, ["auth", "edinet"], input="test_api_key\n")
-    assert result.exit_code == 0
-    assert "EDINETのAPIキーを保存しました。" in result.stdout
-    assert mock_dotenv_path.read_text() == "EDINET_API_KEY='test_api_key'\n"
-
-
-def test_auth_jquants(mock_dotenv_path: Path, mocker: MockerFixture) -> None:
+@pytest.mark.parametrize("command", ["jquants", "j"])
+def test_auth_jquants(
+    command: str, mock_dotenv_path: Path, mocker: MockerFixture
+) -> None:
     dummy_token = "dummy_id_token"
     mock_auth = mocker.patch(
         "kabukit.jquants.client.JQuantsClient.auth", return_value=dummy_token
     )
-    # save_id_tokenはモックせず、実際のファイル書き込みをテストする
-    result = runner.invoke(
-        app, ["auth", "jquants"], input="test@example.com\npassword\n"
-    )
+    result = runner.invoke(app, ["auth", command], input="test@example.com\npassword\n")
     assert result.exit_code == 0
     assert "J-QuantsのIDトークンを保存しました。" in result.stdout
     mock_auth.assert_called_once_with("test@example.com", "password")
     assert mock_dotenv_path.read_text() == f"JQUANTS_ID_TOKEN='{dummy_token}'\n"
+
+
+@pytest.mark.parametrize("command", ["edinet", "e"])
+def test_auth_edinet(command: str, mock_dotenv_path: Path) -> None:
+    result = runner.invoke(app, ["auth", command], input="test_api_key\n")
+    assert result.exit_code == 0
+    assert "EDINETのAPIキーを保存しました。" in result.stdout
+    assert mock_dotenv_path.read_text() == "EDINET_API_KEY='test_api_key'\n"
 
 
 def test_auth_show(mock_dotenv_path: Path) -> None:
