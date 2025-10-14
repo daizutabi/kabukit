@@ -47,10 +47,9 @@ Quiet = Annotated[
 async def info(code: Code = None, *, quiet: Quiet = False) -> None:
     """上場銘柄一覧を取得します。"""
     from kabukit.core.info import Info
-    from kabukit.jquants.client import JQuantsClient
+    from kabukit.jquants.info import get_info
 
-    async with JQuantsClient() as client:
-        df = await client.get_info(code)
+    df = await get_info(code)
 
     if code or not quiet:
         typer.echo(df)
