@@ -2,7 +2,7 @@
 
 ## 一覧
 
-```
+```text
                          損益計算書 貸借対照表 キャッシュフロー 株式数
 1QFinancialStatements    o        o        o             o
 2QFinancialStatements    o        o        o             o
@@ -65,7 +65,7 @@ J-Quants APIから直接取得できる `ForecastTotalDividendPaidAnnual` など
 そのため、`kabukit`では、他の予想値から配当金総額を算出します。
 
 - **実績値**:
-  - `ResultTotalDividendPaidAnnual` は `ResultDividendPerShareAnnual * AverageOutstandingShares` で検証可能です。
+    - `ResultTotalDividendPaidAnnual` は `ResultDividendPerShareAnnual * AverageOutstandingShares` で検証可能です。
 - **予想値**:
-  - 予想1株あたり配当 (`ForecastDividendPerShareAnnual`) と、予想EPSの計算に使われた株式数（`ForecastProfit / ForecastEarningsPerShare` で逆算）を掛け合わせて算出します。
-  - 詳細な計算ロジックと、その背景にある設計思想については、[株価指標の計算方針](indicator_calculation.md)を参照してください。
+    - 予想1株あたり配当 (`ForecastDividendPerShareAnnual`) と、予想EPSの計算に使われた株式数（`ForecastProfit / ForecastEarningsPerShare` で逆算）を掛け合わせて算出します。
+    - 詳細な計算ロジックと、その背景にある設計思想については、[株価指標の計算方針](indicator_calculation.md)を参照してください。
