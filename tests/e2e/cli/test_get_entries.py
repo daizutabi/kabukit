@@ -10,21 +10,10 @@ from kabukit.cli.app import app
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest_mock import MockerFixture
 
 pytestmark = pytest.mark.e2e
 
 runner = CliRunner()
-
-
-@pytest.fixture
-def mock_cache_dir(tmp_path: Path, mocker: MockerFixture) -> Path:
-    """Create a temporary cache directory and mock get_cache_dir for E2E tests."""
-    # For E2E tests, we want to mock the cache directory to a temporary path
-    # to avoid polluting the actual cache and ensure test isolation.
-    mocker.patch("kabukit.core.base.get_cache_dir", return_value=tmp_path)
-    mocker.patch("kabukit.cli.cache.get_cache_dir", return_value=tmp_path)
-    return tmp_path
 
 
 def test_get_entries_all(mock_cache_dir: Path) -> None:
