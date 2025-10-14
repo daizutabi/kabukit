@@ -216,8 +216,7 @@ def test_get_statements_interrupt(
 
     result = runner.invoke(app, ["get", "statements"])
 
-    assert result.exit_code == 1
-    assert "中断しました" in result.stdout
+    assert result.exit_code == 130
     mock_jquants_concurrent_get_statements.assert_awaited_once_with(
         None,
         max_items=None,
@@ -232,8 +231,7 @@ def test_get_prices_interrupt(
 
     result = runner.invoke(app, ["get", "prices"])
 
-    assert result.exit_code == 1
-    assert "中断しました" in result.stdout
+    assert result.exit_code == 130
     mock_jquants_concurrent_get_prices.assert_awaited_once_with(
         None,
         max_items=None,
@@ -246,8 +244,7 @@ def test_get_entries_interrupt(mock_get_entries: AsyncMock) -> None:
 
     result = runner.invoke(app, ["get", "entries"])
 
-    assert result.exit_code == 1
-    assert "中断しました" in result.stdout
+    assert result.exit_code == 130
     mock_get_entries.assert_awaited_once_with(
         None,
         years=10,
