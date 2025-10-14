@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 async def get(
     resource: str,
-    codes: Iterable[str] | str | None = None,
+    codes: Iterable[str] | None = None,
     /,
     limit: int | None = None,
     max_concurrency: int | None = None,
@@ -29,7 +29,7 @@ async def get(
     Args:
         resource (str): 取得するデータの種類。JQuantsClientのメソッド名から"get_"を
             除いたものを指定する。
-        codes (Iterable[str] | str | None): 取得対象の銘柄コードのリスト。
+        codes (Iterable[str] | None): 取得対象の銘柄コードのリスト。
             指定しないときはすべての銘柄が対象となる。
         limit (int | None, optional): 取得する銘柄数の上限。
             指定しないときはすべての銘柄が対象となる。
@@ -47,8 +47,6 @@ async def get(
     """
     if codes is None:
         codes = await get_target_codes()
-    elif isinstance(codes, str):
-        codes = [codes]
 
     data = await concurrent.get(
         JQuantsClient,
@@ -91,6 +89,10 @@ async def get_statements(
     Raises:
         HTTPStatusError: APIリクエストが失敗した場合。
     """
+    if isinstance(codes, str):
+        async with JQuantsClient() as client:
+            return await client.get_statements(codes)
+
     return await get(
         "statements",
         codes,
@@ -132,6 +134,10 @@ async def get_prices(
     Raises:
         HTTPStatusError: APIリクエストが失敗した場合。
     """
+    if isinstance(codes, str):
+        async with JQuantsClient() as client:
+            return await client.get_prices(codes)
+
     return await get(
         "prices",
         codes,

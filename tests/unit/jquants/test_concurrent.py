@@ -70,36 +70,6 @@ async def test_get(mock_utils_get: AsyncMock) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_code(mock_utils_get: AsyncMock) -> None:
-    from kabukit.jquants.concurrent import get
-
-    mock_utils_get.return_value = DataFrame(
-        {"Date": [4, 3, 2, 1], "Code": ["a", "b", "b", "a"]},
-    )
-
-    result = await get(
-        "test_resource",
-        "1234",
-        max_concurrency=10,
-        progress=dummy_progress,  # pyright: ignore[reportArgumentType]
-        callback=dummy_callback,
-    )
-
-    expected = DataFrame({"Date": [1, 4, 2, 3], "Code": ["a", "a", "b", "b"]})
-    assert result.equals(expected)
-
-    mock_utils_get.assert_awaited_once_with(
-        JQuantsClient,
-        "test_resource",
-        ["1234"],
-        limit=None,
-        max_concurrency=10,
-        progress=dummy_progress,
-        callback=dummy_callback,
-    )
-
-
-@pytest.mark.asyncio
 async def test_get_without_codes(
     mock_utils_get: AsyncMock,
     mock_get_target_codes: AsyncMock,
