@@ -7,7 +7,7 @@ from polars import DataFrame
 
 from kabukit.jquants.client import JQuantsClient
 
-pytestmark = pytest.mark.integration
+pytestmark = pytest.mark.system
 
 
 @pytest_asyncio.fixture(scope="module")
