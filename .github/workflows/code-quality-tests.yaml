@@ -1,4 +1,4 @@
-name: CI
+name: Code Quality & Tests
 
 on:
   push:
@@ -14,8 +14,8 @@ env:
   FORCE_COLOR: "1"
 
 jobs:
-  ci:
-    name: Python ${{ matrix.python-version }} on ${{ startsWith(matrix.os, 'macos-') && 'macOS' || startsWith(matrix.os, 'windows-') && 'Windows' || 'Linux' }}
+  unit-tests-linting:
+    name: Unit Tests & Linting (${{ matrix.python-version }} on ${{ startsWith(matrix.os, 'macos-') && 'macOS' || startsWith(matrix.os, 'windows-') && 'Windows' || 'Linux' }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -56,10 +56,10 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
-  ci-full:
-    name: Full Test
+  full-integration-tests:
+    name: Full Integration Tests
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: ci
+    needs: unit-tests-linting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
