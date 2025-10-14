@@ -14,6 +14,8 @@ if TYPE_CHECKING:
 
     from pytest_mock import MockerFixture
 
+pytestmark = pytest.mark.unit
+
 
 def dummy_progress(x: Iterable[Any]) -> Iterable[Any]:
     return x

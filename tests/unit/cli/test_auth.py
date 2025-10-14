@@ -8,6 +8,8 @@ from typer.testing import CliRunner
 
 from kabukit.cli.app import app
 
+pytestmark = pytest.mark.unit
+
 runner = CliRunner()
 
 

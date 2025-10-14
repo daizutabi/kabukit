@@ -14,6 +14,9 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
 
+pytestmark = pytest.mark.unit
+
+
 @pytest.mark.asyncio
 async def test_get_announcement(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"announcement": [{"Date": "2025-01-01"}]}
