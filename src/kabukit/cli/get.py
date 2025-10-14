@@ -74,12 +74,7 @@ async def statements(
     from kabukit.jquants.concurrent import get_statements
 
     progress = None if code or quiet else tqdm.asyncio.tqdm
-
-    try:
-        df = await get_statements(code, max_items=max_items, progress=progress)
-    except KeyboardInterrupt:
-        typer.echo("中断しました。")
-        raise typer.Exit(1) from None
+    df = await get_statements(code, max_items=max_items, progress=progress)
 
     if not quiet:
         typer.echo(df)
@@ -103,12 +98,7 @@ async def prices(
     from kabukit.jquants.concurrent import get_prices
 
     progress = None if code or quiet else tqdm.asyncio.tqdm
-
-    try:
-        df = await get_prices(code, max_items=max_items, progress=progress)
-    except KeyboardInterrupt:
-        typer.echo("中断しました。")
-        raise typer.Exit(1) from None
+    df = await get_prices(code, max_items=max_items, progress=progress)
 
     if not quiet:
         typer.echo(df)
@@ -132,12 +122,7 @@ async def entries(
     from kabukit.edinet.concurrent import get_entries
 
     progress = None if date or quiet else tqdm.asyncio.tqdm
-
-    try:
-        df = await get_entries(date, years=10, progress=progress, max_items=max_items)
-    except (KeyboardInterrupt, RuntimeError):
-        typer.echo("中断しました。")
-        raise typer.Exit(1) from None
+    df = await get_entries(date, years=10, progress=progress, max_items=max_items)
 
     if not quiet:
         typer.echo(df)
