@@ -88,10 +88,12 @@ async def get_entries(
         DataFrame:
             文書一覧を含む単一のDataFrame。
     """
+    if isinstance(dates, (str, datetime.date)):
+        async with EdinetClient() as client:
+            return await client.get_entries(dates)
+
     if dates is None:
         dates = get_dates(days=days, years=years)
-    elif isinstance(dates, (str, datetime.date)):
-        dates = [dates]
 
     df = await get(
         "entries",
@@ -137,7 +139,8 @@ async def get_documents(
             文書含む単一のDataFrame。
     """
     if isinstance(doc_ids, str):
-        doc_ids = [doc_ids]
+        async with EdinetClient() as client:
+            return await client.get_document(doc_ids, pdf=pdf)
 
     df = await get(
         "pdf" if pdf else "csv",

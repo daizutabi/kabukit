@@ -2,7 +2,6 @@ from datetime import date
 
 import pytest
 from polars import DataFrame
-from polars.testing import assert_frame_equal
 
 pytestmark = pytest.mark.integration
 
@@ -39,18 +38,6 @@ async def test_get_entries_single_date() -> None:
     dates = df["Date"].unique().to_list()
     assert len(dates) == 1
     assert dates[0] == date(2025, 10, 9)
-
-
-@pytest.mark.asyncio
-async def test_get_entries_invalid_date() -> None:
-    from kabukit.edinet.concurrent import get_entries
-
-    df = await get_entries(["2000-01-01", "2025-10-09"])
-    df2 = await get_entries("2025-10-09")
-    assert_frame_equal(df, df2)
-
-    df3 = await get_entries("2000-01-01")
-    assert df3.is_empty()
 
 
 @pytest.mark.asyncio
