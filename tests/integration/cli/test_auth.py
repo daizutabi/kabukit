@@ -26,7 +26,8 @@ def test_auth_jquants(
 ) -> None:
     dummy_token = "dummy_id_token"
     mock_auth = mocker.patch(
-        "kabukit.jquants.client.JQuantsClient.auth", return_value=dummy_token
+        "kabukit.jquants.client.JQuantsClient.auth",
+        return_value=dummy_token,
     )
     result = runner.invoke(app, ["auth", command], input="test@example.com\npassword\n")
     assert result.exit_code == 0

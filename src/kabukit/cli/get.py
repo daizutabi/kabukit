@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated, Any
+from typing import Annotated
 
 import typer
 from async_typer import AsyncTyper
 from typer import Argument, Option
-
-if TYPE_CHECKING:
-    from kabukit.core.base import Base
 
 # pyright: reportMissingTypeStubs=false
 # pyright: reportUnknownMemberType=false
@@ -41,16 +38,19 @@ Quiet = Annotated[
     bool,
     Option("--quiet", "-q", help="プログレスバーを表示しません。"),
 ]
+Limit = Annotated[
+    int | None,
+    Option("--limit", help="取得する銘柄数の上限。全銘柄取得時にのみ有効です。"),
+]
 
 
 @app.async_command()
 async def info(code: Code = None, *, quiet: Quiet = False) -> None:
     """上場銘柄一覧を取得します。"""
     from kabukit.core.info import Info
-    from kabukit.jquants.client import JQuantsClient
+    from kabukit.jquants.info import get_info
 
-    async with JQuantsClient() as client:
-        df = await client.get_info(code)
+    df = await get_info(code)
 
     if code or not quiet:
         typer.echo(df)
@@ -60,33 +60,23 @@ async def info(code: Code = None, *, quiet: Quiet = False) -> None:
         typer.echo(f"全銘柄の情報を '{path}' に保存しました。")
 
 
-async def _get(
-    code: str | None,
-    target: str,
-    cls: type[Base],
-    method: str,
-    message: str,
+@app.async_command()
+async def statements(
+    code: Code = None,
     *,
-    quiet: bool = False,
-    **kwargs: Any,
+    quiet: Quiet = False,
+    limit: Limit = None,
 ) -> None:
-    """財務情報・株価情報を取得するための共通処理"""
-    from kabukit.jquants.client import JQuantsClient
-
-    if code is not None:
-        async with JQuantsClient() as client:
-            df = await getattr(client, method)(code)
-        typer.echo(df)
-        return
-
+    """財務情報を取得します。"""
     import tqdm.asyncio
 
-    from kabukit.jquants.concurrent import get
+    from kabukit.core.statements import Statements
+    from kabukit.jquants.concurrent import get_statements
 
-    progress = None if quiet else tqdm.asyncio.tqdm
+    progress = None if code or quiet else tqdm.asyncio.tqdm
 
     try:
-        df = await get(target, progress=progress, **kwargs)
+        df = await get_statements(code, limit=limit, progress=progress)
     except KeyboardInterrupt:
         typer.echo("中断しました。")
         raise typer.Exit(1) from None
@@ -94,43 +84,47 @@ async def _get(
     if not quiet:
         typer.echo(df)
 
-    path = cls(df).write()
-    typer.echo(f"全銘柄の{message}を '{path}' に保存しました。")
+    if code is None:
+        path = Statements(df).write()
+        typer.echo(f"全銘柄の財務情報を '{path}' に保存しました。")
 
 
 @app.async_command()
-async def statements(code: Code = None, *, quiet: Quiet = False) -> None:
-    """財務情報を取得します。"""
-    from kabukit.core.statements import Statements
-
-    await _get(
-        code=code,
-        target="statements",
-        cls=Statements,
-        method="get_statements",
-        message="財務情報",
-        quiet=quiet,
-    )
-
-
-@app.async_command()
-async def prices(code: Code = None, *, quiet: Quiet = False) -> None:
+async def prices(
+    code: Code = None,
+    *,
+    quiet: Quiet = False,
+    limit: Limit = None,
+) -> None:
     """株価情報を取得します。"""
-    from kabukit.core.prices import Prices
+    import tqdm.asyncio
 
-    await _get(
-        code=code,
-        target="prices",
-        cls=Prices,
-        method="get_prices",
-        message="株価情報",
-        quiet=quiet,
-        max_concurrency=8,
-    )
+    from kabukit.core.prices import Prices
+    from kabukit.jquants.concurrent import get_prices
+
+    progress = None if code or quiet else tqdm.asyncio.tqdm
+
+    try:
+        df = await get_prices(code, limit=limit, progress=progress)
+    except KeyboardInterrupt:
+        typer.echo("中断しました。")
+        raise typer.Exit(1) from None
+
+    if not quiet:
+        typer.echo(df)
+
+    if code is None:
+        path = Prices(df).write()
+        typer.echo(f"全銘柄の株価情報を '{path}' に保存しました。")
 
 
 @app.async_command()
-async def entries(date: Date = None, *, quiet: Quiet = False) -> None:
+async def entries(
+    date: Date = None,
+    *,
+    quiet: Quiet = False,
+    limit: Limit = None,
+) -> None:
     """書類一覧を取得します。"""
     import tqdm.asyncio
 
@@ -140,7 +134,7 @@ async def entries(date: Date = None, *, quiet: Quiet = False) -> None:
     progress = None if date or quiet else tqdm.asyncio.tqdm
 
     try:
-        df = await get_entries(date, years=10, progress=progress)
+        df = await get_entries(date, years=10, progress=progress, limit=limit)
     except (KeyboardInterrupt, RuntimeError):
         typer.echo("中断しました。")
         raise typer.Exit(1) from None
@@ -154,20 +148,20 @@ async def entries(date: Date = None, *, quiet: Quiet = False) -> None:
 
 
 @app.async_command(name="all")
-async def all_(code: Code = None, *, quiet: Quiet = False) -> None:
+async def all_(code: Code = None, *, quiet: Quiet = False, limit: Limit = None) -> None:
     """上場銘柄一覧、財務情報、株価情報、書類一覧を連続して取得します。"""
     typer.echo("上場銘柄一覧を取得します。")
     await info(code, quiet=quiet)
 
     typer.echo("---")
     typer.echo("財務情報を取得します。")
-    await statements(code, quiet=quiet)
+    await statements(code, quiet=quiet, limit=limit)
 
     typer.echo("---")
     typer.echo("株価情報を取得します。")
-    await prices(code, quiet=quiet)
+    await prices(code, quiet=quiet, limit=limit)
 
     if code is None:
         typer.echo("---")
         typer.echo("書類一覧を取得します。")
-        await entries(quiet=quiet)
+        await entries(quiet=quiet, limit=limit)
