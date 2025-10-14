@@ -42,6 +42,11 @@ Quiet = Annotated[
     Option("--quiet", "-q", help="プログレスバーを表示しません。"),
 ]
 
+Limit = Annotated[
+    int | None,
+    Option("--limit", help="取得する銘柄数の上限。全銘柄取得時にのみ有効です。"),
+]
+
 
 @app.async_command()
 async def info(code: Code = None, *, quiet: Quiet = False) -> None:
@@ -67,6 +72,7 @@ async def _get(
     message: str,
     *,
     quiet: bool = False,
+    limit: int | None = None,
     **kwargs: Any,
 ) -> None:
     """財務情報・株価情報を取得するための共通処理"""
@@ -85,7 +91,7 @@ async def _get(
     progress = None if quiet else tqdm.asyncio.tqdm
 
     try:
-        df = await get(target, progress=progress, **kwargs)
+        df = await get(target, progress=progress, limit=limit, **kwargs)
     except KeyboardInterrupt:
         typer.echo("中断しました。")
         raise typer.Exit(1) from None
@@ -98,18 +104,29 @@ async def _get(
 
 
 @app.async_command()
-async def statements(code: Code = None, *, quiet: Quiet = False) -> None:
+async def statements(
+    code: Code = None, *, quiet: Quiet = False, limit: Limit = None
+) -> None:
     """財務情報を取得します。"""
-    from kabukit.core.statements import Statements
+    import tqdm.asyncio
 
-    await _get(
-        code=code,
-        target="statements",
-        cls=Statements,
-        method="get_statements",
-        message="財務情報",
-        quiet=quiet,
-    )
+    from kabukit.core.statements import Statements
+    from kabukit.jquants.concurrent import get_statements
+
+    progress = None if code or quiet else tqdm.asyncio.tqdm
+
+    try:
+        df = await get_statements(code, limit=limit, progress=progress)
+    except KeyboardInterrupt:
+        typer.echo("中断しました。")
+        raise typer.Exit(1) from None
+
+    if not quiet:
+        typer.echo(df)
+
+    if code is None:
+        path = Statements(df).write()
+        typer.echo(f"全銘柄の財務情報を '{path}' に保存しました。")
 
 
 @app.async_command()
