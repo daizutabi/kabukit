@@ -140,12 +140,12 @@ df.group_by(c.Code).agg(
 銘柄コードを指定しないと、全銘柄の財務情報を全期間に渡って取得します。
 `marimo` のような UI フレームワークと組み合わせることで、
 進捗状況を可視化することも可能です。
-ここでは、時間短縮のため、`limit`キーワードで取得する銘柄数を制限します。
+ここでは、時間短縮のため、`max_items`キーワードで取得する銘柄数を制限します。
 
 ```python exec="1" source="material-block"
 import marimo as mo
 
-df = await get_statements(limit=3, progress=mo.status.progress_bar)
+df = await get_statements(max_items=3, progress=mo.status.progress_bar)
 df.group_by(c.Code).agg(pl.len())
 ```
 
@@ -206,10 +206,10 @@ df.group_by(c.Code).agg(pl.len(), c.Date.last(), c.Close.last())
 ```
 
 銘柄コードを指定しないと、全銘柄の株価情報を全期間に渡って取得します。
-ここでは、時間短縮のため、`limit`キーワードで取得する銘柄数を制限します。
+ここでは、時間短縮のため、`max_items`キーワードで取得する銘柄数を制限します。
 
 ```python exec="1" source="material-block"
-df = await get_prices(limit=3)
+df = await get_prices(max_items=3)
 df.group_by(c.Code).agg(pl.len())
 ```
 

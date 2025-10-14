@@ -19,7 +19,7 @@ async def get(
     resource: str,
     codes: Iterable[str] | None = None,
     /,
-    limit: int | None = None,
+    max_items: int | None = None,
     max_concurrency: int | None = None,
     progress: Progress | None = None,
     callback: Callback | None = None,
@@ -31,7 +31,7 @@ async def get(
             除いたものを指定する。
         codes (Iterable[str] | None): 取得対象の銘柄コードのリスト。
             指定しないときはすべての銘柄が対象となる。
-        limit (int | None, optional): 取得する銘柄数の上限。
+        max_items (int | None, optional): 取得する銘柄数の上限。
             指定しないときはすべての銘柄が対象となる。
         max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
             指定しないときはデフォルト値が使用される。
@@ -52,7 +52,7 @@ async def get(
         JQuantsClient,
         resource,
         codes,
-        limit=limit,
+        max_items=max_items,
         max_concurrency=max_concurrency,
         progress=progress,
         callback=callback,
@@ -63,7 +63,7 @@ async def get(
 async def get_statements(
     codes: Iterable[str] | str | None = None,
     /,
-    limit: int | None = None,
+    max_items: int | None = None,
     max_concurrency: int = 12,
     progress: Progress | None = None,
     callback: Callback | None = None,
@@ -73,7 +73,7 @@ async def get_statements(
     Args:
         codes (Iterable[str] | str | None): 財務情報を取得する銘柄のコード。
             Noneが指定された場合、全銘柄が対象となる。
-        limit (int | None, optional): 取得する銘柄数の上限。
+        max_items (int | None, optional): 取得する銘柄数の上限。
             指定しないときはすべての銘柄が対象となる。
         max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
             デフォルト値12。
@@ -96,7 +96,7 @@ async def get_statements(
     return await get(
         "statements",
         codes,
-        limit=limit,
+        max_items=max_items,
         max_concurrency=max_concurrency,
         progress=progress,
         callback=callback,
@@ -106,7 +106,7 @@ async def get_statements(
 async def get_prices(
     codes: Iterable[str] | str | None = None,
     /,
-    limit: int | None = None,
+    max_items: int | None = None,
     max_concurrency: int = 8,
     progress: Progress | None = None,
     callback: Callback | None = None,
@@ -118,7 +118,7 @@ async def get_prices(
     Args:
         codes (Iterable[str] | str | None): 財務情報を取得する銘柄のコード。
             Noneが指定された場合、全銘柄が対象となる。
-        limit (int | None, optional): 取得する銘柄数の上限。
+        max_items (int | None, optional): 取得する銘柄数の上限。
             指定しないときはすべての銘柄が対象となる。
         max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
             デフォルト値8。
@@ -141,7 +141,7 @@ async def get_prices(
     return await get(
         "prices",
         codes,
-        limit=limit,
+        max_items=max_items,
         max_concurrency=max_concurrency,
         progress=progress,
         callback=callback,

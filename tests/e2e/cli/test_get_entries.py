@@ -17,7 +17,7 @@ runner = CliRunner()
 
 
 def test_get_entries_all(mock_cache_dir: Path) -> None:
-    result = runner.invoke(app, ["get", "entries", "--limit", "3"])
+    result = runner.invoke(app, ["get", "entries", "--max-items", "3"])
     assert result.exit_code == 0
     assert "書類一覧を" in result.stdout
     assert "shape:" in result.stdout

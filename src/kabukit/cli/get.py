@@ -38,9 +38,9 @@ Quiet = Annotated[
     bool,
     Option("--quiet", "-q", help="プログレスバーを表示しません。"),
 ]
-Limit = Annotated[
+MaxItems = Annotated[
     int | None,
-    Option("--limit", help="取得する銘柄数の上限。全銘柄取得時にのみ有効です。"),
+    Option("--max-items", help="取得する銘柄数の上限。全銘柄取得時にのみ有効です。"),
 ]
 
 
@@ -65,7 +65,7 @@ async def statements(
     code: Code = None,
     *,
     quiet: Quiet = False,
-    limit: Limit = None,
+    max_items: MaxItems = None,
 ) -> None:
     """財務情報を取得します。"""
     import tqdm.asyncio
@@ -76,7 +76,7 @@ async def statements(
     progress = None if code or quiet else tqdm.asyncio.tqdm
 
     try:
-        df = await get_statements(code, limit=limit, progress=progress)
+        df = await get_statements(code, max_items=max_items, progress=progress)
     except KeyboardInterrupt:
         typer.echo("中断しました。")
         raise typer.Exit(1) from None
@@ -94,7 +94,7 @@ async def prices(
     code: Code = None,
     *,
     quiet: Quiet = False,
-    limit: Limit = None,
+    max_items: MaxItems = None,
 ) -> None:
     """株価情報を取得します。"""
     import tqdm.asyncio
@@ -105,7 +105,7 @@ async def prices(
     progress = None if code or quiet else tqdm.asyncio.tqdm
 
     try:
-        df = await get_prices(code, limit=limit, progress=progress)
+        df = await get_prices(code, max_items=max_items, progress=progress)
     except KeyboardInterrupt:
         typer.echo("中断しました。")
         raise typer.Exit(1) from None
@@ -123,7 +123,7 @@ async def entries(
     date: Date = None,
     *,
     quiet: Quiet = False,
-    limit: Limit = None,
+    max_items: MaxItems = None,
 ) -> None:
     """書類一覧を取得します。"""
     import tqdm.asyncio
@@ -134,7 +134,7 @@ async def entries(
     progress = None if date or quiet else tqdm.asyncio.tqdm
 
     try:
-        df = await get_entries(date, years=10, progress=progress, limit=limit)
+        df = await get_entries(date, years=10, progress=progress, max_items=max_items)
     except (KeyboardInterrupt, RuntimeError):
         typer.echo("中断しました。")
         raise typer.Exit(1) from None
@@ -148,20 +148,25 @@ async def entries(
 
 
 @app.async_command(name="all")
-async def all_(code: Code = None, *, quiet: Quiet = False, limit: Limit = None) -> None:
+async def all_(
+    code: Code = None,
+    *,
+    quiet: Quiet = False,
+    max_items: MaxItems = None,
+) -> None:
     """上場銘柄一覧、財務情報、株価情報、書類一覧を連続して取得します。"""
     typer.echo("上場銘柄一覧を取得します。")
     await info(code, quiet=quiet)
 
     typer.echo("---")
     typer.echo("財務情報を取得します。")
-    await statements(code, quiet=quiet, limit=limit)
+    await statements(code, quiet=quiet, max_items=max_items)
 
     typer.echo("---")
     typer.echo("株価情報を取得します。")
-    await prices(code, quiet=quiet, limit=limit)
+    await prices(code, quiet=quiet, max_items=max_items)
 
     if code is None:
         typer.echo("---")
         typer.echo("書類一覧を取得します。")
-        await entries(quiet=quiet, limit=limit)
+        await entries(quiet=quiet, max_items=max_items)

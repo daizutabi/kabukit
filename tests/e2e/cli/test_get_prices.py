@@ -17,7 +17,7 @@ runner = CliRunner()
 
 
 def test_get_prices_all(mock_cache_dir: Path) -> None:
-    result = runner.invoke(app, ["get", "prices", "--limit", "3"])
+    result = runner.invoke(app, ["get", "prices", "--max-items", "3"])
     assert result.exit_code == 0
     assert "全銘柄の株価情報を" in result.stdout
     assert "shape:" in result.stdout

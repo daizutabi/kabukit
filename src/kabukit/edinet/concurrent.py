@@ -20,7 +20,7 @@ async def get(
     resource: str,
     args: Iterable[str | datetime.date],
     /,
-    limit: int | None = None,
+    max_items: int | None = None,
     max_concurrency: int | None = None,
     progress: Progress | None = None,
     callback: Callback | None = None,
@@ -31,7 +31,7 @@ async def get(
         resource (str): 取得するデータの種類。EdinetClientのメソッド名から"get_"を
             除いたものを指定する。
         args (Iterable[str | datetime.date]): 取得対象の引数のリスト。
-        limit (int | None, optional): 取得数の上限。
+        max_items (int | None, optional): 取得数の上限。
             指定しないときはすべてを取得する。
         max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
             指定しないときはデフォルト値が使用される。
@@ -49,7 +49,7 @@ async def get(
         EdinetClient,
         resource,
         args,
-        limit=limit,
+        max_items=max_items,
         max_concurrency=max_concurrency,
         progress=progress,
         callback=callback,
@@ -61,7 +61,7 @@ async def get_entries(
     /,
     days: int | None = None,
     years: int | None = None,
-    limit: int | None = None,
+    max_items: int | None = None,
     max_concurrency: int | None = None,
     progress: Progress | None = None,
     callback: Callback | None = None,
@@ -75,7 +75,7 @@ async def get_entries(
         days (int | None): 過去 days 日の日付リストを取得する。
         years (int | None): 過去 years 年の日付リストを取得する。
             daysが指定されている場合は無視される。
-        limit (int | None, optional): 取得数の上限。
+        max_items (int | None, optional): 取得数の上限。
         max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
             指定しないときはデフォルト値が使用される。
         progress (Progress | None, optional): 進捗表示のための関数。
@@ -98,7 +98,7 @@ async def get_entries(
     df = await get(
         "entries",
         dates,
-        limit=limit,
+        max_items=max_items,
         max_concurrency=max_concurrency,
         progress=progress,
         callback=callback,
@@ -113,7 +113,7 @@ async def get_entries(
 async def get_documents(
     doc_ids: Iterable[str] | str,
     /,
-    limit: int | None = None,
+    max_items: int | None = None,
     max_concurrency: int | None = None,
     progress: Progress | None = None,
     callback: Callback | None = None,
@@ -124,7 +124,7 @@ async def get_documents(
 
     Args:
         doc_ids (Iterable[str] | str): 取得対象の文書IDのリスト。
-        limit (int | None, optional): 取得数の上限。
+        max_items (int | None, optional): 取得数の上限。
         max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
             指定しないときはデフォルト値が使用される。
         progress (Progress | None, optional): 進捗表示のための関数。
@@ -145,7 +145,7 @@ async def get_documents(
     df = await get(
         "pdf" if pdf else "csv",
         doc_ids,
-        limit=limit,
+        max_items=max_items,
         max_concurrency=max_concurrency,
         progress=progress,
         callback=callback,

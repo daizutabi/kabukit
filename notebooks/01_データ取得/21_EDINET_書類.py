@@ -32,7 +32,7 @@ async def _(Entries, button, get_documents, mo, pl):
     if button.value:
         lst = Entries().data.filter(pl.col("Code").is_not_null(), pl.col("csvFlag"))
         doc_ids = lst["docID"].unique()
-        x = await get_documents(doc_ids, limit=100, progress=mo.status.progress_bar)
+        x = await get_documents(doc_ids, max_items=100, progress=mo.status.progress_bar)
         mo.output.append(x)
     return
 

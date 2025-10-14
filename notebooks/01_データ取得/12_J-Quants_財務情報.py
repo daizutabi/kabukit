@@ -44,7 +44,7 @@ def _(mo):
 @app.cell
 async def _(button, get_statements, mo):
     if button.value:
-        await get_statements(limit=100, progress=mo.status.progress_bar)
+        await get_statements(max_items=100, progress=mo.status.progress_bar)
     return
 
 
