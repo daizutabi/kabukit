@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import pytest
 import pytest_asyncio
 
-from kabukit.jquants.client import JQuantsClient
+from kabukit.jquants.client import JQuantsClient, _CalendarCacheManager
 
 if TYPE_CHECKING:
     from unittest.mock import AsyncMock, MagicMock
@@ -20,10 +20,13 @@ async def client():
 
 
 @pytest.fixture(autouse=True)
-def reset_calendar_cache():
-    from kabukit.jquants.client import _calendar_cache_manager
-
-    _calendar_cache_manager._holidays = None  # noqa: SLF001
+def reset_calendar_cache_manager(mocker: MockerFixture):
+    # Patch the global _calendar_cache_manager to a new instance for each test
+    # This ensures its lock is created in the context of the test's event loop
+    mocker.patch(
+        "kabukit.jquants.client._calendar_cache_manager",
+        _CalendarCacheManager(),
+    )
 
 
 @pytest.fixture
