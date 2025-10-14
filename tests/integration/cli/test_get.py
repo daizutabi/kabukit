@@ -55,7 +55,11 @@ def test_get_statements_all(mocker: MockerFixture, mock_cache_dir: Path):
     result = runner.invoke(app, ["get", "statements"])
     assert result.exit_code == 0
     assert "全銘柄の財務情報を" in result.stdout
-    mock_get_statements.assert_called_once_with(None, limit=None, progress=mocker.ANY)
+    mock_get_statements.assert_called_once_with(
+        None,
+        max_items=None,
+        progress=mocker.ANY,
+    )
 
     path = next(mock_cache_dir.joinpath("statements").glob("*.parquet"))
     assert_frame_equal(pl.read_parquet(path), mock_df)
@@ -71,7 +75,7 @@ def test_get_prices_all(mocker: MockerFixture, mock_cache_dir: Path):
     assert result.exit_code == 0
     assert "全銘柄の株価情報を" in result.stdout
 
-    mock_get_prices.assert_called_once_with(None, limit=None, progress=mocker.ANY)
+    mock_get_prices.assert_called_once_with(None, max_items=None, progress=mocker.ANY)
 
     path = next(mock_cache_dir.joinpath("prices").glob("*.parquet"))
     assert_frame_equal(pl.read_parquet(path), mock_df)
@@ -91,7 +95,7 @@ def test_get_entries_all(mocker: MockerFixture, mock_cache_dir: Path):
         None,
         years=10,
         progress=mocker.ANY,
-        limit=None,
+        max_items=None,
     )
 
     path = next(mock_cache_dir.joinpath("entries").glob("*.parquet"))

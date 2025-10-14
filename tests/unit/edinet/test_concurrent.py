@@ -53,7 +53,7 @@ async def test_get(mock_utils_get: AsyncMock) -> None:
         EdinetClient,
         "test_resource",
         ["arg1", "arg2"],
-        limit=None,
+        max_items=None,
         max_concurrency=10,
         progress=dummy_progress,
         callback=dummy_callback,
@@ -85,7 +85,7 @@ async def test_get_entries_days(
 
     result = await get_entries(
         days=3,
-        limit=2,
+        max_items=2,
         max_concurrency=5,
         progress=dummy_progress,  # pyright: ignore[reportArgumentType]
         callback=dummy_callback,
@@ -100,7 +100,7 @@ async def test_get_entries_days(
             datetime.date(2023, 1, 2),
             datetime.date(2023, 1, 1),
         ],
-        limit=2,
+        max_items=2,
         max_concurrency=5,
         progress=dummy_progress,
         callback=dummy_callback,
@@ -133,7 +133,7 @@ async def test_get_entries_years(
             datetime.date(2023, 1, 1),
             datetime.date(2022, 1, 1),
         ],
-        limit=None,
+        max_items=None,
         max_concurrency=None,
         progress=None,
         callback=None,
@@ -187,7 +187,7 @@ async def test_get_documents_csv(mocker: MockerFixture) -> None:
 
     result = await get_documents(
         ["doc1", "doc2", "doc3"],
-        limit=2,
+        max_items=2,
         max_concurrency=5,
         progress=dummy_progress,  # pyright: ignore[reportArgumentType]
         callback=dummy_callback,
@@ -197,7 +197,7 @@ async def test_get_documents_csv(mocker: MockerFixture) -> None:
     mock_get.assert_awaited_once_with(
         "csv",
         ["doc1", "doc2", "doc3"],
-        limit=2,
+        max_items=2,
         max_concurrency=5,
         progress=dummy_progress,
         callback=dummy_callback,
@@ -219,7 +219,7 @@ async def test_get_documents_pdf(mocker: MockerFixture) -> None:
     mock_get.assert_awaited_once_with(
         "pdf",
         ["doc1", "doc2"],
-        limit=None,
+        max_items=None,
         max_concurrency=None,
         progress=None,
         callback=None,

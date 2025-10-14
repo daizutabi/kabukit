@@ -17,7 +17,7 @@ runner = CliRunner()
 
 
 def test_get_statements_all(mock_cache_dir: Path) -> None:
-    result = runner.invoke(app, ["get", "statements", "--limit", "3"])
+    result = runner.invoke(app, ["get", "statements", "--max-items", "3"])
     assert result.exit_code == 0
     assert "全銘柄の財務情報を" in result.stdout
     assert "shape:" in result.stdout

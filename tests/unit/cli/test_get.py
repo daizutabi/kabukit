@@ -45,7 +45,7 @@ def test_get_statements_single_code(
     assert str(MOCK_DF) in result.stdout
     mock_jquants_concurrent_get_statements.assert_awaited_once_with(
         MOCK_CODE,
-        limit=None,
+        max_items=None,
         progress=None,
     )
 
@@ -58,7 +58,7 @@ def test_get_prices_single_code(mock_jquants_concurrent_get_prices: AsyncMock) -
     assert str(MOCK_DF) in result.stdout
     mock_jquants_concurrent_get_prices.assert_awaited_once_with(
         MOCK_CODE,
-        limit=None,
+        max_items=None,
         progress=None,
     )
 
@@ -90,7 +90,7 @@ def test_get_statements_all_codes(
     assert str(MOCK_DF) in result.stdout
     mock_jquants_concurrent_get_statements.assert_awaited_once_with(
         None,
-        limit=None,
+        max_items=None,
         progress=tqdm.asyncio.tqdm,
     )
     MockStatements.assert_called_once_with(MOCK_DF)
@@ -110,7 +110,7 @@ def test_get_prices_all_codes(
     assert str(MOCK_DF) in result.stdout
     mock_jquants_concurrent_get_prices.assert_awaited_once_with(
         None,
-        limit=None,
+        max_items=None,
         progress=tqdm.asyncio.tqdm,
     )
     MockPrices.assert_called_once_with(MOCK_DF)
@@ -130,7 +130,7 @@ def test_get_entries(
         None,
         years=10,
         progress=tqdm.asyncio.tqdm,
-        limit=None,
+        max_items=None,
     )
     MockEntries.assert_called_once_with(MOCK_DF)
     mock_entries.write.assert_called_once()
@@ -150,7 +150,7 @@ def test_get_entries_with_date(
         MOCK_DATE,
         years=10,
         progress=None,
-        limit=None,
+        max_items=None,
     )
     MockEntries.assert_not_called()
 
@@ -187,8 +187,8 @@ def test_get_all_single_code(
     assert result.exit_code == 0
     q = bool(quiet)
     mock_cli_info.assert_awaited_once_with(MOCK_CODE, quiet=q)
-    mock_cli_statements.assert_awaited_once_with(MOCK_CODE, quiet=q, limit=None)
-    mock_cli_prices.assert_awaited_once_with(MOCK_CODE, quiet=q, limit=None)
+    mock_cli_statements.assert_awaited_once_with(MOCK_CODE, quiet=q, max_items=None)
+    mock_cli_prices.assert_awaited_once_with(MOCK_CODE, quiet=q, max_items=None)
 
 
 @pytest.mark.parametrize("quiet", [[], ["-q"], ["--quiet"]])
@@ -204,9 +204,9 @@ def test_get_all_all_codes(
     assert result.exit_code == 0
     q = bool(quiet)
     mock_cli_info.assert_awaited_once_with(None, quiet=q)
-    mock_cli_statements.assert_awaited_once_with(None, quiet=q, limit=None)
-    mock_cli_prices.assert_awaited_once_with(None, quiet=q, limit=None)
-    mock_cli_entries.assert_awaited_once_with(quiet=q, limit=None)
+    mock_cli_statements.assert_awaited_once_with(None, quiet=q, max_items=None)
+    mock_cli_prices.assert_awaited_once_with(None, quiet=q, max_items=None)
+    mock_cli_entries.assert_awaited_once_with(quiet=q, max_items=None)
 
 
 def test_get_statements_interrupt(
@@ -220,7 +220,7 @@ def test_get_statements_interrupt(
     assert "中断しました" in result.stdout
     mock_jquants_concurrent_get_statements.assert_awaited_once_with(
         None,
-        limit=None,
+        max_items=None,
         progress=tqdm.asyncio.tqdm,
     )
 
@@ -236,7 +236,7 @@ def test_get_prices_interrupt(
     assert "中断しました" in result.stdout
     mock_jquants_concurrent_get_prices.assert_awaited_once_with(
         None,
-        limit=None,
+        max_items=None,
         progress=tqdm.asyncio.tqdm,
     )
 
@@ -252,5 +252,5 @@ def test_get_entries_interrupt(mock_get_entries: AsyncMock) -> None:
         None,
         years=10,
         progress=tqdm.asyncio.tqdm,
-        limit=None,
+        max_items=None,
     )

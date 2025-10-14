@@ -13,14 +13,14 @@ def _(mo):
     <https://jpx.gitbook.io/j-quants-ja/api-reference/daily_quotes>
     """,
     )
-    return
 
 
 @app.cell
 def _():
     import marimo as mo
-    from kabukit import JQuantsClient
-    from kabukit import get_prices
+
+    from kabukit import JQuantsClient, get_prices
+
     return JQuantsClient, get_prices, mo
 
 
@@ -29,7 +29,6 @@ async def _(JQuantsClient):
     async with JQuantsClient() as client:
         df = await client.get_prices("3671")
     df
-    return
 
 
 @app.cell
@@ -42,8 +41,7 @@ def _(mo):
 @app.cell
 async def _(button, get_prices, mo):
     if button.value:
-        await get_prices(limit=30, progress=mo.status.progress_bar)
-    return
+        await get_prices(max_items=30, progress=mo.status.progress_bar)
 
 
 if __name__ == "__main__":

@@ -44,7 +44,7 @@ async def test_get_entries_single_date() -> None:
 async def test_get_entries_without_dates() -> None:
     from kabukit.edinet.concurrent import get_entries
 
-    df = await get_entries(days=7, limit=6, callback=callback)
+    df = await get_entries(days=7, max_items=6, callback=callback)
     assert df.width == 30
 
 
@@ -54,7 +54,7 @@ async def test_get_documents_csv() -> None:
 
     df = await get_entries(["2025-09-09", "2025-09-19", "2025-09-22"])
     doc_ids = df.filter(csvFlag=True).get_column("docID").sort()
-    df = await get_documents(doc_ids, limit=10, callback=callback)
+    df = await get_documents(doc_ids, max_items=10, callback=callback)
     assert df["docID"].n_unique() == 10
 
 
@@ -64,7 +64,7 @@ async def test_get_documents_pdf() -> None:
 
     df = await get_entries("2025-09-09")
     doc_ids = df.filter(pdfFlag=True).get_column("docID").to_list()
-    df = await get_documents(doc_ids, limit=2, pdf=True)
+    df = await get_documents(doc_ids, max_items=2, pdf=True)
     assert df.shape == (2, 2)
     for i in range(2):
         pdf = df.item(i, "pdf")

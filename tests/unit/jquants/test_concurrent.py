@@ -64,7 +64,7 @@ async def test_get(mock_utils_get: AsyncMock) -> None:
         JQuantsClient,
         "test_resource",
         ["1234", "5678"],
-        limit=None,
+        max_items=None,
         max_concurrency=10,
         progress=dummy_progress,
         callback=dummy_callback,
@@ -87,7 +87,7 @@ async def test_get_without_codes(
     result = await get(
         "test_resource",
         None,  # codes=None を明示的に渡す
-        limit=2,
+        max_items=2,
         max_concurrency=5,
         progress=dummy_progress,  # pyright: ignore[reportArgumentType]
         callback=dummy_callback,
@@ -102,7 +102,7 @@ async def test_get_without_codes(
         JQuantsClient,
         "test_resource",
         ["1111", "2222", "3333"],  # get_target_codes の結果が渡される
-        limit=2,
+        max_items=2,
         max_concurrency=5,
         progress=dummy_progress,
         callback=dummy_callback,
@@ -120,7 +120,7 @@ async def test_get_statements(mocker: MockerFixture) -> None:
 
     await get_statements(
         ["1111", "2222"],
-        limit=10,
+        max_items=10,
         progress=dummy_progress,  # pyright: ignore[reportArgumentType]
         callback=dummy_callback,
     )
@@ -128,7 +128,7 @@ async def test_get_statements(mocker: MockerFixture) -> None:
     mock_get.assert_awaited_once_with(
         "statements",
         ["1111", "2222"],
-        limit=10,
+        max_items=10,
         max_concurrency=12,  # get_statements のデフォルト値
         progress=dummy_progress,
         callback=dummy_callback,
@@ -164,7 +164,7 @@ async def test_get_prices(mocker: MockerFixture) -> None:
 
     await get_prices(
         ["3333", "4444"],
-        limit=5,
+        max_items=5,
         max_concurrency=20,  # デフォルト(8)を上書き
         progress=dummy_progress,  # pyright: ignore[reportArgumentType]
         callback=dummy_callback,
@@ -173,7 +173,7 @@ async def test_get_prices(mocker: MockerFixture) -> None:
     mock_get.assert_awaited_once_with(
         "prices",
         ["3333", "4444"],
-        limit=5,
+        max_items=5,
         max_concurrency=20,  # 上書きされた値
         progress=dummy_progress,
         callback=dummy_callback,
