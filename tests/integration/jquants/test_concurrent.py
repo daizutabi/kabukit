@@ -23,14 +23,6 @@ async def test_get(resource: str) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_with_single_code(resource: str) -> None:
-    from kabukit.jquants.concurrent import get
-
-    df = await get(resource, "7203")
-    assert df["Code"].unique().to_list() == ["72030"]
-
-
-@pytest.mark.asyncio
 async def test_get_without_codes(resource: str) -> None:
     from kabukit.jquants.concurrent import get
 
@@ -63,6 +55,14 @@ async def test_get_statements_without_codes() -> None:
 
 
 @pytest.mark.asyncio
+async def test_get_statements_with_single_code() -> None:
+    from kabukit.jquants.concurrent import get_statements
+
+    df = await get_statements("7203")
+    assert df["Code"].unique().to_list() == ["72030"]
+
+
+@pytest.mark.asyncio
 async def test_get_prices() -> None:
     from kabukit.jquants.concurrent import get_prices
 
@@ -84,3 +84,11 @@ async def test_get_prices_without_codes() -> None:
 
     df = await get_prices(limit=3)
     assert df["Code"].n_unique() == 3
+
+
+@pytest.mark.asyncio
+async def test_get_prices_with_single_code() -> None:
+    from kabukit.jquants.concurrent import get_prices
+
+    df = await get_prices("7203")
+    assert df["Code"].unique().to_list() == ["72030"]

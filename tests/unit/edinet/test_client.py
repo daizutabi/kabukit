@@ -18,6 +18,8 @@ if TYPE_CHECKING:
 
     from pytest_mock import MockerFixture
 
+pytestmark = pytest.mark.unit
+
 
 def test_set_api_key() -> None:
     client = EdinetClient("abc")

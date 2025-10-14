@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 
     from pytest_mock import MockerFixture
 
+pytestmark = pytest.mark.unit
+
 
 def dummy_progress(x: Iterable[Any]) -> Iterable[Any]:
     return x
@@ -141,29 +143,22 @@ async def test_get_entries_years(
 @pytest.mark.asyncio
 async def test_get_entries_single_date(
     mocker: MockerFixture,
-    mock_get_dates: MagicMock,
 ) -> None:
     from kabukit.edinet.concurrent import get_entries
 
-    mock_get_dates.return_value = [datetime.date(2023, 1, 3)]
-    mock_get = mocker.patch(
-        "kabukit.edinet.concurrent.get",
-        new_callable=mocker.AsyncMock,
+    mock_client_instance = mocker.AsyncMock()
+    mocker.patch(
+        "kabukit.edinet.concurrent.EdinetClient",
+        return_value=mocker.MagicMock(
+            __aenter__=mocker.AsyncMock(return_value=mock_client_instance),
+            __aexit__=mocker.AsyncMock(),
+        ),
     )
-    mock_get.return_value = DataFrame({"Date": [2], "Code": ["10000"]})
 
-    result = await get_entries("2025-10-10")
+    target_date = datetime.date(2025, 10, 10)
+    await get_entries(target_date)
 
-    assert result.equals(DataFrame({"Date": [2], "Code": ["10000"]}))
-    mock_get_dates.assert_not_called()
-    mock_get.assert_awaited_once_with(
-        "entries",
-        ["2025-10-10"],
-        limit=None,
-        max_concurrency=None,
-        progress=None,
-        callback=None,
-    )
+    mock_client_instance.get_entries.assert_awaited_once_with(target_date)
 
 
 @pytest.mark.asyncio
@@ -176,7 +171,7 @@ async def test_get_entries_invalid_date(mocker: MockerFixture) -> None:
     )
     mock_get.return_value = DataFrame()
 
-    result = await get_entries("2025-10-10")
+    result = await get_entries(["2025-10-10"])
     assert result.is_empty()
 
 
@@ -235,20 +230,15 @@ async def test_get_documents_pdf(mocker: MockerFixture) -> None:
 async def test_get_documents_single_doc_id(mocker: MockerFixture) -> None:
     from kabukit.edinet.concurrent import get_documents
 
-    mock_get = mocker.patch(
-        "kabukit.edinet.concurrent.get",
-        new_callable=mocker.AsyncMock,
+    mock_client_instance = mocker.AsyncMock()
+    mocker.patch(
+        "kabukit.edinet.concurrent.EdinetClient",
+        return_value=mocker.MagicMock(
+            __aenter__=mocker.AsyncMock(return_value=mock_client_instance),
+            __aexit__=mocker.AsyncMock(),
+        ),
     )
-    mock_get.return_value = DataFrame({"docID": [3]})
 
-    result = await get_documents("doc1")
+    await get_documents("doc1", pdf=True)
 
-    assert result.equals(DataFrame({"docID": [3]}))
-    mock_get.assert_awaited_once_with(
-        "csv",
-        ["doc1"],
-        limit=None,
-        max_concurrency=None,
-        progress=None,
-        callback=None,
-    )
+    mock_client_instance.get_document.assert_awaited_once_with("doc1", pdf=True)

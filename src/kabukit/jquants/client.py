@@ -18,7 +18,7 @@ from . import calendar, info, prices, statements, topix
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
-    from typing import Any, Self
+    from typing import Any
 
     from httpx import HTTPStatusError  # noqa: F401
     from httpx._types import QueryParamTypes
@@ -118,18 +118,15 @@ class JQuantsClient(Client):
         self,
         mailaddress: str,
         password: str,
-        *,
-        save: bool = False,
-    ) -> Self:
-        """メールアドレスとパスワードで認証し、IDトークンを設定する。
+    ) -> str:
+        """メールアドレスとパスワードで認証し、IDトークンを返す。
 
         Args:
             mailaddress: J-Quantsに登録したメールアドレス。
             password: J-Quantsのパスワード。
-            save: 取得したIDトークンを環境変数ファイルに保存するかどうか。
 
         Returns:
-            認証が完了したクライアント自身のインスタンス。
+            認証によって取得されたIDトークン。
 
         Raises:
             HTTPStatusError: 認証APIリクエストが失敗した場合。
@@ -140,13 +137,16 @@ class JQuantsClient(Client):
 
         url = f"/token/auth_refresh?refreshtoken={refresh_token}"
         data = await self.post(url)
-        id_token = data["idToken"]
+        return data["idToken"]
 
-        if save:
-            set_key(AuthKey.ID_TOKEN, id_token)
+    def save_id_token(self, id_token: str) -> None:
+        """IDトークンを設定ファイルに保存する。
 
+        Args:
+            id_token: 保存するIDトークン。
+        """
+        set_key(AuthKey.ID_TOKEN, id_token)
         self.set_id_token(id_token)
-        return self
 
     async def iter_pages(
         self,

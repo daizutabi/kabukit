@@ -1,7 +1,10 @@
+import pytest
 from polars import DataFrame
 from polars.testing import assert_frame_equal
 
 from kabukit.core.statements import Statements
+
+pytestmark = pytest.mark.unit
 
 
 def test_shares() -> None:

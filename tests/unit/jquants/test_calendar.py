@@ -16,6 +16,8 @@ if TYPE_CHECKING:
 
     from pytest_mock import MockerFixture
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def async_client(mocker: MockerFixture) -> MagicMock:

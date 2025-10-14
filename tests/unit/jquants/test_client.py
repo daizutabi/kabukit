@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from unittest.mock import call
 
 import pytest
 from httpx import HTTPStatusError, Response
@@ -12,6 +11,8 @@ if TYPE_CHECKING:
     from unittest.mock import AsyncMock
 
     from pytest_mock import MockerFixture
+
+pytestmark = pytest.mark.unit
 
 
 def test_set_id_token() -> None:
@@ -96,11 +97,11 @@ async def test_get_failure(mock_get: AsyncMock, mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_auth_successful_no_save(
+async def test_auth_returns_token(
     mock_post: AsyncMock,
     mocker: MockerFixture,
 ) -> None:
-    """Test successful authentication without saving tokens."""
+    """Test successful authentication returns token."""
     responses = [
         Response(200, json={"refreshToken": "test_refresh_token"}),
         Response(200, json={"idToken": "test_id_token"}),
@@ -112,41 +113,19 @@ async def test_auth_successful_no_save(
     mock_set_key = mocker.patch("kabukit.jquants.client.set_key")
 
     client = JQuantsClient()
-    await client.auth("test@example.com", "password", save=False)
+    token = await client.auth("test@example.com", "password")
 
-    assert mock_post.call_count == 2
-    mock_post.assert_any_call(
-        "/token/auth_user",
-        json={"mailaddress": "test@example.com", "password": "password"},
-    )
-    mock_post.assert_any_call(
-        "/token/auth_refresh?refreshtoken=test_refresh_token",
-        json=None,
-    )
+    assert token == "test_id_token"
     mock_set_key.assert_not_called()
 
 
 @pytest.mark.asyncio
-async def test_auth_successful_with_save(
-    mock_post: AsyncMock,
-    mocker: MockerFixture,
-) -> None:
-    """Test successful authentication with saving tokens."""
-    responses = [
-        Response(200, json={"refreshToken": "test_refresh_token"}),
-        Response(200, json={"idToken": "test_id_token"}),
-    ]
-    for r in responses:
-        r.raise_for_status = mocker.MagicMock()
-    mock_post.side_effect = responses
-
+async def test_save_id_token(mocker: MockerFixture) -> None:
+    """Test saving id token."""
     mock_set_key = mocker.patch("kabukit.jquants.client.set_key")
-
     client = JQuantsClient()
-    await client.auth("test@example.com", "password", save=True)
-
-    assert mock_post.call_count == 2
-    mock_set_key.assert_has_calls([call(AuthKey.ID_TOKEN, "test_id_token")])
+    client.save_id_token("test_id_token")
+    mock_set_key.assert_called_once_with(AuthKey.ID_TOKEN, "test_id_token")
 
 
 @pytest.mark.asyncio

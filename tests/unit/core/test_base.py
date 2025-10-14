@@ -10,6 +10,8 @@ from pytest_mock import MockerFixture
 
 from kabukit.core.base import Base, get_filename
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def data() -> DataFrame:

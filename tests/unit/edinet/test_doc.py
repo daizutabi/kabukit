@@ -5,6 +5,8 @@ import polars as pl
 import pytest
 from polars import DataFrame
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture(scope="module")
 def df() -> DataFrame:

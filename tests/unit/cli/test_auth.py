@@ -8,17 +8,25 @@ from typer.testing import CliRunner
 
 from kabukit.cli.app import app
 
+pytestmark = pytest.mark.unit
+
 runner = CliRunner()
 
 
 @pytest.mark.parametrize("command", ["jquants", "j"])
 def test_jquants_success(mock_jquants_client: MagicMock, command: str) -> None:
-    auth = AsyncMock()
-    mock_jquants_client.__aenter__.return_value.auth = auth
-    result = runner.invoke(app, ["auth", command], input="t@e.com\n123\n")
+    mock_auth = AsyncMock(return_value="dummy_id_token")
+    mock_save_id_token = MagicMock()
+    mock_jquants_client.__aenter__.return_value.auth = mock_auth
+    mock_jquants_client.__aenter__.return_value.save_id_token = mock_save_id_token
+
+    input_ = "test@example.com\npassword\n"
+    result = runner.invoke(app, ["auth", command], input=input_)
+
     assert result.exit_code == 0
     assert "J-QuantsのIDトークンを保存しました。" in result.stdout
-    auth.assert_awaited_once_with("t@e.com", "123", save=True)
+    mock_auth.assert_awaited_once_with("test@example.com", "password")
+    mock_save_id_token.assert_called_once_with("dummy_id_token")
 
 
 @pytest.mark.parametrize("command", ["jquants", "j"])

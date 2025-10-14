@@ -9,6 +9,8 @@ from pytest_mock import MockerFixture
 from kabukit.core.prices import Prices
 from kabukit.core.statements import Statements
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture(scope="module")
 def data() -> DataFrame:

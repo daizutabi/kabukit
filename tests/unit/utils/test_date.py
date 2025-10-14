@@ -1,5 +1,7 @@
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 def test_dates_days() -> None:
     from kabukit.utils.date import get_dates

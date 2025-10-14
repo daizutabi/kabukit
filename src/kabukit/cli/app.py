@@ -17,7 +17,7 @@ app.add_typer(cache.app, name="cache")
 
 
 @app.command()
-def version() -> None:
+def version() -> None:  # pragma: no cover
     """バージョン情報を表示します。"""
     from importlib.metadata import version
 

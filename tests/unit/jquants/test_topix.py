@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 
     from pytest_mock import MockerFixture
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.mark.asyncio
 async def test_get_topix(mock_get: AsyncMock, mocker: MockerFixture) -> None:

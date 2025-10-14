@@ -4,6 +4,8 @@ import pytest
 
 from kabukit.analysis.visualization.market import plot_topix_timeseries
 
+pytestmark = pytest.mark.unit
+
 # pyright: reportArgumentType=false
 # pyright: reportUnknownMemberType=false
 

@@ -9,6 +9,8 @@ from kabukit.cli.app import app
 
 from .conftest import MOCK_CODE, MOCK_DF, MOCK_PATH
 
+pytestmark = pytest.mark.unit
+
 runner = CliRunner()
 
 

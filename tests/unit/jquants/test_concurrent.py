@@ -14,6 +14,8 @@ if TYPE_CHECKING:
 
     from pytest_mock import MockerFixture
 
+pytestmark = pytest.mark.unit
+
 
 def dummy_progress(x: Iterable[Any]) -> Iterable[Any]:
     return x
@@ -62,36 +64,6 @@ async def test_get(mock_utils_get: AsyncMock) -> None:
         JQuantsClient,
         "test_resource",
         ["1234", "5678"],
-        limit=None,
-        max_concurrency=10,
-        progress=dummy_progress,
-        callback=dummy_callback,
-    )
-
-
-@pytest.mark.asyncio
-async def test_get_code(mock_utils_get: AsyncMock) -> None:
-    from kabukit.jquants.concurrent import get
-
-    mock_utils_get.return_value = DataFrame(
-        {"Date": [4, 3, 2, 1], "Code": ["a", "b", "b", "a"]},
-    )
-
-    result = await get(
-        "test_resource",
-        "1234",
-        max_concurrency=10,
-        progress=dummy_progress,  # pyright: ignore[reportArgumentType]
-        callback=dummy_callback,
-    )
-
-    expected = DataFrame({"Date": [1, 4, 2, 3], "Code": ["a", "a", "b", "b"]})
-    assert result.equals(expected)
-
-    mock_utils_get.assert_awaited_once_with(
-        JQuantsClient,
-        "test_resource",
-        ["1234"],
         limit=None,
         max_concurrency=10,
         progress=dummy_progress,
@@ -164,6 +136,24 @@ async def test_get_statements(mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
+async def test_get_statements_with_single_code(mocker: MockerFixture) -> None:
+    from kabukit.jquants.concurrent import get_statements
+
+    mock_client_instance = mocker.AsyncMock()
+    mocker.patch(
+        "kabukit.jquants.concurrent.JQuantsClient",
+        return_value=mocker.MagicMock(
+            __aenter__=mocker.AsyncMock(return_value=mock_client_instance),
+            __aexit__=mocker.AsyncMock(),
+        ),
+    )
+
+    await get_statements("7203")
+
+    mock_client_instance.get_statements.assert_awaited_once_with("7203")
+
+
+@pytest.mark.asyncio
 async def test_get_prices(mocker: MockerFixture) -> None:
     from kabukit.jquants.concurrent import get_prices
 
@@ -188,3 +178,21 @@ async def test_get_prices(mocker: MockerFixture) -> None:
         progress=dummy_progress,
         callback=dummy_callback,
     )
+
+
+@pytest.mark.asyncio
+async def test_get_prices_with_single_code(mocker: MockerFixture) -> None:
+    from kabukit.jquants.concurrent import get_prices
+
+    mock_client_instance = mocker.AsyncMock()
+    mocker.patch(
+        "kabukit.jquants.concurrent.JQuantsClient",
+        return_value=mocker.MagicMock(
+            __aenter__=mocker.AsyncMock(return_value=mock_client_instance),
+            __aexit__=mocker.AsyncMock(),
+        ),
+    )
+
+    await get_prices("7203")
+
+    mock_client_instance.get_prices.assert_awaited_once_with("7203")
