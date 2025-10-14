@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
 
 @final
-class _CalendarCache:
+class _CalendarCacheManager:
     def __init__(self) -> None:
         self._holidays: list[datetime.date] | None = None
         self._lock = asyncio.Lock()
@@ -39,7 +39,7 @@ class _CalendarCache:
             return self._holidays
 
 
-_calendar_cache_manager = _CalendarCache()
+_calendar_cache_manager = _CalendarCacheManager()
 
 
 API_VERSION = "v1"
