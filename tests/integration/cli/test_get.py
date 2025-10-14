@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import polars as pl
+import pytest
 from polars.testing import assert_frame_equal
 from typer.testing import CliRunner
 
@@ -12,6 +13,8 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from pytest_mock import MockerFixture
+
+pytestmark = pytest.mark.integration
 
 runner = CliRunner()
 

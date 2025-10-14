@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import pytest
 from typer.testing import CliRunner
 
 from kabukit.cli.app import app
+
+pytestmark = pytest.mark.integration
 
 runner = CliRunner()
 

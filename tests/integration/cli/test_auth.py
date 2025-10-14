@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import pytest
 from typer.testing import CliRunner
 
 from kabukit.cli.app import app
@@ -10,6 +11,8 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from pytest_mock import MockerFixture
+
+pytestmark = pytest.mark.integration
 
 runner = CliRunner()
 
@@ -22,16 +25,18 @@ def test_auth_edinet(mock_dotenv_path: Path) -> None:
 
 
 def test_auth_jquants(mock_dotenv_path: Path, mocker: MockerFixture) -> None:
+    dummy_token = "dummy_id_token"
     mock_auth = mocker.patch(
-        "kabukit.jquants.client.JQuantsClient.auth", return_value=None
+        "kabukit.jquants.client.JQuantsClient.auth", return_value=dummy_token
     )
+    # save_id_tokenはモックせず、実際のファイル書き込みをテストする
     result = runner.invoke(
         app, ["auth", "jquants"], input="test@example.com\npassword\n"
     )
     assert result.exit_code == 0
     assert "J-QuantsのIDトークンを保存しました。" in result.stdout
-    mock_auth.assert_called_once_with("test@example.com", "password", save=True)
-    assert mock_dotenv_path.read_text()
+    mock_auth.assert_called_once_with("test@example.com", "password")
+    assert mock_dotenv_path.read_text() == f"JQUANTS_ID_TOKEN='{dummy_token}'\n"
 
 
 def test_auth_show(mock_dotenv_path: Path) -> None:

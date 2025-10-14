@@ -13,12 +13,8 @@ if TYPE_CHECKING:
 @pytest.fixture
 def mock_cache_dir(tmp_path: Path, mocker: MockerFixture) -> Path:
     """Create a temporary cache directory and mock get_cache_dir."""
-    # Patch the source, for general use (e.g., in `get` commands)
-    mocker.patch("kabukit.utils.config.get_cache_dir", return_value=tmp_path)
-
-    # Patch the specific import used in the `cache` command module
+    mocker.patch("kabukit.core.base.get_cache_dir", return_value=tmp_path)
     mocker.patch("kabukit.cli.cache.get_cache_dir", return_value=tmp_path)
-
     return tmp_path
 
 
