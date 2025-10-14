@@ -1,3 +1,4 @@
+import pytest
 from polars import DataFrame
 
 from kabukit.jquants.schema import (
@@ -6,6 +7,8 @@ from kabukit.jquants.schema import (
     StatementColumns,
     rename,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_rename_all_columns() -> None:

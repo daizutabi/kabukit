@@ -94,9 +94,11 @@ docs = [
 
 [tool.pytest.ini_options]
 addopts = ["--cov=kabukit", "--cov-report=lcov:lcov.info", "--doctest-modules"]
-testpaths = ["tests/unit", "tests/integration", "tests/validation"]
+testpaths = ["tests"]
 markers = [
+  "e2e: marks tests as end-to-end tests",
   "integration: marks tests as integration tests",
+  "unit: marks tests as unit tests",
   "validation: marks tests as data validation tests",
 ]
 

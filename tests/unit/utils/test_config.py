@@ -3,9 +3,13 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
+import pytest
+
 if TYPE_CHECKING:
     from pathlib import Path
     from unittest.mock import MagicMock
+
+pytestmark = pytest.mark.unit
 
 
 def test_get_dotenv_path(user_config_dir: MagicMock, tmp_path: Path) -> None:

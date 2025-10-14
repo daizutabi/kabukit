@@ -2,6 +2,8 @@ from datetime import date
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 def test_iter_items() -> None:
     from kabukit.utils.params import iter_items

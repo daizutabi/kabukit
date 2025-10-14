@@ -9,6 +9,8 @@ from kabukit.analysis.visualization.prices import (
 )
 from kabukit.core.prices import Prices
 
+pytestmark = pytest.mark.unit
+
 # pyright: reportArgumentType=false
 # pyright: reportUnknownMemberType=false
 

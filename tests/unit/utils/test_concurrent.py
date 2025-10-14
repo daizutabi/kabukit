@@ -12,6 +12,8 @@ from kabukit.core.client import Client
 if TYPE_CHECKING:
     from collections.abc import AsyncIterable, AsyncIterator
 
+pytestmark = pytest.mark.unit
+
 
 async def sleep(seconds: list[float]):
     x = (asyncio.sleep(s, s) for s in seconds)

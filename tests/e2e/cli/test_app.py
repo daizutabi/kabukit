@@ -1,5 +1,9 @@
 import subprocess
 
+import pytest
+
+pytestmark = pytest.mark.e2e
+
 
 def test_command():
     """
