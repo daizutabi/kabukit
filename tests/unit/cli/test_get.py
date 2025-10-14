@@ -14,6 +14,18 @@ pytestmark = pytest.mark.unit
 runner = CliRunner()
 
 
+@pytest.fixture
+def mock_jquants_concurrent_get_statements(mocker: MockerFixture) -> AsyncMock:
+    return mocker.patch(
+        "kabukit.jquants.concurrent.get_statements", new_callable=AsyncMock
+    )
+
+
+@pytest.fixture
+def mock_jquants_concurrent_get_prices(mocker: MockerFixture) -> AsyncMock:
+    return mocker.patch("kabukit.jquants.concurrent.get_prices", new_callable=AsyncMock)
+
+
 def test_get_info_single_code(mock_get_info: AsyncMock) -> None:
     result = runner.invoke(app, ["get", "info", MOCK_CODE])
 
@@ -22,20 +34,28 @@ def test_get_info_single_code(mock_get_info: AsyncMock) -> None:
     mock_get_info.assert_awaited_once_with(MOCK_CODE)
 
 
-def test_get_statements_single_code(mock_get_statements: AsyncMock) -> None:
+def test_get_statements_single_code(
+    mock_jquants_concurrent_get_statements: AsyncMock,
+) -> None:
+    mock_jquants_concurrent_get_statements.return_value = MOCK_DF
     result = runner.invoke(app, ["get", "statements", MOCK_CODE])
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
-    mock_get_statements.assert_awaited_once_with(MOCK_CODE)
+    mock_jquants_concurrent_get_statements.assert_awaited_once_with(
+        MOCK_CODE, limit=None, progress=None
+    )
 
 
-def test_get_prices_single_code(mock_get_prices: AsyncMock) -> None:
+def test_get_prices_single_code(mock_jquants_concurrent_get_prices: AsyncMock) -> None:
+    mock_jquants_concurrent_get_prices.return_value = MOCK_DF
     result = runner.invoke(app, ["get", "prices", MOCK_CODE])
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
-    mock_get_prices.assert_awaited_once_with(MOCK_CODE)
+    mock_jquants_concurrent_get_prices.assert_awaited_once_with(
+        MOCK_CODE, limit=None, progress=None
+    )
 
 
 def test_get_info_all_codes(
@@ -54,33 +74,35 @@ def test_get_info_all_codes(
 
 
 def test_get_statements_all_codes(
-    mock_get: AsyncMock,
+    mock_jquants_concurrent_get_statements: AsyncMock,
     MockStatements: MagicMock,  # noqa: N803
     mock_statements: MagicMock,
 ) -> None:
+    mock_jquants_concurrent_get_statements.return_value = MOCK_DF
     result = runner.invoke(app, ["get", "statements"])
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
-    mock_get.assert_awaited_once_with("statements", progress=tqdm.asyncio.tqdm)
+    mock_jquants_concurrent_get_statements.assert_awaited_once_with(
+        None, limit=None, progress=tqdm.asyncio.tqdm
+    )
     MockStatements.assert_called_once_with(MOCK_DF)
     mock_statements.write.assert_called_once()
     assert f"全銘柄の財務情報を '{MOCK_PATH}' に保存しました。" in result.stdout
 
 
 def test_get_prices_all_codes(
-    mock_get: AsyncMock,
+    mock_jquants_concurrent_get_prices: AsyncMock,
     MockPrices: MagicMock,  # noqa: N803
     mock_prices: MagicMock,
 ) -> None:
+    mock_jquants_concurrent_get_prices.return_value = MOCK_DF
     result = runner.invoke(app, ["get", "prices"])
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
-    mock_get.assert_awaited_once_with(
-        "prices",
-        max_concurrency=8,
-        progress=tqdm.asyncio.tqdm,
+    mock_jquants_concurrent_get_prices.assert_awaited_once_with(
+        None, limit=None, progress=tqdm.asyncio.tqdm
     )
     MockPrices.assert_called_once_with(MOCK_DF)
     mock_prices.write.assert_called_once()
@@ -175,14 +197,18 @@ def test_get_all_all_codes(
     mock_cli_entries.assert_awaited_once_with(quiet=bool(quiet))
 
 
-def test_get_statements_interrupt(mock_get: AsyncMock) -> None:
-    mock_get.side_effect = KeyboardInterrupt
+def test_get_statements_interrupt(
+    mock_jquants_concurrent_get_statements: AsyncMock,
+) -> None:
+    mock_jquants_concurrent_get_statements.side_effect = KeyboardInterrupt
 
     result = runner.invoke(app, ["get", "statements"])
 
     assert result.exit_code == 1
     assert "中断しました" in result.stdout
-    mock_get.assert_awaited_once_with("statements", progress=tqdm.asyncio.tqdm)
+    mock_jquants_concurrent_get_statements.assert_awaited_once_with(
+        None, limit=None, progress=tqdm.asyncio.tqdm
+    )
 
 
 def test_get_entries_interrupt(mock_get_entries: AsyncMock) -> None:

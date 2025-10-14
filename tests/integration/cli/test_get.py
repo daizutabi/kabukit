@@ -46,11 +46,15 @@ def test_get_info_all(mocker: MockerFixture, mock_cache_dir: Path):
 
 def test_get_statements_all(mocker: MockerFixture, mock_cache_dir: Path):
     mock_df = pl.DataFrame({"code": ["1234"], "Profit": [100]})
-    mock_get = mocker.patch("kabukit.jquants.concurrent.get", return_value=mock_df)
+    mock_get_statements = mocker.patch(
+        "kabukit.jquants.concurrent.get_statements", return_value=mock_df
+    )  # Changed mock
     result = runner.invoke(app, ["get", "statements"])
     assert result.exit_code == 0
     assert "全銘柄の財務情報を" in result.stdout
-    mock_get.assert_called_once_with("statements", progress=mocker.ANY)
+    mock_get_statements.assert_called_once_with(
+        None, limit=None, progress=mocker.ANY
+    )  # Updated assertion
 
     path = next(mock_cache_dir.joinpath("statements").glob("*.parquet"))
     assert_frame_equal(pl.read_parquet(path), mock_df)
@@ -58,11 +62,15 @@ def test_get_statements_all(mocker: MockerFixture, mock_cache_dir: Path):
 
 def test_get_prices_all(mocker: MockerFixture, mock_cache_dir: Path):
     mock_df = pl.DataFrame({"code": ["1234"], "Close": [1000]})
-    mock_get = mocker.patch("kabukit.jquants.concurrent.get", return_value=mock_df)
+    mock_get_prices = mocker.patch(
+        "kabukit.jquants.concurrent.get_prices", return_value=mock_df
+    )  # Changed mock
     result = runner.invoke(app, ["get", "prices"])
     assert result.exit_code == 0
     assert "全銘柄の株価情報を" in result.stdout
-    mock_get.assert_called_once_with("prices", progress=mocker.ANY, max_concurrency=8)
+    mock_get_prices.assert_called_once_with(
+        None, limit=None, progress=mocker.ANY
+    )  # Updated assertion
 
     path = next(mock_cache_dir.joinpath("prices").glob("*.parquet"))
     assert_frame_equal(pl.read_parquet(path), mock_df)

@@ -38,7 +38,6 @@ Quiet = Annotated[
     bool,
     Option("--quiet", "-q", help="プログレスバーを表示しません。"),
 ]
-
 Limit = Annotated[
     int | None,
     Option("--limit", help="取得する銘柄数の上限。全銘柄取得時にのみ有効です。"),
