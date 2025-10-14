@@ -5,7 +5,7 @@ from typer.testing import CliRunner
 
 from kabukit.cli.app import app
 
-pytestmark = pytest.mark.integration
+pytestmark = pytest.mark.system
 
 runner = CliRunner()
 
