@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
+from httpx import HTTPStatusError, Request, Response
 from typer.testing import CliRunner
 
 from kabukit.cli.app import app
@@ -19,7 +20,9 @@ runner = CliRunner()
 
 @pytest.mark.parametrize("command", ["jquants", "j"])
 def test_auth_jquants(
-    command: str, mock_dotenv_path: Path, mocker: MockerFixture
+    command: str,
+    mock_dotenv_path: Path,
+    mocker: MockerFixture,
 ) -> None:
     dummy_token = "dummy_id_token"
     mock_auth = mocker.patch(
@@ -30,6 +33,26 @@ def test_auth_jquants(
     assert "J-QuantsのIDトークンを保存しました。" in result.stdout
     mock_auth.assert_called_once_with("test@example.com", "password")
     assert mock_dotenv_path.read_text() == f"JQUANTS_ID_TOKEN='{dummy_token}'\n"
+
+
+@pytest.mark.parametrize("command", ["jquants", "j"])
+def test_auth_jquants_error(command: str, mocker: MockerFixture) -> None:
+    mock_post = mocker.patch(
+        "kabukit.jquants.client.JQuantsClient.post",
+        new_callable=mocker.AsyncMock,
+    )
+    mock_post.side_effect = HTTPStatusError(
+        "400 Bad Request",
+        request=Request("POST", "http://mock-api.com/token"),
+        response=Response(400),
+    )
+
+    input_ = "invalid@example.com\ninvalid_password\n"
+    result = runner.invoke(app, ["auth", command], input=input_)
+
+    assert result.exit_code == 1
+    assert "認証に失敗しました" in result.stdout
+    mock_post.assert_awaited_once()
 
 
 @pytest.mark.parametrize("command", ["edinet", "e"])
