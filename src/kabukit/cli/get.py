@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated, Any
+from typing import Annotated
 
 import typer
 from async_typer import AsyncTyper
 from typer import Argument, Option
-
-if TYPE_CHECKING:
-    from kabukit.core.base import Base
 
 # pyright: reportMissingTypeStubs=false
 # pyright: reportUnknownMemberType=false
@@ -64,45 +61,6 @@ async def info(code: Code = None, *, quiet: Quiet = False) -> None:
         typer.echo(f"全銘柄の情報を '{path}' に保存しました。")
 
 
-async def _get(
-    code: str | None,
-    target: str,
-    cls: type[Base],
-    method: str,
-    message: str,
-    *,
-    quiet: bool = False,
-    limit: int | None = None,
-    **kwargs: Any,
-) -> None:
-    """財務情報・株価情報を取得するための共通処理"""
-    from kabukit.jquants.client import JQuantsClient
-
-    if code is not None:
-        async with JQuantsClient() as client:
-            df = await getattr(client, method)(code)
-        typer.echo(df)
-        return
-
-    import tqdm.asyncio
-
-    from kabukit.jquants.concurrent import get
-
-    progress = None if quiet else tqdm.asyncio.tqdm
-
-    try:
-        df = await get(target, progress=progress, limit=limit, **kwargs)
-    except KeyboardInterrupt:
-        typer.echo("中断しました。")
-        raise typer.Exit(1) from None
-
-    if not quiet:
-        typer.echo(df)
-
-    path = cls(df).write()
-    typer.echo(f"全銘柄の{message}を '{path}' に保存しました。")
-
-
 @app.async_command()
 async def statements(
     code: Code = None, *, quiet: Quiet = False, limit: Limit = None
@@ -130,19 +88,29 @@ async def statements(
 
 
 @app.async_command()
-async def prices(code: Code = None, *, quiet: Quiet = False) -> None:
+async def prices(
+    code: Code = None, *, quiet: Quiet = False, limit: Limit = None
+) -> None:
     """株価情報を取得します。"""
-    from kabukit.core.prices import Prices
+    import tqdm.asyncio
 
-    await _get(
-        code=code,
-        target="prices",
-        cls=Prices,
-        method="get_prices",
-        message="株価情報",
-        quiet=quiet,
-        max_concurrency=8,
-    )
+    from kabukit.core.prices import Prices
+    from kabukit.jquants.concurrent import get_prices
+
+    progress = None if code or quiet else tqdm.asyncio.tqdm
+
+    try:
+        df = await get_prices(code, limit=limit, progress=progress)
+    except KeyboardInterrupt:
+        typer.echo("中断しました。")
+        raise typer.Exit(1) from None
+
+    if not quiet:
+        typer.echo(df)
+
+    if code is None:
+        path = Prices(df).write()
+        typer.echo(f"全銘柄の株価情報を '{path}' に保存しました。")
 
 
 @app.async_command()

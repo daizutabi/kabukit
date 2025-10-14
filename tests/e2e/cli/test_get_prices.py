@@ -27,29 +27,23 @@ def mock_cache_dir(tmp_path: Path, mocker: MockerFixture) -> Path:
     return tmp_path
 
 
-def test_get_info_all(mock_cache_dir: Path) -> None:
-    """Test 'kabu get info' to retrieve all listed info and save to cache."""
-    result = runner.invoke(app, ["get", "info"])
+def test_get_prices_all(mock_cache_dir: Path) -> None:
+    result = runner.invoke(app, ["get", "prices", "--limit", "3"])
     assert result.exit_code == 0
-    assert "全銘柄の情報を" in result.stdout
-    assert "Code" in result.stdout
-    assert "CompanyName" in result.stdout
+    assert "全銘柄の株価情報を" in result.stdout
+    assert "shape:" in result.stdout
 
     # Verify a file was written to the mocked cache directory
-    info_cache_dir = mock_cache_dir / "info"
-    assert info_cache_dir.is_dir()
-    assert any(info_cache_dir.iterdir())  # Check if any file exists in the directory
+    prices_cache_dir = mock_cache_dir / "prices"
+    assert prices_cache_dir.is_dir()
+    assert any(prices_cache_dir.iterdir())  # Check if any file exists in the directory
 
 
-def test_get_info_specific_code(mock_cache_dir: Path) -> None:
-    """Test 'kabu get info <code_id>' to retrieve info for a specific code."""
+def test_get_prices_specific_code(mock_cache_dir: Path) -> None:
     # Use a known, stable code like Toyota (7203)
-    result = runner.invoke(app, ["get", "info", "7203"])
+    result = runner.invoke(app, ["get", "prices", "7203"])
     assert result.exit_code == 0
-    assert "7203" in result.stdout
-    assert "トヨタ自動車" in result.stdout
-    assert "Code" in result.stdout
-    assert "CompanyName" in result.stdout
+    assert "shape:" in result.stdout
 
-    info_cache_dir = mock_cache_dir / "info"
-    assert not info_cache_dir.exists()
+    prices_cache_dir = mock_cache_dir / "prices"
+    assert not prices_cache_dir.exists()
