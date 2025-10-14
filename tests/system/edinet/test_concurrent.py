@@ -3,7 +3,7 @@ from datetime import date
 import pytest
 from polars import DataFrame
 
-pytestmark = pytest.mark.integration
+pytestmark = pytest.mark.system
 
 
 @pytest.mark.asyncio

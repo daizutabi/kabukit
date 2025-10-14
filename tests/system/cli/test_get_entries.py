@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-pytestmark = pytest.mark.e2e
+pytestmark = pytest.mark.system
 
 runner = CliRunner()
 

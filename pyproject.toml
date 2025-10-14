@@ -96,8 +96,8 @@ docs = [
 addopts = ["--cov=kabukit", "--cov-report=lcov:lcov.info", "--doctest-modules"]
 testpaths = ["tests"]
 markers = [
-  "e2e: marks tests as end-to-end tests",
   "integration: marks tests as integration tests",
+  "system: marks tests as system tests",
   "unit: marks tests as unit tests",
   "validation: marks tests as data validation tests",
 ]

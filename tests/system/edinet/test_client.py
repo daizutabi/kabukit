@@ -5,7 +5,7 @@ from polars import DataFrame
 
 from kabukit.edinet.client import EdinetClient
 
-pytestmark = pytest.mark.integration
+pytestmark = pytest.mark.system
 
 
 @pytest.mark.asyncio

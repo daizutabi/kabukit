@@ -5,7 +5,7 @@ import pytest_asyncio
 from kabukit.core.prices import Prices
 from kabukit.jquants.client import JQuantsClient
 
-pytestmark = pytest.mark.integration
+pytestmark = pytest.mark.system
 
 
 @pytest_asyncio.fixture(scope="module")
