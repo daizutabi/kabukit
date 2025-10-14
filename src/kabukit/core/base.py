@@ -47,7 +47,6 @@ class Base:
         self.data.write_parquet(filename)
         return filename
 
-
     def filter(
         self,
         *predicates: IntoExprColumn | Iterable[IntoExprColumn] | bool | list[bool],
