@@ -43,7 +43,7 @@ jobs:
       - name: Run pre-commit hooks
         run: uv run pre-commit run --all-files
       - name: Run tests
-        run: uv run pytest -v --junitxml=junit.xml -m "not integration and not validation"
+        run: uv run pytest -v -m unit --junitxml=junit.xml
       - name: Upload Codecov Results
         if: success()
         uses: codecov/codecov-action@v5
