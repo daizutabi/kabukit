@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from typing import Annotated
 
 import typer
@@ -30,11 +31,20 @@ async def auth_jquants(mailaddress: str, password: str) -> None:
 
 Mailaddress = Annotated[
     str,
-    Option(prompt=True, help="J-Quantsに登録したメールアドレス。"),
+    Option(
+        default_factory=lambda: os.environ.get("JQUANTS_MAILADDRESS")
+        or typer.prompt("J-Quantsに登録したメールアドレス"),
+        help="J-Quantsに登録したメールアドレス。",
+    ),
 ]
 Password = Annotated[
     str,
-    Option(prompt=True, hide_input=True, help="J-Quantsのパスワード。"),
+    Option(
+        default_factory=lambda: os.environ.get("JQUANTS_PASSWORD")
+        or typer.prompt("J-Quantsのパスワード", hide_input=True),
+        hide_input=True,
+        help="J-Quantsのパスワード。",
+    ),
 ]
 
 
@@ -57,7 +67,14 @@ def auth_edinet(api_key: str) -> None:
     typer.echo("EDINETのAPIキーを保存しました。")
 
 
-ApiKey = Annotated[str, Option(prompt=True, help="取得したEDINET APIキー。")]
+ApiKey = Annotated[
+    str,
+    Option(
+        default_factory=lambda: os.environ.get("EDINET_API_KEY")
+        or typer.prompt("取得したEDINET APIキー"),
+        help="取得したEDINET APIキー。",
+    ),
+]
 
 
 @app.command()
