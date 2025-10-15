@@ -14,7 +14,7 @@ from kabukit.edinet.client import AuthKey, EdinetClient
 
 if TYPE_CHECKING:
     from typing import Any
-    from unittest.mock import AsyncMock, MagicMock
+    from unittest.mock import AsyncMock
 
     from pytest_mock import MockerFixture
 
@@ -47,36 +47,24 @@ def test_set_api_key_directly(mocker: MockerFixture) -> None:
     mock_get_config_value.assert_not_called()
 
 
-@pytest.fixture
-def async_client(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("kabukit.core.client.AsyncClient").return_value
-
-
-@pytest.fixture
-def get(async_client: MagicMock, mocker: MockerFixture) -> AsyncMock:
-    get = mocker.AsyncMock()
-    async_client.get = get
-    return get
-
-
 @pytest.mark.asyncio
-async def test_get_success(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     expected_response = Response(200, json={"message": "success"})
-    get.return_value = expected_response
+    mock_get.return_value = expected_response
     expected_response.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
     response = await client.get("test/path", params={"a": "b"})
 
     assert response == expected_response
-    get.assert_awaited_once_with("test/path", params={"a": "b"})
+    mock_get.assert_awaited_once_with("test/path", params={"a": "b"})
     expected_response.raise_for_status.assert_called_once()
 
 
 @pytest.mark.asyncio
-async def test_get_failure(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_failure(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     error_response = Response(400)
-    get.return_value = error_response
+    mock_get.return_value = error_response
     error_response.raise_for_status = mocker.MagicMock(
         side_effect=HTTPStatusError(
             "Bad Request",
@@ -94,27 +82,27 @@ async def test_get_failure(get: AsyncMock, mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_count_success(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_count_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"metadata": {"status": "200", "resultset": {"count": 123}}}
     response = Response(200, json=json)
-    get.return_value = response
+    mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
     count = await client.get_count("2023-10-26")
 
     assert count == 123
-    get.assert_awaited_once_with(
+    mock_get.assert_awaited_once_with(
         "/documents.json",
         params={"date": "2023-10-26", "type": 1},
     )
 
 
 @pytest.mark.asyncio
-async def test_get_count_fail(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_count_fail(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"metadata": {"status": "404", "message": "error"}}
     response = Response(200, json=json)
-    get.return_value = response
+    mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
@@ -124,11 +112,11 @@ async def test_get_count_fail(get: AsyncMock, mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_entries_success(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_entries_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     results = [{"docID": "S100TEST"}]
     json = {"results": results}
     response = Response(200, json=json)
-    get.return_value = response
+    mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
     mock_clean_documents = mocker.patch("kabukit.edinet.client.clean_entries")
@@ -140,7 +128,7 @@ async def test_get_entries_success(get: AsyncMock, mocker: MockerFixture) -> Non
     df = await client.get_entries(date)
 
     assert_frame_equal(df, expected_df)
-    get.assert_awaited_once_with(
+    mock_get.assert_awaited_once_with(
         "/documents.json",
         params={"date": date, "type": 2},
     )
@@ -148,10 +136,13 @@ async def test_get_entries_success(get: AsyncMock, mocker: MockerFixture) -> Non
 
 
 @pytest.mark.asyncio
-async def test_get_entries_no_results(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_entries_no_results(
+    mock_get: AsyncMock,
+    mocker: MockerFixture,
+) -> None:
     json = {"metadata": {"status": "200"}}
     response = Response(200, json=json)
-    get.return_value = response
+    mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
@@ -162,12 +153,12 @@ async def test_get_entries_no_results(get: AsyncMock, mocker: MockerFixture) -> 
 
 @pytest.mark.asyncio
 async def test_get_entries_empty_results(
-    get: AsyncMock,
+    mock_get: AsyncMock,
     mocker: MockerFixture,
 ) -> None:
     json: dict[str, list[Any]] = {"results": []}
     response = Response(200, json=json)
-    get.return_value = response
+    mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
@@ -177,26 +168,26 @@ async def test_get_entries_empty_results(
 
 
 @pytest.mark.asyncio
-async def test_get_response(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_response(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     expected_response = Response(200, content=b"file content")
-    get.return_value = expected_response
-    get.return_value.raise_for_status = mocker.MagicMock()
+    mock_get.return_value = expected_response
+    mock_get.return_value.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
     response = await client.get_response("S100TEST", doc_type=1)
 
     assert response == expected_response
-    get.assert_awaited_once_with("/documents/S100TEST", params={"type": 1})
+    mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 1})
 
 
 @pytest.mark.asyncio
-async def test_get_pdf_success(get: AsyncMock, mocker: MockerFixture) -> None:
-    get.return_value = Response(
+async def test_get_pdf_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+    mock_get.return_value = Response(
         200,
         content=b"pdf content",
         headers={"content-type": "application/pdf"},
     )
-    get.return_value.raise_for_status = mocker.MagicMock()
+    mock_get.return_value.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
     df = await client.get_pdf("S100TEST")
@@ -204,17 +195,17 @@ async def test_get_pdf_success(get: AsyncMock, mocker: MockerFixture) -> None:
     expected = DataFrame({"docID": ["S100TEST"], "pdf": [b"pdf content"]})
 
     assert_frame_equal(df, expected)
-    get.assert_awaited_once_with("/documents/S100TEST", params={"type": 2})
+    mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 2})
 
 
 @pytest.mark.asyncio
-async def test_get_pdf_fail(get: AsyncMock, mocker: MockerFixture) -> None:
-    get.return_value = Response(
+async def test_get_pdf_fail(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+    mock_get.return_value = Response(
         200,
         content=b"not a pdf",
         headers={"content-type": "application/json"},
     )
-    get.return_value.raise_for_status = mocker.MagicMock()
+    mock_get.return_value.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
     msg = "PDF is not available."
@@ -223,29 +214,29 @@ async def test_get_pdf_fail(get: AsyncMock, mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_zip_success(get: AsyncMock, mocker: MockerFixture) -> None:
-    get.return_value = Response(
+async def test_get_zip_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+    mock_get.return_value = Response(
         200,
         content=b"zip content",
         headers={"content-type": "application/octet-stream"},
     )
-    get.return_value.raise_for_status = mocker.MagicMock()
+    mock_get.return_value.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
     content = await client.get_zip("S100TEST", doc_type=5)
 
     assert content == b"zip content"
-    get.assert_awaited_once_with("/documents/S100TEST", params={"type": 5})
+    mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 5})
 
 
 @pytest.mark.asyncio
-async def test_get_zip_fail(get: AsyncMock, mocker: MockerFixture) -> None:
-    get.return_value = Response(
+async def test_get_zip_fail(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+    mock_get.return_value = Response(
         200,
         content=b"not a zip",
         headers={"content-type": "application/json"},
     )
-    get.return_value.raise_for_status = mocker.MagicMock()
+    mock_get.return_value.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
     msg = "ZIP is not available."
@@ -254,19 +245,19 @@ async def test_get_zip_fail(get: AsyncMock, mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_csv_success(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_csv_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     csv_content = "header1\theader2\nvalue1\tvalue2"
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w") as zf:
         zf.writestr("test.csv", csv_content.encode("utf-16-le"))
     zip_content = zip_buffer.getvalue()
 
-    get.return_value = Response(
+    mock_get.return_value = Response(
         200,
         content=zip_content,
         headers={"content-type": "application/octet-stream"},
     )
-    get.return_value.raise_for_status = mocker.MagicMock()
+    mock_get.return_value.raise_for_status = mocker.MagicMock()
 
     mock_clean_csv = mocker.patch("kabukit.edinet.client.clean_csv")
     expected_df = pl.DataFrame({"header1": ["value1"], "header2": ["value2"]})
@@ -276,23 +267,26 @@ async def test_get_csv_success(get: AsyncMock, mocker: MockerFixture) -> None:
     df = await client.get_csv("S100TEST")
 
     assert_frame_equal(df, expected_df)
-    get.assert_awaited_once_with("/documents/S100TEST", params={"type": 5})
+    mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 5})
     mock_clean_csv.assert_called_once()
 
 
 @pytest.mark.asyncio
-async def test_get_csv_no_csv_in_zip(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_csv_no_csv_in_zip(
+    mock_get: AsyncMock,
+    mocker: MockerFixture,
+) -> None:
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w") as zf:
         zf.writestr("test.txt", "some text")
     zip_content = zip_buffer.getvalue()
 
-    get.return_value = Response(
+    mock_get.return_value = Response(
         200,
         content=zip_content,
         headers={"content-type": "application/octet-stream"},
     )
-    get.return_value.raise_for_status = mocker.MagicMock()
+    mock_get.return_value.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
     msg = "CSV is not available."
@@ -301,33 +295,36 @@ async def test_get_csv_no_csv_in_zip(get: AsyncMock, mocker: MockerFixture) -> N
 
 
 @pytest.mark.asyncio
-async def test_get_retries_on_failure(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_retries_on_failure(
+    mock_get: AsyncMock,
+    mocker: MockerFixture,
+) -> None:
     """Test that the get method retries on retryable failures."""
     error = ConnectTimeout("Connection timed out")
     success_response = Response(200, json={"message": "success"})
     success_response.raise_for_status = mocker.MagicMock()
 
-    get.side_effect = [error, error, success_response]
+    mock_get.side_effect = [error, error, success_response]
 
     client = EdinetClient("test_key")
     response = await client.get("test/path", params={})
 
     assert response == success_response
-    assert get.call_count == 3
+    assert mock_get.call_count == 3
 
 
 @pytest.mark.asyncio
-async def test_get_fails_after_retries(get: AsyncMock) -> None:
+async def test_get_fails_after_retries(mock_get: AsyncMock) -> None:
     """Test that the get method fails after exhausting all retries."""
     error = ConnectTimeout("Connection timed out")
-    get.side_effect = [error, error, error]
+    mock_get.side_effect = [error, error, error]
 
     client = EdinetClient("test_key")
 
     with pytest.raises(ConnectTimeout):
         await client.get("test/path", params={})
 
-    assert get.call_count == 3
+    assert mock_get.call_count == 3
 
 
 @pytest.mark.asyncio

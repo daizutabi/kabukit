@@ -118,21 +118,12 @@ async def test_get_without_codes(
 
 
 @pytest.mark.asyncio
-async def test_get_info(mocker: MockerFixture) -> None:
+async def test_get_info(mock_jquants_client_context: AsyncMock) -> None:
     from kabukit.jquants.concurrent import get_info
-
-    mock_client_instance = mocker.AsyncMock()
-    mocker.patch(
-        "kabukit.jquants.concurrent.JQuantsClient",
-        return_value=mocker.MagicMock(
-            __aenter__=mocker.AsyncMock(return_value=mock_client_instance),
-            __aexit__=mocker.AsyncMock(),
-        ),
-    )
 
     await get_info("7203")
 
-    mock_client_instance.get_info.assert_awaited_once_with("7203")
+    mock_jquants_client_context.get_info.assert_awaited_once_with("7203")
 
 
 @pytest.mark.asyncio
@@ -200,21 +191,14 @@ async def test_get_statements(mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_statements_with_single_code(mocker: MockerFixture) -> None:
+async def test_get_statements_with_single_code(
+    mock_jquants_client_context: AsyncMock,
+) -> None:
     from kabukit.jquants.concurrent import get_statements
-
-    mock_client_instance = mocker.AsyncMock()
-    mocker.patch(
-        "kabukit.jquants.concurrent.JQuantsClient",
-        return_value=mocker.MagicMock(
-            __aenter__=mocker.AsyncMock(return_value=mock_client_instance),
-            __aexit__=mocker.AsyncMock(),
-        ),
-    )
 
     await get_statements("7203")
 
-    mock_client_instance.get_statements.assert_awaited_once_with("7203")
+    mock_jquants_client_context.get_statements.assert_awaited_once_with("7203")
 
 
 @pytest.mark.asyncio
@@ -245,18 +229,11 @@ async def test_get_prices(mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_prices_with_single_code(mocker: MockerFixture) -> None:
+async def test_get_prices_with_single_code(
+    mock_jquants_client_context: AsyncMock,
+) -> None:
     from kabukit.jquants.concurrent import get_prices
-
-    mock_client_instance = mocker.AsyncMock()
-    mocker.patch(
-        "kabukit.jquants.concurrent.JQuantsClient",
-        return_value=mocker.MagicMock(
-            __aenter__=mocker.AsyncMock(return_value=mock_client_instance),
-            __aexit__=mocker.AsyncMock(),
-        ),
-    )
 
     await get_prices("7203")
 
-    mock_client_instance.get_prices.assert_awaited_once_with("7203")
+    mock_jquants_client_context.get_prices.assert_awaited_once_with("7203")
