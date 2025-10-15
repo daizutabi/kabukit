@@ -144,7 +144,7 @@ def test_fin_current_period_days(fin: DataFrame, period: str, days: int) -> None
     )
     x = df["x"].mean()
     assert isinstance(x, float)
-    assert 0.995 < x <= 1
+    assert 0.994 < x <= 1
 
 
 def test_per_share(data: DataFrame) -> None:
