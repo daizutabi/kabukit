@@ -27,9 +27,13 @@ def test_set_api_key() -> None:
 
 
 def test_set_api_key_none(mocker: MockerFixture) -> None:
-    mocker.patch.dict("os.environ", {AuthKey.API_KEY: "def"})
+    mock_get_config_value = mocker.patch(
+        "kabukit.edinet.client.get_config_value",
+        return_value="def",
+    )
     client = EdinetClient()
     assert client.client.params["Subscription-Key"] == "def"
+    mock_get_config_value.assert_called_once_with(AuthKey.API_KEY)
 
 
 @pytest.fixture
