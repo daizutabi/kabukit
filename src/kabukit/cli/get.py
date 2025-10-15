@@ -48,7 +48,7 @@ MaxItems = Annotated[
 async def info(code: Code = None, *, quiet: Quiet = False) -> None:
     """上場銘柄一覧を取得します。"""
     from kabukit.core.info import Info
-    from kabukit.jquants.info import get_info
+    from kabukit.jquants.concurrent import get_info
 
     df = await get_info(code)
 
