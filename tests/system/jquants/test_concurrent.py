@@ -31,6 +31,23 @@ async def test_get_without_codes(resource: str) -> None:
 
 
 @pytest.mark.asyncio
+async def test_get_target_codes() -> None:
+    from kabukit.jquants.concurrent import get_target_codes
+
+    codes = await get_target_codes()
+    assert "72030" in codes
+    assert "99840" in codes
+
+
+@pytest.mark.asyncio
+async def test_get_target_codes_all_ends_with_zero() -> None:
+    from kabukit.jquants.concurrent import get_target_codes
+
+    codes = await get_target_codes()
+    assert all(code.endswith("0") for code in codes)
+
+
+@pytest.mark.asyncio
 async def test_get_statements() -> None:
     from kabukit.jquants.concurrent import get_statements
 

@@ -103,20 +103,3 @@ def test_rename(df: DataFrame) -> None:
 
     df_renamed = InfoColumns.rename(df, strict=True)
     assert df_renamed.columns == [c.value for c in InfoColumns]
-
-
-@pytest.mark.asyncio
-async def test_get_target_codes() -> None:
-    from kabukit.jquants.info import get_target_codes
-
-    codes = await get_target_codes()
-    assert "72030" in codes
-    assert "99840" in codes
-
-
-@pytest.mark.asyncio
-async def test_get_target_codes_all_ends_with_zero() -> None:
-    from kabukit.jquants.info import get_target_codes
-
-    codes = await get_target_codes()
-    assert all(code.endswith("0") for code in codes)
