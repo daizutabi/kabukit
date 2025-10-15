@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import datetime
-import os
 from enum import StrEnum
 from typing import TYPE_CHECKING, final
 from zoneinfo import ZoneInfo
@@ -11,7 +10,7 @@ import polars as pl
 from polars import DataFrame
 
 from kabukit.core.client import Client
-from kabukit.utils.config import load_dotenv, set_key
+from kabukit.utils.config import get_config_value
 from kabukit.utils.params import get_params
 
 from . import calendar, info, prices, statements, topix
@@ -49,7 +48,8 @@ BASE_URL = f"https://api.jquants.com/{API_VERSION}"
 class AuthKey(StrEnum):
     """J-Quants認証のための環境変数キー。"""
 
-    REFRESH_TOKEN = "JQUANTS_REFRESH_TOKEN"  # noqa: S105
+    MAILADDRESS = "JQUANTS_MAILADDRESS"
+    PASSWORD = "JQUANTS_PASSWORD"  # noqa: S105
     ID_TOKEN = "JQUANTS_ID_TOKEN"  # noqa: S105
 
 
@@ -71,11 +71,11 @@ class JQuantsClient(Client):
         """HTTPヘッダーにIDトークンを設定する。
 
         Args:
-            id_token: 設定するIDトークン。Noneの場合、環境変数から読み込む。
+            id_token: 設定するIDトークン。Noneの場合、設定ファイルまたは
+                環境変数から読み込む。
         """
         if id_token is None:
-            load_dotenv()
-            id_token = os.environ.get(AuthKey.ID_TOKEN)
+            id_token = get_config_value(AuthKey.ID_TOKEN)
 
         if id_token:
             self.client.headers["Authorization"] = f"Bearer {id_token}"
@@ -116,37 +116,41 @@ class JQuantsClient(Client):
 
     async def auth(
         self,
-        mailaddress: str,
-        password: str,
+        mailaddress: str | None = None,
+        password: str | None = None,
     ) -> str:
         """メールアドレスとパスワードで認証し、IDトークンを返す。
 
         Args:
-            mailaddress: J-Quantsに登録したメールアドレス。
-            password: J-Quantsのパスワード。
+            mailaddress (str | None): J-Quantsに登録したメールアドレス。
+                Noneの場合、設定ファイルまたは環境変数から読み込む。
+            password (str | None): J-Quantsのパスワード。
+                Noneの場合、設定ファイルまたは環境変数から読み込む。
 
         Returns:
-            認証によって取得されたIDトークン。
+            str: 認証によって取得されたIDトークン。
 
         Raises:
+            ValueError: メールアドレスまたはパスワードが指定されていない場合。
             HTTPStatusError: 認証APIリクエストが失敗した場合。
         """
+        mailaddress = mailaddress or get_config_value(AuthKey.MAILADDRESS)
+        password = password or get_config_value(AuthKey.PASSWORD)
+
+        if not mailaddress or not password:
+            msg = "メールアドレスとパスワードを指定するか、"
+            msg += "環境変数に設定する必要がある。"
+            raise ValueError(msg)
+
         json_data = {"mailaddress": mailaddress, "password": password}
         data = await self.post("/token/auth_user", json=json_data)
         refresh_token = data["refreshToken"]
 
         url = f"/token/auth_refresh?refreshtoken={refresh_token}"
         data = await self.post(url)
-        return data["idToken"]
-
-    def save_id_token(self, id_token: str) -> None:
-        """IDトークンを設定ファイルに保存する。
-
-        Args:
-            id_token: 保存するIDトークン。
-        """
-        set_key(AuthKey.ID_TOKEN, id_token)
+        id_token = data["idToken"]
         self.set_id_token(id_token)
+        return id_token
 
     async def iter_pages(
         self,

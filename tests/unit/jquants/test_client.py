@@ -120,15 +120,6 @@ async def test_auth_returns_token(
 
 
 @pytest.mark.asyncio
-async def test_save_id_token(mocker: MockerFixture) -> None:
-    """Test saving id token."""
-    mock_set_key = mocker.patch("kabukit.jquants.client.set_key")
-    client = JQuantsClient()
-    client.save_id_token("test_id_token")
-    mock_set_key.assert_called_once_with(AuthKey.ID_TOKEN, "test_id_token")
-
-
-@pytest.mark.asyncio
 async def test_iter_pages(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     def side_effect(_url: str, params: dict[str, str]) -> Response:
         if "pagination_key" not in params:
