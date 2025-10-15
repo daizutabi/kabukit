@@ -45,13 +45,13 @@ jobs:
       - name: Run tests
         run: uv run pytest -v -m unit --junitxml=junit.xml
       - name: Upload Codecov Results
-        if: success()
+        if: success() && matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14'
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: lcov.info
       - name: Upload test results to Codecov
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() }} && matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14'
         uses: codecov/test-results-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
