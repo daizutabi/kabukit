@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import io
-import os
 import zipfile
 from enum import StrEnum
 from typing import TYPE_CHECKING
@@ -11,7 +10,7 @@ from polars import DataFrame
 from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
 
 from kabukit.core.client import Client
-from kabukit.utils.config import load_dotenv
+from kabukit.utils.config import get_config_value
 from kabukit.utils.params import get_params
 
 from .doc import clean_csv, clean_entries, clean_pdf, read_csv
@@ -55,11 +54,11 @@ class EdinetClient(Client):
         """HTTPクエリパラメータにAPIキーを設定する。
 
         Args:
-            api_key: 設定するAPIキー。Noneの場合、環境変数から読み込む。
+            api_key: 設定するAPIキー。Noneの場合、設定ファイルまたは
+                環境変数から読み込む。
         """
         if api_key is None:
-            load_dotenv()
-            api_key = os.environ.get(AuthKey.API_KEY)
+            api_key = get_config_value(AuthKey.API_KEY)
 
         if api_key:
             self.client.params = {"Subscription-Key": api_key}

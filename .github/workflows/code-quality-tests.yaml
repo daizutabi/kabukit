@@ -75,11 +75,11 @@ jobs:
         env:
           JQUANTS_MAILADDRESS: ${{ secrets.JQUANTS_MAILADDRESS }}
           JQUANTS_PASSWORD: ${{ secrets.JQUANTS_PASSWORD }}
-        run: uv run kabu auth jquants --mailaddress "$JQUANTS_MAILADDRESS" --password "$JQUANTS_PASSWORD"
+        run: uv run kabu auth jquants
       - name: Authenticate (EDINET)
         env:
           EDINET_API_KEY: ${{ secrets.EDINET_API_KEY }}
-        run: uv run kabu auth edinet --api-key "$EDINET_API_KEY"
+        run: uv run kabu auth edinet
       - name: Cache and get data
         id: cache-data
         uses: actions/cache@v4
