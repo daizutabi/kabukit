@@ -21,9 +21,13 @@ def test_set_id_token() -> None:
 
 
 def test_set_id_token_none(mocker: MockerFixture) -> None:
-    mocker.patch.dict("os.environ", {AuthKey.ID_TOKEN: "def"})
+    mock_get_config_value = mocker.patch(
+        "kabukit.jquants.client.get_config_value",
+        return_value="def",
+    )
     client = JQuantsClient()
     assert client.client.headers["Authorization"] == "Bearer def"
+    mock_get_config_value.assert_called_once_with(AuthKey.ID_TOKEN)
 
 
 @pytest.mark.asyncio
@@ -110,13 +114,10 @@ async def test_auth_returns_token(
         r.raise_for_status = mocker.MagicMock()
     mock_post.side_effect = responses
 
-    mock_set_key = mocker.patch("kabukit.jquants.client.set_key")
-
     client = JQuantsClient()
     token = await client.auth("test@example.com", "password")
 
     assert token == "test_id_token"
-    mock_set_key.assert_not_called()
 
 
 @pytest.mark.asyncio
