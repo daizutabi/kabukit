@@ -105,6 +105,9 @@ def edinet_alias(api_key: ApiKey) -> None:
 
 def auth_edinet(api_key: str) -> None:
     """EDINET APIのAPIキーを設定ファイルに保存します。"""
+    if not api_key or api_key.strip() == "":
+        typer.echo("APIキーが入力されていません。")
+        raise Exit(1)
 
     save_config_key(EdinetAuthKey.API_KEY, api_key)
     typer.echo("EDINETのAPIキーを保存しました。")
