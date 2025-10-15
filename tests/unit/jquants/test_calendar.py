@@ -12,27 +12,15 @@ from polars.testing import assert_frame_equal
 from kabukit.jquants.client import JQuantsClient
 
 if TYPE_CHECKING:
-    from unittest.mock import AsyncMock, MagicMock
+    from unittest.mock import AsyncMock
 
     from pytest_mock import MockerFixture
 
 pytestmark = pytest.mark.unit
 
 
-@pytest.fixture
-def async_client(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("kabukit.core.client.AsyncClient").return_value
-
-
-@pytest.fixture
-def get(async_client: MagicMock, mocker: MockerFixture) -> AsyncMock:
-    get = mocker.AsyncMock()
-    async_client.get = get
-    return get
-
-
 @pytest.mark.asyncio
-async def test_get_calendar(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_calendar(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     """Test get_calendar method."""
     # 1. Mock the API response
     json_data = {
@@ -44,7 +32,7 @@ async def test_get_calendar(get: AsyncMock, mocker: MockerFixture) -> None:
         ],
     }
     response = Response(200, json=json_data)
-    get.return_value = response
+    mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
     # 2. Call the method
@@ -80,16 +68,16 @@ async def test_get_calendar(get: AsyncMock, mocker: MockerFixture) -> None:
     )
 
     assert_frame_equal(result_df.sort("Date"), expected_df)
-    get.assert_awaited_once_with("/markets/trading_calendar", params={})
+    mock_get.assert_awaited_once_with("/markets/trading_calendar", params={})
 
 
 @pytest.mark.asyncio
-async def test_get_calendar_empty(get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_calendar_empty(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     """Test get_calendar method with an empty response."""
     # 1. Mock the API response
     json: dict[str, list[dict[str, str]]] = {"trading_calendar": []}
     response = Response(200, json=json)
-    get.return_value = response
+    mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
     # 2. Call the method
@@ -98,4 +86,4 @@ async def test_get_calendar_empty(get: AsyncMock, mocker: MockerFixture) -> None
 
     # 3. Assert the result
     assert result_df.is_empty()
-    get.assert_awaited_once_with("/markets/trading_calendar", params={})
+    mock_get.assert_awaited_once_with("/markets/trading_calendar", params={})

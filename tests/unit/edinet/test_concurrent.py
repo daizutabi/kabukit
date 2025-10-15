@@ -141,24 +141,13 @@ async def test_get_entries_years(
 
 
 @pytest.mark.asyncio
-async def test_get_entries_single_date(
-    mocker: MockerFixture,
-) -> None:
+async def test_get_entries_single_date(mock_edinet_client_context: AsyncMock) -> None:
     from kabukit.edinet.concurrent import get_entries
-
-    mock_client_instance = mocker.AsyncMock()
-    mocker.patch(
-        "kabukit.edinet.concurrent.EdinetClient",
-        return_value=mocker.MagicMock(
-            __aenter__=mocker.AsyncMock(return_value=mock_client_instance),
-            __aexit__=mocker.AsyncMock(),
-        ),
-    )
 
     target_date = datetime.date(2025, 10, 10)
     await get_entries(target_date)
 
-    mock_client_instance.get_entries.assert_awaited_once_with(target_date)
+    mock_edinet_client_context.get_entries.assert_awaited_once_with(target_date)
 
 
 @pytest.mark.asyncio
@@ -227,18 +216,11 @@ async def test_get_documents_pdf(mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_documents_single_doc_id(mocker: MockerFixture) -> None:
+async def test_get_documents_single_doc_id(
+    mock_edinet_client_context: AsyncMock,
+) -> None:
     from kabukit.edinet.concurrent import get_documents
-
-    mock_client_instance = mocker.AsyncMock()
-    mocker.patch(
-        "kabukit.edinet.concurrent.EdinetClient",
-        return_value=mocker.MagicMock(
-            __aenter__=mocker.AsyncMock(return_value=mock_client_instance),
-            __aexit__=mocker.AsyncMock(),
-        ),
-    )
 
     await get_documents("doc1", pdf=True)
 
-    mock_client_instance.get_document.assert_awaited_once_with("doc1", pdf=True)
+    mock_edinet_client_context.get_document.assert_awaited_once_with("doc1", pdf=True)

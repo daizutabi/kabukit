@@ -8,7 +8,7 @@ import pytest_asyncio
 from kabukit.jquants.client import JQuantsClient, _CalendarCacheManager
 
 if TYPE_CHECKING:
-    from unittest.mock import AsyncMock, MagicMock
+    from unittest.mock import AsyncMock
 
     from pytest_mock import MockerFixture
 
@@ -30,19 +30,14 @@ def reset_calendar_cache_manager(mocker: MockerFixture):
 
 
 @pytest.fixture
-def mock_async_client(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("kabukit.core.client.AsyncClient").return_value
-
-
-@pytest.fixture
-def mock_post(mock_async_client: MagicMock, mocker: MockerFixture) -> AsyncMock:
-    mock_post = mocker.AsyncMock()
-    mock_async_client.post = mock_post
-    return mock_post
-
-
-@pytest.fixture
-def mock_get(mock_async_client: MagicMock, mocker: MockerFixture) -> AsyncMock:
-    mock_get = mocker.AsyncMock()
-    mock_async_client.get = mock_get
-    return mock_get
+def mock_jquants_client_context(mocker: MockerFixture) -> AsyncMock:
+    """JQuantsClientの非同期コンテキストマネージャをモックするフィクスチャ"""
+    mock_client_instance = mocker.AsyncMock()
+    mocker.patch(
+        "kabukit.jquants.concurrent.JQuantsClient",
+        return_value=mocker.MagicMock(
+            __aenter__=mocker.AsyncMock(return_value=mock_client_instance),
+            __aexit__=mocker.AsyncMock(),
+        ),
+    )
+    return mock_client_instance
