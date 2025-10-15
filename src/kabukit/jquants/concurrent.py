@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import polars as pl
+from polars import DataFrame
+
 from kabukit.utils import concurrent
 
 from .client import JQuantsClient
-from .info import get_target_codes
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -58,6 +60,41 @@ async def get(
         callback=callback,
     )
     return data.sort("Code", "Date")
+
+
+async def get_info(code: str | None = None, /) -> DataFrame:
+    """上場銘柄一覧銘を取得する。
+
+    Returns:
+        銘柄情報を含むDataFrame。
+
+    Raises:
+        HTTPStatusError: APIリクエストが失敗した場合。
+    """
+    async with JQuantsClient() as client:
+        return await client.get_info(code)
+
+
+async def get_target_codes() -> list[str]:
+    """分析対象となる銘柄コードのリストを返す。
+
+    以下の条件を満たす銘柄は対象外とする。
+
+    - 市場: TOKYO PRO MARKET
+    - 業種: その他 -- (投資信託など)
+    - 優先株式
+    """
+    info = await get_info()
+
+    return (
+        info.filter(
+            pl.col("MarketCodeName") != "TOKYO PRO MARKET",
+            pl.col("Sector17CodeName") != "その他",
+            ~pl.col("CompanyName").str.contains("優先株式"),
+        )
+        .get_column("Code")
+        .to_list()
+    )
 
 
 async def get_statements(

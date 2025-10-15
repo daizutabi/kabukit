@@ -41,6 +41,14 @@ def mock_get_target_codes(mocker: MockerFixture) -> AsyncMock:
     )
 
 
+@pytest.fixture
+def mock_get_info(mocker: MockerFixture) -> AsyncMock:
+    return mocker.patch(
+        "kabukit.jquants.concurrent.get_info",
+        new_callable=mocker.AsyncMock,
+    )
+
+
 @pytest.mark.asyncio
 async def test_get(mock_utils_get: AsyncMock) -> None:
     from kabukit.jquants.concurrent import get
@@ -107,6 +115,62 @@ async def test_get_without_codes(
         progress=dummy_progress,
         callback=dummy_callback,
     )
+
+
+@pytest.mark.asyncio
+async def test_get_info(mocker: MockerFixture) -> None:
+    from kabukit.jquants.concurrent import get_info
+
+    mock_client_instance = mocker.AsyncMock()
+    mocker.patch(
+        "kabukit.jquants.concurrent.JQuantsClient",
+        return_value=mocker.MagicMock(
+            __aenter__=mocker.AsyncMock(return_value=mock_client_instance),
+            __aexit__=mocker.AsyncMock(),
+        ),
+    )
+
+    await get_info("7203")
+
+    mock_client_instance.get_info.assert_awaited_once_with("7203")
+
+
+@pytest.mark.asyncio
+async def test_get_target_codes(mock_get_info: AsyncMock) -> None:
+    from kabukit.jquants.concurrent import get_target_codes
+
+    mock_df = DataFrame(
+        {
+            "Code": ["0001", "0002", "0003", "0004", "0005"],
+            "MarketCodeName": [
+                "プライム",
+                "TOKYO PRO MARKET",  # フィルタリング対象
+                "スタンダード",
+                "グロース",
+                "プライム",
+            ],
+            "Sector17CodeName": [
+                "情報・通信業",
+                "サービス業",
+                "その他",  # フィルタリング対象
+                "小売業",
+                "銀行業",
+            ],
+            "CompanyName": [
+                "A社",
+                "B社",
+                "C社",
+                "D（優先株式）",  # フィルタリング対象
+                "E社",
+            ],
+        },
+    )
+    mock_get_info.return_value = mock_df
+
+    result = await get_target_codes()
+
+    mock_get_info.assert_awaited_once_with()
+    assert result == ["0001", "0005"]
 
 
 @pytest.mark.asyncio
