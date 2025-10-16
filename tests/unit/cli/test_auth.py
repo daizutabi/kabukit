@@ -209,11 +209,30 @@ def test_edinet_success_cli_arg(
 
 
 @pytest.mark.parametrize("command", ["edinet", "e"])
-def test_edinet_success_prompt_fallback(
+def test_edinet_success_config_fallback(
+    mock_get_config_value: MagicMock,
     mock_save_config_key: MagicMock,
     mock_typer_prompt: MagicMock,
     command: str,
 ) -> None:
+    mock_get_config_value.return_value = "config_api_key"
+
+    result = runner.invoke(app, ["auth", command])
+
+    assert result.exit_code == 0
+    assert "既存のAPIキーを使います。" in result.stdout
+    mock_save_config_key.assert_not_called()
+    mock_typer_prompt.assert_not_called()
+
+
+@pytest.mark.parametrize("command", ["edinet", "e"])
+def test_edinet_success_prompt_fallback(
+    mock_get_config_value: MagicMock,
+    mock_save_config_key: MagicMock,
+    mock_typer_prompt: MagicMock,
+    command: str,
+) -> None:
+    mock_get_config_value.return_value = None
     mock_typer_prompt.return_value = "prompt_api_key"
 
     result = runner.invoke(app, ["auth", command])
@@ -224,15 +243,17 @@ def test_edinet_success_prompt_fallback(
         EdinetAuthKey.API_KEY,
         "prompt_api_key",
     )
-    mock_typer_prompt.assert_called_once_with("取得したEDINET APIキー")
+    mock_typer_prompt.assert_called_once_with("EDINETで取得したAPIキー")
 
 
 @pytest.mark.parametrize("command", ["edinet", "e"])
 def test_edinet_error_empty_prompt(
+    mock_get_config_value: MagicMock,
     mock_save_config_key: MagicMock,
     mock_typer_prompt: MagicMock,
     command: str,
 ) -> None:
+    mock_get_config_value.return_value = None
     mock_typer_prompt.return_value = ""
 
     result = runner.invoke(app, ["auth", command])
