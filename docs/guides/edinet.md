@@ -60,6 +60,8 @@ df_years.select("Date", "Code", "docID", "filerName", "pdfFlag", "csvFlag").head
 
 `kabukit.get_documents` 関数を使うと、書類本文を取得できます。
 書類一覧で取得した書類 ID (`docID`) を引数にとります。
+取得される書類本文は、EDINET が提供する CSV 形式のデータ
+（元のデータは XBRL 形式）をPolars DataFrameにしたものです。
 
 ```python exec="1" source="material-block"
 from kabukit import get_documents
@@ -68,7 +70,7 @@ df = await get_documents("S100WUKL")
 df.select("docID", "要素ID", "項目名", "値").head()
 ```
 
-複数の書類 ID を与えて、非同期に並列に取得することもできます。
+複数の書類 ID を与えて、非同期に並列取得することもできます。
 
 ```python exec="1" source="material-block"
 doc_ids = df_years.filter("csvFlag")["docID"]  # CSV形式を提供する書類を選択
@@ -76,10 +78,10 @@ df = await get_documents(doc_ids, max_items=3)
 df.select("docID", "要素ID", "項目名", "値").head()
 ```
 
-`pdf`キーワードを`True`に指定すると、書類本文をPDF形式で
-取得できます。データフレームのカラム名は `"pdf"` でデータ型は、
-`polars.Binary`です。バイナリファイルとして保存すれば、
-PDF形式の書類を閲覧することができます。
+`pdf` キーワードを `True` に指定すると、書類本文を PDF 形式で
+取得できます。
+データフレームのカラム名は `"pdf"`、データ型は `polars.Binary` です。
+バイナリファイルとして保存すれば、PDF 形式の書類を閲覧することができます。
 
 ```python .md#_
 import polars as pl
@@ -95,9 +97,12 @@ df.select("docID", "pdf").tail()
 pl.Config(fmt_str_lengths=None)
 ```
 
-## クライアントの使い方（より詳細な制御が必要な場合）
+## クライアントの使い方
 
-`EdinetClient` は、より詳細な制御（例: タイムアウト設定、リトライポリシーの変更など）が必要な場合に直接利用します。
+`EdinetClient` は、より詳細な制御（例: タイムアウト設定、リトライポリシーの変更など）
+が必要な場合に直接利用します。
+特に、`EdinetClient.client` 属性は `httpx.AsyncClient` のインスタンスであるため、
+`httpx` が提供する豊富なメソッドや設定に直接アクセスすることが可能です。
 
 ノートブックで `kabukit.EdinetClient` をインポートしてインスタンスを作成します。
 
@@ -140,7 +145,7 @@ df = await client.get_document("S100WUKL")
 df.select("docID", "要素ID", "項目名", "値").head()
 ```
 
-`pdf`キーワードを`True`に指定すると、書類本文をPDF形式で
+`pdf` キーワードを `True` に指定すると、書類本文を PDF 形式で
 取得できます。
 
 ```python .md#_
