@@ -10,21 +10,50 @@ kabukit は、[J-Quants API](https://jpx-jquants.com/)
 
 ## 認証
 
+`kabu auth` コマンドは、以下の優先順位で認証情報を探索します。
+
+1. コマンドラインオプション (例: `--mailaddress`)
+2. 設定ファイル (例: `~/.config/kabukit/config.toml`)
+3. 環境変数 (例: `JQUANTS_MAILADDRESS`)
+4. 上記いずれにも見つからない場合は、インタラクティブな入力プロンプトを表示
+
 ### J-Quants API
 
 J-Quants API を利用するには、事前に
 [ユーザー登録](https://jpx-jquants.com/auth/signup/?lang=ja)
 が必要です。
 
-`auth jquants` サブコマンドを使い、登録したメールアドレスとパスワードで認証して、
-ID トークンを取得します。
-ID トークンはユーザーの設定ディレクトリに保存されます。
+`auth jquants` サブコマンド (エイリアス: `auth j`) で
+ID トークンを取得し、設定ファイルに保存します。
+
+#### 基本的な使い方（インタラクティブ）
+
+オプションを指定せずにコマンドを実行すると、対話形式でメールアドレスとパスワードを尋ねられます。
 
 ```bash
 $ kabu auth jquants
 Mailaddress: my_email@example.com
-Password: my_password
+Password:
 J-QuantsのIDトークンを保存しました。
+```
+
+#### 非インタラクティブな使い方
+
+CI/CD 環境など、対話的な入力ができない場合は、
+コマンドラインオプションまたは環境変数で認証情報を指定できます。
+
+- コマンドラインオプションを使う場合
+
+```bash
+$ kabu auth jquants --mailaddress my_email@example.com --password my_password
+```
+
+- 環境変数を使う場合
+
+```bash
+$ export JQUANTS_MAILADDRESS="my_email@example.com"
+$ export JQUANTS_PASSWORD="my_password"
+$ kabu auth jquants
 ```
 
 ### EDINET API
@@ -33,12 +62,33 @@ EDINET API を利用するには、事前に
 [API キーの取得](https://disclosure2dl.edinet-fsa.go.jp/guide/static/disclosure/download/ESE140206.pdf)
 が必要です。
 
-`auth edinet` サブコマンド使い、取得した API キーをユーザーの設定ディレクトリに保存します。
+`auth edinet` サブコマンド (エイリアス: `auth e`) で API キーを
+設定ファイルに保存します。
+
+#### 基本的な使い方（インタラクティブ）
 
 ```bash
 $ kabu auth edinet
 Api key: my_api_key
 EDINETのAPIキーを保存しました。
+```
+
+ただし、すでに設定ファイルや環境変数で API キーが設定されている場合は、
+何もしません。
+
+#### 非インタラクティブな使い方
+
+- コマンドラインオプションを使う場合
+
+```bash
+$ kabu auth edinet --api-key my_api_key
+```
+
+**環境変数を使う場合:**
+
+```bash
+$ export EDINET_API_KEY="my_api_key"
+$ kabu auth edinet
 ```
 
 ### 認証データの確認
@@ -47,9 +97,9 @@ EDINETのAPIキーを保存しました。
 
 ```bash
 $ kabu auth show
-設定ファイル: /home/my_name/.config/kabukit/.env
-JQUANTS_ID_TOKEN: ******
-EDINET_API_KEY: ******
+設定ファイル: /home/my_name/.config/kabukit/config.toml
+JQUANTS_ID_TOKEN = "..."
+EDINET_API_KEY = "..."
 ```
 
 ## データ取得
