@@ -324,3 +324,29 @@ def test_auth_edinet_prompt_fallback_error(
     assert result.exit_code == 1
     assert "APIキーが入力されていません。" in result.stdout
     mock_typer_prompt.assert_called_once_with("EDINETで取得したAPIキー")
+
+
+def test_auth_show_no_config_file(
+    mock_config_path: Path,
+) -> None:
+    """auth show コマンドは設定ファイルが存在しないと設定ファイルだけを表示する"""
+    # mock_config_path はデフォルトでファイルが存在しない状態をモックしている
+    result = runner.invoke(app, ["auth", "show"])
+
+    assert result.exit_code == 0
+    assert result.stdout == f"設定ファイル: {mock_config_path}\n" in result.stdout
+
+
+def test_auth_show_with_config_file(
+    mock_config_path: Path,
+) -> None:
+    """auth show コマンドが設定ファイルが存在し、内容が正しく表示されることを確認する"""
+    # テスト用の設定ファイルを作成
+    mock_config_path.write_text("abc\n")
+
+    # CLIコマンドを実行
+    result = runner.invoke(app, ["auth", "show"])
+
+    assert result.exit_code == 0
+    assert f"設定ファイル: {mock_config_path!s}" in result.stdout
+    assert "----\nabc\n----" in result.stdout
