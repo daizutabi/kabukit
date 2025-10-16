@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from httpx import HTTPStatusError, Request, Response
@@ -35,13 +35,25 @@ def mock_jquants_client_auth(mocker: MockerFixture) -> AsyncMock:
     return mock_auth
 
 
+@pytest.fixture
+def mock_get_config_value(mocker: MockerFixture) -> MagicMock:
+    """kabukit.cli.auth.get_config_value をモックするフィクスチャ"""
+    return mocker.patch("kabukit.cli.auth.get_config_value")
+
+
+@pytest.fixture
+def mock_typer_prompt(mocker: MockerFixture) -> MagicMock:
+    """typer.prompt をモックするフィクスチャ"""
+    return mocker.patch("typer.prompt")
+
+
 @pytest.fixture(params=["jquants", "j"])
-def command(request: pytest.FixtureRequest) -> str:
+def jquants_command(request: pytest.FixtureRequest) -> str:
     return request.param
 
 
 def test_auth_command_saves_token_to_config(
-    command: str,
+    jquants_command: str,
     mock_config_path: Path,
     mock_jquants_client_auth: AsyncMock,
 ) -> None:
@@ -54,7 +66,7 @@ def test_auth_command_saves_token_to_config(
         app,
         [
             "auth",
-            command,
+            jquants_command,
             "--mailaddress",
             "test@example.com",
             "--password",
@@ -76,7 +88,7 @@ def test_auth_command_saves_token_to_config(
 
 
 def test_auth_command_handles_auth_failure(
-    command: str,
+    jquants_command: str,
     mock_config_path: Path,
     mock_jquants_client_auth: AsyncMock,
 ) -> None:
@@ -93,7 +105,7 @@ def test_auth_command_handles_auth_failure(
         app,
         [
             "auth",
-            command,
+            jquants_command,
             "--mailaddress",
             "test@example.com",
             "--password",
@@ -110,3 +122,114 @@ def test_auth_command_handles_auth_failure(
 
     # 設定ファイルが作成されていないことを確認
     assert not mock_config_path.exists()
+
+
+def test_auth_command_config_fallback(
+    jquants_command: str,
+    mock_config_path: Path,
+    mock_jquants_client_auth: AsyncMock,
+    mock_get_config_value: MagicMock,
+) -> None:
+    """auth コマンドが設定ファイルから認証情報を読み込み、トークンを保存する"""
+    # JQuantsClient.auth が返すトークンを設定
+    mock_jquants_client_auth.return_value = "mocked_id_token_from_config"
+
+    # get_config_value が設定ファイルから値を返すように設定
+    def side_effect(key: str) -> str | None:
+        if key == JQuantsAuthKey.MAILADDRESS:
+            return "config@example.com"
+        if key == JQuantsAuthKey.PASSWORD:
+            return "config_password"
+        return None
+
+    mock_get_config_value.side_effect = side_effect
+
+    # CLIコマンドを実行 (引数なし)
+    result = runner.invoke(app, ["auth", jquants_command])
+
+    # CLIコマンドが成功したことを確認
+    assert result.exit_code == 0
+    assert "J-QuantsのIDトークンを保存しました。" in result.stdout
+
+    # JQuantsClient.auth が正しい引数で呼び出されたことを確認
+    mock_jquants_client_auth.assert_awaited_once_with(
+        "config@example.com",
+        "config_password",
+    )
+
+    # 設定ファイルが正しく書き込まれたことを確認
+    assert mock_config_path.exists()
+    text = mock_config_path.read_text()
+    assert f'{JQuantsAuthKey.ID_TOKEN} = "mocked_id_token_from_config"' in text
+    mock_get_config_value.assert_any_call(JQuantsAuthKey.MAILADDRESS)
+    mock_get_config_value.assert_any_call(JQuantsAuthKey.PASSWORD)
+
+
+def test_auth_command_prompt_fallback(
+    jquants_command: str,
+    mock_config_path: Path,
+    mock_jquants_client_auth: AsyncMock,
+    mock_get_config_value: MagicMock,
+    mock_typer_prompt: MagicMock,
+) -> None:
+    """auth コマンドがプロンプトから認証情報を読み込み、トークンを保存する"""
+    # JQuantsClient.auth が返すトークンを設定
+    mock_jquants_client_auth.return_value = "mocked_id_token_from_prompt"
+
+    # get_config_value が None を返すように設定 (プロンプトにフォールバックさせるため)
+    mock_get_config_value.return_value = None
+
+    # typer.prompt がダミーの入力を返すように設定
+    mock_typer_prompt.side_effect = ["prompt@example.com", "prompt_password"]
+
+    # CLIコマンドを実行 (引数なし)
+    result = runner.invoke(app, ["auth", jquants_command])
+
+    # CLIコマンドが成功したことを確認
+    assert result.exit_code == 0
+    assert "J-QuantsのIDトークンを保存しました。" in result.stdout
+
+    # JQuantsClient.auth が正しい引数で呼び出されたことを確認
+    mock_jquants_client_auth.assert_awaited_once_with(
+        "prompt@example.com",
+        "prompt_password",
+    )
+
+    # 設定ファイルが正しく書き込まれたことを確認
+    assert mock_config_path.exists()
+    text = mock_config_path.read_text()
+    assert f'{JQuantsAuthKey.ID_TOKEN} = "mocked_id_token_from_prompt"' in text
+    mock_get_config_value.assert_any_call(JQuantsAuthKey.MAILADDRESS)
+    mock_get_config_value.assert_any_call(JQuantsAuthKey.PASSWORD)
+    assert mock_typer_prompt.call_count == 2
+
+
+@pytest.mark.parametrize(
+    ("size_effect", "msg"),
+    [(["", ""], "メールアドレス"), (["prompt@example.com", ""], "パスワード")],
+)
+def test_auth_command_prompt_fallback_error(
+    jquants_command: str,
+    mock_jquants_client_auth: AsyncMock,
+    mock_get_config_value: MagicMock,
+    mock_typer_prompt: MagicMock,
+    size_effect: list[str],
+    msg: str,
+) -> None:
+    """auth コマンドがプロンプトから認証情報を読み込み、トークンを保存する"""
+    # JQuantsClient.auth が返すトークンを設定
+    mock_jquants_client_auth.return_value = "mocked_id_token_from_prompt"
+
+    # get_config_value が None を返すように設定 (プロンプトにフォールバックさせるため)
+    mock_get_config_value.return_value = None
+
+    # typer.prompt がダミーの入力を返すように設定 (一部は空文字列)
+
+    mock_typer_prompt.side_effect = size_effect
+
+    # CLIコマンドを実行 (引数なし)
+    result = runner.invoke(app, ["auth", jquants_command])
+
+    # CLIコマンドが成功したことを確認
+    assert result.exit_code == 1
+    assert msg in result.stdout
