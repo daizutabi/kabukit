@@ -49,7 +49,7 @@ def test_auth_jquants_success(
 @pytest.mark.skipif(not is_auth_set, reason=reason)
 def test_auth_jquants_success_and_get_data(authenticated_cli_session: None) -> None:  # noqa: ARG001  # pyright: ignore[reportUnusedParameter]
     """auth jquants コマンドで認証後、別のCLIコマンドが成功することを確認する"""
-    result_get_info = runner.invoke(app, ["get", "info", "--max-items", "1"])
+    result_get_info = runner.invoke(app, ["get", "info", "7203"])
     assert result_get_info.exit_code == 0
     assert "Code" in result_get_info.stdout  # データが取得されたことを確認
 
