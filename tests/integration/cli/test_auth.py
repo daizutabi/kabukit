@@ -263,22 +263,32 @@ def test_auth_edinet_saves_api_key_to_config(
     mock_typer_prompt.assert_not_called()  # プロンプトは呼ばれない
 
 
-def test_auth_edinet_config_fallback(
+def test_auth_edinet_always_prompts_and_overwrites(
     edinet_command: str,
+    mock_config_path: Path,
     mock_get_config_value: MagicMock,
     mock_typer_prompt: MagicMock,
 ) -> None:
-    """auth edinet コマンドが設定ファイルから API キーを読み込む"""
-    mock_get_config_value.return_value = "config_api_key_456"
+    """引数なしの場合、既存のキーがあっても常にプロンプトを表示することをテストする"""
+    # 既存のキーが設定されている状況をシミュレート
+    mock_get_config_value.return_value = "existing_api_key"
+    # ユーザーがプロンプトに新しいキーを入力する状況をシミュレート
+    mock_typer_prompt.return_value = "new_api_key_from_prompt"
 
     # CLIコマンドを実行（引数なし）
     result = runner.invoke(app, ["auth", edinet_command])
 
     # CLIコマンドが成功したことを確認
     assert result.exit_code == 0
-    assert "既存のAPIキーを使います。" in result.stdout
+    assert "EDINETのAPIキーを保存しました。" in result.stdout
 
-    mock_typer_prompt.assert_not_called()
+    # プロンプトが表示されたことを確認
+    mock_typer_prompt.assert_called_once_with("EDINETで取得したAPIキー")
+
+    # 設定ファイルが新しいキーで正しく上書きされたことを確認
+    assert mock_config_path.exists()
+    text = mock_config_path.read_text()
+    assert f'{EdinetAuthKey.API_KEY} = "new_api_key_from_prompt"' in text
 
 
 def test_auth_edinet_prompt_fallback(
@@ -287,7 +297,7 @@ def test_auth_edinet_prompt_fallback(
     mock_config_path: Path,
     mock_typer_prompt: MagicMock,
 ) -> None:
-    """auth edinet コマンドがプロンプトから API キーを読み込み、保存する"""
+    """引数なしかつ既存のキーがない場合、プロンプトを表示することをテストする"""
     mock_get_config_value.return_value = None  # 設定ファイルには存在しない
 
     # typer.prompt がダミーの入力を返すように設定

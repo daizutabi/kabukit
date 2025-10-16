@@ -103,16 +103,12 @@ def edinet_alias(api_key: ApiKey = None) -> None:
 
 def auth_edinet(api_key: str | None) -> None:
     """EDINET APIのAPIキーを設定ファイルに保存します。"""
-
-    if not api_key and get_config_value(EdinetAuthKey.API_KEY):
-        typer.echo("既存のAPIキーを使います。")
-        raise typer.Exit(0)
-
     if api_key is None:
         api_key = typer.prompt("EDINETで取得したAPIキー")
-        if not api_key or api_key.strip() == "":
-            typer.echo("APIキーが入力されていません。")
-            raise Exit(1)
+
+    if not api_key or api_key.strip() == "":
+        typer.echo("APIキーが入力されていません。")
+        raise Exit(1)
 
     save_config_key(EdinetAuthKey.API_KEY, api_key)
     typer.echo("EDINETのAPIキーを保存しました。")
@@ -120,7 +116,7 @@ def auth_edinet(api_key: str | None) -> None:
 
 @app.command()
 def show() -> None:
-    """設定ファイルに保存したトークン・APIキーを表示します。"""
+    """設定ファイルに保存したJ-Quants IDトークンおよびEDINET APIキーを表示します。"""
     path = get_config_path()
     typer.echo(f"設定ファイル: {path}")
 
