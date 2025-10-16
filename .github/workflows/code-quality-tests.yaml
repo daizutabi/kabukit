@@ -76,10 +76,6 @@ jobs:
           JQUANTS_MAILADDRESS: ${{ secrets.JQUANTS_MAILADDRESS }}
           JQUANTS_PASSWORD: ${{ secrets.JQUANTS_PASSWORD }}
         run: uv run kabu auth jquants
-      - name: Authenticate (EDINET)
-        env:
-          EDINET_API_KEY: ${{ secrets.EDINET_API_KEY }}
-        run: uv run kabu auth edinet
       - name: Cache and get data
         id: cache-data
         uses: actions/cache@v4
@@ -90,6 +86,10 @@ jobs:
         if: steps.cache-data.outputs.cache-hit != 'true'
         run: uv run kabu get statements
       - name: Run all tests
+        env:
+          JQUANTS_MAILADDRESS: ${{ secrets.JQUANTS_MAILADDRESS }}
+          JQUANTS_PASSWORD: ${{ secrets.JQUANTS_PASSWORD }}
+          EDINET_API_KEY: ${{ secrets.EDINET_API_KEY }}
         run: uv run pytest -v --junitxml=junit.xml
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
