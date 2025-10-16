@@ -44,7 +44,7 @@ async def test_auth_and_reread_from_config(
     tmp_path: Path,
 ) -> None:
     from kabukit.jquants.client import AuthKey
-    from kabukit.utils.config import get_config_path, save_config_key
+    from kabukit.utils.config import save_config_key
 
     mocker.patch(
         "kabukit.utils.config.get_config_path",
@@ -58,10 +58,7 @@ async def test_auth_and_reread_from_config(
 
     client = JQuantsClient()
     assert id_token in client.client.headers["Authorization"]
-
-    path = get_config_path()
-    assert path.parent == tmp_path
-    assert id_token in path.read_text()
+    assert id_token in (tmp_path / "config.toml").read_text()
 
 
 @pytest.mark.skipif(not is_auth_set, reason=reason)
