@@ -7,6 +7,7 @@ from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
 from kabukit.cli.app import app
+from kabukit.edinet.client import AuthKey as EdinetAuthKey  # 追加
 from kabukit.jquants.client import AuthKey as JQuantsAuthKey
 
 pytestmark = pytest.mark.integration
@@ -52,12 +53,17 @@ def jquants_command(request: pytest.FixtureRequest) -> str:
     return request.param
 
 
-def test_auth_command_saves_token_to_config(
+@pytest.fixture(params=["edinet", "e"])
+def edinet_command(request: pytest.FixtureRequest) -> str:
+    return request.param
+
+
+def test_auth_jquants_saves_token_to_config(
     jquants_command: str,
     mock_config_path: Path,
     mock_jquants_client_auth: AsyncMock,
 ) -> None:
-    """auth コマンドが JQuantsClient.auth を呼び出し、返されたトークンを保存する"""
+    """auth jquants コマンドが JQuantsClient.auth を呼び出し、トークンを保存する"""
     # JQuantsClient.auth が返すトークンを設定
     mock_jquants_client_auth.return_value = "mocked_id_token_123"
 
@@ -87,12 +93,12 @@ def test_auth_command_saves_token_to_config(
     assert f'{JQuantsAuthKey.ID_TOKEN} = "mocked_id_token_123"' in text
 
 
-def test_auth_command_handles_auth_failure(
+def test_auth_jquants_handles_auth_failure(
     jquants_command: str,
     mock_config_path: Path,
     mock_jquants_client_auth: AsyncMock,
 ) -> None:
-    """CLI auth コマンドが JQuantsClient.auth の認証失敗を適切に処理すること"""
+    """auth jquants コマンドが JQuantsClient.auth の認証失敗を適切に処理する"""
     # JQuantsClient.auth が HTTPStatusError を発生させるように設定
     mock_jquants_client_auth.side_effect = HTTPStatusError(
         "401 Unauthorized",
@@ -124,13 +130,13 @@ def test_auth_command_handles_auth_failure(
     assert not mock_config_path.exists()
 
 
-def test_auth_command_config_fallback(
+def test_auth_jquants_config_fallback(
     jquants_command: str,
     mock_config_path: Path,
     mock_jquants_client_auth: AsyncMock,
     mock_get_config_value: MagicMock,
 ) -> None:
-    """auth コマンドが設定ファイルから認証情報を読み込み、トークンを保存する"""
+    """auth jquants コマンドが設定ファイルから認証情報を読み込み、トークンを保存する"""
     # JQuantsClient.auth が返すトークンを設定
     mock_jquants_client_auth.return_value = "mocked_id_token_from_config"
 
@@ -165,14 +171,14 @@ def test_auth_command_config_fallback(
     mock_get_config_value.assert_any_call(JQuantsAuthKey.PASSWORD)
 
 
-def test_auth_command_prompt_fallback(
+def test_auth_jquants_prompt_fallback(
     jquants_command: str,
     mock_config_path: Path,
     mock_jquants_client_auth: AsyncMock,
     mock_get_config_value: MagicMock,
     mock_typer_prompt: MagicMock,
 ) -> None:
-    """auth コマンドがプロンプトから認証情報を読み込み、トークンを保存する"""
+    """auth jquants コマンドがプロンプトから認証情報を読み込み、トークンを保存する"""
     # JQuantsClient.auth が返すトークンを設定
     mock_jquants_client_auth.return_value = "mocked_id_token_from_prompt"
 
@@ -208,7 +214,7 @@ def test_auth_command_prompt_fallback(
     ("size_effect", "msg"),
     [(["", ""], "メールアドレス"), (["prompt@example.com", ""], "パスワード")],
 )
-def test_auth_command_prompt_fallback_error(
+def test_auth_jquants_prompt_fallback_error(
     jquants_command: str,
     mock_jquants_client_auth: AsyncMock,
     mock_get_config_value: MagicMock,
@@ -216,7 +222,7 @@ def test_auth_command_prompt_fallback_error(
     size_effect: list[str],
     msg: str,
 ) -> None:
-    """auth コマンドがプロンプトから認証情報を読み込み、トークンを保存する"""
+    """auth jquants コマンドがプロンプトから認証情報を読み出すが、空文字で失敗する"""
     # JQuantsClient.auth が返すトークンを設定
     mock_jquants_client_auth.return_value = "mocked_id_token_from_prompt"
 
@@ -224,7 +230,6 @@ def test_auth_command_prompt_fallback_error(
     mock_get_config_value.return_value = None
 
     # typer.prompt がダミーの入力を返すように設定 (一部は空文字列)
-
     mock_typer_prompt.side_effect = size_effect
 
     # CLIコマンドを実行 (引数なし)
@@ -233,3 +238,89 @@ def test_auth_command_prompt_fallback_error(
     # CLIコマンドが成功したことを確認
     assert result.exit_code == 1
     assert msg in result.stdout
+
+
+def test_auth_edinet_saves_api_key_to_config(
+    edinet_command: str,
+    mock_config_path: Path,
+    mock_typer_prompt: MagicMock,  # プロンプトが呼ばれないことを確認するため
+) -> None:
+    """auth edinet コマンドが API キーを引数で受け取り、設定ファイルに保存する"""
+    # CLIコマンドを実行
+    result = runner.invoke(
+        app,
+        ["auth", edinet_command, "--api-key", "cli_api_key_123"],
+    )
+
+    # CLIコマンドが成功したことを確認
+    assert result.exit_code == 0
+    assert "EDINETのAPIキーを保存しました。" in result.stdout
+
+    # 設定ファイルが正しく書き込まれたことを確認
+    assert mock_config_path.exists()
+    text = mock_config_path.read_text()
+    assert f'{EdinetAuthKey.API_KEY} = "cli_api_key_123"' in text
+    mock_typer_prompt.assert_not_called()  # プロンプトは呼ばれない
+
+
+def test_auth_edinet_config_fallback(
+    edinet_command: str,
+    mock_get_config_value: MagicMock,
+    mock_typer_prompt: MagicMock,
+) -> None:
+    """auth edinet コマンドが設定ファイルから API キーを読み込む"""
+    mock_get_config_value.return_value = "config_api_key_456"
+
+    # CLIコマンドを実行（引数なし）
+    result = runner.invoke(app, ["auth", edinet_command])
+
+    # CLIコマンドが成功したことを確認
+    assert result.exit_code == 0
+    assert "既存のAPIキーを使います。" in result.stdout
+
+    mock_typer_prompt.assert_not_called()
+
+
+def test_auth_edinet_prompt_fallback(
+    edinet_command: str,
+    mock_get_config_value: MagicMock,
+    mock_config_path: Path,
+    mock_typer_prompt: MagicMock,
+) -> None:
+    """auth edinet コマンドがプロンプトから API キーを読み込み、保存する"""
+    mock_get_config_value.return_value = None  # 設定ファイルには存在しない
+
+    # typer.prompt がダミーの入力を返すように設定
+    mock_typer_prompt.side_effect = ["prompt_api_key_456"]
+
+    # CLIコマンドを実行（引数なし）
+    result = runner.invoke(app, ["auth", edinet_command])
+
+    # CLIコマンドが成功したことを確認
+    assert result.exit_code == 0
+    assert "EDINETのAPIキーを保存しました。" in result.stdout
+
+    # 設定ファイルが正しく書き込まれたことを確認
+    assert mock_config_path.exists()
+    text = mock_config_path.read_text()
+    assert f'{EdinetAuthKey.API_KEY} = "prompt_api_key_456"' in text
+    mock_typer_prompt.assert_called_once_with("EDINETで取得したAPIキー")
+
+
+def test_auth_edinet_prompt_fallback_error(
+    edinet_command: str,
+    mock_get_config_value: MagicMock,
+    mock_typer_prompt: MagicMock,
+) -> None:
+    """auth edinet コマンドがプロンプトからの入力が空の場合にエラーを処理する"""
+    mock_get_config_value.return_value = None  # 設定ファイルには存在しない
+    # typer.prompt が空文字列を返すように設定
+    mock_typer_prompt.return_value = ""
+
+    # CLIコマンドを実行（引数なし）
+    result = runner.invoke(app, ["auth", edinet_command])
+
+    # CLIコマンドが失敗したことを確認
+    assert result.exit_code == 1
+    assert "APIキーが入力されていません。" in result.stdout
+    mock_typer_prompt.assert_called_once_with("EDINETで取得したAPIキー")

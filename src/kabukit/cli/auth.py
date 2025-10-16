@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from typing import Annotated
 
 import typer
@@ -83,31 +82,37 @@ async def auth_jquants(mailaddress: str | None, password: str | None) -> None:
 
 
 ApiKey = Annotated[
-    str,
+    str | None,
     Option(
-        default_factory=lambda: os.environ.get(EdinetAuthKey.API_KEY)
-        or typer.prompt("取得したEDINET APIキー"),
-        help="取得したEDINET APIキー。",
+        "--api-key",
+        help="EDINET APIキー。",
     ),
 ]
 
 
 @app.command()
-def edinet(api_key: ApiKey) -> None:
+def edinet(api_key: ApiKey = None) -> None:
     """EDINET APIのAPIキーを設定ファイルに保存します。(エイリアス: e)"""
     auth_edinet(api_key)
 
 
 @app.command(name="e", hidden=True)
-def edinet_alias(api_key: ApiKey) -> None:
+def edinet_alias(api_key: ApiKey = None) -> None:
     auth_edinet(api_key)
 
 
-def auth_edinet(api_key: str) -> None:
+def auth_edinet(api_key: str | None) -> None:
     """EDINET APIのAPIキーを設定ファイルに保存します。"""
-    if not api_key or api_key.strip() == "":
-        typer.echo("APIキーが入力されていません。")
-        raise Exit(1)
+
+    if not api_key and get_config_value(EdinetAuthKey.API_KEY):
+        typer.echo("既存のAPIキーを使います。")
+        raise typer.Exit(0)
+
+    if api_key is None:
+        api_key = typer.prompt("EDINETで取得したAPIキー")
+        if not api_key or api_key.strip() == "":
+            typer.echo("APIキーが入力されていません。")
+            raise Exit(1)
 
     save_config_key(EdinetAuthKey.API_KEY, api_key)
     typer.echo("EDINETのAPIキーを保存しました。")
