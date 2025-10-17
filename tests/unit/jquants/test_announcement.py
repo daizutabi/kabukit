@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import pytest
 from httpx import Response
 
-from kabukit.jquants.client import JQuantsClient
+from kabukit.sources.jquants.client import JQuantsClient
 
 if TYPE_CHECKING:
     from unittest.mock import AsyncMock

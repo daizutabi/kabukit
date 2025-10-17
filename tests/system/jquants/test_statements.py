@@ -5,7 +5,7 @@ import pytest
 import pytest_asyncio
 from polars import DataFrame
 
-from kabukit.jquants.client import JQuantsClient
+from kabukit.sources.jquants.client import JQuantsClient
 
 pytestmark = pytest.mark.system
 
@@ -57,14 +57,14 @@ def test_column_dtype(df: DataFrame, name: str, dtype: type) -> None:
 
 
 def test_columns(df: DataFrame) -> None:
-    from kabukit.jquants.schema import StatementColumns
+    from kabukit.sources.jquants.schema import StatementColumns
 
     assert len(df.columns) == len(StatementColumns)
     assert df.columns == [c.name for c in StatementColumns]
 
 
 def test_rename(df: DataFrame) -> None:
-    from kabukit.jquants.schema import StatementColumns
+    from kabukit.sources.jquants.schema import StatementColumns
 
     df_renamed = StatementColumns.rename(df, strict=True)
     assert df_renamed.columns == [c.value for c in StatementColumns]

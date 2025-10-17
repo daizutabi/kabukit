@@ -9,7 +9,7 @@ from httpx import Response
 from polars import DataFrame
 from polars.testing import assert_frame_equal
 
-from kabukit.jquants.client import JQuantsClient
+from kabukit.sources.jquants.client import JQuantsClient
 
 if TYPE_CHECKING:
     from unittest.mock import AsyncMock

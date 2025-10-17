@@ -3,7 +3,7 @@ import pytest
 import pytest_asyncio
 from polars import DataFrame
 
-from kabukit.edinet.client import EdinetClient
+from kabukit.sources.edinet.client import EdinetClient
 
 pytestmark = pytest.mark.system
 

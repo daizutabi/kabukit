@@ -48,7 +48,7 @@ MaxItems = Annotated[
 async def info(code: Code = None, *, quiet: Quiet = False) -> None:
     """上場銘柄一覧を取得します。"""
     from kabukit.core.info import Info
-    from kabukit.jquants.concurrent import get_info
+    from kabukit.sources.jquants.concurrent import get_info
 
     df = await get_info(code)
 
@@ -71,7 +71,7 @@ async def statements(
     import tqdm.asyncio
 
     from kabukit.core.statements import Statements
-    from kabukit.jquants.concurrent import get_statements
+    from kabukit.sources.jquants.concurrent import get_statements
 
     progress = None if code or quiet else tqdm.asyncio.tqdm
     df = await get_statements(code, max_items=max_items, progress=progress)
@@ -95,7 +95,7 @@ async def prices(
     import tqdm.asyncio
 
     from kabukit.core.prices import Prices
-    from kabukit.jquants.concurrent import get_prices
+    from kabukit.sources.jquants.concurrent import get_prices
 
     progress = None if code or quiet else tqdm.asyncio.tqdm
     df = await get_prices(code, max_items=max_items, progress=progress)
@@ -119,7 +119,7 @@ async def entries(
     import tqdm.asyncio
 
     from kabukit.core.entries import Entries
-    from kabukit.edinet.concurrent import get_entries
+    from kabukit.sources.edinet.concurrent import get_entries
 
     progress = None if date or quiet else tqdm.asyncio.tqdm
     df = await get_entries(date, years=10, progress=progress, max_items=max_items)

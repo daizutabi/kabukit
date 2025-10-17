@@ -7,7 +7,7 @@ import polars as pl
 import pytest
 from polars import DataFrame
 
-from kabukit.core.client import Client
+from kabukit.sources.base import Client
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterable, AsyncIterator

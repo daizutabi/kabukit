@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import pytest
 from httpx import HTTPStatusError, Response
 
-from kabukit.jquants.client import AuthKey, JQuantsClient
+from kabukit.sources.jquants.client import AuthKey, JQuantsClient
 
 if TYPE_CHECKING:
     from unittest.mock import AsyncMock
@@ -44,7 +44,10 @@ async def test_auth_value_error_missing_mailaddress(mocker: MockerFixture) -> No
             return "config_pass"
         return None
 
-    mocker.patch("kabukit.jquants.client.get_config_value", side_effect=side_effect)
+    mocker.patch(
+        "kabukit.sources.jquants.client.get_config_value",
+        side_effect=side_effect,
+    )
     client = JQuantsClient()
 
     with pytest.raises(ValueError, match="メールアドレスとパスワードを指定するか"):
@@ -58,7 +61,10 @@ async def test_auth_value_error_missing_password(mocker: MockerFixture) -> None:
             return "config@example.com"
         return None
 
-    mocker.patch("kabukit.jquants.client.get_config_value", side_effect=side_effect)
+    mocker.patch(
+        "kabukit.sources.jquants.client.get_config_value",
+        side_effect=side_effect,
+    )
     client = JQuantsClient()
 
     with pytest.raises(ValueError, match="メールアドレスとパスワードを指定するか"):
@@ -75,7 +81,10 @@ async def test_auth_success_with_config_mailaddress(
             return "config@example.com"
         return "config_pass"
 
-    mocker.patch("kabukit.jquants.client.get_config_value", side_effect=side_effect)
+    mocker.patch(
+        "kabukit.sources.jquants.client.get_config_value",
+        side_effect=side_effect,
+    )
     responses = [
         Response(200, json={"refreshToken": "test_refresh_token"}),
         Response(200, json={"idToken": "test_id_token"}),
@@ -104,7 +113,10 @@ async def test_auth_success_with_config_password(
             return "config@example.com"
         return "config_pass"
 
-    mocker.patch("kabukit.jquants.client.get_config_value", side_effect=side_effect)
+    mocker.patch(
+        "kabukit.sources.jquants.client.get_config_value",
+        side_effect=side_effect,
+    )
     responses = [
         Response(200, json={"refreshToken": "test_refresh_token"}),
         Response(200, json={"idToken": "test_id_token"}),

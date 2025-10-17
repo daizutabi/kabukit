@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 import polars as pl
 from polars import DataFrame
 
-from kabukit.core.client import Client
+from kabukit.sources.base import Client
 from kabukit.utils.config import get_config_value
 from kabukit.utils.params import get_params
 

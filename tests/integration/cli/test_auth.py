@@ -7,8 +7,8 @@ from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
 from kabukit.cli.app import app
-from kabukit.edinet.client import AuthKey as EdinetAuthKey  # 追加
-from kabukit.jquants.client import AuthKey as JQuantsAuthKey
+from kabukit.sources.edinet.client import AuthKey as EdinetAuthKey  # 追加
+from kabukit.sources.jquants.client import AuthKey as JQuantsAuthKey
 
 pytestmark = pytest.mark.integration
 
@@ -32,7 +32,7 @@ def mock_jquants_client_auth(mocker: MockerFixture) -> AsyncMock:
     これにより、CLIが JQuantsClient をインスタンス化する部分はテストされる
     """
     mock_auth = mocker.AsyncMock()
-    mocker.patch("kabukit.jquants.client.JQuantsClient.auth", new=mock_auth)
+    mocker.patch("kabukit.sources.jquants.client.JQuantsClient.auth", new=mock_auth)
     return mock_auth
 
 

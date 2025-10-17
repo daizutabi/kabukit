@@ -5,7 +5,7 @@ import pytest
 import pytest_asyncio
 from polars import DataFrame
 
-from kabukit.jquants.client import JQuantsClient
+from kabukit.sources.jquants.client import JQuantsClient
 
 pytestmark = pytest.mark.system
 

@@ -1,6 +1,6 @@
 import pytest_asyncio
 
-from kabukit.jquants.client import JQuantsClient
+from kabukit.sources.jquants.client import JQuantsClient
 
 
 @pytest_asyncio.fixture

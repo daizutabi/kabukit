@@ -9,7 +9,7 @@ import httpx
 from polars import DataFrame
 from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
 
-from kabukit.core.client import Client
+from kabukit.sources.base import Client
 from kabukit.utils.config import get_config_value
 from kabukit.utils.params import get_params
 
