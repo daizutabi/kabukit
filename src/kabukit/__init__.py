@@ -1,3 +1,4 @@
+from . import cache
 from .core.entries import Entries
 from .core.info import Info
 from .core.prices import Prices
@@ -19,6 +20,7 @@ __all__ = [
     "JQuantsClient",
     "Prices",
     "Statements",
+    "cache",
     "get_documents",
     "get_entries",
     "get_info",
