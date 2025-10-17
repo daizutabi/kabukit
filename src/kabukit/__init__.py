@@ -1,4 +1,4 @@
-from . import cache
+from .core import cache
 from .core.entries import Entries
 from .core.info import Info
 from .core.prices import Prices
