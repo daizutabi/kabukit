@@ -47,39 +47,10 @@ def mock_get_prices(mocker: MockerFixture) -> AsyncMock:
 
 
 @pytest.fixture
-def MockInfo(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("kabukit.core.info.Info")
-
-
-@pytest.fixture
-def mock_info(MockInfo: MagicMock) -> MagicMock:  # noqa: N803
-    instance = MockInfo.return_value
-    instance.write.return_value = MOCK_PATH
-    return instance
-
-
-@pytest.fixture
-def MockStatements(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("kabukit.core.statements.Statements")
-
-
-@pytest.fixture
-def mock_statements(MockStatements: MagicMock) -> MagicMock:  # noqa: N803
-    instance = MockStatements.return_value
-    instance.write.return_value = MOCK_PATH
-    return instance
-
-
-@pytest.fixture
-def MockPrices(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("kabukit.core.prices.Prices")
-
-
-@pytest.fixture
-def mock_prices(MockPrices: MagicMock) -> MagicMock:  # noqa: N803
-    instance = MockPrices.return_value
-    instance.write.return_value = MOCK_PATH
-    return instance
+def mock_cache_write(mocker: MockerFixture) -> MagicMock:
+    mock_cache_write = mocker.patch("kabukit.core.cache.write")
+    mock_cache_write.return_value = MOCK_PATH
+    return mock_cache_write
 
 
 @pytest.fixture
@@ -89,24 +60,3 @@ def mock_get_entries(mocker: MockerFixture) -> AsyncMock:
         new_callable=mocker.AsyncMock,
         return_value=MOCK_DF,
     )
-
-
-@pytest.fixture
-def mock_get_csv(mocker: MockerFixture) -> AsyncMock:
-    return mocker.patch(
-        "kabukit.source.sedinet.concurrent.get_csv",
-        new_callable=mocker.AsyncMock,
-        return_value=MOCK_DF,
-    )
-
-
-@pytest.fixture
-def MockEntries(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("kabukit.core.entries.Entries")
-
-
-@pytest.fixture
-def mock_entries(MockEntries: MagicMock) -> MagicMock:  # noqa: N803
-    instance = MockEntries.return_value
-    instance.write.return_value = MOCK_PATH
-    return instance

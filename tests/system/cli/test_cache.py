@@ -17,8 +17,8 @@ runner = CliRunner()
 
 
 def test_cache_tree_system(mock_cache_dir: Path) -> None:
-    """
-    System test for 'kabu cache tree' command.
+    """System test for 'kabu cache tree' command.
+
     Verifies that it correctly lists contents of a real (mocked) cache directory.
     """
     # Populate cache with some dummy data using a 'get' command
@@ -36,8 +36,8 @@ def test_cache_tree_system(mock_cache_dir: Path) -> None:
 
 
 def test_cache_clean_system(mock_cache_dir: Path) -> None:
-    """
-    System test for 'kabu cache clean' command.
+    """System test for 'kabu cache clean' command.
+
     Verifies that it correctly removes a real (mocked) cache directory.
     """
     # Populate cache with some dummy data using a 'get' command
