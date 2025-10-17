@@ -19,6 +19,12 @@ pytestmark = pytest.mark.integration
 runner = CliRunner()
 
 
+@pytest.fixture
+def mock_cache_dir(tmp_path: Path, mocker: MockerFixture) -> Path:
+    mocker.patch("kabukit.core.cache.get_cache_dir", return_value=tmp_path)
+    return tmp_path
+
+
 def test_get_info_with_code(mocker: MockerFixture):
     mock_df = pl.DataFrame({"code": ["1234"], "name": ["test"]})
     mock_get = mocker.patch(

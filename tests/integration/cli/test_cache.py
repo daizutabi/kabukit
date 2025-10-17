@@ -10,9 +10,17 @@ from kabukit.cli.app import app
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from pytest_mock import MockerFixture
+
 pytestmark = pytest.mark.integration
 
 runner = CliRunner()
+
+
+@pytest.fixture
+def mock_cache_dir(tmp_path: Path, mocker: MockerFixture) -> Path:
+    mocker.patch("kabukit.cli.cache.get_cache_dir", return_value=tmp_path)
+    return tmp_path
 
 
 def test_cache_tree(mock_cache_dir: Path):
