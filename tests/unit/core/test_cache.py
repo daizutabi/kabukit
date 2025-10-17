@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+import datetime
 from typing import TYPE_CHECKING
+from zoneinfo import ZoneInfo
 
+import polars as pl
 import pytest
+from polars import DataFrame
+from polars.testing import assert_frame_equal
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -90,4 +95,45 @@ def test_get_cache_filepath_no_data_found(
 
     with pytest.raises(FileNotFoundError, match="No data found in"):
         _get_cache_filepath(name="test")
+    mock_get_cache_dir.assert_called_once()
+
+
+def test_read(mocker: MockerFixture, tmp_path: Path) -> None:
+    from kabukit.core.cache import read
+
+    data = DataFrame({"A": [1, 2], "B": ["x", "y"]})
+
+    mock_get_cache_filepath = mocker.patch(
+        "kabukit.core.cache._get_cache_filepath",
+        return_value=tmp_path,
+    )
+
+    cache_dir = tmp_path / "test"
+    cache_dir.mkdir()
+
+    data = DataFrame({"A": [1, 2], "B": ["x", "y"]})
+    data.write_parquet(cache_dir / "20230101.parquet")
+
+    result = read("test", path="20230101.parquet")
+    assert_frame_equal(result, data)
+
+    mock_get_cache_filepath.assert_called_once_with("test", "20230101.parquet")
+
+
+def test_write(mocker: MockerFixture, tmp_path: Path) -> None:
+    from kabukit.core.cache import write
+
+    mock_get_cache_dir = mocker.patch(
+        "kabukit.core.cache.get_cache_dir",
+        return_value=tmp_path,
+    )
+
+    data = DataFrame({"A": [1, 2], "B": ["x", "y"]})
+    path = write("test", data)
+
+    assert path.exists()
+    timestamp = datetime.datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y%m%d")
+    assert path == tmp_path / "test" / f"{timestamp}.parquet"
+    assert_frame_equal(pl.read_parquet(path), data)
+
     mock_get_cache_dir.assert_called_once()
