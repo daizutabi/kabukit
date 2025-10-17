@@ -21,6 +21,9 @@ runner = CliRunner()
 
 @pytest.fixture
 def mock_cache_dir(tmp_path: Path, mocker: MockerFixture) -> Path:
+    """Create a temporary cache directory and mock get_cache_dir for tests."""
+    # For integration tests, we want to mock the cache directory to a temporary path
+    # to avoid polluting the actual cache and ensure test isolation.
     mocker.patch("kabukit.core.cache.get_cache_dir", return_value=tmp_path)
     return tmp_path
 
