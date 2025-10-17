@@ -5,7 +5,7 @@ pytestmark = pytest.mark.unit
 
 @pytest.mark.asyncio
 async def test_async_with() -> None:
-    from kabukit.core.client import Client
+    from kabukit.sources.base import Client
 
     async with Client() as client:
         assert not client.client.is_closed

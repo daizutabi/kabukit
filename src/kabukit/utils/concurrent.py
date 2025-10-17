@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from polars import DataFrame
     from tqdm.asyncio import tqdm
 
-    from kabukit.core.client import Client
+    from kabukit.sources.base import Client
 
     class _Progress(Protocol):
         def __call__(
