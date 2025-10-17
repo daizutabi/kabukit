@@ -6,7 +6,7 @@ from polars import col as c
 
 from kabukit.core.prices import Prices
 from kabukit.core.statements import Statements
-from kabukit.jquants.concurrent import get
+from kabukit.sources.jquants.concurrent import get
 from tests.validation.conftest import pytestmark  # noqa: F401
 
 

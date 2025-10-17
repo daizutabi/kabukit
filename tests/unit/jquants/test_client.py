@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import pytest
 from httpx import HTTPStatusError, Response
 
-from kabukit.jquants.client import AuthKey, JQuantsClient
+from kabukit.sources.jquants.client import AuthKey, JQuantsClient
 
 if TYPE_CHECKING:
     from unittest.mock import AsyncMock
@@ -22,7 +22,7 @@ def test_set_id_token() -> None:
 
 def test_set_id_token_none(mocker: MockerFixture) -> None:
     mock_get_config_value = mocker.patch(
-        "kabukit.jquants.client.get_config_value",
+        "kabukit.sources.jquants.client.get_config_value",
         return_value="def",
     )
     client = JQuantsClient()

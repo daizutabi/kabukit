@@ -1,7 +1,7 @@
 import pytest
 from polars import DataFrame
 
-from kabukit.jquants.schema import (
+from kabukit.sources.jquants.schema import (
     InfoColumns,
     PriceColumns,
     StatementColumns,

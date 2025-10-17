@@ -6,7 +6,7 @@ from httpx import HTTPStatusError
 from polars import DataFrame
 from pytest_mock import MockerFixture
 
-from kabukit.jquants.client import JQuantsClient
+from kabukit.sources.jquants.client import JQuantsClient
 
 pytestmark = pytest.mark.system
 
@@ -43,7 +43,7 @@ async def test_auth_and_reread_from_config(
     mocker: MockerFixture,
     tmp_path: Path,
 ) -> None:
-    from kabukit.jquants.client import AuthKey
+    from kabukit.sources.jquants.client import AuthKey
     from kabukit.utils.config import save_config_key
 
     mocker.patch(

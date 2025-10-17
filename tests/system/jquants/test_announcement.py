@@ -1,6 +1,6 @@
 import pytest
 
-from kabukit.jquants.client import JQuantsClient
+from kabukit.sources.jquants.client import JQuantsClient
 
 pytestmark = pytest.mark.system
 

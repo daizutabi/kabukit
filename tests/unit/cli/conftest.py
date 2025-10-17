@@ -18,13 +18,13 @@ MOCK_PATH = "fake/path.csv"
 
 @pytest.fixture
 def mock_jquants_client(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("kabukit.jquants.client.JQuantsClient").return_value
+    return mocker.patch("kabukit.sources.jquants.client.JQuantsClient").return_value
 
 
 @pytest.fixture
 def mock_get_info(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.jquants.concurrent.get_info",
+        "kabukit.sources.jquants.concurrent.get_info",
         new_callable=mocker.AsyncMock,
         return_value=MOCK_DF,
     )
@@ -33,14 +33,17 @@ def mock_get_info(mocker: MockerFixture) -> AsyncMock:
 @pytest.fixture
 def mock_get_statements(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.jquants.concurrent.get_statements",
+        "kabukit.sources.jquants.concurrent.get_statements",
         new_callable=AsyncMock,
     )
 
 
 @pytest.fixture
 def mock_get_prices(mocker: MockerFixture) -> AsyncMock:
-    return mocker.patch("kabukit.jquants.concurrent.get_prices", new_callable=AsyncMock)
+    return mocker.patch(
+        "kabukit.sources.jquants.concurrent.get_prices",
+        new_callable=AsyncMock,
+    )
 
 
 @pytest.fixture

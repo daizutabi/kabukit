@@ -5,7 +5,7 @@ import pytest
 import pytest_asyncio
 from polars import DataFrame
 
-from kabukit.jquants.client import JQuantsClient
+from kabukit.sources.jquants.client import JQuantsClient
 
 pytestmark = pytest.mark.system
 
@@ -111,13 +111,13 @@ def test_turnover_value(df: DataFrame) -> None:
 
 
 def test_columns(df: DataFrame) -> None:
-    from kabukit.jquants.schema import PriceColumns
+    from kabukit.sources.jquants.schema import PriceColumns
 
     assert df.columns == [c.name for c in PriceColumns]
 
 
 def test_rename(df: DataFrame) -> None:
-    from kabukit.jquants.schema import PriceColumns
+    from kabukit.sources.jquants.schema import PriceColumns
 
     df_renamed = PriceColumns.rename(df, strict=True)
     assert df_renamed.columns == [c.value for c in PriceColumns]

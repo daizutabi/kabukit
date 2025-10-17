@@ -7,8 +7,8 @@ from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
 from kabukit.cli.app import app
-from kabukit.jquants.client import AuthKey as JQuantsAuthKey
 from kabukit.sources.edinet.client import AuthKey as EdinetAuthKey
+from kabukit.sources.jquants.client import AuthKey as JQuantsAuthKey
 
 pytestmark = pytest.mark.unit
 
@@ -22,7 +22,7 @@ def mock_jquants_client(mocker: MockerFixture) -> MagicMock:
     mock_client_instance.__aenter__.return_value = mock_client_instance
     mock_client_instance.__aexit__.return_value = None
     return mocker.patch(
-        "kabukit.jquants.client.JQuantsClient",
+        "kabukit.sources.jquants.client.JQuantsClient",
         return_value=mock_client_instance,
     )
 

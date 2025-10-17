@@ -7,7 +7,7 @@ import pytest
 from httpx import Response
 from polars import DataFrame
 
-from kabukit.jquants.client import JQuantsClient
+from kabukit.sources.jquants.client import JQuantsClient
 
 if TYPE_CHECKING:
     from unittest.mock import AsyncMock
@@ -31,7 +31,7 @@ async def test_get_info(mock_get: AsyncMock, mocker: MockerFixture) -> None:
 
 
 def test_clean() -> None:
-    from kabukit.jquants.info import clean
+    from kabukit.sources.jquants.info import clean
 
     df = DataFrame(
         {

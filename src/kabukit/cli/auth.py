@@ -7,8 +7,8 @@ from async_typer import AsyncTyper  # pyright: ignore[reportMissingTypeStubs]
 from httpx import HTTPStatusError
 from typer import Exit, Option
 
-from kabukit.jquants.client import AuthKey as JQuantsAuthKey
 from kabukit.sources.edinet.client import AuthKey as EdinetAuthKey
+from kabukit.sources.jquants.client import AuthKey as JQuantsAuthKey
 from kabukit.utils.config import get_config_path, get_config_value, save_config_key
 
 # pyright: reportUnknownMemberType=false
@@ -52,7 +52,7 @@ async def jquants_alias(
 
 async def auth_jquants(mailaddress: str | None, password: str | None) -> None:
     """J-Quants APIの認証を行い、トークンを設定ファイルに保存します。"""
-    from kabukit.jquants.client import JQuantsClient
+    from kabukit.sources.jquants.client import JQuantsClient
 
     mailaddress = mailaddress or get_config_value(JQuantsAuthKey.MAILADDRESS)
 

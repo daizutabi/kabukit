@@ -8,7 +8,7 @@ import pytest
 from httpx import Response
 from polars import DataFrame
 
-from kabukit.jquants.client import JQuantsClient
+from kabukit.sources.jquants.client import JQuantsClient
 
 if TYPE_CHECKING:
     from unittest.mock import AsyncMock
@@ -91,7 +91,7 @@ async def test_get_flags(
     mock_get.side_effect = get_side_effect
 
     mock_clean = mocker.patch(
-        "kabukit.jquants.statements.clean",
+        "kabukit.sources.jquants.statements.clean",
         return_value=DataFrame(
             {
                 "Code": ["7203"],
@@ -101,7 +101,7 @@ async def test_get_flags(
         ),
     )
     mock_with_date = mocker.patch(
-        "kabukit.jquants.statements.with_date",
+        "kabukit.sources.jquants.statements.with_date",
         return_value=DataFrame({"Date": [datetime.date(2023, 1, 1)]}),
     )
 
@@ -125,7 +125,7 @@ async def test_get_flags(
 
 @pytest.fixture
 def df() -> DataFrame:
-    from kabukit.jquants.statements import clean
+    from kabukit.sources.jquants.statements import clean
 
     return DataFrame(
         {
@@ -189,7 +189,7 @@ def test_clean(df: DataFrame, column: str, values: list[Any]) -> None:
 def test_with_date() -> None:
     from datetime import date, time
 
-    from kabukit.jquants.statements import with_date
+    from kabukit.sources.jquants.statements import with_date
 
     df = DataFrame(
         {

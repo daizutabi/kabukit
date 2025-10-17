@@ -3,7 +3,7 @@ import pytest
 import pytest_asyncio
 
 from kabukit.core.prices import Prices
-from kabukit.jquants.client import JQuantsClient
+from kabukit.sources.jquants.client import JQuantsClient
 
 pytestmark = pytest.mark.system
 

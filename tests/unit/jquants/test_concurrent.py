@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import pytest
 from polars import DataFrame
 
-from kabukit.jquants.client import JQuantsClient
+from kabukit.sources.jquants.client import JQuantsClient
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -36,7 +36,7 @@ def mock_utils_get(mocker: MockerFixture) -> AsyncMock:
 @pytest.fixture
 def mock_get_target_codes(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.jquants.concurrent.get_target_codes",
+        "kabukit.sources.jquants.concurrent.get_target_codes",
         new_callable=mocker.AsyncMock,
     )
 
@@ -44,14 +44,14 @@ def mock_get_target_codes(mocker: MockerFixture) -> AsyncMock:
 @pytest.fixture
 def mock_get_info(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.jquants.concurrent.get_info",
+        "kabukit.sources.jquants.concurrent.get_info",
         new_callable=mocker.AsyncMock,
     )
 
 
 @pytest.mark.asyncio
 async def test_get(mock_utils_get: AsyncMock) -> None:
-    from kabukit.jquants.concurrent import get
+    from kabukit.sources.jquants.concurrent import get
 
     mock_utils_get.return_value = DataFrame(
         {"Date": [4, 3, 2, 1], "Code": ["a", "b", "b", "a"]},
@@ -84,7 +84,7 @@ async def test_get_without_codes(
     mock_utils_get: AsyncMock,
     mock_get_target_codes: AsyncMock,
 ) -> None:
-    from kabukit.jquants.concurrent import get
+    from kabukit.sources.jquants.concurrent import get
 
     mock_get_target_codes.return_value = ["1111", "2222", "3333"]
     # get() は .sort("Code", "Date") を行うので、モックの戻り値にもカラムが必要
@@ -119,7 +119,7 @@ async def test_get_without_codes(
 
 @pytest.mark.asyncio
 async def test_get_info(mock_jquants_client_context: AsyncMock) -> None:
-    from kabukit.jquants.concurrent import get_info
+    from kabukit.sources.jquants.concurrent import get_info
 
     await get_info("7203")
 
@@ -128,7 +128,7 @@ async def test_get_info(mock_jquants_client_context: AsyncMock) -> None:
 
 @pytest.mark.asyncio
 async def test_get_target_codes(mock_get_info: AsyncMock) -> None:
-    from kabukit.jquants.concurrent import get_target_codes
+    from kabukit.sources.jquants.concurrent import get_target_codes
 
     mock_df = DataFrame(
         {
@@ -166,10 +166,10 @@ async def test_get_target_codes(mock_get_info: AsyncMock) -> None:
 
 @pytest.mark.asyncio
 async def test_get_statements(mocker: MockerFixture) -> None:
-    from kabukit.jquants.concurrent import get_statements
+    from kabukit.sources.jquants.concurrent import get_statements
 
     mock_get = mocker.patch(
-        "kabukit.jquants.concurrent.get",
+        "kabukit.sources.jquants.concurrent.get",
         new_callable=mocker.AsyncMock,
     )
 
@@ -194,7 +194,7 @@ async def test_get_statements(mocker: MockerFixture) -> None:
 async def test_get_statements_with_single_code(
     mock_jquants_client_context: AsyncMock,
 ) -> None:
-    from kabukit.jquants.concurrent import get_statements
+    from kabukit.sources.jquants.concurrent import get_statements
 
     await get_statements("7203")
 
@@ -203,10 +203,10 @@ async def test_get_statements_with_single_code(
 
 @pytest.mark.asyncio
 async def test_get_prices(mocker: MockerFixture) -> None:
-    from kabukit.jquants.concurrent import get_prices
+    from kabukit.sources.jquants.concurrent import get_prices
 
     mock_get = mocker.patch(
-        "kabukit.jquants.concurrent.get",
+        "kabukit.sources.jquants.concurrent.get",
         new_callable=mocker.AsyncMock,
     )
 
@@ -232,7 +232,7 @@ async def test_get_prices(mocker: MockerFixture) -> None:
 async def test_get_prices_with_single_code(
     mock_jquants_client_context: AsyncMock,
 ) -> None:
-    from kabukit.jquants.concurrent import get_prices
+    from kabukit.sources.jquants.concurrent import get_prices
 
     await get_prices("7203")
 

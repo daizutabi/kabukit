@@ -6,7 +6,7 @@ import pytest
 import pytest_asyncio
 from polars import DataFrame
 
-from kabukit.jquants.client import JQuantsClient
+from kabukit.sources.jquants.client import JQuantsClient
 
 pytestmark = pytest.mark.system
 
@@ -93,13 +93,13 @@ def test_scale_category(df: DataFrame, sc: str) -> None:
 
 
 def test_columns(df: DataFrame) -> None:
-    from kabukit.jquants.schema import InfoColumns
+    from kabukit.sources.jquants.schema import InfoColumns
 
     assert df.columns == [c.name for c in InfoColumns]
 
 
 def test_rename(df: DataFrame) -> None:
-    from kabukit.jquants.schema import InfoColumns
+    from kabukit.sources.jquants.schema import InfoColumns
 
     df_renamed = InfoColumns.rename(df, strict=True)
     assert df_renamed.columns == [c.value for c in InfoColumns]

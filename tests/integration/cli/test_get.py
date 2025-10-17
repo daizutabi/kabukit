@@ -22,7 +22,7 @@ runner = CliRunner()
 def test_get_info_with_code(mocker: MockerFixture):
     mock_df = pl.DataFrame({"code": ["1234"], "name": ["test"]})
     mock_get = mocker.patch(
-        "kabukit.jquants.client.JQuantsClient.get_info",
+        "kabukit.sources.jquants.client.JQuantsClient.get_info",
         return_value=mock_df,
     )
     result = runner.invoke(app, ["get", "info", "1234"])
@@ -34,7 +34,7 @@ def test_get_info_with_code(mocker: MockerFixture):
 def test_get_info_all(mocker: MockerFixture, mock_cache_dir: Path):
     mock_df = pl.DataFrame({"code": ["1234"], "name": ["test"]})
     mock_get = mocker.patch(
-        "kabukit.jquants.client.JQuantsClient.get_info",
+        "kabukit.sources.jquants.client.JQuantsClient.get_info",
         return_value=mock_df,
     )
     result = runner.invoke(app, ["get", "info"])
@@ -49,7 +49,7 @@ def test_get_info_all(mocker: MockerFixture, mock_cache_dir: Path):
 def test_get_statements_all(mocker: MockerFixture, mock_cache_dir: Path):
     mock_df = pl.DataFrame({"code": ["1234"], "Profit": [100]})
     mock_get_statements = mocker.patch(
-        "kabukit.jquants.concurrent.get_statements",
+        "kabukit.sources.jquants.concurrent.get_statements",
         return_value=mock_df,
     )
     result = runner.invoke(app, ["get", "statements"])
@@ -68,7 +68,7 @@ def test_get_statements_all(mocker: MockerFixture, mock_cache_dir: Path):
 def test_get_prices_all(mocker: MockerFixture, mock_cache_dir: Path):
     mock_df = pl.DataFrame({"code": ["1234"], "Close": [1000]})
     mock_get_prices = mocker.patch(
-        "kabukit.jquants.concurrent.get_prices",
+        "kabukit.sources.jquants.concurrent.get_prices",
         return_value=mock_df,
     )
     result = runner.invoke(app, ["get", "prices"])
