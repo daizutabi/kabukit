@@ -36,7 +36,7 @@ def test_data_dir(mocker: MockerFixture, cls: type[Base], name: str) -> None:
 
 def test_write(mocker: MockerFixture, data: DataFrame) -> None:
     mock_cache_write = mocker.patch(
-        "kabukit.cache.write",
+        "kabukit.core.cache.write",
         return_value=Path("mocked_path.parquet"),
     )
     path = Base(data).write()
@@ -50,11 +50,8 @@ def test_init_from_cache(mocker: MockerFixture, data: DataFrame) -> None:
 
     # Mock cache.read for Base class
     mock_cache_read_base = mocker.patch(
-        "kabukit.cache.read",
-        side_effect=[
-            df2,
-            df1,
-        ],  # First call returns df2 (latest), second call returns df1 (specific path)
+        "kabukit.core.cache.read",
+        side_effect=[df2, df1],
     )
 
     base = Base()
@@ -65,13 +62,10 @@ def test_init_from_cache(mocker: MockerFixture, data: DataFrame) -> None:
     base = Base(path="20231026.parquet")
     assert isinstance(base, Base)
     assert_frame_equal(base.data, df1)
-    mock_cache_read_base.assert_any_call(
-        "base",
-        "20231026.parquet",
-    )  # Check for specific path
+    mock_cache_read_base.assert_any_call("base", "20231026.parquet")
 
     # Mock cache.read for Derived class
-    mock_cache_read_derived = mocker.patch("kabukit.cache.read", return_value=df2)
+    mock_cache_read_derived = mocker.patch("kabukit.core.cache.read", return_value=df2)
     derived = Derived()
     assert isinstance(derived, Derived)
     assert_frame_equal(derived.data, df2)
@@ -80,7 +74,7 @@ def test_init_from_cache(mocker: MockerFixture, data: DataFrame) -> None:
 
 def test_init_from_cache_file_not_found(mocker: MockerFixture) -> None:
     mocker.patch(
-        "kabukit.cache.read",
+        "kabukit.core.cache.read",
         side_effect=FileNotFoundError("No data found in mocked_cache_dir"),
     )
     with pytest.raises(FileNotFoundError, match="No data found in mocked_cache_dir"):
