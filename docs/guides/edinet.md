@@ -19,7 +19,7 @@ API を利用するには、事前にコマンドラインで EDINET API の API
 kabukit は、手軽に EDINET API からデータを取得できるモジュールレベル関数を提供します。
 これらの関数は内部で非同期処理を並列実行するため、効率的に情報を取得できます。
 
-### 書類一覧の取得 (`get_entries`)
+### 書類一覧 (`get_entries`)
 
 [`kabukit.get_entries`][] 関数は、提出書類一覧を取得します。
 
@@ -54,12 +54,10 @@ df_years = await get_entries(years=1)
 df_years.select("Date", "Code", "docID", "filerName", "pdfFlag", "csvFlag").head()
 ```
 
-### 書類本文の取得 (`get_documents`)
+### 書類本文 (`get_documents`)
 
 [`kabukit.get_documents`][] 関数は、書類本文を取得します。
 書類一覧で取得した書類 ID (`docID`) を引数にとります。
-取得される書類本文は、EDINET が提供する CSV 形式のデータ
-（元のデータは XBRL 形式）をPolars DataFrameにしたものです。
 
 ```python exec="1" source="material-block"
 from kabukit import get_documents
@@ -124,7 +122,7 @@ async with EdinetClient() as client:
 # 自動でセッションが閉じられる
 ```
 
-### 書類一覧の取得 (`get_entries`)
+### 書類一覧 (`get_entries`)
 
 [`EdinetClient.get_entries`][kabukit.EdinetClient.get_entries]
 メソッドは、日付を指定して、提出された書類のメタデータを取得します。
@@ -138,7 +136,7 @@ df = await client.get_entries("2025-10-10")
 df.select("Date", "Code", "docID", "filerName", "pdfFlag", "csvFlag").tail()
 ```
 
-### 書類本文の取得 (`get_document`)
+### 書類本文 (`get_document`)
 
 [`EdinetClient.get_document`][kabukit.EdinetClient.get_document]
 メソッドは、文書 ID を指定して、書類本文を取得します。
@@ -152,7 +150,6 @@ df.select("docID", "要素ID", "項目名", "値").head()
 取得できます。
 
 ```python .md#_
-import polars as pl
 pl.Config(fmt_str_lengths=15)
 ```
 
@@ -164,3 +161,10 @@ df.select("docID", "pdf").tail()
 ```python .md#_
 pl.Config(fmt_str_lengths=None)
 ```
+
+## データ形式について
+
+[`kabukit.get_documents`][] 関数や
+[`EdinetClient.get_document`][kabukit.EdinetClient.get_document] メソッドで
+取得される書類本文は、EDINET が提供する CSV 形式のデータ（元のデータは XBRL 形式）を
+Polars DataFrame に変換したものです。
