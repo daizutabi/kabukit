@@ -46,81 +46,77 @@ def test_get_prices_single_code(mock_get_prices: AsyncMock) -> None:
 
 def test_get_info_all_codes(
     mock_get_info: AsyncMock,
-    MockInfo: MagicMock,  # noqa: N803
-    mock_info: MagicMock,
+    mock_cache_write: MagicMock,
 ) -> None:
     result = runner.invoke(app, ["get", "info"])
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
-    mock_get_info.assert_awaited_once_with(None)
-    MockInfo.assert_called_once_with(MOCK_DF)
-    mock_info.write.assert_called_once()
     assert f"全銘柄の情報を '{MOCK_PATH}' に保存しました。" in result.stdout
+
+    mock_get_info.assert_awaited_once_with(None)
+    mock_cache_write.assert_called_once_with("info", MOCK_DF)
 
 
 def test_get_statements_all_codes(
     mock_get_statements: AsyncMock,
-    MockStatements: MagicMock,  # noqa: N803
-    mock_statements: MagicMock,
+    mock_cache_write: MagicMock,
 ) -> None:
     mock_get_statements.return_value = MOCK_DF
     result = runner.invoke(app, ["get", "statements"])
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
+    assert f"全銘柄の財務情報を '{MOCK_PATH}' に保存しました。" in result.stdout
+
     mock_get_statements.assert_awaited_once_with(
         None,
         max_items=None,
         progress=tqdm.asyncio.tqdm,
     )
-    MockStatements.assert_called_once_with(MOCK_DF)
-    mock_statements.write.assert_called_once()
-    assert f"全銘柄の財務情報を '{MOCK_PATH}' に保存しました。" in result.stdout
+    mock_cache_write.assert_called_once_with("statements", MOCK_DF)
 
 
 def test_get_prices_all_codes(
     mock_get_prices: AsyncMock,
-    MockPrices: MagicMock,  # noqa: N803
-    mock_prices: MagicMock,
+    mock_cache_write: MagicMock,
 ) -> None:
     mock_get_prices.return_value = MOCK_DF
     result = runner.invoke(app, ["get", "prices"])
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
+    assert f"全銘柄の株価情報を '{MOCK_PATH}' に保存しました。" in result.stdout
+
     mock_get_prices.assert_awaited_once_with(
         None,
         max_items=None,
         progress=tqdm.asyncio.tqdm,
     )
-    MockPrices.assert_called_once_with(MOCK_DF)
-    mock_prices.write.assert_called_once()
-    assert f"全銘柄の株価情報を '{MOCK_PATH}' に保存しました。" in result.stdout
+    mock_cache_write.assert_called_once_with("prices", MOCK_DF)
 
 
 def test_get_entries(
     mock_get_entries: AsyncMock,
-    MockEntries: MagicMock,  # noqa: N803
-    mock_entries: MagicMock,
+    mock_cache_write: MagicMock,
 ) -> None:
     result = runner.invoke(app, ["get", "entries"])
 
     assert result.exit_code == 0
+    assert f"書類一覧を '{MOCK_PATH}' に保存しました。" in result.stdout
+
     mock_get_entries.assert_awaited_once_with(
         None,
         years=10,
         progress=tqdm.asyncio.tqdm,
         max_items=None,
     )
-    MockEntries.assert_called_once_with(MOCK_DF)
-    mock_entries.write.assert_called_once()
-    assert f"書類一覧を '{MOCK_PATH}' に保存しました。" in result.stdout
+    mock_cache_write.assert_called_once_with("entries", MOCK_DF)
 
 
 def test_get_entries_with_date(
     mock_get_entries: AsyncMock,
-    MockEntries: MagicMock,  # noqa: N803
+    mock_cache_write: MagicMock,
 ) -> None:
     MOCK_DATE = "2023-01-01"  # noqa: N806
     result = runner.invoke(app, ["get", "entries", MOCK_DATE])
@@ -133,7 +129,7 @@ def test_get_entries_with_date(
         progress=None,
         max_items=None,
     )
-    MockEntries.assert_not_called()
+    mock_cache_write.assert_not_called()
 
 
 @pytest.fixture
