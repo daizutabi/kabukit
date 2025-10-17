@@ -8,7 +8,7 @@ kabukit は、[J-Quants API](https://jpx-jquants.com/)
 
 コマンド名は `kabu` です。
 
-## 認証設定
+## 認証設定 (`auth`)
 
 `kabu auth` コマンドは、以下の優先順位で認証情報を探索します。
 
@@ -17,7 +17,7 @@ kabukit は、[J-Quants API](https://jpx-jquants.com/)
 3. 環境変数 (例: `JQUANTS_MAILADDRESS`)
 4. 上記いずれにも見つからない場合は、インタラクティブな入力プロンプトを表示
 
-### J-Quants API
+### J-Quants API (`jquants`)
 
 J-Quants API を利用するには、事前に
 [ユーザー登録](https://jpx-jquants.com/auth/signup/?lang=ja)
@@ -26,7 +26,7 @@ J-Quants API を利用するには、事前に
 `auth jquants` サブコマンド (エイリアス: `auth j`) で
 ID トークンを取得し、設定ファイルに保存します。
 
-#### 基本的な使い方（インタラクティブ）
+#### 対話的な使い方
 
 オプションを指定せずにコマンドを実行すると、対話形式でメールアドレスとパスワードを尋ねられます。
 
@@ -37,7 +37,7 @@ Password:
 J-QuantsのIDトークンを保存しました。
 ```
 
-#### 非インタラクティブな使い方
+#### 非対話的な使い方
 
 CI/CD 環境など、対話的な入力ができない場合は、
 コマンドラインオプションまたは環境変数で認証情報を指定できます。
@@ -56,7 +56,7 @@ $ export JQUANTS_PASSWORD="my_password"
 $ kabu auth jquants
 ```
 
-### EDINET API
+### EDINET API (`edinet`)
 
 EDINET API を利用するには、事前に
 [API キーの取得](https://disclosure2dl.edinet-fsa.go.jp/guide/static/disclosure/download/ESE140206.pdf)
@@ -65,7 +65,7 @@ EDINET API を利用するには、事前に
 `auth edinet` サブコマンド (エイリアス: `auth e`) で API キーを
 設定ファイルに保存します。
 
-#### 基本的な使い方（インタラクティブ）
+#### 対話的な使い方
 
 ```bash
 $ kabu auth edinet
@@ -73,7 +73,7 @@ Api key: my_api_key
 EDINETのAPIキーを保存しました。
 ```
 
-#### 非インタラクティブな使い方
+#### 非対話的な使い方
 
 - コマンドラインオプションを使う場合
 
@@ -91,9 +91,9 @@ $ export EDINET_API_KEY="my_api_key"
 `kabu auth edinet`コマンドで設定ファイルに保存する
 必要はありません。
 
-### 認証情報の確認
+### 認証設定の表示 (`show`)
 
-認証データの保存先と内容は、`auth show` サブコマンドで確認できます。
+認証設定の保存先と内容は、`auth show` サブコマンドで表示できます。
 
 ```bash
 $ kabu auth show
@@ -102,7 +102,7 @@ JQUANTS_ID_TOKEN = "..."
 EDINET_API_KEY = "..."
 ```
 
-## 情報取得
+## 情報取得 (`get`)
 
 `get` サブコマンドは、J-Quants API および EDINET API から各種情報を取得します。
 
@@ -251,14 +251,19 @@ $ kabu get all [code]
 銘柄コードを省略したときに限り、
 これらの情報はキャッシュディレクトリに保存されます。
 
-## キャッシュ情報の確認と消去
+## キャッシュ (`cache`)
+
+### ツリー表示 (`tree`)
 
 `cache tree` サブコマンドを使うと、
-キャッシュディレクトリに保存された情報を確認できます。
+キャッシュディレクトリに保存された情報を
+ツリーで表示します。
 
 ```console exec="on" source="console"
 $ kabu cache tree
 ```
+
+### 消去 (`clean`)
 
 `cache clean` サブコマンドを使うと、
 キャッシュ情報を消去できます。

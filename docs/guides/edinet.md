@@ -164,7 +164,7 @@ pl.Config(fmt_str_lengths=None)
 
 ## データ形式について
 
-[`kabukit.get_documents`][] 関数や
+[`kabukit.get_documents`][] 関数および
 [`EdinetClient.get_document`][kabukit.EdinetClient.get_document] メソッドで
 取得される書類本文は、EDINET が提供する CSV 形式のデータ（元のデータは XBRL 形式）を
 Polars DataFrame に変換したものです。
