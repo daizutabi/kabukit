@@ -4,20 +4,145 @@ kabukit は、[httpx](https://www.python-httpx.org/) を使った非同期設計
 [Jupyter](https://jupyter.org/) や [marimo](https://marimo.io/) のような
 非同期処理を直接扱えるノートブック環境で快適に利用できます。
 
-このガイドでは、`JQuantsClient` を使ったデータ取得とキャッシュの活用方法を解説します。
+このガイドでは、kabukit が提供する高レベルなモジュール関数と、
+より詳細な制御が可能な [`JQuantsClient`][kabukit.JQuantsClient]
+の使い方を解説します。
 
-## 認証
+## 認証設定
 
-API を利用するには、事前にコマンドラインで J-Quants API の認証情報を設定しておく必要があります。
+API を利用するには、事前にコマンドラインで J-Quants API の ID トークンを取得
+しておく必要があります。
+詳細は、[コマンドラインインターフェースの使い方](cli.md)の「認証設定」セクションを参照してください。
 
-```bash
-$ kabu auth jquants
-Mailaddress: my_email@example.com
-Password: my_password
-J-QuantsのIDトークンを保存しました。
+## モジュールレベル関数
+
+kabukit は、手軽に J-Quants API からデータを取得できるモジュールレベル関数を提供します。
+これらの関数は内部で非同期処理を並列実行するため、効率的に情報を取得できます。
+
+### 上場銘柄一覧 (`get_info`)
+
+[`kabukit.get_info`][] 関数は、上場企業の情報を取得します。
+
+銘柄コード (4 桁または 5 桁の文字列) を指定すると、指定した銘柄の情報を取得できます。
+
+```python exec="1" source="material-block"
+from kabukit import get_info
+
+df = await get_info("7203")  # または "72030"
+df.select("Date", "Code", "CompanyName", "MarketCodeName")
 ```
 
-## クライアントの使い方
+銘柄コードを省略すると、全上場企業の情報を取得できます。
+
+```python exec="1" source="material-block"
+df = await get_info()  # 全上場銘柄一覧を取得
+df = df.filter(MarketCodeName="プライム")  # 市場区分がプライムの企業を選択
+df.select("Date", "Code", "CompanyName", "MarketCodeName")
+```
+
+### 財務情報 (`get_statements`)
+
+[`kabukit.get_statements`][] 関数は、
+上場企業の四半期毎の決算短信サマリーや業績・配当情報の修正に関する
+開示情報（主に数値データ）を取得します。
+
+銘柄コードを指定すると、指定した銘柄の全期間分の財務情報を取得できます。
+
+```python exec="1" source="material-block"
+from kabukit import get_statements
+
+df = await get_statements("7203")
+df.select("DisclosedDate", "Code", "TypeOfDocument")
+```
+
+銘柄コードのリストを指定すると、複数の企業の全期間分の財務情報を一度に取得できます。
+このとき、J-Quants API へのリクエストは非同期で並列に行われます。
+
+```python exec="1" source="material-block"
+from polars import col as c
+import polars as pl
+
+# 複数銘柄の財務情報を取得
+df = await get_statements(["7203", "9984", "8306", "6758"])
+
+# 銘柄コードごとに集計
+df.group_by(c.Code).agg(
+    pl.len().alias("財務情報の数"),
+    c.DisclosedDate.first().alias("初回開示日"),
+    c.DisclosedDate.last().alias("最終開示日"),
+)
+```
+
+銘柄コードを指定しない場合、全銘柄の財務情報を全期間に渡って取得します。
+データ量が大きくなるため、コマンドラインインターフェースの利用を推奨します。
+ノートブックで試す場合は、`max_items` で取得する銘柄数を制限できます。
+また、`progress` に marimo のプログレスバーを指定することで、
+進捗を可視化することができます。
+
+```python exec="1" source="material-block"
+import marimo as mo
+
+# 最初の3銘柄だけ取得。その際、プログレスバーを表示
+df = await get_statements(max_items=3, progress=mo.status.progress_bar)
+df.group_by(c.Code).agg(pl.len())
+```
+
+### 株価情報 (`get_prices`)
+
+[`kabukit.get_prices`][] 関数は、株価情報を取得します。
+
+株価情報は、分割・併合を考慮した調整済み株価（小数点第２位四捨五入）と
+調整前の株価の両方を含みます。
+
+銘柄コードを指定すると、指定した銘柄の全期間分の株価情報を取得できます。
+
+```python .md#_
+pl.Config.set_tbl_cols(None)
+```
+
+```python exec="1" source="material-block"
+from kabukit import get_prices
+
+df = await get_prices("7203")
+df.select("Date", "Code", "Open", "High", "Low", "Close", "Volume")
+```
+
+銘柄コードのリストを指定すると、複数の企業の全期間分の株価情報を一度に取得できます。
+
+```python exec="1" source="material-block"
+df = await get_prices(["7203", "9984", "8306", "6758"])
+
+# 銘柄コードごとに集計
+df.group_by(c.Code).agg(
+    pl.len().alias("日数"),
+    c.Low.min().alias("最安値"),
+    c.High.max().alias("最高値"),
+    c.Close.last().alias("直近終値"),
+    c.TurnoverValue.mean().alias("1日あたり平均取引代金"),
+)
+```
+
+銘柄コードを指定しない場合、全銘柄の株価情報を全期間に渡って取得します。
+データ量が非常に大きくなるため、コマンドラインインターフェースの利用を推奨します。
+ノートブックで試す場合は、`max_items` で取得する銘柄数を制限できます。
+また、`progress` に marimo のプログレスバーを指定することで、
+進捗を可視化することができます。
+
+```python exec="1" source="material-block"
+# 最初の3銘柄だけ取得。その際、プログレスバーを表示
+df = await get_prices(max_items=3, progress=mo.status.progress_bar)
+df.group_by(c.Code).agg(pl.len())
+```
+
+## JQuantsClient
+
+[`JQuantsClient`][kabukit.JQuantsClient] の各メソッドは、
+[J-Quants APIの仕様](https://jpx.gitbook.io/j-quants-ja/api-reference)
+に対応した実装となっています。
+また、より詳細な制御（例: タイムアウト設定、リトライポリシーの変更など）
+が必要な場合に直接利用します。
+特に、`JQuantsClient.client` 属性は `httpx.AsyncClient` のインスタンスであるため、
+httpx が提供する豊富なメソッドや設定に直接アクセスすることが可能です。
 
 ノートブックで `kabukit.JQuantsClient` をインポートしてインスタンスを作成します。
 
@@ -38,70 +163,115 @@ async with JQuantsClient() as client:
 # 自動でセッションが閉じられる
 ```
 
-## データ取得
+### 上場銘柄一覧 (`get_info`)
 
-`JQuantsClient` は、さまざまなデータを取得するための非同期メソッドを提供します。
-返り値はすべて高速な `polars.DataFrame` です。
-
-### 上場銘柄一覧
-
-`get_info` メソッドは、上場企業の情報を取得します。
+[`JQuantsClient.get_info`][kabukit.JQuantsClient.get_info]
+メソッドは、上場企業の情報を取得します。
 J-Quants API の[上場銘柄一覧 (/listed/info)](https://jpx.gitbook.io/j-quants-ja/api-reference/listed_info)
 に対応します。
 
-```python .md#_
-client = JQuantsClient()
-```
-
-引数に銘柄コードを指定すると、特定企業の情報を取得できます。
+引数に銘柄コードを指定して、指定した銘柄の情報を取得します。
+実行した日付あるいは翌営業日の情報となります。
 
 ```python exec="1" source="material-block"
-df = await client.get_info("7203")
-df.select("Date", "Code", "CompanyName")
+from kabukit import JQuantsClient
+
+client = JQuantsClient()
+
+df = await client.get_info("7203")  # トヨタ自動車
+df.select("Date", "Code", "CompanyName", "Sector17CodeName")
 ```
 
-戻り値のカラムは、J-Quants API の
-[データ項目概要](https://jpx.gitbook.io/j-quants-ja/api-reference/listed_info#dta)
-に対応します。
+`date` 引数に日付を指定して、指定した日付の全銘柄情報を取得します。
 
-引数を省略すると、全企業の情報を取得できます。
+```python exec="1" source="material-block"
+df = await client.get_info(date="2020-10-01")
+df = df.filter(c.Sector17CodeName != "その他")  # 投資信託などを除く
+df.select("Date", "Code", "CompanyName", "Sector17CodeName")
+```
+
+引数を指定しない場合、実行した日付の全銘柄情報を取得します。
 
 ```python exec="1" source="material-block"
 df = await client.get_info()
-df.select("Date", "Code", "CompanyName").tail()
+df = df.filter(c.Sector17CodeName != "その他")  # 投資信託などを除く
+df.select("Date", "Code", "CompanyName", "Sector33CodeName")
 ```
 
-```python exec="1" source="material-block"
-df.shape
-```
+### 財務情報 (`get_statements`)
 
-`JQuantsClinet`のインスタンスを保持する必要がないとき、
-トップレベルの`get_info`関数を使うと、同じ全企業の情報を取得できます。
-
-```python exec="1" source="material-block"
-from kabukit import get_info
-
-df = await get_info()
-df.shape
-```
-
-### 財務情報
-
-`get_statements` メソッドは、四半期の財務情報を取得します。
+[`JQuantsClient.get_statements`][kabukit.JQuantsClient.get_statements]
+メソッドは、
+上場企業の四半期毎の決算短信サマリーや業績・配当情報の修正に関する
+開示情報（主に数値データ）を取得します。
 J-Quants API の[財務情報 (/fins/statements)](https://jpx.gitbook.io/j-quants-ja/api-reference/statements)
 に対応します。
 
-引数に銘柄コードを指定すると、指定した企業の全期間分の情報を取得できます。
+引数に銘柄コードを指定して、指定した銘柄の全期間分の財務情報を取得します。
 
 ```python exec="1" source="material-block"
-df = await client.get_statements("7203")
-df.select("DisclosedDate", "Code", "TypeOfDocument", "Profit").tail()
+df = await client.get_statements("7203") # トヨタ自動車
+df.select("DisclosedDate", "Code", "TypeOfDocument", "NetSales", "Profit")
 ```
 
-戻り値のカラムは、J-Quants API の
-[データ項目概要](https://jpx.gitbook.io/j-quants-ja/api-reference/statements#dta)
+`date` 引数に日付を指定して、指定した日付に開示された財務情報を取得します。
+
+```python exec="1" source="material-block"
+df = await client.get_statements(date="2025-10-16")
+df.select("DisclosedDate", "Code", "TypeOfDocument", "Profit", "ForecastProfit")
+```
+
+### 株価情報 (`get_prices`)
+
+[`JQuantsClient.get_prices`][kabukit.JQuantsClient.get_prices]
+メソッドは、株価情報を取得します。
+J-Quants API の[株価四本値 (/prices/daily_quotes)](https://jpx.gitbook.io/j-quants-ja/api-reference/daily_quotes)
 に対応します。
-ただし、分析を行いやすくするために、株式数に関して以下の変更を行っています。
+
+株価情報は、分割・併合を考慮した調整済み株価（小数点第２位四捨五入）と
+調整前の株価の両方を含みます。
+
+引数に銘柄コードを指定して、指定した銘柄の全期間分の株価情報を取得します。
+
+```python exec="1" source="material-block"
+df = await client.get_prices("7203") # トヨタ自動車
+df.select("Date", "Code", "Open", "High", "Low", "Close", "Volume")
+```
+
+`date` 引数に日付を指定して、全上場銘柄について指定された日付の株価情報を取得します。
+
+```python exec="1" source="material-block"
+df = await client.get_prices(date="2025-10-17")
+df.select("Date", "Code", "Open", "High", "Low", "Close", "Volume")
+```
+
+`from_`, `to` 引数で期間を指定することもできます。
+このとき銘柄コードは必須です。
+
+```python exec="1" source="material-block"
+df = await client.get_prices("7203", from_="2025-01-01", to="2025-05-31")
+
+# 月次の株価四本値を求める
+df.group_by(c.Date.dt.truncate("1mo"), c.Code).agg(
+    c.Open.first(),
+    c.High.max(),
+    c.Low.min(),
+    c.Close.last(),
+    c.Volume.sum(),
+).sort(c.Code, c.Date)
+```
+
+## DataFrameのカラム名について
+
+J-Quants API から返される JSON 形式のデータは、
+`JQuantsClient`クラスの各メソッドで Polars DataFrame に変換されます。
+その際、後続の分析を行いやすくするために、一部のカラム名が変更されます。
+
+### 財務情報
+
+株式数に関するカラム名は、
+文字数を短縮するため、および、意味を明確にするために、
+以下のように変更されます。
 
 - 期末発行済株式数（自己株式を含む）
     - （変更前）NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock
@@ -113,112 +283,26 @@ df.select("DisclosedDate", "Code", "TypeOfDocument", "Profit").tail()
     - （変更前）AverageNumberOfShares
     - （変更後）AverageOutstandingShares
 
-引数に日付を指定すると、該当する開示日の情報を全企業分の財務情報を取得できます。
-
-```python exec="1" source="material-block"
-df = await client.get_statements(date="2025-10-10")
-df.select("DisclosedDate", "Code", "TypeOfDocument", "Profit").head()
-```
-
-複数の企業の全期間分の財務情報を一度に取得するには、
-トップレベルの `get_statements` 関数を使います。
-第一引数には銘柄コードのリストを与えます。
-
-```python exec="1" source="material-block"
-import polars as pl
-from polars import col as c
-from kabukit import get_statements
-
-df = await get_statements(["7203", "9984", "8306", "6758"])
-df.group_by(c.Code).agg(
-    pl.len(),
-    c.DisclosedDate.first().alias("first"),
-    c.DisclosedDate.last().alias("last"),
-)
-```
-
-銘柄コードを指定しないと、全銘柄の財務情報を全期間に渡って取得します。
-`marimo` のような UI フレームワークと組み合わせることで、
-進捗状況を可視化することも可能です。
-ここでは、時間短縮のため、`max_items`キーワードで取得する銘柄数を制限します。
-
-```python exec="1" source="material-block"
-import marimo as mo
-
-df = await get_statements(max_items=3, progress=mo.status.progress_bar)
-df.group_by(c.Code).agg(pl.len())
-```
-
-通常、全銘柄・全期間の財務情報の取得は、
-コマンドラインインターフェースで行い、
-ノートブックでは保存されたキャッシュデータを用います。
-詳しくは、
-[コマンドラインインターフェースの使い方](cli.md)
-を参照してください。
-
 ### 株価情報
 
-`get_prices` メソッドは、株価情報を取得します。
-J-Quants API の[株価四本値 (/prices/daily_quotes)](https://jpx.gitbook.io/j-quants-ja/api-reference/daily_quotes)
-に対応します。
+株価に関するカラム名が以下のように変更されます。
 
-引数に銘柄コードを指定すると、指定した企業の全期間の株価情報を取得できます。
+- J-Quants API では、調整済みの値に `Adjustment` プレフィックス
+  を付けています。kabukit ではカラム名を単純化するために、
+  プレフィックスのない `Open`, `Close` などで、調整済みの値を表します。
+- `Raw` プレフィックスが付いているものが、調整前の実際に取引に使われた値です。
 
-```python exec="1" source="material-block"
-df = await client.get_prices("7203")
-df.select("Date", "Code", "Open", "High", "Low", "Close", "Volume").tail()
-```
-
-戻り値のカラムは、J-Quants API の
-[データ項目概要](https://jpx.gitbook.io/j-quants-ja/api-reference/daily_quotes#dta)
-に対応します。
-ただし、分析を行いやすくするために、株価などの調整に関して以下の変更を行っています。
+下に対応表を示します。
 
 | J-Quants API | kabukit | 説明 |
 | :--: | :--: | :--: |
-| Open | RawOpen | 始値（調整前） |
-| High | RawHigh | 高値（調整前） |
-| Low | RawLow | 安値（調整前） |
-| Close | RawClose | 終値（調整前） |
-| Volume | RawVolume | 取引高（調整前） |
 | AdjustmentOpen | Open | 調整済み始値 |
 | AdjustmentHigh | High | 調整済み高値 |
 | AdjustmentLow | Low | 調整済み安値 |
 | AdjustmentClose | Close | 調整済み終値 |
 | AdjustmentVolume | Volume | 調整済み取引高 |
-
-引数に日付を指定すると、該当する取引日の全企業分の株価情報を取得できます
-
-```python exec="1" source="material-block"
-df = await client.get_prices(date="2025-10-10")
-df.select("Date", "Code", "Open", "High", "Low", "Close", "Volume").tail()
-```
-
-複数の企業の全期間分の株価情報を一度に取得するには、
-トップレベルの `get_prices` 関数を使います。
-第一引数には銘柄コードのリストを与えます。
-
-```python exec="1" source="material-block"
-from kabukit import get_prices
-
-df = await get_prices(["7203", "9984", "8306", "6758"])
-df.group_by(c.Code).agg(pl.len(), c.Date.last(), c.Close.last())
-```
-
-銘柄コードを指定しないと、全銘柄の株価情報を全期間に渡って取得します。
-ここでは、時間短縮のため、`max_items`キーワードで取得する銘柄数を制限します。
-
-```python exec="1" source="material-block"
-df = await get_prices(max_items=3)
-df.group_by(c.Code).agg(pl.len())
-```
-
-通常、全銘柄・全期間の株価情報の取得は、
-コマンドラインインターフェースで行い、
-ノートブックでは保存されたキャッシュデータを用います。
-詳しくは、
-
-- [コマンドラインインターフェースの使い方](cli.md)
-- [キャッシュデータの活用](cli.md)
-
-を参照してください。
+| Open | RawOpen | 始値（調整前） |
+| High | RawHigh | 高値（調整前） |
+| Low | RawLow | 安値（調整前） |
+| Close | RawClose | 終値（調整前） |
+| Volume | RawVolume | 取引高（調整前） |

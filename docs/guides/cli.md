@@ -8,7 +8,7 @@ kabukit は、[J-Quants API](https://jpx-jquants.com/)
 
 コマンド名は `kabu` です。
 
-## 認証
+## 認証設定
 
 `kabu auth` コマンドは、以下の優先順位で認証情報を探索します。
 
