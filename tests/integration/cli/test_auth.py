@@ -7,8 +7,8 @@ from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
 from kabukit.cli.app import app
-from kabukit.edinet.client import AuthKey as EdinetAuthKey  # 追加
 from kabukit.jquants.client import AuthKey as JQuantsAuthKey
+from kabukit.sources.edinet.client import AuthKey as EdinetAuthKey  # 追加
 
 pytestmark = pytest.mark.integration
 

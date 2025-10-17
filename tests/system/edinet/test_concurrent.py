@@ -8,7 +8,7 @@ pytestmark = pytest.mark.system
 
 @pytest.mark.asyncio
 async def test_get() -> None:
-    from kabukit.edinet.concurrent import get
+    from kabukit.sources.edinet.concurrent import get
 
     df = await get("entries", ["2025-09-09", "2025-09-19", "2025-09-22"])
     assert df.shape == (1231, 30)
@@ -23,7 +23,7 @@ def callback(df: DataFrame) -> DataFrame:
 
 @pytest.mark.asyncio
 async def test_get_entries_dates() -> None:
-    from kabukit.edinet.concurrent import get_entries
+    from kabukit.sources.edinet.concurrent import get_entries
 
     df = await get_entries(["2025-10-09", "2025-10-10"])
     expected = [date(2025, 10, 9), date(2025, 10, 10)]
@@ -32,7 +32,7 @@ async def test_get_entries_dates() -> None:
 
 @pytest.mark.asyncio
 async def test_get_entries_single_date() -> None:
-    from kabukit.edinet.concurrent import get_entries
+    from kabukit.sources.edinet.concurrent import get_entries
 
     df = await get_entries("2025-10-09")
     dates = df["Date"].unique().to_list()
@@ -42,7 +42,7 @@ async def test_get_entries_single_date() -> None:
 
 @pytest.mark.asyncio
 async def test_get_entries_without_dates() -> None:
-    from kabukit.edinet.concurrent import get_entries
+    from kabukit.sources.edinet.concurrent import get_entries
 
     df = await get_entries(days=7, max_items=6, callback=callback)
     assert df.width == 30
@@ -50,7 +50,7 @@ async def test_get_entries_without_dates() -> None:
 
 @pytest.mark.asyncio
 async def test_get_documents_csv() -> None:
-    from kabukit.edinet.concurrent import get_documents, get_entries
+    from kabukit.sources.edinet.concurrent import get_documents, get_entries
 
     df = await get_entries(["2025-09-09", "2025-09-19", "2025-09-22"])
     doc_ids = df.filter(csvFlag=True).get_column("docID").sort()
@@ -60,7 +60,7 @@ async def test_get_documents_csv() -> None:
 
 @pytest.mark.asyncio
 async def test_get_documents_pdf() -> None:
-    from kabukit.edinet.concurrent import get_documents, get_entries
+    from kabukit.sources.edinet.concurrent import get_documents, get_entries
 
     df = await get_entries("2025-09-09")
     doc_ids = df.filter(pdfFlag=True).get_column("docID").to_list()
@@ -74,7 +74,7 @@ async def test_get_documents_pdf() -> None:
 
 @pytest.mark.asyncio
 async def test_get_documents_single_doc_id() -> None:
-    from kabukit.edinet.concurrent import get_documents, get_entries
+    from kabukit.sources.edinet.concurrent import get_documents, get_entries
 
     df = await get_entries("2025-09-09")
     doc_id = df.filter(csvFlag=True).get_column("docID").first()
@@ -86,7 +86,7 @@ async def test_get_documents_single_doc_id() -> None:
 
 @pytest.mark.asyncio
 async def test_get_documents_invalid_id_raises_error() -> None:
-    from kabukit.edinet.concurrent import get_documents
+    from kabukit.sources.edinet.concurrent import get_documents
 
     with pytest.raises(ValueError, match="ZIP is not available"):
         await get_documents("E00000")

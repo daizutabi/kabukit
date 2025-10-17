@@ -84,7 +84,7 @@ def test_get_prices_all(mocker: MockerFixture, mock_cache_dir: Path):
 def test_get_entries_all(mocker: MockerFixture, mock_cache_dir: Path):
     mock_df = pl.DataFrame({"docID": ["doc1"], "filerName": ["test"]})
     mock_get_entries = mocker.patch(
-        "kabukit.edinet.concurrent.get_entries",
+        "kabukit.sources.edinet.concurrent.get_entries",
         return_value=mock_df,
     )
     result = runner.invoke(app, ["get", "entries"])

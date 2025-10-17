@@ -82,7 +82,7 @@ def mock_prices(MockPrices: MagicMock) -> MagicMock:  # noqa: N803
 @pytest.fixture
 def mock_get_entries(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.edinet.concurrent.get_entries",
+        "kabukit.sources.edinet.concurrent.get_entries",
         new_callable=mocker.AsyncMock,
         return_value=MOCK_DF,
     )
@@ -91,7 +91,7 @@ def mock_get_entries(mocker: MockerFixture) -> AsyncMock:
 @pytest.fixture
 def mock_get_csv(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.edinet.concurrent.get_csv",
+        "kabukit.source.sedinet.concurrent.get_csv",
         new_callable=mocker.AsyncMock,
         return_value=MOCK_DF,
     )

@@ -7,8 +7,8 @@ from async_typer import AsyncTyper  # pyright: ignore[reportMissingTypeStubs]
 from httpx import HTTPStatusError
 from typer import Exit, Option
 
-from kabukit.edinet.client import AuthKey as EdinetAuthKey
 from kabukit.jquants.client import AuthKey as JQuantsAuthKey
+from kabukit.sources.edinet.client import AuthKey as EdinetAuthKey
 from kabukit.utils.config import get_config_path, get_config_value, save_config_key
 
 # pyright: reportUnknownMemberType=false

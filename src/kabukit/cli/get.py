@@ -119,7 +119,7 @@ async def entries(
     import tqdm.asyncio
 
     from kabukit.core.entries import Entries
-    from kabukit.edinet.concurrent import get_entries
+    from kabukit.sources.edinet.concurrent import get_entries
 
     progress = None if date or quiet else tqdm.asyncio.tqdm
     df = await get_entries(date, years=10, progress=progress, max_items=max_items)

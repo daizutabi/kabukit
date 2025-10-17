@@ -10,7 +10,7 @@ from httpx import ConnectTimeout, HTTPStatusError, Response
 from polars import DataFrame
 from polars.testing import assert_frame_equal
 
-from kabukit.edinet.client import AuthKey, EdinetClient
+from kabukit.sources.edinet.client import AuthKey, EdinetClient
 
 if TYPE_CHECKING:
     from typing import Any
@@ -28,7 +28,7 @@ def test_set_api_key() -> None:
 
 def test_set_api_key_none_and_no_config(mocker: MockerFixture) -> None:
     mock_get_config_value = mocker.patch(
-        "kabukit.edinet.client.get_config_value",
+        "kabukit.sources.edinet.client.get_config_value",
         return_value=None,
     )
     client = EdinetClient()
@@ -38,7 +38,7 @@ def test_set_api_key_none_and_no_config(mocker: MockerFixture) -> None:
 
 def test_set_api_key_directly(mocker: MockerFixture) -> None:
     mock_get_config_value = mocker.patch(
-        "kabukit.edinet.client.get_config_value",
+        "kabukit.sources.edinet.client.get_config_value",
         return_value="should_not_be_called",
     )
     client = EdinetClient("initial_key")
@@ -119,7 +119,7 @@ async def test_get_entries_success(mock_get: AsyncMock, mocker: MockerFixture) -
     mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
-    mock_clean_documents = mocker.patch("kabukit.edinet.client.clean_entries")
+    mock_clean_documents = mocker.patch("kabukit.sources.edinet.client.clean_entries")
     expected_df = pl.DataFrame(results)
     mock_clean_documents.return_value = expected_df
 
@@ -259,7 +259,7 @@ async def test_get_csv_success(mock_get: AsyncMock, mocker: MockerFixture) -> No
     )
     mock_get.return_value.raise_for_status = mocker.MagicMock()
 
-    mock_clean_csv = mocker.patch("kabukit.edinet.client.clean_csv")
+    mock_clean_csv = mocker.patch("kabukit.sources.edinet.client.clean_csv")
     expected_df = pl.DataFrame({"header1": ["value1"], "header2": ["value2"]})
     mock_clean_csv.return_value = expected_df
 
