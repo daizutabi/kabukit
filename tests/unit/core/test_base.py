@@ -34,14 +34,24 @@ def test_data_dir(mocker: MockerFixture, cls: type[Base], name: str) -> None:
     mock_user_cache_dir.assert_called_once_with("kabukit", appauthor=False)
 
 
-def test_write(mocker: MockerFixture, data: DataFrame) -> None:
+def test_write_no_name(mocker: MockerFixture, data: DataFrame) -> None:
     mock_cache_write = mocker.patch(
         "kabukit.core.cache.write",
         return_value=Path("mocked_path.parquet"),
     )
     path = Base(data).write()
     assert path == Path("mocked_path.parquet")
-    mock_cache_write.assert_called_once_with("base", data)
+    mock_cache_write.assert_called_once_with("base", data, None)
+
+
+def test_write_with_name(mocker: MockerFixture, data: DataFrame) -> None:
+    mock_cache_write = mocker.patch(
+        "kabukit.core.cache.write",
+        return_value=Path("mocked_path.parquet"),
+    )
+    path = Base(data).write(name="my_file")
+    assert path == Path("mocked_path.parquet")
+    mock_cache_write.assert_called_once_with("base", data, "my_file")
 
 
 def test_init_from_cache(mocker: MockerFixture, data: DataFrame) -> None:
@@ -59,10 +69,10 @@ def test_init_from_cache(mocker: MockerFixture, data: DataFrame) -> None:
     assert_frame_equal(base.data, df2)
     mock_cache_read_base.assert_any_call("base", None)  # Check for latest
 
-    base = Base(path="20231026.parquet")
+    base = Base(name="20231026")
     assert isinstance(base, Base)
     assert_frame_equal(base.data, df1)
-    mock_cache_read_base.assert_any_call("base", "20231026.parquet")
+    mock_cache_read_base.assert_any_call("base", "20231026")
 
     # Mock cache.read for Derived class
     mock_cache_read_derived = mocker.patch("kabukit.core.cache.read", return_value=df2)
