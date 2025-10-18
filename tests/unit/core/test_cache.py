@@ -17,6 +17,39 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
+def test_glob_returns_latest_file(mocker: MockerFixture, tmp_path: Path) -> None:
+    from kabukit.core.cache import glob
+
+    mock_get_cache_dir = mocker.patch("kabukit.core.cache.get_cache_dir")
+    mock_get_cache_dir.return_value = tmp_path
+
+    test_dir = tmp_path / "test"
+    test_dir.mkdir()
+
+    # Create some dummy parquet files
+    (test_dir / "20230101.parquet").touch()
+    (test_dir / "20230102.parquet").touch()
+    (test_dir / "20230103.parquet").touch()
+
+    result = glob(name="test")
+    assert result == test_dir / "20230103.parquet"
+    mock_get_cache_dir.assert_called_once()
+
+
+def test_glob_no_data_found(tmp_path: Path, mocker: MockerFixture) -> None:
+    from kabukit.core.cache import glob
+
+    mock_get_cache_dir = mocker.patch("kabukit.core.cache.get_cache_dir")
+    mock_get_cache_dir.return_value = tmp_path
+
+    test_dir = tmp_path / "test"
+    test_dir.mkdir()
+
+    with pytest.raises(FileNotFoundError, match="No data found in"):
+        glob(name="test")
+    mock_get_cache_dir.assert_called_once()
+
+
 def test_get_cache_filepath_with_absolute_path(tmp_path: Path) -> None:
     from kabukit.core.cache import _get_cache_filepath
 
