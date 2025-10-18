@@ -38,7 +38,7 @@ def test_glob_with_group(mocker: MockerFixture, tmp_path: Path) -> None:
     file2.touch()
     file3.touch()
 
-    base_time = time.time()
+    base_time = int(time.time())
     os.utime(file1, (base_time + 2, base_time + 2))
     os.utime(file2, (base_time, base_time))
     os.utime(file3, (base_time + 1, base_time + 1))
@@ -64,7 +64,7 @@ def test_glob_no_group(mocker: MockerFixture, tmp_path: Path) -> None:
     file1.touch()
     file2.touch()
 
-    base_time = time.time()
+    base_time = int(time.time())
     os.utime(file1, (base_time + 1, base_time + 1))
     os.utime(file2, (base_time, base_time))
 
@@ -141,8 +141,7 @@ def test_get_cache_filepath_no_name_latest_file(
     file2.touch()
     file3.touch()
 
-    # Set explicit modification times (oldest to newest)
-    base_time = time.time()
+    base_time = int(time.time())
     os.utime(file1, (base_time, base_time))
     os.utime(file2, (base_time + 1, base_time + 1))
     os.utime(file3, (base_time + 2, base_time + 2))
