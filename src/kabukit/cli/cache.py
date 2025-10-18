@@ -49,14 +49,12 @@ def add_to_tree(tree: Tree, path: Path) -> None:
 
 
 def format_info(path: Path) -> str:
-    if path.is_dir():
-        return ""
-
     size = path.stat().st_size
     formatted_size = format_size(size)
 
     timestamp = path.stat().st_mtime
     formatted_timestamp = format_timestamp(timestamp)
+
     return f"{formatted_timestamp}, {formatted_size}"
 
 
