@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import datetime
 import shutil
 from typing import TYPE_CHECKING
+from zoneinfo import ZoneInfo
 
 import typer
 from rich.console import Console
@@ -15,17 +17,6 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 app = typer.Typer(add_completion=False, help="キャッシュを管理します。")
-
-
-def add_to_tree(tree: Tree, path: Path) -> None:
-    for p in sorted(path.iterdir()):
-        if p.is_dir():
-            branch = tree.add(p.name)
-            add_to_tree(branch, p)
-        else:
-            size = p.stat().st_size
-            formatted_size = format_size(size)
-            tree.add(f"{p.name} ({formatted_size})")
 
 
 @app.command()
@@ -43,14 +34,43 @@ def tree() -> None:
     console.print(tree_view)
 
 
-def format_size(size_in_bytes: int) -> str:
-    if size_in_bytes < 1024:
-        return f"{size_in_bytes} B"
+def add_to_tree(tree: Tree, path: Path) -> None:
+    for p in sorted(path.iterdir(), key=lambda x: x.stat().st_mtime):
+        info = format_info(p)
+        label = f"{p.name} ({info})" if info else p.name
 
-    if size_in_bytes < 1024 * 1024:
-        return f"{size_in_bytes / 1024:.1f} KB"
+        if p.is_dir():
+            branch = tree.add(label)
+            add_to_tree(branch, p)
+        else:
+            tree.add(label)
 
-    return f"{size_in_bytes / (1024 * 1024):.1f} MB"
+
+def format_info(path: Path) -> str:
+    if path.is_dir():
+        return ""
+
+    size = path.stat().st_size
+    formatted_size = format_size(size)
+
+    timestamp = path.stat().st_mtime
+    formatted_timestamp = format_timestamp(timestamp)
+    return f"{formatted_timestamp}, {formatted_size}"
+
+
+def format_timestamp(timestamp: float) -> str:
+    dt = datetime.datetime.fromtimestamp(timestamp, tz=ZoneInfo("Asia/Tokyo"))
+    return dt.strftime("%Y-%m-%d %H:%M")
+
+
+def format_size(size: int) -> str:
+    if size < 1024:
+        return f"{size} B"
+
+    if size < 1024 * 1024:
+        return f"{size / 1024:.1f} KB"
+
+    return f"{size / (1024 * 1024):.1f} MB"
 
 
 @app.command()
