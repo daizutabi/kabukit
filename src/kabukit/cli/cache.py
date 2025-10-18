@@ -29,20 +29,22 @@ def tree() -> None:
         return
 
     console = Console()
-    tree_view = Tree(str(cache_dir))
+
+    label = f"[bold blue]{cache_dir}[/bold blue]"
+    tree_view = Tree(label)
     add_to_tree(tree_view, cache_dir)
     console.print(tree_view)
 
 
 def add_to_tree(tree: Tree, path: Path) -> None:
     for p in sorted(path.iterdir(), key=lambda x: x.stat().st_mtime):
-        info = format_info(p)
-        label = f"{p.name} ({info})" if info else p.name
-
         if p.is_dir():
+            label = f"[bold blue]{p.name}[/bold blue]"
             branch = tree.add(label)
             add_to_tree(branch, p)
         else:
+            info = format_info(p)
+            label = f"{p.name} [dim]{info}[/dim]"
             tree.add(label)
 
 
