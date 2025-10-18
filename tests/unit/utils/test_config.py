@@ -10,9 +10,6 @@ if TYPE_CHECKING:
     from unittest.mock import MagicMock
 
     from pytest_mock import MockerFixture
-if TYPE_CHECKING:
-    from pathlib import Path
-    from unittest.mock import MagicMock
 
 pytestmark = pytest.mark.unit
 
