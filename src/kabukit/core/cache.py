@@ -10,26 +10,33 @@ import polars as pl
 from kabukit.utils.config import get_cache_dir
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from polars import DataFrame
 
 
-def glob(name: str) -> Path:
-    """Get the latest cache file from the specified cache subdirectory.
+def glob(name: str | None = None) -> Iterator[Path]:
+    """Glob parquet files in the cache directory.
 
     Args:
-        name: The name of the cache subdirectory (e.g., "info", "statements").
+        name (str | None, optional): The name of the cache
+            subdirectory (e.g., "info", "statements").
+            If None, it globs all `*.parquet` files recursively.
 
-    Returns:
-        Path: The path to the latest Parquet file in the subdirectory.
-
-    Raises:
-        FileNotFoundError: If no Parquet files are found in the subdirectory.
+    Yields:
+        Path: An iterator of Path objects for the matched parquet files.
     """
-    data_dir = get_cache_dir() / name
-    filenames = sorted(data_dir.glob("*.parquet"))
+    if name is None:
+        yield from get_cache_dir().glob("**/*.parquet")
+    else:
+        yield from get_cache_dir().joinpath(name).glob("*.parquet")
+
+
+def _get_latest_filepath(name: str) -> Path:
+    filenames = sorted(glob(name))
 
     if not filenames:
-        msg = f"No data found in {data_dir}"
+        msg = f"No data found for {name} in the cache directory"
         raise FileNotFoundError(msg)
 
     return filenames[-1]
@@ -37,7 +44,7 @@ def glob(name: str) -> Path:
 
 def _get_cache_filepath(name: str, path: str | Path | None = None) -> Path:
     if path is None:
-        return glob(name)
+        return _get_latest_filepath(name)
 
     data_dir = get_cache_dir() / name
 
@@ -57,7 +64,7 @@ def _get_cache_filepath(name: str, path: str | Path | None = None) -> Path:
 
 
 def read(name: str, path: str | Path | None = None) -> DataFrame:
-    """Reads a polars.DataFrame directly from the cache.
+    """Read a polars.DataFrame directly from the cache.
 
     Args:
         name: The name of the cache subdirectory (e.g., "info", "statements").
@@ -75,7 +82,7 @@ def read(name: str, path: str | Path | None = None) -> DataFrame:
 
 
 def write(name: str, df: DataFrame) -> Path:
-    """Writes a polars.DataFrame directly to the cache.
+    """Write a polars.DataFrame directly to the cache.
 
     Args:
         name: The name of the cache subdirectory (e.g., "info", "statements").
