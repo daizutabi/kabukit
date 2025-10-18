@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import shutil
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
@@ -28,8 +29,7 @@ def glob(group: str | None = None) -> Iterator[Path]:
     if group is None:
         yield from get_cache_dir().glob("**/*.parquet")
     else:
-        data_dir = get_cache_dir() / group
-        yield from data_dir.glob("*.parquet")
+        yield from get_cache_dir().joinpath(group).glob("*.parquet")
 
 
 def _get_latest_filepath(group: str) -> Path:
@@ -56,7 +56,7 @@ def _get_cache_filepath(group: str, name: str | None = None) -> Path:
 
 
 def read(group: str, name: str | None = None) -> DataFrame:
-    """Reads a polars.DataFrame directly from the cache.
+    """Read a polars.DataFrame directly from the cache.
 
     Args:
         group: The name of the cache subdirectory (e.g., "info", "statements").
@@ -74,7 +74,7 @@ def read(group: str, name: str | None = None) -> DataFrame:
 
 
 def write(group: str, df: DataFrame, name: str | None = None) -> Path:
-    """Writes a polars.DataFrame directly to the cache.
+    """Write a polars.DataFrame directly to the cache.
 
     Args:
         group: The name of the cache subdirectory (e.g., "info", "statements").
@@ -87,11 +87,27 @@ def write(group: str, df: DataFrame, name: str | None = None) -> Path:
     """
     data_dir = get_cache_dir() / group
     data_dir.mkdir(parents=True, exist_ok=True)
-    if name is None:
-        timestamp = datetime.datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y%m%d")
-        filename = data_dir / f"{timestamp}.parquet"
-    else:
-        filename = data_dir / f"{name}.parquet"
 
+    if name is None:
+        name = datetime.datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y%m%d")
+
+    filename = data_dir / f"{name}.parquet"
     df.write_parquet(filename)
     return filename
+
+
+def clean(group: str | None = None) -> None:
+    """Remove the entire cache directory or a specified cache group.
+
+    Args:
+        group (str | None, optional): The name of the cache
+            subdirectory (e.g., "info", "statements") to remove.
+            If None, the entire cache directory is removed.
+    """
+    if group is None:
+        target_dir = get_cache_dir()
+    else:
+        target_dir = get_cache_dir() / group
+
+    if target_dir.exists():
+        shutil.rmtree(target_dir)

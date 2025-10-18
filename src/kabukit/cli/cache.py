@@ -43,6 +43,16 @@ def tree() -> None:
     console.print(tree_view)
 
 
+def format_size(size_in_bytes: int) -> str:
+    if size_in_bytes < 1024:
+        return f"{size_in_bytes} B"
+
+    if size_in_bytes < 1024 * 1024:
+        return f"{size_in_bytes / 1024:.1f} KB"
+
+    return f"{size_in_bytes / (1024 * 1024):.1f} MB"
+
+
 @app.command()
 def clean() -> None:
     """キャッシュディレクトリを削除します。"""
@@ -61,13 +71,3 @@ def clean() -> None:
         msg += "エラーが発生しました。"
         typer.secho(msg, fg=typer.colors.RED, bold=True)
         raise typer.Exit(1) from None
-
-
-def format_size(size_in_bytes: int) -> str:
-    if size_in_bytes < 1024:
-        return f"{size_in_bytes} B"
-
-    if size_in_bytes < 1024 * 1024:
-        return f"{size_in_bytes / 1024:.1f} KB"
-
-    return f"{size_in_bytes / (1024 * 1024):.1f} MB"

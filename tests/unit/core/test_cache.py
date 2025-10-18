@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import shutil
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
@@ -165,10 +166,8 @@ def test_read(mocker: MockerFixture, tmp_path: Path) -> None:
 def test_write_no_name(mocker: MockerFixture, tmp_path: Path) -> None:
     from kabukit.core.cache import write
 
-    mock_get_cache_dir = mocker.patch(
-        "kabukit.core.cache.get_cache_dir",
-        return_value=tmp_path,
-    )
+    mock_get_cache_dir = mocker.patch("kabukit.core.cache.get_cache_dir")
+    mock_get_cache_dir.return_value = tmp_path
 
     data = DataFrame({"A": [1, 2], "B": ["x", "y"]})
     path = write("test", data)
@@ -184,10 +183,8 @@ def test_write_no_name(mocker: MockerFixture, tmp_path: Path) -> None:
 def test_write_with_name(mocker: MockerFixture, tmp_path: Path) -> None:
     from kabukit.core.cache import write
 
-    mock_get_cache_dir = mocker.patch(
-        "kabukit.core.cache.get_cache_dir",
-        return_value=tmp_path,
-    )
+    mock_get_cache_dir = mocker.patch("kabukit.core.cache.get_cache_dir")
+    mock_get_cache_dir.return_value = tmp_path
 
     data = DataFrame({"A": [1, 2], "B": ["x", "y"]})
     path = write("test", data, name="my_file")
@@ -197,3 +194,71 @@ def test_write_with_name(mocker: MockerFixture, tmp_path: Path) -> None:
     assert_frame_equal(pl.read_parquet(path), data)
 
     mock_get_cache_dir.assert_called_once()
+
+
+def test_clean(mocker: MockerFixture, tmp_path: Path) -> None:
+    from kabukit.core.cache import clean
+
+    mock_get_cache_dir = mocker.patch("kabukit.core.cache.get_cache_dir")
+    mock_get_cache_dir.return_value = tmp_path
+
+    # Test cleaning the entire cache
+    (tmp_path / "group1").mkdir()
+    (tmp_path / "group1" / "file1.parquet").touch()
+    (tmp_path / "group2").mkdir()
+    (tmp_path / "group2" / "file2.parquet").touch()
+
+    assert tmp_path.exists()
+    assert (tmp_path / "group1").exists()
+    assert (tmp_path / "group2").exists()
+
+    clean()  # Clean entire cache
+
+    assert not tmp_path.exists()
+    mock_get_cache_dir.assert_called_once()  # Called once for clean()
+
+    # Reset mock and tmp_path for group-specific clean
+    mock_get_cache_dir.reset_mock()
+    mock_get_cache_dir.return_value = tmp_path
+    tmp_path.mkdir()  # Recreate tmp_path for next test
+
+    (tmp_path / "group_to_remove").mkdir()
+    (tmp_path / "group_to_remove" / "file.parquet").touch()
+    (tmp_path / "another_group").mkdir()
+    (tmp_path / "another_group" / "file.parquet").touch()
+
+    assert (tmp_path / "group_to_remove").exists()
+    assert (tmp_path / "another_group").exists()
+
+    clean(group="group_to_remove")
+
+    assert not (tmp_path / "group_to_remove").exists()
+    assert (tmp_path / "another_group").exists()  # Other group should remain
+    mock_get_cache_dir.assert_called_once()  # Called once for clean(group=...)
+
+
+def test_clean_no_dir(mocker: MockerFixture, tmp_path: Path) -> None:
+    from kabukit.core.cache import clean
+
+    mock_get_cache_dir = mocker.patch("kabukit.core.cache.get_cache_dir")
+    mock_get_cache_dir.return_value = tmp_path
+
+    # Ensure the main cache directory does not exist
+    if tmp_path.exists():
+        shutil.rmtree(tmp_path)
+    assert not tmp_path.exists()
+
+    # Test clean() when main cache dir doesn't exist
+    clean()
+    assert not tmp_path.exists()
+    mock_get_cache_dir.assert_called_once()  # Called once for clean()
+
+    # Reset mock and tmp_path for group-specific clean
+    mock_get_cache_dir.reset_mock()
+    mock_get_cache_dir.return_value = tmp_path
+    assert not tmp_path.exists()  # Ensure it's still gone
+
+    # Test clean(group) when the group dir doesn't exist
+    clean(group="non_existent_group")
+    assert not (tmp_path / "non_existent_group").exists()
+    mock_get_cache_dir.assert_called_once()  # Called once for clean(group=...)
