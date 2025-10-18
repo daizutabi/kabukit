@@ -63,3 +63,27 @@ $ kabu cache clean
 
     - [サブスクリプションのキャンセルまたは退会後に、データを利用することは可能ですか？](https://jpx.gitbook.io/j-quants-ja/faq/usage#sabusukuripushonnokyanserumatahanidtawosurukotohadesuka)
     - [プラン変更後、変更前のプランのデータを利用することは可能ですか？](https://jpx.gitbook.io/j-quants-ja/faq/usage#purannopurannodtawosurukotohadesuka)
+
+## キャッシュの利用方法
+
+### 1. CLIでデータを取得
+
+まず、`kabu get` コマンドを使ってデータを取得し、キャッシュを作成します。
+例えば、以下のコマンドは株価情報を取得し、`prices` キャッシュに保存します。
+
+```console exec="on" source="console"
+$ kabu get prices --code 8306 --start 2024-07-01
+```
+
+### 2. Pythonでキャッシュを読み込む
+
+上記で保存したキャッシュは、`kabukit.core.cache.read` 関数を使って簡単に読み込めます。
+
+```python
+import polars as pl
+from kabukit.core import cache
+
+# 株価情報を読み込む
+prices_df = cache.read("prices")
+print(prices_df.head())
+```
