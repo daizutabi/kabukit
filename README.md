@@ -44,7 +44,7 @@ kabukit は、コマンドラインだけでなく、Python コードからも A
 [pypi-v-link]: https://pypi.org/project/kabukit/
 [python-v-image]: https://img.shields.io/pypi/pyversions/kabukit.svg
 [python-v-link]: https://pypi.org/project/kabukit
-[GHAction-image]: https://github.com/daizutabi/kabukit/actions/workflows/ci.yaml/badge.svg?branch=main&event=push
+[GHAction-image]: https://github.com/daizutabi/kabukit/actions/workflows/code-quality-tests.yaml/badge.svg?branch=main&event=push
 [GHAction-link]: https://github.com/daizutabi/kabukit/actions?query=event%3Apush+branch%3Amain
 [codecov-image]: https://codecov.io/github/daizutabi/kabukit/graph/badge.svg?token=Yu6lAdVVnd
 [codecov-link]: https://codecov.io/github/daizutabi/kabukit?branch=main
