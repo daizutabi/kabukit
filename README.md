@@ -1,15 +1,24 @@
-# kabukit
+<p align="center">
+  <img src="https://raw.githubusercontent.com/daizutabi/kabukit/main/docs/assets/images/logo.svg" alt="Kabukit Logo" style="width: 3cm;">
+</p>
 
-[![PyPI Version][pypi-v-image]][pypi-v-link]
-[![Python Version][python-v-image]][python-v-link]
-[![Build Status][GHAction-image]][GHAction-link]
-[![Coverage Status][codecov-image]][codecov-link]
-[![Documentation Status][docs-image]][docs-link]
+<p align="center">
+  <span style="font-size: 48px; font-weight: bold; color: #217867;">kabukit</span>
+</p>
 
-A Python toolkit for Japanese financial market data,
-supporting J-Quants and EDINET APIs.
+<p align="center">
+  <em>A Python toolkit for Japanese financial market data, supporting J-Quants and EDINET APIs.</em>
+</p>
 
-kabukit は、 [J-Quants API](https://jpx-jquants.com/) および [EDINET API](https://disclosure2dl.edinet-fsa.go.jp/guide/static/disclosure/WZEK0110.html) から、効率的に日本の金融市場データを取得するツールキットです。
+<p align="center">
+  <a href="https://pypi.org/project/kabukit/"><img src="https://img.shields.io/pypi/v/kabukit.svg"/></a>
+  <a href="https://pypi.org/project/kabukit/"><img src="https://img.shields.io/pypi/pyversions/kabukit.svg"/></a>
+  <a href="https://github.com/daizutabi/kabukit/actions?query=event%3Apush+branch%3Amain"><img src="https://github.com/daizutabi/kabukit/actions/workflows/code-quality-tests.yaml/badge.svg?branch=main&event=push"/></a>
+  <a href="https://codecov.io/github/daizutabi/kabukit?branch=main"><img src="https://codecov.io/github/daizutabi/kabukit/graph/badge.svg?token=Yu6lAdVVnd"/></a>
+  <a href="https://daizutabi.github.io/kabukit/"><img src="https://img.shields.io/badge/docs-latest-blue.svg"/></a>
+</p>
+
+**kabukit** は、 [J-Quants API](https://jpx-jquants.com/) および [EDINET API](https://disclosure2dl.edinet-fsa.go.jp/guide/static/disclosure/WZEK0110.html) から、効率的に日本の金融市場データを取得するツールキットです。
 
 高速なデータ処理ライブラリである [Polars](https://pola.rs/) と、モダンな非同期 HTTP クライアントである [httpx](https://www.python-httpx.org/) を基盤として構築されており、パフォーマンスを重視しています。
 
@@ -37,16 +46,3 @@ kabukit は、コマンドラインだけでなく、Python コードからも A
 
 - [J-Quants API の使い方](https://daizutabi.github.io/kabukit/guides/jquants/)
 - [EDINET API の使い方](https://daizutabi.github.io/kabukit/guides/edinet/)
-
-<!-- Badges -->
-
-[pypi-v-image]: https://img.shields.io/pypi/v/kabukit.svg
-[pypi-v-link]: https://pypi.org/project/kabukit/
-[python-v-image]: https://img.shields.io/pypi/pyversions/kabukit.svg
-[python-v-link]: https://pypi.org/project/kabukit
-[GHAction-image]: https://github.com/daizutabi/kabukit/actions/workflows/code-quality-tests.yaml/badge.svg?branch=main&event=push
-[GHAction-link]: https://github.com/daizutabi/kabukit/actions?query=event%3Apush+branch%3Amain
-[codecov-image]: https://codecov.io/github/daizutabi/kabukit/graph/badge.svg?token=Yu6lAdVVnd
-[codecov-link]: https://codecov.io/github/daizutabi/kabukit?branch=main
-[docs-image]: https://img.shields.io/badge/docs-latest-blue.svg
-[docs-link]: https://daizutabi.github.io/kabukit/
