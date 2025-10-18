@@ -16,7 +16,8 @@ pytestmark = pytest.mark.unit
 
 @pytest.fixture(autouse=True)
 def user_cache_dir(mocker: MockerFixture, tmp_path: Path) -> MagicMock:
-    def side_effect(name: str) -> str:
+    def side_effect(name: str, appauthor: bool) -> str:
+        assert appauthor is False
         return str(tmp_path / name)
 
     return mocker.patch("kabukit.utils.config.user_cache_dir", side_effect=side_effect)
@@ -26,7 +27,7 @@ def test_get_cache_dir(user_cache_dir: MagicMock, tmp_path: Path) -> None:
     from kabukit.utils.config import get_cache_dir
 
     path = get_cache_dir()
-    user_cache_dir.assert_called_once_with("kabukit")
+    user_cache_dir.assert_called_once_with("kabukit", appauthor=False)
     assert path == tmp_path / "kabukit"
 
 
