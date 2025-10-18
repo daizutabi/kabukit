@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import shutil
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
@@ -55,7 +56,7 @@ def _get_cache_filepath(group: str, name: str | None = None) -> Path:
 
 
 def read(group: str, name: str | None = None) -> DataFrame:
-    """Reads a polars.DataFrame directly from the cache.
+    """Read a polars.DataFrame directly from the cache.
 
     Args:
         group: The name of the cache subdirectory (e.g., "info", "statements").
@@ -73,7 +74,7 @@ def read(group: str, name: str | None = None) -> DataFrame:
 
 
 def write(group: str, df: DataFrame, name: str | None = None) -> Path:
-    """Writes a polars.DataFrame directly to the cache.
+    """Write a polars.DataFrame directly to the cache.
 
     Args:
         group: The name of the cache subdirectory (e.g., "info", "statements").
@@ -93,3 +94,20 @@ def write(group: str, df: DataFrame, name: str | None = None) -> Path:
     filename = data_dir / f"{name}.parquet"
     df.write_parquet(filename)
     return filename
+
+
+def clean(group: str | None = None) -> None:
+    """Remove the entire cache directory or a specified cache group.
+
+    Args:
+        group (str | None, optional): The name of the cache
+            subdirectory (e.g., "info", "statements") to remove.
+            If None, the entire cache directory is removed.
+    """
+    if group is None:
+        target_dir = get_cache_dir()
+    else:
+        target_dir = get_cache_dir() / group
+
+    if target_dir.exists():
+        shutil.rmtree(target_dir)
