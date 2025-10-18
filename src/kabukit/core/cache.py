@@ -27,13 +27,15 @@ def glob(group: str | None = None) -> Iterator[Path]:
         An iterator of Path objects for the matched parquet files.
     """
     if group is None:
-        yield from get_cache_dir().glob("**/*.parquet")
+        paths = get_cache_dir().glob("**/*.parquet")
     else:
-        yield from get_cache_dir().joinpath(group).glob("*.parquet")
+        paths = get_cache_dir().joinpath(group).glob("*.parquet")
+
+    yield from sorted(paths, key=lambda path: path.stat().st_mtime)
 
 
 def _get_latest_filepath(group: str) -> Path:
-    filenames = sorted(glob(group))
+    filenames = list(glob(group))
 
     if not filenames:
         msg = f"No data found for {group}"
