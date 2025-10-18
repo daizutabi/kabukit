@@ -31,5 +31,5 @@ def test_get_cache_dir_windows() -> None:
     from kabukit.utils.config import get_cache_dir
 
     result = get_cache_dir()
-    pattern = r"^C:\\Users\S+\\AppData\\Locall\\kabukit\\Cache$"
+    pattern = r"^C:\\Users\S+\\AppData\\Local\\kabukit\\Cache$"
     assert re.match(pattern, str(result))
