@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING
 
 import pytest
@@ -26,13 +27,19 @@ def mock_cache_dir(tmp_path: Path, mocker: MockerFixture) -> Path:
     return tmp_path
 
 
+def remove_ansi(text: str) -> str:
+    return re.sub(r"\x1B\[[0-?]*[ -/]*[@-~]", "", text)
+
+
 def test_cache_tree(mock_cache_dir: Path):
     (mock_cache_dir / "info").mkdir()
     (mock_cache_dir / "info/dummy_file.txt").touch()
 
     result = runner.invoke(app, ["cache", "tree"])
     assert result.exit_code == 0
-    assert str(mock_cache_dir) in result.stdout
+
+    output = remove_ansi(result.stdout.replace("\n", ""))
+    assert str(mock_cache_dir) in output
     assert "info" in result.stdout
     assert "dummy_file.txt" in result.stdout
     assert "0 B" in result.stdout

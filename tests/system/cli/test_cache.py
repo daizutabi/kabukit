@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING
 
 import pytest
@@ -16,6 +17,10 @@ pytestmark = pytest.mark.system
 runner = CliRunner()
 
 
+def remove_ansi(text: str) -> str:
+    return re.sub(r"\x1B\[[0-?]*[ -/]*[@-~]", "", text)
+
+
 def test_cache_tree_system(mock_cache_dir: Path) -> None:
     """System test for 'kabu cache tree' command.
 
@@ -29,7 +34,9 @@ def test_cache_tree_system(mock_cache_dir: Path) -> None:
     # Now run cache tree and assert its output
     result_tree = runner.invoke(app, ["cache", "tree"])
     assert result_tree.exit_code == 0
-    assert str(mock_cache_dir) in result_tree.stdout
+
+    output = remove_ansi(result_tree.stdout.replace("\n", ""))
+    assert str(mock_cache_dir) in output
     assert "statements" in result_tree.stdout
     files = (mock_cache_dir / "statements").iterdir()
     assert any(f.name in result_tree.stdout for f in files)
