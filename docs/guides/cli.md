@@ -277,42 +277,8 @@ $ kabu get all [code]
 これまでに説明したように、
 銘柄コードや日付を省略したり、`all`コマンドを使ったりすることで、
 キャッシュディレクトリに取得した情報が保存されます。
-コマンドラインインターフェース上で、キャッシュの内容を
+
+`cache` サブコマンドを使うと、キャッシュの内容を
 表示したり消去したりできます。
 
-### ツリー表示 (`tree`)
-
-`cache tree` サブコマンドを使うと、
-キャッシュディレクトリに保存された情報を
-ツリーで表示します。
-
-```console exec="on" source="console"
-$ kabu cache tree
-```
-
-取得した日付とファイルサイズが表示されます。
-不要になったキャッシュは、キャッシュディレクトリとツリー表示を
-もとに手動で削除できます。
-
-### 消去 (`clean`)
-
-`cache clean` サブコマンドを使うと、
-キャッシュ情報をすべて消去できます。
-
-```bash
-$ kabu cache clean
-キャッシュディレクトリ '/home/my_name/.cache/kabukit' を正常にクリーンアップしました。
-```
-
-!!! warning
-    `cache clean` コマンドを実行すると、ユーザーの意思を確認することなく、
-    キャッシュがすべて消去されます。ご注意ください。
-
-!!! note
-    J-Quants API は、データ販売ではなく、データを利用するサービスです。
-    取得したデータを蓄積して利用することは許可されていません。不要になった
-    キャッシュは削除するようお願いします。
-    詳しくは以下に示す J-Quants API の公式 FAQ を参照してください。
-
-    - [サブスクリプションのキャンセルまたは退会後に、データを利用することは可能ですか？](https://jpx.gitbook.io/j-quants-ja/faq/usage#sabusukuripushonnokyanserumatahanidtawosurukotohadesuka)
-    - [プラン変更後、変更前のプランのデータを利用することは可能ですか？](https://jpx.gitbook.io/j-quants-ja/faq/usage#purannopurannodtawosurukotohadesuka)
+詳細は、[キャッシュの活用](cache.md)を参照してください。
