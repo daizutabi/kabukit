@@ -13,24 +13,19 @@ if TYPE_CHECKING:
     from polars import DataFrame
 
 
-def _get_cache_filepath(name: str, path: str | Path | None = None) -> Path:
+def glob(name: str) -> Path:
+    """Get the latest cache file from the specified cache subdirectory.
+
+    Args:
+        name: The name of the cache subdirectory (e.g., "info", "statements").
+
+    Returns:
+        Path: The path to the latest Parquet file in the subdirectory.
+
+    Raises:
+        FileNotFoundError: If no Parquet files are found in the subdirectory.
+    """
     data_dir = get_cache_dir() / name
-
-    if path:
-        if isinstance(path, str):
-            path = Path(path)
-
-        if path.exists():
-            return path
-
-        filename = data_dir / path
-
-        if not filename.exists():
-            msg = f"File not found: {filename}"
-            raise FileNotFoundError(msg)
-
-        return filename
-
     filenames = sorted(data_dir.glob("*.parquet"))
 
     if not filenames:
@@ -38,6 +33,27 @@ def _get_cache_filepath(name: str, path: str | Path | None = None) -> Path:
         raise FileNotFoundError(msg)
 
     return filenames[-1]
+
+
+def _get_cache_filepath(name: str, path: str | Path | None = None) -> Path:
+    if path is None:
+        return glob(name)
+
+    data_dir = get_cache_dir() / name
+
+    if isinstance(path, str):
+        path = Path(path)
+
+    if path.exists():
+        return path
+
+    filename = data_dir / path
+
+    if not filename.exists():
+        msg = f"File not found: {filename}"
+        raise FileNotFoundError(msg)
+
+    return filename
 
 
 def read(name: str, path: str | Path | None = None) -> DataFrame:
