@@ -3,7 +3,6 @@
 CLI の `kabu get` コマンドで取得された各種情報は、
 キャッシュとしてローカルストレージに保存されます。
 ノートブックなどからは、これらのキャッシュを直接読み込むことができます。
-情報取得のためにウェブアクセスが不要になるため、分析をすぐに開始できます。
 
 ## キャッシュの目的とメリット
 
@@ -55,7 +54,7 @@ $ kabu cache clean
     `cache clean` コマンドを実行すると、ユーザーの意思を確認することなく、
     キャッシュがすべて消去されます。ご注意ください。
 
-!!! note
+!!! info
     J-Quants API は、データ販売ではなく、データを利用するサービスです。
     取得したデータを蓄積して利用することは許可されていません。不要になった
     キャッシュは削除するようお願いします。
@@ -64,26 +63,98 @@ $ kabu cache clean
     - [サブスクリプションのキャンセルまたは退会後に、データを利用することは可能ですか？](https://jpx.gitbook.io/j-quants-ja/faq/usage#sabusukuripushonnokyanserumatahanidtawosurukotohadesuka)
     - [プラン変更後、変更前のプランのデータを利用することは可能ですか？](https://jpx.gitbook.io/j-quants-ja/faq/usage#purannopurannodtawosurukotohadesuka)
 
-## キャッシュの利用方法
+## Pythonでのキャッシュ利用
 
-### 1. CLIでデータを取得
-
-まず、`kabu get` コマンドを使ってデータを取得し、キャッシュを作成します。
-例えば、以下のコマンドは株価情報を取得し、`prices` キャッシュに保存します。
+まず、現在のキャッシュの状態を確認しておきます。
 
 ```console exec="on" source="console"
-$ kabu get prices --code 8306 --start 2024-07-01
+$ kabu cache tree
 ```
 
-### 2. Pythonでキャッシュを読み込む
+[`kabukit.core.cache`][] モジュールは、Pythonからキャッシュを操作するための関数を提供します。
+なお、`cache`モジュールは、`kabukit` パッケージから公開されているので、
 
-上記で保存したキャッシュは、`kabukit.core.cache.read` 関数を使って簡単に読み込めます。
+```python exec="1" source="material-block"
+from kabukit import cache
+```
+
+のようにインポートできます。
+
+### キャッシュの読み込み (`cache.read`)
+
+[`kabukit.core.cache.read`][] 関数を使って簡単に読み込めます。
+`group` 引数でキャッシュのカテゴリ（例: "prices", "info"）を指定し、
+`name` 引数で特定のファイル名を指定します。`name` を省略すると、
+その `group` の最新のファイルが読み込まれます。
+
+```python exec="1" source="material-block"
+cache.read("info").tail(3)
+```
+
+### キャッシュの書き込み (`cache.write`)
+
+[`kabukit.core.cache.write`][] 関数を使って
+キャッシュを書き込むこともできます。
+
+```python exec="1" source="material-block"
+from kabukit import get_info
+
+df = await get_info("7203")
+cache.write("info", df, "7203")
+```
+
+### キャッシュリスト (`cache.glob`)
+
+[`kabukit.core.cache.glob`][] 関数を使って
+キャッシュの一覧を取得することができます。
+
+```python exec="1" source="material-block"
+list(cache.glob("info"))
+```
+
+### キャッシュの削除 (`cache.glob`)
+<!-- ```python
+import polars as pl
+from kabukit.core import cache
+
+# 株価情報を読み込む (最新のファイル)
+prices_df = cache.read(group="prices")
+print(prices_df.head())
+
+# 特定のファイル名を指定して読み込む (例: "20240701" 部分)
+specific_prices_df = cache.read(group="prices", name="20240701")
+print(specific_prices_df.head())
+```
+
+#### データの書き込み (`cache.write`)
+
+`kabukit.core.cache.write` 関数を使って、DataFrameをキャッシュに保存できます。
+`group` 引数でキャッシュのカテゴリを指定し、`name` 引数でファイル名を指定します。`name` を省略すると、現在の日付がファイル名として使用されます。
 
 ```python
 import polars as pl
 from kabukit.core import cache
 
-# 株価情報を読み込む
-prices_df = cache.read("prices")
-print(prices_df.head())
+# サンプルデータ
+data_to_cache = pl.DataFrame({"col1": [1, 2], "col2": ["A", "B"]})
+
+# 日付をファイル名として保存
+cache.write(group="my_data", df=data_to_cache)
+
+# 特定のファイル名を指定して保存
+cache.write(group="my_data", df=data_to_cache, name="custom_data_set")
 ```
+
+#### キャッシュの消去 (`cache.clean`)
+
+`kabukit.core.cache.clean` 関数を使って、キャッシュを削除できます。
+`group` 引数を省略するとキャッシュディレクトリ全体が削除され、`group` を指定するとそのカテゴリのキャッシュのみが削除されます。
+
+```python
+from kabukit.core import cache
+
+# キャッシュ全体を削除
+cache.clean()
+
+# 特定のグループのキャッシュのみを削除
+cache.clean(group="prices") -->
