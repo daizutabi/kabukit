@@ -87,7 +87,6 @@ docs = [
   "mkapi>=4.5.0",
   "mkdocs-material>=9.6.21",
   "mkdocs-nbsync>=0.1.5",
-  "mkdocs-typer>=0.0.3",
   "nbconvert>=7.16.6",
   "pymdownx-cjk-autojoin>=0.2.1",
 ]

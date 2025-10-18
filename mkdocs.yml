@@ -55,7 +55,6 @@ markdown_extensions:
   - cjk_autojoin
   - def_list
   - md_in_html
-  - mkdocs-typer
   - pymdownx.details
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
@@ -92,7 +91,6 @@ nav:
   #     - "調整済み株式数": "data_layer/adjusted_shares.md"
   #     - "J-Quants スキーマ": "data_layer/jquants_schema.md"
   #     - "実践的な注意点": "data_layer/practical_notes.md"
-  - CLI: cli_reference.md
   - API: $api/kabukit.***
 extra_css:
   - assets/css/kabukit.css
