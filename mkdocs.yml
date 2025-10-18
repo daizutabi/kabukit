@@ -6,7 +6,7 @@ repo_url: https://github.com/daizutabi/kabukit/
 repo_name: daizutabi/kabukit
 edit_uri: edit/main/docs/
 theme:
-  logo: logo.svg
+  logo: assets/images/logo.svg
   name: material
   font:
     text: Fira Sans
@@ -15,8 +15,8 @@ theme:
     repo: fontawesome/brands/github
   palette:
     - scheme: default
-      primary: indigo
-      accent: indigo
+      primary: white
+      accent: white
       toggle:
         icon: material/weather-sunny
         name: Switch to dark mode
@@ -95,4 +95,4 @@ nav:
   - CLI: cli_reference.md
   - API: $api/kabukit.***
 extra_css:
-  - css/kabukit.css
+  - assets/css/kabukit.css
