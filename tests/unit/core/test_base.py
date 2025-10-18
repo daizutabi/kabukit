@@ -31,7 +31,7 @@ def test_data_dir(mocker: MockerFixture, cls: type[Base], name: str) -> None:
         return_value="cache",
     )
     assert cls.data_dir() == Path("cache") / name
-    mock_user_cache_dir.assert_called_once_with("kabukit")
+    mock_user_cache_dir.assert_called_once_with("kabukit", appauthor=False)
 
 
 def test_write(mocker: MockerFixture, data: DataFrame) -> None:

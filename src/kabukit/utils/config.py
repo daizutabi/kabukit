@@ -17,7 +17,7 @@ def get_cache_dir() -> Path:
     Returns:
         Path: The path to the cache directory.
     """
-    return Path(user_cache_dir("kabukit"))
+    return Path(user_cache_dir("kabukit", appauthor=False))
 
 
 def get_config_path() -> Path:
