@@ -1,24 +1,19 @@
-th,
-td {
+.dataframe th,
+.dataframe td {
   font-size: 80%;
   padding-left: 4px;
   padding-right: 4px;
+  text-align: center;
 }
 
-thead th {
+.dataframe thead th {
   font-weight: bold;
-  text-align: center;
+}
+
+.dataframe thead td {
+  color: gray;
 }
 
 .dataframe thead tr:first-child {
   border-bottom: 1px solid rgba(128, 128, 128, 0.2);
-}
-
-thead td {
-  color: gray;
-  text-align: center;
-}
-
-tbody td {
-  text-align: center;
 }
