@@ -34,7 +34,8 @@ def test_cache_tree(mock_cache_dir: Path):
     assert result.exit_code == 0
     assert str(mock_cache_dir) in result.stdout
     assert "info" in result.stdout
-    assert "dummy_file.txt (0 B)" in result.stdout
+    assert "dummy_file.txt" in result.stdout
+    assert "0 B" in result.stdout
 
 
 def test_cache_tree_error(mock_cache_dir: Path):

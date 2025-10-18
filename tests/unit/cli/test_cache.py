@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 import pytest
@@ -19,6 +20,10 @@ def test_cache_tree_not_exist(mocker: MockerFixture) -> None:
     assert "は存在しません" in result.stdout
 
 
+def remove_ansi(text: str) -> str:
+    return re.sub(r"\x1B\[[0-?]*[ -/]*[@-~]", "", text)
+
+
 def test_cache_tree_exists(mocker: MockerFixture, tmp_path: Path) -> None:
     mock_get_cache_dir = mocker.patch("kabukit.cli.cache.get_cache_dir")
     mock_get_cache_dir.return_value = tmp_path
@@ -27,7 +32,9 @@ def test_cache_tree_exists(mocker: MockerFixture, tmp_path: Path) -> None:
 
     result = runner.invoke(app, ["cache", "tree"])
     assert result.exit_code == 0
-    assert str(tmp_path) in result.stdout.replace("\n", "")
+
+    output = remove_ansi(result.stdout.replace("\n", ""))
+    assert str(tmp_path) in output
     assert "info" in result.stdout
     assert "test.parquet" in result.stdout
 
