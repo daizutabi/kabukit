@@ -28,8 +28,7 @@ def glob(group: str | None = None) -> Iterator[Path]:
     if group is None:
         yield from get_cache_dir().glob("**/*.parquet")
     else:
-        data_dir = get_cache_dir() / group
-        yield from data_dir.glob("*.parquet")
+        yield from get_cache_dir().joinpath(group).glob("*.parquet")
 
 
 def _get_latest_filepath(group: str) -> Path:
@@ -87,11 +86,10 @@ def write(group: str, df: DataFrame, name: str | None = None) -> Path:
     """
     data_dir = get_cache_dir() / group
     data_dir.mkdir(parents=True, exist_ok=True)
-    if name is None:
-        timestamp = datetime.datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y%m%d")
-        filename = data_dir / f"{timestamp}.parquet"
-    else:
-        filename = data_dir / f"{name}.parquet"
 
+    if name is None:
+        name = datetime.datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y%m%d")
+
+    filename = data_dir / f"{name}.parquet"
     df.write_parquet(filename)
     return filename
