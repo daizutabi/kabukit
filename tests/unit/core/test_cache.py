@@ -17,6 +17,63 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
+def test_glob_with_name(mocker: MockerFixture, tmp_path: Path) -> None:
+    from kabukit.core.cache import glob
+
+    mock_get_cache_dir = mocker.patch("kabukit.core.cache.get_cache_dir")
+    mock_get_cache_dir.return_value = tmp_path
+
+    test_dir = tmp_path / "test"
+    test_dir.mkdir()
+
+    # Create some dummy parquet files
+    file1 = test_dir / "20230101.parquet"
+    file2 = test_dir / "20230102.parquet"
+    file3 = test_dir / "20230103.parquet"
+    file1.touch()
+    file2.touch()
+    file3.touch()
+
+    result = glob(name="test")
+    assert set(result) == {file1, file2, file3}
+    mock_get_cache_dir.assert_called_once()
+
+
+def test_glob_no_name(mocker: MockerFixture, tmp_path: Path) -> None:
+    from kabukit.core.cache import glob
+
+    mock_get_cache_dir = mocker.patch("kabukit.core.cache.get_cache_dir")
+    mock_get_cache_dir.return_value = tmp_path
+
+    dir1 = tmp_path / "dir1"
+    dir2 = tmp_path / "dir2"
+    dir1.mkdir()
+    dir2.mkdir()
+
+    file1 = dir1 / "file1.parquet"
+    file2 = dir2 / "file2.parquet"
+    file1.touch()
+    file2.touch()
+
+    result = glob()
+    assert set(result) == {file1, file2}
+    mock_get_cache_dir.assert_called_once()
+
+
+def test_glob_no_data_found(tmp_path: Path, mocker: MockerFixture) -> None:
+    from kabukit.core.cache import glob
+
+    mock_get_cache_dir = mocker.patch("kabukit.core.cache.get_cache_dir")
+    mock_get_cache_dir.return_value = tmp_path
+
+    test_dir = tmp_path / "test"
+    test_dir.mkdir()
+
+    result = glob(name="test")
+    assert list(result) == []
+    mock_get_cache_dir.assert_called_once()
+
+
 def test_get_cache_filepath_with_absolute_path(tmp_path: Path) -> None:
     from kabukit.core.cache import _get_cache_filepath
 
@@ -93,7 +150,7 @@ def test_get_cache_filepath_no_data_found(
     test_dir = tmp_path / "test"
     test_dir.mkdir()
 
-    with pytest.raises(FileNotFoundError, match="No data found in"):
+    with pytest.raises(FileNotFoundError, match="No data found for"):
         _get_cache_filepath(name="test")
     mock_get_cache_dir.assert_called_once()
 
