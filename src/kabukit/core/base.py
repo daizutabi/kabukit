@@ -22,21 +22,21 @@ class Base:
         self,
         data: DataFrame | None = None,
         *,
-        path: str | Path | None = None,
+        name: str | None = None,
     ) -> None:
         if data is not None:
             self.data = data
             return
 
-        self.data = cache.read(self.__class__.__name__.lower(), path)
+        self.data = cache.read(self.__class__.__name__.lower(), name)
 
     @classmethod
     def data_dir(cls) -> Path:
         clsname = cls.__name__.lower()
         return get_cache_dir() / clsname
 
-    def write(self) -> Path:
-        return cache.write(self.__class__.__name__.lower(), self.data)
+    def write(self, name: str | None = None) -> Path:
+        return cache.write(self.__class__.__name__.lower(), self.data, name)
 
     def filter(
         self,
