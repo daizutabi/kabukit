@@ -19,10 +19,10 @@ CLI の `kabu get` コマンドで取得された各種情報は、
 kabukit は [platformdirs](https://platformdirs.readthedocs.io/en/latest/) ライブラリを使用しており、
 各OSの標準的なディレクトリにキャッシュを保存します。
 
-| OS      | キャッシュディレクトリの場所                                      |
-| :------ | :----------------------------------------------------------- |
-| Linux   | `~/.cache/kabukit`                                           |
-| macOS   | `~/Library/Caches/kabukit`                                   |
+| OS      | キャッシュディレクトリの場所                           |
+| :------ | :------------------------------------------------ |
+| Linux   | `~/.cache/kabukit`                                |
+| macOS   | `~/Library/Caches/kabukit`                        |
 | Windows | `C:\Users\<ユーザー名>\AppData\Local\kabukit\Cache` |
 
 ## CLIでのキャッシュ管理
