@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import datetime
+import os
 import shutil
+import time
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
@@ -31,12 +33,18 @@ def test_glob_with_group(mocker: MockerFixture, tmp_path: Path) -> None:
     file1 = test_dir / "20230101.parquet"
     file2 = test_dir / "20230102.parquet"
     file3 = test_dir / "20230103.parquet"
+
     file1.touch()
     file2.touch()
     file3.touch()
 
-    result = glob(group="test")
-    assert set(result) == {file1, file2, file3}
+    base_time = time.time()
+    os.utime(file1, (base_time + 2, base_time + 2))
+    os.utime(file2, (base_time, base_time))
+    os.utime(file3, (base_time + 1, base_time + 1))
+
+    result = list(glob(group="test"))
+    assert result == [file2, file3, file1]
     mock_get_cache_dir.assert_called_once()
 
 
@@ -56,8 +64,12 @@ def test_glob_no_group(mocker: MockerFixture, tmp_path: Path) -> None:
     file1.touch()
     file2.touch()
 
-    result = glob()
-    assert set(result) == {file1, file2}
+    base_time = time.time()
+    os.utime(file1, (base_time + 1, base_time + 1))
+    os.utime(file2, (base_time, base_time))
+
+    result = list(glob())
+    assert result == [file2, file1]
     mock_get_cache_dir.assert_called_once()
 
 
@@ -120,13 +132,23 @@ def test_get_cache_filepath_no_name_latest_file(
     test_dir = tmp_path / "test"
     test_dir.mkdir()
 
-    # Create some dummy parquet files
-    (test_dir / "20230101.parquet").touch()
-    (test_dir / "20230102.parquet").touch()
-    (test_dir / "20230103.parquet").touch()
+    # Create dummy parquet files with explicit modification times
+    file1 = test_dir / "20230103.parquet"
+    file2 = test_dir / "20230102.parquet"
+    file3 = test_dir / "20230101.parquet"
+
+    file1.touch()
+    file2.touch()
+    file3.touch()
+
+    # Set explicit modification times (oldest to newest)
+    base_time = time.time()
+    os.utime(file1, (base_time, base_time))
+    os.utime(file2, (base_time + 1, base_time + 1))
+    os.utime(file3, (base_time + 2, base_time + 2))
 
     result = _get_cache_filepath(group="test")
-    assert result == test_dir / "20230103.parquet"
+    assert result == test_dir / "20230101.parquet"
     mock_get_cache_dir.assert_called_once()
 
 
