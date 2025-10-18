@@ -23,7 +23,7 @@ kabukit は [platformdirs](https://platformdirs.readthedocs.io/en/latest/) ラ�
 | :------ | :----------------------------------------------------------- |
 | Linux   | `~/.cache/kabukit`                                           |
 | macOS   | `~/Library/Caches/kabukit`                                   |
-| Windows | `C:\Users\<ユーザー名>\AppData\Local\kabukit\kabukit\Cache` |
+| Windows | `C:\Users\<ユーザー名>\AppData\Local\kabukit\Cache` |
 
 ## CLIでのキャッシュ管理
 
