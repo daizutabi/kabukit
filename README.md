@@ -13,7 +13,7 @@
 <p align="center">
   <a href="https://pypi.org/project/kabukit/"><img src="https://img.shields.io/pypi/v/kabukit.svg"/></a>
   <a href="https://pypi.org/project/kabukit/"><img src="https://img.shields.io/pypi/pyversions/kabukit.svg"/></a>
-  <a href="https://github.com/daizutabi/kabukit/actions?query=event%3Apush+branch%3Amain"><img src="https://github.com/daizutabi/kabukit/actions/workflows/code-quality-tests.yaml/badge.svg?branch=main&event=push"/></a>
+  <a href="https://github.com/daizutabi/kabukit/actions?query=event%3Apush+branch%3Amain"><img src="https://img.shields.io/github/actions/workflow/status/daizutabi/kabukit/code-quality-tests.yaml?branch=main&label=ci&logo=github"/></a>
   <a href="https://codecov.io/github/daizutabi/kabukit?branch=main"><img src="https://codecov.io/github/daizutabi/kabukit/graph/badge.svg?token=Yu6lAdVVnd"/></a>
   <a href="https://daizutabi.github.io/kabukit/"><img src="https://img.shields.io/badge/docs-latest-blue.svg"/></a>
 </p>
@@ -77,7 +77,7 @@ kabu get statements 7203
 
 ### Python で使う
 
-[Jupyter](https://jupyter.org/) や [marimo](https://marimo.io/) などのノートブック環境では、`await` 文を直接記述できます。
+[Jupyter](https://jupyter.org/) や [marimo](https://marimo.io/) などのノートブック環境では、`await` 式を直接記述できます。
 
 ```python
 from kabukit import get_info, get_prices

@@ -111,7 +111,7 @@ df_prices = await get_prices("7203")
 
 !!! note
     [Jupyter](https://jupyter.org/) や [marimo](https://marimo.io/)
-    などのノートブック環境では、`await` 文を直接記述できます。
+    などのノートブック環境では、`await` 式を直接記述できます。
 
 ## 主な機能
 
