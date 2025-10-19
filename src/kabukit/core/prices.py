@@ -20,7 +20,7 @@ class Prices(Base):
 
     このクラスは、Polars DataFrameを内部で利用して、J-Quants APIなどから
     取得した株価の時系列データを格納する。
-    株式分割などを考慮した調整や、財務データと連携した各種利回り指標の計算、
+    株式分割などを考慮した調整や、財務情報と連携した各種利回り指標の計算、
     時価総額の算出といった、分析に不可欠なデータ加工機能を提供する。
 
     Attributes:
@@ -79,7 +79,7 @@ class Prices(Base):
             仮定する。期中の増資や自己株式取得などは考慮されない。
 
         Args:
-            statements (Statements): 財務データを提供する`Statements`オブジェクト。
+            statements (Statements): 財務情報を提供する`Statements`オブジェクト。
 
         Returns:
             Self: 調整済み株式数列が追加された、新しいPricesオブジェクト。
@@ -169,7 +169,7 @@ class Prices(Base):
         """時系列の純資産を列として追加する。
 
         Args:
-            statements (Statements): 財務データを提供する`Statements`オブジェクト。
+            statements (Statements): 財務情報を提供する`Statements`オブジェクト。
 
         Returns:
             Self: `Equity` 列が追加された、新しいPricesオブジェクト。
@@ -219,7 +219,7 @@ class Prices(Base):
         """時系列の予想純利益を列として追加する。
 
         Args:
-            statements (Statements): 財務データを提供する`Statements`オブジェクト。
+            statements (Statements): 財務情報を提供する`Statements`オブジェクト。
 
         Returns:
             Self: `ForecastProfit` 列が追加された、新しいPricesオブジェクト。
@@ -267,7 +267,7 @@ class Prices(Base):
         """時系列の予想年間配当総額を列として追加する。
 
         Args:
-            statements (Statements): 財務データを提供する`Statements`オブジェクト。
+            statements (Statements): 財務情報を提供する`Statements`オブジェクト。
 
         Returns:
             Self: `ForecastDividend` 列が追加された、新しいPricesオブジェクト。
@@ -324,7 +324,7 @@ class Prices(Base):
         無駄な計算は行われない。
 
         Args:
-            statements (Statements): 財務データを提供する`Statements`オブジェクト。
+            statements (Statements): 財務情報を提供する`Statements`オブジェクト。
 
         Returns:
             Self: 各種利回り指標の列が追加された、新しいPricesオブジェクト。

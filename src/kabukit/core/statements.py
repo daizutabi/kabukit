@@ -25,7 +25,7 @@ class Statements(Base):
     def shares(self) -> DataFrame:
         """発行済株式数と自己株式数を時系列データとして抽出する。
 
-        財務データの中から、株式数に関連する情報（発行済株式数、自己株式数）を
+        財務情報の中から、株式数に関連する情報（発行済株式数、自己株式数）を
         時系列データとして抽出する。
 
         Returns:
@@ -44,7 +44,7 @@ class Statements(Base):
     def equity(self) -> DataFrame:
         """純資産を時系列データとして抽出する。
 
-        財務データの中から、純資産の情報を時系列データとして抽出する。
+        財務情報の中から、純資産の情報を時系列データとして抽出する。
 
         Returns:
             pl.DataFrame: Date, Code, Equity 列を持つDataFrame。
