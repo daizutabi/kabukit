@@ -54,6 +54,7 @@ markdown_extensions:
   - attr_list
   - cjk_autojoin
   - def_list
+  - footnotes
   - md_in_html
   - pymdownx.details
   - pymdownx.emoji:

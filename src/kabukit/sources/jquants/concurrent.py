@@ -63,7 +63,7 @@ async def get(
 
 
 async def get_info(code: str | None = None, /) -> DataFrame:
-    """上場銘柄一覧銘を取得する。
+    """上場銘柄一覧を取得する。
 
     Returns:
         銘柄情報を含むDataFrame。

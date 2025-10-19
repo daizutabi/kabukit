@@ -10,13 +10,13 @@
 
 以下の2つのデータソースが存在することを前提とする。
 
-1.  **財務データ (`statements`)**
-    *   **主なカラム**: `DisclosedDate`, `DisclosedTime`, `Code`, `IssuedShares`, `TreasuryShares`
-    *   **特徴**: データは四半期ごとなど、特定の日にのみ存在する。
+1. **財務情報 (`statements`)**
+    * **主なカラム**: `DisclosedDate`, `DisclosedTime`, `Code`, `IssuedShares`, `TreasuryShares`
+    * **特徴**: データは四半期ごとなど、特定の日にのみ存在する。
 
-2.  **株価データ (`prices`)**
-    *   **主なカラム**: `Date`, `Code`, `AdjustmentFactor`
-    *   **特徴**: データは営業日毎日存在する。`AdjustmentFactor`は株式分割や併合の権利落ち日にのみ比率が記録され、それ以外の日は`1.0`となる。
+2. **株価データ (`prices`)**
+    * **主なカラム**: `Date`, `Code`, `AdjustmentFactor`
+    * **特徴**: データは営業日毎日存在する。`AdjustmentFactor`は株式分割や併合の権利落ち日にのみ比率が記録され、それ以外の日は`1.0`となる。
 
 ## 計算ロジック
 

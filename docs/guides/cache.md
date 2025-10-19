@@ -15,8 +15,9 @@ CLI の `kabu get` コマンドで取得された各種情報は、
 ## キャッシュの仕組み
 
 キャッシュディレクトリの場所は、OSによって異なります。
-kabukit は [platformdirs](https://platformdirs.readthedocs.io/en/latest/) ライブラリを使用しており、
-各OSの標準的なディレクトリにキャッシュを保存します。
+kabukit は [platformdirs](https://platformdirs.readthedocs.io/en/latest/)
+ライブラリを使用しており、
+各 OS の標準的なディレクトリにキャッシュを保存します。
 
 | OS      | キャッシュディレクトリの場所                           |
 | :------ | :------------------------------------------------ |
@@ -24,16 +25,16 @@ kabukit は [platformdirs](https://platformdirs.readthedocs.io/en/latest/) ラ�
 | macOS   | `~/Library/Caches/kabukit`                        |
 | Windows | `C:\Users\<ユーザー名>\AppData\Local\kabukit\Cache` |
 
-## CLIでのキャッシュ管理
+## CLI でのキャッシュ管理
 
 `kabu cache` コマンドを使って、キャッシュの管理ができます。
 
 ### ツリー表示 (`tree`)
 
-`cache tree` サブコマンドを使うと、
+`kabu cache tree` コマンドを使うと、
 キャッシュディレクトリの構造をツリー形式で表示できます。
 
-```console exec="on" source="console"
+```console exec="on" source="console" result="ansi"
 $ kabu cache tree
 ```
 
@@ -42,7 +43,7 @@ $ kabu cache tree
 
 ### 消去 (`clean`)
 
-`cache clean` サブコマンドを使うと、
+`kabu cache clean` コマンドを使うと、
 キャッシュ情報をすべて消去できます。
 
 ```bash
@@ -65,96 +66,73 @@ $ kabu cache clean
 
 ## Pythonでのキャッシュ利用
 
+[`kabukit.cache`][kabukit.core.cache] モジュールは、
+Pythonからキャッシュを操作するための関数を提供します。
+
+### 読み込み (`read`)
+
+[`cache.read`][kabukit.core.cache.read] 関数を使って、
+キャッシュを読み込めます。
+`group` 引数でキャッシュのグループを指定し、
+`name` 引数で特定のファイルを指定します。
+`name` には拡張子 `.parquet` は含めません。
+`name` を省略すると、その `group` の最新のキャッシュファイルが読み込まれます。
+
 まず、現在のキャッシュの状態を確認しておきます。
 
-```console exec="on" source="console"
+```console exec="on" source="console" result="ansi"
 $ kabu cache tree
 ```
 
-[`kabukit.core.cache`][] モジュールは、Pythonからキャッシュを操作するための関数を提供します。
-なお、`cache`モジュールは、`kabukit` パッケージから公開されているので、
+キャッシュファイル (`*.parquet`) がグループごとにディレクトリに
+分割されています。`group` 引数には、このディレクリ名を指定します。
+また、最新のキャッシュを使うことが多いので、
+ほとんどの場合、`name` 引数は省略されます。
+
+以下では、上場銘柄一覧 ("info") の最新データを読み込み、
+最後の 3 行を表示します。
 
 ```python exec="1" source="material-block"
 from kabukit import cache
-```
 
-のようにインポートできます。
-
-### キャッシュの読み込み (`cache.read`)
-
-[`kabukit.core.cache.read`][] 関数を使って簡単に読み込めます。
-`group` 引数でキャッシュのカテゴリ（例: "prices", "info"）を指定し、
-`name` 引数で特定のファイル名を指定します。`name` を省略すると、
-その `group` の最新のファイルが読み込まれます。
-
-```python exec="1" source="material-block"
 cache.read("info").tail(3)
 ```
 
-### キャッシュの書き込み (`cache.write`)
+### 書き込み (`write`)
 
-[`kabukit.core.cache.write`][] 関数を使って
+[`cache.read`][kabukit.core.cache.read] 関数を使って、
 キャッシュを書き込むこともできます。
+CLI コマンドでは、実行した日付でファイル名が自動で設定されるのに対し、
+Python コードでは、ユーザーがファイル名を指定することができます。
+
+以下では、トヨタ自動車 (銘柄コード 7203) の銘柄情報を `toyota.parquet`
+というファイル名で保存します。
 
 ```python exec="1" source="material-block"
 from kabukit import get_info
 
 df = await get_info("7203")
-cache.write("info", df, "7203")
+cache.write("info", df, "toyota")
 ```
 
-### キャッシュリスト (`cache.glob`)
+### 一覧の取得 (`glob`)
 
-[`kabukit.core.cache.glob`][] 関数を使って
-キャッシュの一覧を取得することができます。
+[`cache.glob`][kabukit.core.cache.glob] 関数を使って
+キャッシュファイルのパス一覧を取得することができます。
+
+引数には`group`を指定します。
 
 ```python exec="1" source="material-block"
-list(cache.glob("info"))
+for path in cache.glob("info"):
+    print(path)
 ```
 
-### キャッシュの削除 (`cache.glob`)
-<!-- ```python
-import polars as pl
-from kabukit.core import cache
+ここで、`cache.glob` 関数の戻り値は、ファイルの
+更新日時順でソートされています。
 
-# 株価情報を読み込む (最新のファイル)
-prices_df = cache.read(group="prices")
-print(prices_df.head())
+引数を省略すると、全てのキャッシュファイルのパスを取得できます。
 
-# 特定のファイル名を指定して読み込む (例: "20240701" 部分)
-specific_prices_df = cache.read(group="prices", name="20240701")
-print(specific_prices_df.head())
+```python exec="1" source="material-block"
+for path in cache.glob():
+    print(path)
 ```
-
-#### データの書き込み (`cache.write`)
-
-`kabukit.core.cache.write` 関数を使って、DataFrameをキャッシュに保存できます。
-`group` 引数でキャッシュのカテゴリを指定し、`name` 引数でファイル名を指定します。`name` を省略すると、現在の日付がファイル名として使用されます。
-
-```python
-import polars as pl
-from kabukit.core import cache
-
-# サンプルデータ
-data_to_cache = pl.DataFrame({"col1": [1, 2], "col2": ["A", "B"]})
-
-# 日付をファイル名として保存
-cache.write(group="my_data", df=data_to_cache)
-
-# 特定のファイル名を指定して保存
-cache.write(group="my_data", df=data_to_cache, name="custom_data_set")
-```
-
-#### キャッシュの消去 (`cache.clean`)
-
-`kabukit.core.cache.clean` 関数を使って、キャッシュを削除できます。
-`group` 引数を省略するとキャッシュディレクトリ全体が削除され、`group` を指定するとそのカテゴリのキャッシュのみが削除されます。
-
-```python
-from kabukit.core import cache
-
-# キャッシュ全体を削除
-cache.clean()
-
-# 特定のグループのキャッシュのみを削除
-cache.clean(group="prices") -->

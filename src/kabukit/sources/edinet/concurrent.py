@@ -43,7 +43,7 @@ async def get(
 
     Returns:
         DataFrame:
-            すべての銘柄の財務情報を含む単一のDataFrame。
+            すべての書類情報を含む単一のDataFrame。
     """
     return await concurrent.get(
         EdinetClient,

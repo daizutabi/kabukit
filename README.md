@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <span style="font-size: 48px; font-weight: bold; color: #217867;">kabukit</span>
+  <img src="https://raw.githubusercontent.com/daizutabi/kabukit/main/docs/assets/images/kabukit.svg" alt="Kabukit" style="width: 5cm;">
 </p>
 
 <p align="center">
