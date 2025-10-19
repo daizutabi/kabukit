@@ -21,7 +21,7 @@ kabukit は、手軽に J-Quants API からデータを取得できるモジュ�
 
 ### 上場銘柄一覧 (`get_info`)
 
-[`kabukit.get_info`][] 関数は、上場企業の情報を取得します。
+[`kabukit.get_info`][] 関数は、上場銘柄の情報を取得します。
 
 銘柄コード (4 桁または 5 桁の文字列) を指定すると、指定した銘柄の情報を取得できます。
 
@@ -32,21 +32,23 @@ df = await get_info("7203")  # または "72030"
 df.select("Date", "Code", "CompanyName", "MarketCodeName")
 ```
 
-銘柄コードを省略すると、全上場企業の情報を取得できます。
+銘柄コードを省略すると、全上場銘柄の情報を取得できます。
 
 ```python exec="1" source="material-block"
 df = await get_info()  # 全上場銘柄一覧を取得
-df = df.filter(MarketCodeName="プライム")  # 市場区分がプライムの企業を選択
+df = df.filter(MarketCodeName="プライム")  # 市場区分がプライムの銘柄を選択
 df.select("Date", "Code", "CompanyName", "MarketCodeName")
 ```
 
 ### 財務情報 (`get_statements`)
 
-[`kabukit.get_statements`][] 関数は、
-上場企業の四半期毎の決算短信サマリーや業績・配当情報の修正に関する
+[`JQuantsClient.get_statements`][kabukit.JQuantsClient.get_statements] メソッドは、
+企業の四半期毎の決算短信サマリーや業績・配当情報の修正に関する
 開示情報（主に数値データ）を取得します。
+J-Quants API の [財務情報 (/fins/statements)](https://jpx.gitbook.io/j-quants-ja/api-reference/statements)
+エンドポイントに対応しています。
 
-銘柄コードを指定すると、指定した銘柄の全期間分の財務情報を取得できます。
+引数に銘柄コードを指定して、指定した銘柄の全期間分の財務情報を取得します。
 
 ```python exec="1" source="material-block"
 from kabukit import get_statements
@@ -55,7 +57,7 @@ df = await get_statements("7203")
 df.select("DisclosedDate", "Code", "TypeOfDocument")
 ```
 
-銘柄コードのリストを指定すると、複数の企業の全期間分の財務情報を一度に取得できます。
+銘柄コードのリストを指定すると、複数銘柄の全期間分の財務情報を一度に取得できます。
 このとき、J-Quants API へのリクエストは非同期で並列に行われます。
 
 ```python exec="1" source="material-block"
@@ -107,7 +109,7 @@ df = await get_prices("7203")
 df.select("Date", "Code", "Open", "High", "Low", "Close", "Volume")
 ```
 
-銘柄コードのリストを指定すると、複数の企業の全期間分の株価情報を一度に取得できます。
+銘柄コードのリストを指定すると、複数銘柄の全期間分の株価情報を一度に取得できます。
 
 ```python exec="1" source="material-block"
 df = await get_prices(["7203", "9984", "8306", "6758"])

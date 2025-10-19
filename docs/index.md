@@ -41,7 +41,7 @@ kabukit は、こうした課題を解決します:
 
     ---
 
-    `kabu get prices` の一行で、全上場企業の 10 年分[^1] の株価データが手に入ります。
+    `kabu get prices` の一行で、全上場銘柄の 10 年分[^1] の株価データが手に入ります。
     API の認証設定も対話形式で簡単に完了。今すぐ分析を始められます。
 
 - **:fontawesome-solid-code: ノートブックで快適な分析体験**
@@ -49,7 +49,7 @@ kabukit は、こうした課題を解決します:
     ---
 
     [Jupyter](https://jupyter.org/) や [marimo](https://marimo.io/)
-    で `await get_statements()` と書くだけで、全上場企業の情報を非同期で並列取得。
+    で `await get_statements()` と書くだけで、全上場銘柄の財務情報を非同期で並列取得。
     [Polars](https://pola.rs/) によるデータフレーム操作で、数千銘柄のデータも瞬時に処理できます。
 
 - **:fontawesome-solid-database: 賢いキャッシュで高速アクセス**
@@ -103,7 +103,7 @@ Python コードから使う場合:
 ```python
 from kabukit import get_info, get_prices
 
-# 全上場企業の情報を取得
+# 全上場銘柄の情報を取得
 df_info = await get_info()
 
 # 特定銘柄の株価を取得
