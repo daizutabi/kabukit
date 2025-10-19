@@ -1,19 +1,34 @@
-.dataframe th,
-.dataframe td {
+div.dataframe th,
+div.dataframe td {
   font-size: 80%;
   padding-left: 4px;
   padding-right: 4px;
   text-align: center;
 }
 
-.dataframe thead th {
+div.dataframe thead th {
   font-weight: bold;
 }
 
-.dataframe thead td {
+div.dataframe thead td {
   color: gray;
 }
 
-.dataframe thead tr:first-child {
+div.dataframe thead tr:first-child {
   border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+div.result:has(pre) {
+  padding-right: 0px !important;
+}
+
+div.result pre {
+  padding: 0px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+div.result pre code {
+  padding-left: 0px;
+  background-color: transparent;
 }
