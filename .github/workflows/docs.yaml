@@ -43,7 +43,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/kabukit
-          key: data-${{ runner.os }}-${{ hashFiles('**/uv.lock') }}
+          key: docs-data-${{ runner.os }}-${{ hashFiles('**/uv.lock') }}
       - name: Debug - Check cache after restore
         run: |
           echo "=== Cache hit: ${{ steps.cache-data.outputs.cache-hit }}"
