@@ -142,10 +142,12 @@ kabukit の使い方を、以下のガイドで詳しく解説しています。
   認証設定から、データ取得、キャッシュ管理まで、CLI の全機能を解説
 
 - **[J-Quants API の使い方](guides/jquants.md)**:
-  Python から J-Quants API を使う方法。モジュール関数と `JQuantsClient` の使い分け
+  上場銘柄情報、財務情報、株価四本値を、Python から取得する方法。
+  モジュール関数と `JQuantsClient` の使い分け
 
 - **[EDINET API の使い方](guides/edinet.md)**:
-  有価証券報告書などの開示書類を、Python から取得する方法
+  有価証券報告書などの開示書類を、Python から取得する方法。
+  モジュール関数と `EdinetClient` の使い分け
 
 - **[キャッシュの活用](guides/cache.md)**:
   キャッシュの仕組みと、CLI および Python からの管理方法
