@@ -20,8 +20,8 @@ hide:
 
 # はじめに
 
-<p align="center">
-日本の株式投資分析を、もっと手軽に、もっと速く。
+<p align="center" style="margin-bottom: 40px;">
+日本の株式投資分析を、もっと手軽に、もっと速く
 </p>
 
 **kabukit** は、J-Quants と EDINET のデータを、
@@ -138,8 +138,9 @@ df_prices = await get_prices("7203")
 
 kabukit の使い方を、以下のガイドで詳しく解説しています。
 
-- **[コマンドラインインターフェースの使い方](guides/cli.md)**:
-  認証設定から、データ取得、キャッシュ管理まで、CLI の全機能を解説
+- **[CLIの使い方](guides/cli.md)**:
+  認証設定から、データ取得、キャッシュ管理まで、
+  コマンドラインインターフェース (CLI) の全機能を解説
 
 - **[J-Quants API の使い方](guides/jquants.md)**:
   上場銘柄情報、財務情報、株価四本値を、Python から取得する方法。
