@@ -100,7 +100,7 @@ cache.read("info").tail(3)
 
 ### 書き込み (`write`)
 
-[`cache.read`][kabukit.core.cache.read] 関数を使って、
+[`cache.write`][kabukit.core.cache.write] 関数を使って、
 キャッシュを書き込むこともできます。
 CLI コマンドでは、実行した日付でファイル名が自動で設定されるのに対し、
 Python コードでは、ユーザーがファイル名を指定することができます。
@@ -129,10 +129,17 @@ for path in cache.glob("info"):
 
 ここで、`cache.glob` 関数の戻り値は、ファイルの
 更新日時順でソートされています。
+先ほど作成した `toyota.parquet` が末尾に追加されていることが分かります。
 
 引数を省略すると、全てのキャッシュファイルのパスを取得できます。
 
 ```python exec="1" source="material-block"
 for path in cache.glob():
     print(path)
+```
+
+```python .md#_
+for path in cache.glob("info"):
+    if path.name == "toyota.parquet":
+        path.unlink()
 ```
