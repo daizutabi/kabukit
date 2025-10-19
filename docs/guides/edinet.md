@@ -77,10 +77,10 @@ df.select("docID", "要素ID", "項目名", "値").head()
 ```
 
 !!! info
-    EDINETの書類は、すべてがCSV形式（XBRL）で提供されるわけではありません。
-    `csvFlag` が `True` の書類のみ、構造化データとして取得できます。
+    EDINETの書類は、すべてが CSV 形式 (XBRL) で提供されるわけではありません。
+    `csvFlag` が `True` の書類のみ、表形式の構造化データとして取得できます。
 
-`pdf` キーワードを `True` に指定すると、書類本文を PDF 形式で
+`pdf` キーワード引数を `True` に指定すると、書類本文を PDF 形式で
 取得できます。
 データフレームのカラム名は `"pdf"`、データ型は `polars.Binary` です。
 バイナリファイルとして保存すれば、PDF 形式の書類を閲覧することができます。
@@ -101,8 +101,8 @@ pl.Config(fmt_str_lengths=None)
 ```
 
 !!! info
-    EDINETの書類は、すべてがPDF形式で提供されるわけではありません。
-    `pdfFlag` が `True` の書類のみ、PDFの原本を取得できます。
+    EDINETの書類は、すべてが PDF 形式で提供されるわけではありません。
+    `pdfFlag` が `True` の書類のみ、PDF の原本を取得できます。
 
 ## EdinetClient
 
@@ -155,7 +155,7 @@ df = await client.get_document("S100WUKL")
 df.select("docID", "要素ID", "項目名", "値").head()
 ```
 
-`pdf` キーワードを `True` に指定すると、書類本文を PDF 形式で
+`pdf` キーワード引数を `True` に指定すると、書類本文を PDF 形式で
 取得できます。
 
 ```python .md#_
@@ -170,6 +170,11 @@ df.select("docID", "pdf").tail()
 ```python .md#_
 pl.Config(fmt_str_lengths=None)
 ```
+
+!!! note
+    モジュール関数は複数の書類を一度に取得できるので、`get_documents`（複数形）です。
+    一方、`EdinetClient` のメソッドは単一の書類を取得するので、
+    `get_document`（単数形）です。
 
 ## データ形式について
 
