@@ -77,7 +77,7 @@ kabu get statements 7203
 
 ### Python で使う
 
-[Jupyter](https://jupyter.org/) や [marimo](https://marimo.io/) などのノートブック環境では、`await` 文を直接記述できます。
+[Jupyter](https://jupyter.org/) や [marimo](https://marimo.io/) などのノートブック環境では、`await` 式を直接記述できます。
 
 ```python
 from kabukit import get_info, get_prices
