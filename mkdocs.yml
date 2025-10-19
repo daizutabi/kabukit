@@ -92,6 +92,6 @@ nav:
   #     - "調整済み株式数": "data_layer/adjusted_shares.md"
   #     - "J-Quants スキーマ": "data_layer/jquants_schema.md"
   #     - "実践的な注意点": "data_layer/practical_notes.md"
-  - API: $api/kabukit.***
+  - API リファレンス: $api/kabukit.***
 extra_css:
   - assets/css/kabukit.css
