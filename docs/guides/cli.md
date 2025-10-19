@@ -1,4 +1,4 @@
-# コマンドラインインターフェースの使い方
+# CLI の使い方
 
 kabukit は、[J-Quants API](https://jpx-jquants.com/)
 および
@@ -38,8 +38,11 @@ J-Quants API を利用するには、事前に
 [ユーザー登録](https://jpx-jquants.com/auth/signup/?lang=ja)
 が必要です。
 
-`auth jquants` サブコマンド (エイリアス: `auth j`) で
-ID トークンを取得し、設定ファイルに保存します。
+`kabu auth jquants` コマンドで、
+事前登録したメールアドレスとパスワードを使って認証を行い、
+ID トークンを取得します。
+取得した ID トークンは、設定ファイルに保存され、
+あとから再利用されます。
 
 #### 対話的な使い方
 
@@ -48,22 +51,22 @@ ID トークンを取得し、設定ファイルに保存します。
 ```bash
 $ kabu auth jquants
 Mailaddress: my_email@example.com
-Password:
+Password: my_password
 J-QuantsのIDトークンを保存しました。
 ```
 
 #### 非対話的な使い方
 
-CI/CD 環境など、対話的な入力ができない場合は、
+CI/CD 環境など、対話的な入力ができないときは、
 コマンドラインオプションまたは環境変数で認証情報を指定できます。
 
-- コマンドラインオプションを使う場合
+- コマンドラインオプション
 
 ```bash
 $ kabu auth jquants --mailaddress my_email@example.com --password my_password
 ```
 
-- 環境変数を使う場合
+- 環境変数
 
 ```bash
 $ export JQUANTS_MAILADDRESS="my_email@example.com"
@@ -77,8 +80,7 @@ EDINET API を利用するには、事前に
 [API キーの取得](https://disclosure2dl.edinet-fsa.go.jp/guide/static/disclosure/download/ESE140206.pdf)
 が必要です。
 
-`auth edinet` サブコマンド (エイリアス: `auth e`) で API キーを
-設定ファイルに保存します。
+`kabu auth edinet` コマンドで API キーを設定ファイルに保存します。
 
 #### 対話的な使い方
 
@@ -90,26 +92,26 @@ EDINETのAPIキーを保存しました。
 
 #### 非対話的な使い方
 
-- コマンドラインオプションを使う場合
+- コマンドラインオプション
 
 ```bash
 $ kabu auth edinet --api-key my_api_key
 ```
 
-- 環境変数を使う場合
+- 環境変数
 
 ```bash
 $ export EDINET_API_KEY="my_api_key"
 ```
 
 !!! note
-    EDINET API 接続時に環境変数を参照します。
-    `kabu auth edinet`コマンドで設定ファイルに保存する
+    環境変数を設定しているときは、別途
+    `kabu auth edinet`コマンドを実行する
     必要はありません。
 
 ### 認証設定の表示 (`show`)
 
-認証設定の保存先と内容は、`auth show` サブコマンドで表示できます。
+認証設定の保存先と内容は、`kabu auth show` コマンドで表示できます。
 
 ```bash
 $ kabu auth show
@@ -120,11 +122,11 @@ EDINET_API_KEY = "..."
 
 ## 情報取得 (`get`)
 
-`get` サブコマンドは、J-Quants API および EDINET API から各種情報を取得します。
+`kabu get` コマンドは、J-Quants API および EDINET API から各種情報を取得します。
 
 ### 上場銘柄一覧 (`info`)
 
-`get info` サブコマンドを使うと、
+`kabu get info` コマンドを使うと、
 J-Quants API から上場銘柄一覧を取得します。
 
 銘柄コードを指定すると、指定した銘柄の最新情報を取得できます。
@@ -155,7 +157,7 @@ $ kabu get info
 
 ### 財務情報 (`statements`)
 
-`get statements` サブコマンドを使うと、
+`kabu get statements` コマンドを使うと、
 J-Quants API から財務情報を取得します。
 
 銘柄コードを指定すると、指定した銘柄の全期間分の財務情報を取得できます。
@@ -188,7 +190,7 @@ shape: (165_891, 105)
 
 ### 株価情報 (`prices`)
 
-`get prices` サブコマンドを使うと、
+`kabu get prices` コマンドを使うと、
 J-Quants API から株価情報を取得します。
 
 銘柄コードを指定すると、指定した銘柄の全期間分の株価情報を取得できます。
@@ -221,7 +223,7 @@ shape: (8_128_217, 16)
 
 ### 書類一覧 (`entries`)
 
-`get entries` サブコマンドを使うと、
+`kabu get entries` コマンドを使うと、
 EDINET API から提出書類一覧を取得します。
 
 日付 (YYYY-MM-DD) を指定すると、
@@ -256,7 +258,7 @@ shape: (896_632, 30)
 ### 全ての情報の一括取得 (`all`)
 
 これまで、4 つの情報を個別のコマンドで取得してきました。
-`get all` サブコマンドを使うと、全ての入手可能な情報を一度に取得できます。
+`kabu get all` コマンドを使うと、全ての入手可能な情報を一度に取得できます。
 
 ```bash
 $ kabu get all [code]
@@ -275,12 +277,12 @@ $ kabu get all [code]
 ## キャッシュ (`cache`)
 
 これまでに説明したように、
-銘柄コードや日付を省略したり、`all`コマンドを使ったりすることで、
+銘柄コードや日付を省略したり、`kabu get all` コマンドを使ったりすることで、
 キャッシュディレクトリに取得した情報が保存されます。
 
-`cache` サブコマンドを使うと以下のことができます。
+`kabu cache` コマンドを使うと以下のことができます。
 
-- `cache tree`: キャッシュの内容をツリー表示します
-- `cache clean`: キャッシュ全体を消去します
+- `kabu cache tree`: キャッシュの内容をツリー表示します
+- `kabu cache clean`: キャッシュ全体を消去します
 
 詳細は、[キャッシュの活用](cache.md)を参照してください。
