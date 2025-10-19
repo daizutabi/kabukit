@@ -12,7 +12,7 @@ kabukit は、[httpx](https://www.python-httpx.org/) を使った非同期設計
 
 API を利用するには、事前にコマンドラインで J-Quants API の ID トークンを取得
 しておく必要があります。
-詳細は、[CLIの使い方](cli.md)の[「認証設定」](cli.md#auth)セクションを参照してください。
+詳細は、[CLIの使い方](cli.md)の「認証設定」セクションを参照してください。
 
 ## モジュールレベル関数
 
@@ -166,7 +166,7 @@ async with JQuantsClient() as client:
 ### 上場銘柄一覧 (`get_info`)
 
 [`JQuantsClient.get_info`][kabukit.JQuantsClient.get_info]
-メソッドは、上場企業の情報を取得します。
+メソッドは、上場銘柄の情報を取得します。
 J-Quants API の[上場銘柄一覧 (/listed/info)](https://jpx.gitbook.io/j-quants-ja/api-reference/listed_info)
 に対応します。
 
@@ -202,7 +202,7 @@ df.select("Date", "Code", "CompanyName", "Sector33CodeName")
 
 [`JQuantsClient.get_statements`][kabukit.JQuantsClient.get_statements]
 メソッドは、
-上場企業の四半期毎の決算短信サマリーや業績・配当情報の修正に関する
+企業の四半期毎の決算短信サマリーや業績・配当情報の修正に関する
 開示情報（主に数値データ）を取得します。
 J-Quants API の[財務情報 (/fins/statements)](https://jpx.gitbook.io/j-quants-ja/api-reference/statements)
 に対応します。
