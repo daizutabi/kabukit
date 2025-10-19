@@ -108,7 +108,7 @@ Python コードでは、ユーザーがファイル名を指定することが�
 以下では、トヨタ自動車 (銘柄コード 7203) の銘柄情報を `toyota.parquet`
 というファイル名で保存します。
 
-```python exec="1" source="material-block"
+```python exec="1" source="material-block" result="1"
 from kabukit import get_info
 
 df = await get_info("7203")
@@ -122,7 +122,7 @@ cache.write("info", df, "toyota")
 
 引数には`group`を指定します。
 
-```python exec="1" source="material-block"
+```python exec="1" source="material-block" result="1"
 for path in cache.glob("info"):
     print(path)
 ```
@@ -133,7 +133,7 @@ for path in cache.glob("info"):
 
 引数を省略すると、全てのキャッシュファイルのパスを取得できます。
 
-```python exec="1" source="material-block"
+```python exec="1" source="material-block" result="1"
 for path in cache.glob():
     print(path)
 ```
