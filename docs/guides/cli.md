@@ -46,12 +46,12 @@ ID トークンを取得します。
 
 #### 対話的な使い方
 
-オプションを指定せずにコマンドを実行すると、対話形式でメールアドレスとパスワードを尋ねられます。
+オプションを指定せずにコマンドを実行すると、メールアドレスとパスワードの入力を求められます。
 
 ```bash
 $ kabu auth jquants
 Mailaddress: my_email@example.com
-Password: my_password
+Password:
 J-QuantsのIDトークンを保存しました。
 ```
 
