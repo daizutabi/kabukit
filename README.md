@@ -1,9 +1,9 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/daizutabi/kabukit/main/docs/assets/images/logo.svg" alt="Kabukit Logo" style="width: 3cm;">
+  <img src="https://raw.githubusercontent.com/daizutabi/kabukit/main/docs/assets/images/logo.svg" alt="Kabukit Logo"">
 </p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/daizutabi/kabukit/main/docs/assets/images/kabukit.svg" alt="Kabukit" style="width: 5cm;">
+  <img src="https://raw.githubusercontent.com/daizutabi/kabukit/main/docs/assets/images/kabukit.svg" alt="Kabukit">
 </p>
 
 <p align="center">

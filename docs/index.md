@@ -11,11 +11,11 @@ hide:
 </style>
 
 <p align="center" style="margin-top: 0px; margin-bottom: 0px;">
-  <img src="assets/images/logo.svg" width="100px">
+  <img src="assets/images/logo.svg">
 </p>
 
 <p align="center" style="margin-top: 0px; margin-bottom: 0px;">
-  <img src="assets/images/kabukit.svg" width="180px">
+  <img src="assets/images/kabukit.svg">
 </p>
 
 # はじめに
