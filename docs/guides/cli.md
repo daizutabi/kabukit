@@ -285,4 +285,5 @@ $ kabu get all [code]
 - `kabu cache tree`: キャッシュの内容をツリー表示します
 - `kabu cache clean`: キャッシュ全体を消去します
 
-詳細は、[キャッシュの活用](cache.md)を参照してください。
+キャッシュの仕組みや、Python からの活用方法については、
+[キャッシュの活用](cache.md)ガイドを参照してください。
