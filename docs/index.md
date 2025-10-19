@@ -1,7 +1,43 @@
+---
+hide:
+  - navigation
+---
+
+<style>
+  .md-typeset h1,
+  .md-content__button {
+    display: none;
+  }
+</style>
+
+<p align="center" style="margin-top: 0px; margin-bottom: 0px;">
+  <img src="assets/images/logo.svg" width="100px">
+</p>
+
+<p align="center" style="margin-top: 0px; margin-bottom: 0px;">
+  <img src="assets/images/kabukit.svg" width="180px">
+</p>
+
 # はじめに
 
-kabukit は、日本の金融市場データを効率的に取得・解析するための Python ツールキットです。
-以下の 2 つの API をサポートしています。
+**kabukit** は、日本の金融市場データを効率的に取得・解析するための Python ツールキットです。
+コマンドラインインターフェース (CLI)と
+
+=== "pip でインストール"
+
+    ```bash
+    pip install kabukit
+    ```
+
+=== "uv でインストール"
+
+    ```bash
+    uv add kabukit
+    ```
+
+## 特徴
+
+kabukit は、以下の 2 つの API をサポートしています。
 
 - [J-Quants API](https://jpx-jquants.com/)
 - [EDINET API](https://disclosure2dl.edinet-fsa.go.jp/guide/static/disclosure/WZEK0110.html)
@@ -9,15 +45,6 @@ kabukit は、日本の金融市場データを効率的に取得・解析する
 高速なデータ処理ライブラリである [Polars](https://pola.rs/) と、
 モダンな非同期 HTTP クライアントである [httpx](https://www.python-httpx.org/)
 を基盤として構築されており、パフォーマンスを重視しています。
-
-## インストール
-
-`uv` または `pip` を使ってインストールします。
-Python バージョンは 3.12 以上が必要です。
-
-```bash
-pip install kabukit
-```
 
 ## ドキュメントの構成
 
