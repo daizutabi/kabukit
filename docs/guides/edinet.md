@@ -10,7 +10,7 @@ kabukit は、[httpx](https://www.python-httpx.org/) を使った非同期設計
 ## 認証設定
 
 API を利用するには、事前にコマンドラインで EDINET API の API キーを設定しておく必要があります。
-詳細は、[コマンドラインインターフェースの使い方](cli.md)の「認証設定」セクションを参照してください。
+詳細は、[CLIの使い方](cli.md)の「認証設定」セクションを参照してください。
 
 環境変数 `EDINET_API_KEY` に直接 API キーを設定することも可能です。
 
@@ -76,6 +76,10 @@ df = await get_documents(doc_ids, max_items=3)
 df.select("docID", "要素ID", "項目名", "値").head()
 ```
 
+!!! info
+    EDINETの書類は、すべてがCSV形式（XBRL）で提供されるわけではありません。
+    `csvFlag` が `True` の書類のみ、構造化データとして取得できます。
+
 `pdf` キーワードを `True` に指定すると、書類本文を PDF 形式で
 取得できます。
 データフレームのカラム名は `"pdf"`、データ型は `polars.Binary` です。
@@ -87,6 +91,7 @@ pl.Config(fmt_str_lengths=15)
 ```
 
 ```python exec="1" source="material-block"
+doc_ids = df_years.filter(c.pdfFlag)["docID"]  # PDF形式を提供する書類を選択
 df = await get_documents(doc_ids, max_items=3, pdf=True)
 df.select("docID", "pdf").tail()
 ```
@@ -94,6 +99,10 @@ df.select("docID", "pdf").tail()
 ```python .md#_
 pl.Config(fmt_str_lengths=None)
 ```
+
+!!! info
+    EDINETの書類は、すべてがPDF形式で提供されるわけではありません。
+    `pdfFlag` が `True` の書類のみ、PDFの原本を取得できます。
 
 ## EdinetClient
 
