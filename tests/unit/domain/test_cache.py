@@ -263,7 +263,7 @@ def test_write_with_name(mocker: MockerFixture, tmp_path: Path) -> None:
     mock_get_cache_dir.assert_called_once()
 
 
-def test_clean(mocker: MockerFixture, tmp_path: Path) -> None:
+def test_clean_all_cache(mocker: MockerFixture, tmp_path: Path) -> None:
     from kabukit.domain.cache import clean
 
     mock_get_cache_dir = mocker.patch("kabukit.domain.cache.get_cache_dir")
@@ -284,10 +284,12 @@ def test_clean(mocker: MockerFixture, tmp_path: Path) -> None:
     assert not tmp_path.exists()
     mock_get_cache_dir.assert_called_once()  # Called once for clean()
 
-    # Reset mock and tmp_path for group-specific clean
-    mock_get_cache_dir.reset_mock()
+
+def test_clean_by_source_and_group(mocker: MockerFixture, tmp_path: Path) -> None:
+    from kabukit.domain.cache import clean
+
+    mock_get_cache_dir = mocker.patch("kabukit.domain.cache.get_cache_dir")
     mock_get_cache_dir.return_value = tmp_path
-    tmp_path.mkdir()  # Recreate tmp_path for next test
 
     (tmp_path / "jquants" / "group_to_remove").mkdir(parents=True)
     (tmp_path / "jquants" / "group_to_remove" / "file.parquet").touch()
