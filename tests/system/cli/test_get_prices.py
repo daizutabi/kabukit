@@ -23,7 +23,7 @@ def test_get_prices_all(mock_cache_dir: Path) -> None:
     assert "shape:" in result.stdout
 
     # Verify a file was written to the mocked cache directory
-    prices_cache_dir = mock_cache_dir / "prices"
+    prices_cache_dir = mock_cache_dir / "jquants" / "prices"
     assert prices_cache_dir.is_dir()
     assert any(prices_cache_dir.iterdir())  # Check if any file exists in the directory
 

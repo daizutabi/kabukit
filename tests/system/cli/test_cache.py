@@ -38,7 +38,8 @@ def test_cache_tree_system(mock_cache_dir: Path) -> None:
     output = remove_ansi(result_tree.stdout.replace("\n", ""))
     assert str(mock_cache_dir) in output
     assert "statements" in result_tree.stdout
-    files = (mock_cache_dir / "statements").iterdir()
+    statements_cache_dir = mock_cache_dir / "jquants" / "statements"
+    files = statements_cache_dir.iterdir()
     assert any(f.name in result_tree.stdout for f in files)
 
 

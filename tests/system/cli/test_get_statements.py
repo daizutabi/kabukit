@@ -22,8 +22,7 @@ def test_get_statements_all(mock_cache_dir: Path) -> None:
     assert "全銘柄の財務情報を" in result.stdout
     assert "shape:" in result.stdout
 
-    # Verify a file was written to the mocked cache directory
-    statements_cache_dir = mock_cache_dir / "statements"
+    statements_cache_dir = mock_cache_dir / "jquants" / "statements"
     assert statements_cache_dir.is_dir()
     assert any(statements_cache_dir.iterdir())
 

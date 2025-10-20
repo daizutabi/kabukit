@@ -47,7 +47,7 @@ MaxItems = Annotated[
 @app.async_command()
 async def info(code: Code = None, *, quiet: Quiet = False) -> None:
     """上場銘柄一覧を取得します。"""
-    from kabukit.core import cache
+    from kabukit.domain import cache
     from kabukit.sources.jquants.concurrent import get_info
 
     df = await get_info(code)
@@ -56,7 +56,7 @@ async def info(code: Code = None, *, quiet: Quiet = False) -> None:
         typer.echo(df)
 
     if code is None:
-        path = cache.write("info", df)
+        path = cache.write("jquants", "info", df)
         typer.echo(f"全銘柄の情報を '{path}' に保存しました。")
 
 
@@ -70,7 +70,7 @@ async def statements(
     """財務情報を取得します。"""
     import tqdm.asyncio
 
-    from kabukit.core import cache
+    from kabukit.domain import cache
     from kabukit.sources.jquants.concurrent import get_statements
 
     progress = None if code or quiet else tqdm.asyncio.tqdm
@@ -80,7 +80,7 @@ async def statements(
         typer.echo(df)
 
     if code is None:
-        path = cache.write("statements", df)
+        path = cache.write("jquants", "statements", df)
         typer.echo(f"全銘柄の財務情報を '{path}' に保存しました。")
 
 
@@ -94,7 +94,7 @@ async def prices(
     """株価情報を取得します。"""
     import tqdm.asyncio
 
-    from kabukit.core import cache
+    from kabukit.domain import cache
     from kabukit.sources.jquants.concurrent import get_prices
 
     progress = None if code or quiet else tqdm.asyncio.tqdm
@@ -104,7 +104,7 @@ async def prices(
         typer.echo(df)
 
     if code is None:
-        path = cache.write("prices", df)
+        path = cache.write("jquants", "prices", df)
         typer.echo(f"全銘柄の株価情報を '{path}' に保存しました。")
 
 
@@ -118,7 +118,7 @@ async def entries(
     """書類一覧を取得します。"""
     import tqdm.asyncio
 
-    from kabukit.core import cache
+    from kabukit.domain import cache
     from kabukit.sources.edinet.concurrent import get_entries
 
     progress = None if date or quiet else tqdm.asyncio.tqdm
@@ -128,7 +128,7 @@ async def entries(
         typer.echo(df)
 
     if not date:
-        path = cache.write("entries", df)
+        path = cache.write("edinet", "entries", df)
         typer.echo(f"書類一覧を '{path}' に保存しました。")
 
 

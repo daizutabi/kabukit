@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from kabukit.core.statements import Statements
+from kabukit.domain.jquants.statements import Statements
 
 try:
     _statements = Statements()

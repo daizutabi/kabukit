@@ -28,15 +28,26 @@ class Base:
             self.data = data
             return
 
-        self.data = cache.read(self.__class__.__name__.lower(), name)
+        source, group = self._get_cache_path_parts()
+        self.data = cache.read(source, group, name)
+
+    @classmethod
+    def _get_cache_path_parts(cls) -> tuple[str, str]:
+        parts = cls.__module__.split(".")
+        # e.g. kabukit.domain.jquants.info -> jquants
+        source = parts[-2]
+        # e.g. kabukit.domain.jquants.info -> info
+        group = parts[-1]
+        return source, group
 
     @classmethod
     def data_dir(cls) -> Path:
-        clsname = cls.__name__.lower()
-        return get_cache_dir() / clsname
+        source, group = cls._get_cache_path_parts()
+        return get_cache_dir() / source / group
 
     def write(self, name: str | None = None) -> Path:
-        return cache.write(self.__class__.__name__.lower(), self.data, name)
+        source, group = self._get_cache_path_parts()
+        return cache.write(source, group, self.data, name)
 
     def filter(
         self,

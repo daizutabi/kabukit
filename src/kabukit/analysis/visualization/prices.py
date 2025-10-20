@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Literal
 import altair as alt
 
 if TYPE_CHECKING:
-    from kabukit.core.prices import Prices
+    from kabukit.domain.jquants.prices import Prices
 
 
 def plot_prices(

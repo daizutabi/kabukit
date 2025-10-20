@@ -10,7 +10,7 @@ from polars import col as c
 from tests.validation.conftest import pytestmark  # noqa: F401
 
 if TYPE_CHECKING:
-    from kabukit.core.statements import Statements
+    from kabukit.domain.jquants.statements import Statements
 
 # 指標が乖離している決算書を確認する必要あり
 

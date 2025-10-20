@@ -8,12 +8,12 @@ import pytest_asyncio
 from polars import DataFrame
 from polars import col as c
 
-from kabukit.core.prices import Prices
+from kabukit.domain.jquants.prices import Prices
 from kabukit.sources.jquants.concurrent import get
 from tests.validation.conftest import pytestmark  # noqa: F401
 
 if TYPE_CHECKING:
-    from kabukit.core.statements import Statements
+    from kabukit.domain.jquants.statements import Statements
 
 
 @pytest_asyncio.fixture(scope="module")
