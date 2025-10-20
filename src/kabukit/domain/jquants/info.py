@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .base import Base
+from kabukit.domain.base import Base
 
 
 class Info(Base):

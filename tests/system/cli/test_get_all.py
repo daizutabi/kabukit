@@ -26,8 +26,12 @@ def test_get_all(mock_cache_dir: Path) -> None:
     assert "書類一覧を取得します。" in result.stdout
 
     # Verify cache directories and files
-    expected_cache_dirs = ["info", "statements", "prices", "entries"]
-    for cache_type in expected_cache_dirs:
-        cache_path = mock_cache_dir / cache_type
-        assert cache_path.is_dir()
-        assert any(cache_path.iterdir())
+    expected_cache_dirs = {
+        "jquants": ["info", "statements", "prices"],
+        "edinet": ["entries"],
+    }
+    for source, groups in expected_cache_dirs.items():
+        for group in groups:
+            cache_path = mock_cache_dir / source / group
+            assert cache_path.is_dir()
+            assert any(cache_path.iterdir())

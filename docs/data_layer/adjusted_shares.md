@@ -4,7 +4,7 @@
 
 四半期ごとにしか発表されない株式数を、日々の株価データに追従させ、株式分割・併合の影響を正しく反映させるための`polars`を使った実装方法を記録する。
 
-このドキュメントは、`kabukit.core.prices.Prices.with_adjusted_shares`メソッドの背景となる計算ロジックを解説する。
+このドキュメントは、`kabukit.domain.jquants.prices.Prices.with_adjusted_shares`メソッドの背景となる計算ロジックを解説する。
 
 ## 前提データ
 

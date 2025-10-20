@@ -60,7 +60,7 @@ def test_get_info_all_codes(
     assert f"全銘柄の情報を '{MOCK_PATH}' に保存しました。" in result.stdout
 
     mock_get_info.assert_awaited_once_with(None)
-    mock_cache_write.assert_called_once_with("info", MOCK_DF)
+    mock_cache_write.assert_called_once_with("jquants", "info", MOCK_DF)
 
 
 def test_get_statements_all_codes(
@@ -79,7 +79,7 @@ def test_get_statements_all_codes(
         max_items=None,
         progress=tqdm.asyncio.tqdm,
     )
-    mock_cache_write.assert_called_once_with("statements", MOCK_DF)
+    mock_cache_write.assert_called_once_with("jquants", "statements", MOCK_DF)
 
 
 def test_get_prices_all_codes(
@@ -98,7 +98,7 @@ def test_get_prices_all_codes(
         max_items=None,
         progress=tqdm.asyncio.tqdm,
     )
-    mock_cache_write.assert_called_once_with("prices", MOCK_DF)
+    mock_cache_write.assert_called_once_with("jquants", "prices", MOCK_DF)
 
 
 def test_get_entries(
@@ -116,7 +116,7 @@ def test_get_entries(
         progress=tqdm.asyncio.tqdm,
         max_items=None,
     )
-    mock_cache_write.assert_called_once_with("entries", MOCK_DF)
+    mock_cache_write.assert_called_once_with("edinet", "entries", MOCK_DF)
 
 
 def test_get_entries_with_date(

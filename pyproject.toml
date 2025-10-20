@@ -152,3 +152,6 @@ reportIncompatibleVariableOverride = false
 reportPrivateUsage = false
 reportUnusedCallResult = false
 reportUnusedImport = false
+
+[tool.ty.src]
+include = ["src", "tests"]

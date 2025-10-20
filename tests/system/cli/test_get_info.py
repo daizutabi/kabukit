@@ -24,8 +24,7 @@ def test_get_info_all(mock_cache_dir: Path) -> None:
     assert "Code" in result.stdout
     assert "CompanyName" in result.stdout
 
-    # Verify a file was written to the mocked cache directory
-    info_cache_dir = mock_cache_dir / "info"
+    info_cache_dir = mock_cache_dir / "jquants" / "info"
     assert info_cache_dir.is_dir()
     assert any(info_cache_dir.iterdir())  # Check if any file exists in the directory
 

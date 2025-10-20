@@ -9,7 +9,7 @@ from kabukit.analysis.visualization.prices import (
     plot_prices_candlestick,
     plot_prices_volume,
 )
-from kabukit.core.prices import Prices
+from kabukit.domain.jquants.prices import Prices
 
 pytestmark = pytest.mark.unit
 

@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from .base import Base
+from kabukit.domain.base import Base
 
 if TYPE_CHECKING:
     from polars import DataFrame

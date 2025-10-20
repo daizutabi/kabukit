@@ -66,14 +66,14 @@ $ kabu cache clean
 
 ## Pythonでのキャッシュ利用
 
-[`kabukit.cache`][kabukit.core.cache] モジュールは、
+[`kabukit.cache`][kabukit.domain.cache] モジュールは、
 Pythonからキャッシュを操作するための関数を提供します。
 
 ### 読み込み (`read`)
 
-[`cache.read`][kabukit.core.cache.read] 関数を使って、
+[`cache.read`][kabukit.domain.cache.read] 関数を使って、
 キャッシュを読み込めます。
-`group` 引数でキャッシュのグループを指定し、
+`source` と `group` 引数でキャッシュのグループを指定し、
 `name` 引数で特定のファイルを指定します。
 `name` には拡張子 `.parquet` は含めません。
 `name` を省略すると、その `group` の最新のキャッシュファイルが読み込まれます。
@@ -84,8 +84,8 @@ Pythonからキャッシュを操作するための関数を提供します。
 $ kabu cache tree
 ```
 
-キャッシュファイル (`*.parquet`) がグループごとにディレクトリに
-分割されています。`group` 引数には、このディレクリ名を指定します。
+キャッシュファイル (`*.parquet`) がソースとグループごとにディレクトリに
+分割されています。`source` と `group` 引数には、このディレクリ名を指定します。
 また、最新のキャッシュを使うことが多いので、
 ほとんどの場合、`name` 引数は省略されます。
 
@@ -95,12 +95,12 @@ $ kabu cache tree
 ```python exec="1" source="material-block"
 from kabukit import cache
 
-cache.read("info").tail(3)
+cache.read("jquants", "info").tail(3)
 ```
 
 ### 書き込み (`write`)
 
-[`cache.write`][kabukit.core.cache.write] 関数を使って、
+[`cache.write`][kabukit.domain.cache.write] 関数を使って、
 キャッシュを書き込むこともできます。
 CLI コマンドでは、実行した日付でファイル名が自動で設定されるのに対し、
 Python コードでは、ユーザーがファイル名を指定することができます。
@@ -112,18 +112,18 @@ Python コードでは、ユーザーがファイル名を指定することが�
 from kabukit import get_info
 
 df = await get_info("7203")
-cache.write("info", df, "toyota")
+cache.write("jquants", "info", df, "toyota")
 ```
 
 ### 一覧の取得 (`glob`)
 
-[`cache.glob`][kabukit.core.cache.glob] 関数を使って
+[`cache.glob`][kabukit.domain.cache.glob] 関数を使って
 キャッシュファイルのパス一覧を取得することができます。
 
-引数には`group`を指定します。
+引数には`source`と`group`を指定します。
 
 ```python exec="1" source="material-block" result="1"
-for path in cache.glob("info"):
+for path in cache.glob("jquants", "info"):
     print(path)
 ```
 
@@ -139,7 +139,7 @@ for path in cache.glob():
 ```
 
 ```python .md#_
-for path in cache.glob("info"):
+for path in cache.glob("jquants", "info"):
     if path.name == "toyota.parquet":
         path.unlink()
 ```

@@ -48,7 +48,7 @@ def mock_get_prices(mocker: MockerFixture) -> AsyncMock:
 
 @pytest.fixture
 def mock_cache_write(mocker: MockerFixture) -> MagicMock:
-    mock_cache_write = mocker.patch("kabukit.core.cache.write")
+    mock_cache_write = mocker.patch("kabukit.domain.cache.write")
     mock_cache_write.return_value = MOCK_PATH
     return mock_cache_write
 

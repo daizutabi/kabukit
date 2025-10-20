@@ -4,7 +4,7 @@ import polars as pl
 import pytest
 import pytest_asyncio
 
-from kabukit.core.prices import Prices
+from kabukit.domain.jquants.prices import Prices
 from kabukit.sources.jquants.client import JQuantsClient
 
 pytestmark = pytest.mark.system

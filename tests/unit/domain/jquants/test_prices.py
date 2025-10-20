@@ -8,8 +8,8 @@ import pytest
 from polars import DataFrame, Series
 from polars.testing import assert_frame_equal
 
-from kabukit.core.prices import Prices
-from kabukit.core.statements import Statements
+from kabukit.domain.jquants.prices import Prices
+from kabukit.domain.jquants.statements import Statements
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture

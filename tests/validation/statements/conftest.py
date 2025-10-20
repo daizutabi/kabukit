@@ -7,7 +7,7 @@ from polars import DataFrame
 from polars import col as c
 
 if TYPE_CHECKING:
-    from kabukit.core.statements import Statements
+    from kabukit.domain.jquants.statements import Statements
 
 
 @pytest.fixture(scope="module")

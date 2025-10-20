@@ -4,7 +4,7 @@ import pytest
 from polars import DataFrame
 from polars.testing import assert_frame_equal
 
-from kabukit.core.statements import Statements
+from kabukit.domain.jquants.statements import Statements
 
 pytestmark = pytest.mark.unit
 

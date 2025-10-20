@@ -24,7 +24,7 @@ def mock_cache_dir(tmp_path: Path, mocker: MockerFixture) -> Path:
     """Create a temporary cache directory and mock get_cache_dir for tests."""
     # For integration tests, we want to mock the cache directory to a temporary path
     # to avoid polluting the actual cache and ensure test isolation.
-    mocker.patch("kabukit.core.cache.get_cache_dir", return_value=tmp_path)
+    mocker.patch("kabukit.domain.cache.get_cache_dir", return_value=tmp_path)
     return tmp_path
 
 
@@ -51,7 +51,7 @@ def test_get_info_all(mocker: MockerFixture, mock_cache_dir: Path):
     assert "全銘柄の情報を" in result.stdout
     assert mock_get.call_count == 1
 
-    path = next(mock_cache_dir.joinpath("info").glob("*.parquet"))
+    path = next(mock_cache_dir.joinpath("jquants", "info").glob("*.parquet"))
     assert_frame_equal(pl.read_parquet(path), mock_df)
 
 
@@ -70,7 +70,7 @@ def test_get_statements_all(mocker: MockerFixture, mock_cache_dir: Path):
         progress=mocker.ANY,
     )
 
-    path = next(mock_cache_dir.joinpath("statements").glob("*.parquet"))
+    path = next(mock_cache_dir.joinpath("jquants", "statements").glob("*.parquet"))
     assert_frame_equal(pl.read_parquet(path), mock_df)
 
 
@@ -86,7 +86,7 @@ def test_get_prices_all(mocker: MockerFixture, mock_cache_dir: Path):
 
     mock_get_prices.assert_called_once_with(None, max_items=None, progress=mocker.ANY)
 
-    path = next(mock_cache_dir.joinpath("prices").glob("*.parquet"))
+    path = next(mock_cache_dir.joinpath("jquants", "prices").glob("*.parquet"))
     assert_frame_equal(pl.read_parquet(path), mock_df)
 
 
@@ -107,5 +107,5 @@ def test_get_entries_all(mocker: MockerFixture, mock_cache_dir: Path):
         max_items=None,
     )
 
-    path = next(mock_cache_dir.joinpath("entries").glob("*.parquet"))
+    path = next(mock_cache_dir.joinpath("edinet", "entries").glob("*.parquet"))
     assert_frame_equal(pl.read_parquet(path), mock_df)
