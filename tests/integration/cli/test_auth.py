@@ -1,14 +1,20 @@
-from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pytest
 from httpx import HTTPStatusError, Request, Response
-from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
 from kabukit.cli.app import app
-from kabukit.sources.edinet.client import AuthKey as EdinetAuthKey  # 追加
+from kabukit.sources.edinet.client import AuthKey as EdinetAuthKey
 from kabukit.sources.jquants.client import AuthKey as JQuantsAuthKey
+
+if TYPE_CHECKING:
+    from pathlib import Path
+    from unittest.mock import AsyncMock, MagicMock
+
+    from pytest_mock import MockerFixture
 
 pytestmark = pytest.mark.integration
 

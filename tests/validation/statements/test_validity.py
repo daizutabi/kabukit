@@ -1,11 +1,16 @@
+from __future__ import annotations
+
 from datetime import date
+from typing import TYPE_CHECKING
 
 import pytest
 from polars import DataFrame
 from polars import col as c
 
-from kabukit.core.statements import Statements
 from tests.validation.conftest import pytestmark  # noqa: F401
+
+if TYPE_CHECKING:
+    from kabukit.core.statements import Statements
 
 # 指標が乖離している決算書を確認する必要あり
 

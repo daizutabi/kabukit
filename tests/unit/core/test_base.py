@@ -1,12 +1,17 @@
+from __future__ import annotations
+
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import polars as pl
 import pytest
 from polars import DataFrame
 from polars.testing import assert_frame_equal
-from pytest_mock import MockerFixture
 
 from kabukit.core.base import Base
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 pytestmark = pytest.mark.unit
 

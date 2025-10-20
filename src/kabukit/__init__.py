@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .core import cache
 from .core.entries import Entries
 from .core.info import Info
