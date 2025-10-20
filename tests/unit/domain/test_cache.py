@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
-def test_glob_with_source_and_group(mocker: MockerFixture, tmp_path: Path) -> None:
+def test_glob_by_source_and_group(mocker: MockerFixture, tmp_path: Path) -> None:
     from kabukit.domain.cache import glob
 
     mock_get_cache_dir = mocker.patch("kabukit.domain.cache.get_cache_dir")
@@ -48,7 +48,7 @@ def test_glob_with_source_and_group(mocker: MockerFixture, tmp_path: Path) -> No
     mock_get_cache_dir.assert_called_once()
 
 
-def test_glob_no_group(mocker: MockerFixture, tmp_path: Path) -> None:
+def test_glob_all_recursively(mocker: MockerFixture, tmp_path: Path) -> None:
     from kabukit.domain.cache import glob
 
     mock_get_cache_dir = mocker.patch("kabukit.domain.cache.get_cache_dir")
@@ -73,7 +73,7 @@ def test_glob_no_group(mocker: MockerFixture, tmp_path: Path) -> None:
     mock_get_cache_dir.assert_called_once()
 
 
-def test_glob_only_group(mocker: MockerFixture, tmp_path: Path) -> None:
+def test_glob_by_group_across_sources(mocker: MockerFixture, tmp_path: Path) -> None:
     from kabukit.domain.cache import glob
 
     mock_get_cache_dir = mocker.patch("kabukit.domain.cache.get_cache_dir")
@@ -96,7 +96,7 @@ def test_glob_only_group(mocker: MockerFixture, tmp_path: Path) -> None:
     mock_get_cache_dir.assert_called_once()
 
 
-def test_glob_only_source(mocker: MockerFixture, tmp_path: Path) -> None:
+def test_glob_by_source_recursively(mocker: MockerFixture, tmp_path: Path) -> None:
     from kabukit.domain.cache import glob
 
     mock_get_cache_dir = mocker.patch("kabukit.domain.cache.get_cache_dir")
@@ -119,7 +119,7 @@ def test_glob_only_source(mocker: MockerFixture, tmp_path: Path) -> None:
     mock_get_cache_dir.assert_called_once()
 
 
-def test_glob_no_data_found(tmp_path: Path, mocker: MockerFixture) -> None:
+def test_glob_returns_empty_if_no_data(tmp_path: Path, mocker: MockerFixture) -> None:
     from kabukit.domain.cache import glob
 
     mock_get_cache_dir = mocker.patch("kabukit.domain.cache.get_cache_dir")
