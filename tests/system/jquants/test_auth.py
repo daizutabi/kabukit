@@ -1,12 +1,18 @@
+from __future__ import annotations
+
 import os
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 from httpx import HTTPStatusError
 from polars import DataFrame
-from pytest_mock import MockerFixture
 
 from kabukit.sources.jquants.client import JQuantsClient
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from pytest_mock import MockerFixture
 
 pytestmark = pytest.mark.system
 

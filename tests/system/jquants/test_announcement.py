@@ -1,6 +1,11 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pytest
 
-from kabukit.sources.jquants.client import JQuantsClient
+if TYPE_CHECKING:
+    from kabukit.sources.jquants.client import JQuantsClient
 
 pytestmark = pytest.mark.system
 

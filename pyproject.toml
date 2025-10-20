@@ -138,6 +138,9 @@ ignore = [
 "schema.py" = ["E501"]
 "notebooks/**/*.py" = ["F704", "PLE1142"]
 
+[tool.ruff.lint.isort]
+required-imports = ["from __future__ import annotations"]
+
 [tool.ruff.format]
 exclude = ["schema.py"]
 

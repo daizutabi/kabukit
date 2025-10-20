@@ -1,13 +1,18 @@
+from __future__ import annotations
+
 from datetime import date
+from typing import TYPE_CHECKING
 
 import polars as pl
 import pytest
 from polars import DataFrame, Series
 from polars.testing import assert_frame_equal
-from pytest_mock import MockerFixture
 
 from kabukit.core.prices import Prices
 from kabukit.core.statements import Statements
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 pytestmark = pytest.mark.unit
 

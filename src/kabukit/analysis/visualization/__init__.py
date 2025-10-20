@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .market import plot_topix_timeseries
 from .prices import plot_prices
 
