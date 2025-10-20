@@ -27,7 +27,7 @@ def glob(source: str | None = None, group: str | None = None) -> Iterator[Path]:
     Returns:
         An iterator of Path objects for the matched parquet files.
     """
-    paths: Iterator[Path]
+    paths: Iterator[Path] = iter([])  # Initialize paths
 
     if source is None and group is None:
         paths = get_cache_dir().glob("**/*.parquet")
@@ -37,10 +37,6 @@ def glob(source: str | None = None, group: str | None = None) -> Iterator[Path]:
         paths = get_cache_dir().joinpath(source, group).glob("*.parquet")
     elif source is None and group:
         paths = get_cache_dir().glob(f"*/{group}/*.parquet")
-    else:
-        # This case should ideally not be reached if the above conditions are exhaustive
-        # but added for type checker satisfaction.
-        paths = iter([])
 
     yield from sorted(paths, key=lambda path: path.stat().st_mtime)
 
@@ -121,16 +117,16 @@ def clean(source: str | None = None, group: str | None = None) -> None:
             subdirectory (e.g., "info", "statements") to remove.
             If None, the entire cache directory is removed.
     """
-    target_dir: Path | None = None
-
     if source is None and group is None:
         target_dir = get_cache_dir()
     elif source and group is None:
         target_dir = get_cache_dir() / source
     elif source and group:
         target_dir = get_cache_dir() / source / group
-    elif source is None and group:
-        return  # not supported
+    else:
+        # This specific combination (group without source) is not supported.
+        # The function returns early.
+        return
 
-    if target_dir is not None and target_dir.exists():
+    if target_dir.exists():
         shutil.rmtree(target_dir)

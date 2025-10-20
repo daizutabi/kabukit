@@ -73,6 +73,52 @@ def test_glob_no_group(mocker: MockerFixture, tmp_path: Path) -> None:
     mock_get_cache_dir.assert_called_once()
 
 
+def test_glob_only_group(mocker: MockerFixture, tmp_path: Path) -> None:
+    from kabukit.domain.cache import glob
+
+    mock_get_cache_dir = mocker.patch("kabukit.domain.cache.get_cache_dir")
+    mock_get_cache_dir.return_value = tmp_path
+
+    # Create dummy files in different sources within the same group
+    (tmp_path / "jquants" / "group1").mkdir(parents=True)
+    (tmp_path / "edinet" / "group1").mkdir(parents=True)
+    file1 = tmp_path / "jquants" / "group1" / "file1.parquet"
+    file2 = tmp_path / "edinet" / "group1" / "file2.parquet"
+    file1.touch()
+    file2.touch()
+
+    base_time = int(time.time())
+    os.utime(file1, (base_time + 1, base_time + 1))
+    os.utime(file2, (base_time, base_time))
+
+    result = list(glob(group="group1"))
+    assert result == [file2, file1]  # Sorted by mtime
+    mock_get_cache_dir.assert_called_once()
+
+
+def test_glob_only_source(mocker: MockerFixture, tmp_path: Path) -> None:
+    from kabukit.domain.cache import glob
+
+    mock_get_cache_dir = mocker.patch("kabukit.domain.cache.get_cache_dir")
+    mock_get_cache_dir.return_value = tmp_path
+
+    # Create dummy files in different groups within the same source
+    (tmp_path / "jquants" / "group1").mkdir(parents=True)
+    (tmp_path / "jquants" / "group2").mkdir(parents=True)
+    file1 = tmp_path / "jquants" / "group1" / "file1.parquet"
+    file2 = tmp_path / "jquants" / "group2" / "file2.parquet"
+    file1.touch()
+    file2.touch()
+
+    base_time = int(time.time())
+    os.utime(file1, (base_time + 1, base_time + 1))
+    os.utime(file2, (base_time, base_time))
+
+    result = list(glob(source="jquants"))
+    assert result == [file2, file1]  # Sorted by mtime
+    mock_get_cache_dir.assert_called_once()
+
+
 def test_glob_no_data_found(tmp_path: Path, mocker: MockerFixture) -> None:
     from kabukit.domain.cache import glob
 
@@ -257,6 +303,34 @@ def test_clean(mocker: MockerFixture, tmp_path: Path) -> None:
     # Other group should remain
     assert (tmp_path / "jquants" / "another_group").exists()
     mock_get_cache_dir.assert_called_once()  # Called once for clean(group=...)
+
+
+def test_clean_only_source(mocker: MockerFixture, tmp_path: Path) -> None:
+    from kabukit.domain.cache import clean
+
+    mock_get_cache_dir = mocker.patch("kabukit.domain.cache.get_cache_dir")
+    mock_get_cache_dir.return_value = tmp_path
+
+    # Create a dummy source directory to be removed
+    (tmp_path / "jquants" / "some_group").mkdir(parents=True)
+    assert (tmp_path / "jquants").exists()
+
+    # Call clean with only source
+    clean(source="jquants")
+
+    # Assert that the source directory is removed
+    assert not (tmp_path / "jquants").exists()
+    mock_get_cache_dir.assert_called_once()
+
+
+def test_clean_only_group_not_supported(mocker: MockerFixture) -> None:
+    from kabukit.domain.cache import clean
+
+    mock_get_cache_dir = mocker.patch("kabukit.domain.cache.get_cache_dir")
+
+    clean(group="group")
+
+    mock_get_cache_dir.assert_not_called()
 
 
 def test_clean_no_dir(mocker: MockerFixture, tmp_path: Path) -> None:
