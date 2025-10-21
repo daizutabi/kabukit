@@ -4,12 +4,12 @@ import asyncio
 import datetime
 from enum import StrEnum
 from typing import TYPE_CHECKING, final
-from zoneinfo import ZoneInfo
 
 import polars as pl
 
 from kabukit.sources.base import Client
 from kabukit.utils.config import get_config_value
+from kabukit.utils.date import today
 from kabukit.utils.params import get_params
 
 from . import calendar, info, prices, statements, topix
@@ -318,10 +318,10 @@ class JQuantsClient(Client):
             pl.DataFrame: データが見つかった場合はその日の株価DataFrame、
             見つからない場合は空のDataFrame。
         """
-        today = datetime.datetime.now(ZoneInfo("Asia/Tokyo")).date()
+        start_date = today()
 
         for days in range(num_days):
-            date = today - datetime.timedelta(days)
+            date = start_date - datetime.timedelta(days)
             df = await self.get_prices(date=date, clean=clean)
 
             if not df.is_empty():
