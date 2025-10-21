@@ -1,18 +1,18 @@
 from __future__ import annotations
 
-import datetime
-from zoneinfo import ZoneInfo
+from typing import TYPE_CHECKING
 
 import polars as pl
+
+from kabukit.utils.date import strpdate
+
+if TYPE_CHECKING:
+    import datetime
 
 
 def clean_entries(df: pl.DataFrame, date: str | datetime.date) -> pl.DataFrame:
     if isinstance(date, str):
-        date = (
-            datetime.datetime.strptime(date, "%Y-%m-%d")
-            .replace(tzinfo=ZoneInfo("Asia/Tokyo"))
-            .date()
-        )
+        date = strpdate(date)
 
     null_columns = [c for c in df.columns if df[c].dtype == pl.Null]
 

@@ -1,8 +1,25 @@
 from __future__ import annotations
 
+import datetime
+
 import pytest
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize(
+    ("date_str", "fmt", "date"),
+    [
+        ("2023-10-15", "%Y-%m-%d", datetime.date(2023, 10, 15)),
+        ("2023-10-15", None, datetime.date(2023, 10, 15)),
+        ("20231015", "%Y%m%d", datetime.date(2023, 10, 15)),
+        ("20231015", None, datetime.date(2023, 10, 15)),
+    ],
+)
+def test_strpdate(date_str: str, fmt: str | None, date: datetime.date) -> None:
+    from kabukit.utils.date import strpdate
+
+    assert strpdate(date_str, fmt) == date
 
 
 def test_dates_days() -> None:
