@@ -3,8 +3,8 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING
 
+import polars as pl
 import pytest
-from polars import DataFrame
 
 from kabukit.sources.edinet.client import EdinetClient
 
@@ -22,7 +22,7 @@ def dummy_progress(x: Iterable[Any]) -> Iterable[Any]:
     return x
 
 
-def dummy_callback(df: DataFrame) -> DataFrame:
+def dummy_callback(df: pl.DataFrame) -> pl.DataFrame:
     return df
 
 
@@ -38,7 +38,7 @@ def mock_utils_get(mocker: MockerFixture) -> AsyncMock:
 async def test_get(mock_utils_get: AsyncMock) -> None:
     from kabukit.sources.edinet.concurrent import get
 
-    mock_utils_get.return_value = DataFrame({"a": [1]})
+    mock_utils_get.return_value = pl.DataFrame({"a": [1]})
 
     result = await get(
         "test_resource",
@@ -48,7 +48,7 @@ async def test_get(mock_utils_get: AsyncMock) -> None:
         callback=dummy_callback,
     )
 
-    assert result.equals(DataFrame({"a": [1]}))
+    assert result.equals(pl.DataFrame({"a": [1]}))
     mock_utils_get.assert_awaited_once_with(
         EdinetClient,
         "test_resource",
@@ -81,7 +81,7 @@ async def test_get_entries_days(
         "kabukit.sources.edinet.concurrent.get",
         new_callable=mocker.AsyncMock,
     )
-    mock_get.return_value = DataFrame({"Date": [2], "Code": ["10000"]})
+    mock_get.return_value = pl.DataFrame({"Date": [2], "Code": ["10000"]})
 
     result = await get_entries(
         days=3,
@@ -91,7 +91,7 @@ async def test_get_entries_days(
         callback=dummy_callback,
     )
 
-    assert result.equals(DataFrame({"Date": [2], "Code": ["10000"]}))
+    assert result.equals(pl.DataFrame({"Date": [2], "Code": ["10000"]}))
     mock_get_dates.assert_called_once_with(days=3, years=None)
     mock_get.assert_awaited_once_with(
         "entries",
@@ -122,7 +122,7 @@ async def test_get_entries_years(
         "kabukit.sources.edinet.concurrent.get",
         new_callable=mocker.AsyncMock,
     )
-    mock_get.return_value = DataFrame({"Date": [1], "Code": ["10000"]})
+    mock_get.return_value = pl.DataFrame({"Date": [1], "Code": ["10000"]})
 
     await get_entries(years=2)
 
@@ -158,7 +158,7 @@ async def test_get_entries_invalid_date(mocker: MockerFixture) -> None:
         "kabukit.sources.edinet.concurrent.get",
         new_callable=mocker.AsyncMock,
     )
-    mock_get.return_value = DataFrame()
+    mock_get.return_value = pl.DataFrame()
 
     result = await get_entries(["2025-10-10"])
     assert result.is_empty()
@@ -172,7 +172,7 @@ async def test_get_documents_csv(mocker: MockerFixture) -> None:
         "kabukit.sources.edinet.concurrent.get",
         new_callable=mocker.AsyncMock,
     )
-    mock_get.return_value = DataFrame({"docID": [3]})
+    mock_get.return_value = pl.DataFrame({"docID": [3]})
 
     result = await get_documents(
         ["doc1", "doc2", "doc3"],
@@ -182,7 +182,7 @@ async def test_get_documents_csv(mocker: MockerFixture) -> None:
         callback=dummy_callback,
     )
 
-    assert result.equals(DataFrame({"docID": [3]}))
+    assert result.equals(pl.DataFrame({"docID": [3]}))
     mock_get.assert_awaited_once_with(
         "csv",
         ["doc1", "doc2", "doc3"],
@@ -201,7 +201,7 @@ async def test_get_documents_pdf(mocker: MockerFixture) -> None:
         "kabukit.sources.edinet.concurrent.get",
         new_callable=mocker.AsyncMock,
     )
-    mock_get.return_value = DataFrame({"docID": [1]})
+    mock_get.return_value = pl.DataFrame({"docID": [1]})
 
     await get_documents(["doc1", "doc2"], pdf=True)
 

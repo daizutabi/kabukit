@@ -5,14 +5,13 @@ from zoneinfo import ZoneInfo
 
 import polars as pl
 import pytest
-from polars import DataFrame
 
 pytestmark = pytest.mark.unit
 
 
 @pytest.fixture(scope="module")
-def df() -> DataFrame:
-    return DataFrame(
+def df() -> pl.DataFrame:
+    return pl.DataFrame(
         {
             "csvFlag": ["1", "0"],
             "pdfFlag": ["1", "0"],
@@ -25,7 +24,7 @@ def df() -> DataFrame:
     )
 
 
-def test_clean_entries_columns(df: DataFrame) -> None:
+def test_clean_entries_columns(df: pl.DataFrame) -> None:
     from kabukit.sources.edinet.doc import clean_entries
 
     df = clean_entries(df, "2025-09-19")
@@ -42,7 +41,7 @@ def test_clean_entries_columns(df: DataFrame) -> None:
 
 
 @pytest.mark.parametrize("d", ["2025-09-19", date(2025, 9, 19)])
-def test_clean_entries_date_time(df: DataFrame, d: str | date) -> None:
+def test_clean_entries_date_time(df: pl.DataFrame, d: str | date) -> None:
     from kabukit.sources.edinet.doc import clean_entries
 
     df = clean_entries(df, d)
@@ -57,7 +56,7 @@ def test_clean_entries_date_time(df: DataFrame, d: str | date) -> None:
 def test_clean_entries_date_time_null() -> None:
     from kabukit.sources.edinet.doc import clean_entries
 
-    df = DataFrame(
+    df = pl.DataFrame(
         {
             "submitDateTime": ["", None],
             "opeDateTime": ["", ""],
@@ -70,7 +69,7 @@ def test_clean_entries_date_time_null() -> None:
     assert df["opeDateTime"].dtype == pl.Datetime
 
 
-def test_clean_entries_flag(df: DataFrame) -> None:
+def test_clean_entries_flag(df: pl.DataFrame) -> None:
     from kabukit.sources.edinet.doc import clean_entries
 
     df = clean_entries(df, "2025-09-19")
@@ -78,7 +77,7 @@ def test_clean_entries_flag(df: DataFrame) -> None:
     assert df["pdfFlag"].to_list() == [True, False]
 
 
-def test_clean_entries_period(df: DataFrame) -> None:
+def test_clean_entries_period(df: pl.DataFrame) -> None:
     from kabukit.sources.edinet.doc import clean_entries
 
     df = clean_entries(df, "2025-09-19")
@@ -86,7 +85,7 @@ def test_clean_entries_period(df: DataFrame) -> None:
     assert df["periodEnd"].to_list() == [date(2025, 9, 30), None]
 
 
-def test_clean_entries_ope_datetime(df: DataFrame) -> None:
+def test_clean_entries_ope_datetime(df: pl.DataFrame) -> None:
     from kabukit.sources.edinet.doc import clean_entries
 
     df = clean_entries(df, "2025-09-19")
@@ -108,7 +107,7 @@ def test_clean_pdf() -> None:
 def test_clean_csv() -> None:
     from kabukit.sources.edinet.doc import clean_csv
 
-    df = DataFrame({"a": [1, 2]})
+    df = pl.DataFrame({"a": [1, 2]})
     df = clean_csv(df, "abc")
     assert df.columns == ["docID", "a"]
     assert df["docID"].to_list() == ["abc", "abc"]

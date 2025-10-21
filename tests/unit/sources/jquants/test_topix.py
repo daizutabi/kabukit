@@ -3,9 +3,9 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING
 
+import polars as pl
 import pytest
 from httpx import Response
-from polars import DataFrame
 from polars.testing import assert_frame_equal
 
 from kabukit.sources.jquants.client import JQuantsClient
@@ -28,7 +28,7 @@ async def test_get_topix(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     client = JQuantsClient("test_token")
     result = await client.get_topix()
 
-    expected = DataFrame(
+    expected = pl.DataFrame(
         {
             "Date": [datetime.date(2025, 1, 1)],
             "Code": ["TOPIX"],

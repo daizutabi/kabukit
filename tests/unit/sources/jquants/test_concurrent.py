@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import polars as pl
 import pytest
-from polars import DataFrame
 
 from kabukit.sources.jquants.client import JQuantsClient
 
@@ -21,7 +21,7 @@ def dummy_progress(x: Iterable[Any]) -> Iterable[Any]:
     return x
 
 
-def dummy_callback(df: DataFrame) -> DataFrame:
+def dummy_callback(df: pl.DataFrame) -> pl.DataFrame:
     return df
 
 
@@ -53,7 +53,7 @@ def mock_get_info(mocker: MockerFixture) -> AsyncMock:
 async def test_get(mock_utils_get: AsyncMock) -> None:
     from kabukit.sources.jquants.concurrent import get
 
-    mock_utils_get.return_value = DataFrame(
+    mock_utils_get.return_value = pl.DataFrame(
         {"Date": [4, 3, 2, 1], "Code": ["a", "b", "b", "a"]},
     )
 
@@ -65,7 +65,7 @@ async def test_get(mock_utils_get: AsyncMock) -> None:
         callback=dummy_callback,
     )
 
-    expected = DataFrame({"Date": [1, 4, 2, 3], "Code": ["a", "a", "b", "b"]})
+    expected = pl.DataFrame({"Date": [1, 4, 2, 3], "Code": ["a", "a", "b", "b"]})
     assert result.equals(expected)
 
     mock_utils_get.assert_awaited_once_with(
@@ -88,7 +88,7 @@ async def test_get_without_codes(
 
     mock_get_target_codes.return_value = ["1111", "2222", "3333"]
     # get() は .sort("Code", "Date") を行うので、モックの戻り値にもカラムが必要
-    mock_utils_get.return_value = DataFrame(
+    mock_utils_get.return_value = pl.DataFrame(
         {"Date": [1], "Code": ["c"], "b": [2]},
     )
 
@@ -102,7 +102,7 @@ async def test_get_without_codes(
     )
 
     # ソート後の結果を期待値とする
-    expected = DataFrame({"Date": [1], "Code": ["c"], "b": [2]})
+    expected = pl.DataFrame({"Date": [1], "Code": ["c"], "b": [2]})
     assert result.equals(expected)
 
     mock_get_target_codes.assert_awaited_once()
@@ -130,7 +130,7 @@ async def test_get_info(mock_jquants_client_context: AsyncMock) -> None:
 async def test_get_target_codes(mock_get_info: AsyncMock) -> None:
     from kabukit.sources.jquants.concurrent import get_target_codes
 
-    mock_df = DataFrame(
+    mock_df = pl.DataFrame(
         {
             "Code": ["0001", "0002", "0003", "0004", "0005"],
             "MarketCodeName": [

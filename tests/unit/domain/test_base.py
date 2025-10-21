@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 import pytest
-from polars import DataFrame
 from polars.testing import assert_frame_equal
 
 from kabukit.domain.base import Base
@@ -17,11 +16,11 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
-def data() -> DataFrame:
-    return DataFrame({"A": [1, 2], "B": ["x", "y"]})
+def data() -> pl.DataFrame:
+    return pl.DataFrame({"A": [1, 2], "B": ["x", "y"]})
 
 
-def test_init(data: DataFrame) -> None:
+def test_init(data: pl.DataFrame) -> None:
     assert_frame_equal(Base(data).data, data)
 
 
@@ -38,7 +37,7 @@ def test_data_dir(mocker: MockerFixture) -> None:
     assert Derived.data_dir() == Path("cache") / "jquants" / "derived"
 
 
-def test_write_no_name(mocker: MockerFixture, data: DataFrame) -> None:
+def test_write_no_name(mocker: MockerFixture, data: pl.DataFrame) -> None:
     mocker.patch.object(Derived, "__module__", "kabukit.domain.jquants.derived")
     mock_cache_write = mocker.patch(
         "kabukit.domain.cache.write",
@@ -49,7 +48,7 @@ def test_write_no_name(mocker: MockerFixture, data: DataFrame) -> None:
     mock_cache_write.assert_called_once_with("jquants", "derived", data, None)
 
 
-def test_write_with_name(mocker: MockerFixture, data: DataFrame) -> None:
+def test_write_with_name(mocker: MockerFixture, data: pl.DataFrame) -> None:
     mocker.patch.object(Derived, "__module__", "kabukit.domain.jquants.derived")
     mock_cache_write = mocker.patch(
         "kabukit.domain.cache.write",
@@ -60,7 +59,7 @@ def test_write_with_name(mocker: MockerFixture, data: DataFrame) -> None:
     mock_cache_write.assert_called_once_with("jquants", "derived", data, "my_file")
 
 
-def test_init_from_cache(mocker: MockerFixture, data: DataFrame) -> None:
+def test_init_from_cache(mocker: MockerFixture, data: pl.DataFrame) -> None:
     mocker.patch.object(Derived, "__module__", "kabukit.domain.jquants.derived")
     mock_cache_read = mocker.patch("kabukit.domain.cache.read", return_value=data)
 
@@ -80,6 +79,6 @@ def test_init_from_cache_file_not_found(mocker: MockerFixture) -> None:
         Derived()
 
 
-def test_filter(data: DataFrame) -> None:
-    expected = DataFrame({"A": [1], "B": ["x"]})
+def test_filter(data: pl.DataFrame) -> None:
+    expected = pl.DataFrame({"A": [1], "B": ["x"]})
     assert_frame_equal(Derived(data).filter(pl.col("A") == 1).data, expected)

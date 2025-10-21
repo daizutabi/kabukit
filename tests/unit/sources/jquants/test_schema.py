@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import polars as pl
 import pytest
-from polars import DataFrame
 
 from kabukit.sources.jquants.schema import (
     InfoColumns,
@@ -34,7 +34,7 @@ def test_rename_all_columns() -> None:
         "TotalAssets": [2000000],
         "Equity": [1200000],
     }
-    df = DataFrame(test_data)
+    df = pl.DataFrame(test_data)
 
     # 変換を実行
     renamed_df = rename(df)

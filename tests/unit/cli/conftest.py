@@ -3,15 +3,15 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
 
+import polars as pl
 import pytest
-from polars import DataFrame
 
 if TYPE_CHECKING:
     from unittest.mock import MagicMock
 
     from pytest_mock import MockerFixture
 
-MOCK_DF = DataFrame({"A": [1, 2], "B": [3, 4]})
+MOCK_DF = pl.DataFrame({"A": [1, 2], "B": [3, 4]})
 MOCK_CODE = "1234"
 MOCK_PATH = "fake/path.csv"
 

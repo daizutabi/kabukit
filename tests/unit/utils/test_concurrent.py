@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 import pytest
-from polars import DataFrame
 
 from kabukit.sources.base import Client
 
@@ -51,9 +50,9 @@ async def test_collect_fn() -> None:
     assert sorted(result) == [0.01, 0.02, 0.03]
 
 
-async def sleep_df(second: float) -> DataFrame:
+async def sleep_df(second: float) -> pl.DataFrame:
     await asyncio.sleep(second)
-    return DataFrame({"a": [second]})
+    return pl.DataFrame({"a": [second]})
 
 
 @pytest.mark.asyncio
@@ -74,9 +73,9 @@ async def test_concat_fn() -> None:
 
 
 class MockClient(Client):
-    async def get_data(self, code: int) -> DataFrame:
+    async def get_data(self, code: int) -> pl.DataFrame:
         await asyncio.sleep(0.01)
-        return DataFrame({"Code": [code]})
+        return pl.DataFrame({"Code": [code]})
 
 
 @pytest.mark.asyncio
@@ -99,9 +98,9 @@ async def test_get() -> None:
 
 
 async def progress(
-    ait: AsyncIterable[DataFrame],
+    ait: AsyncIterable[pl.DataFrame],
     total: int | None = None,
-) -> AsyncIterator[DataFrame]:
+) -> AsyncIterator[pl.DataFrame]:
     async for x in ait:
         yield x.with_columns(pl.col("Code") * total)
 
@@ -114,7 +113,7 @@ async def test_get_progress() -> None:
     assert df["Code"].sort().to_list() == [3, 6, 9]
 
 
-def callback(df: DataFrame) -> DataFrame:
+def callback(df: pl.DataFrame) -> pl.DataFrame:
     return df.with_columns(pl.col("Code") * 10)
 
 

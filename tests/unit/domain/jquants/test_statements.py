@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import polars as pl
 import pytest
-from polars import DataFrame
 from polars.testing import assert_frame_equal
 
 from kabukit.domain.jquants.statements import Statements
@@ -10,7 +10,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_shares() -> None:
-    data = DataFrame(
+    data = pl.DataFrame(
         {
             "Date": [1, 2],
             "Code": [3, 4],
@@ -23,7 +23,7 @@ def test_shares() -> None:
 
     result = Statements(data).shares()
 
-    expected = DataFrame(
+    expected = pl.DataFrame(
         {
             "Date": [1],
             "Code": [3],
@@ -36,7 +36,7 @@ def test_shares() -> None:
 
 
 def test_forecast_profit() -> None:
-    data = DataFrame(
+    data = pl.DataFrame(
         {
             "Date": [1, 2, 1, 2],
             "Code": [1, 1, 2, 2],
@@ -48,7 +48,7 @@ def test_forecast_profit() -> None:
 
     result = Statements(data).forecast_profit()
 
-    expected = DataFrame(
+    expected = pl.DataFrame(
         {
             "Date": [2, 1, 2],
             "Code": [1, 2, 2],
@@ -60,7 +60,7 @@ def test_forecast_profit() -> None:
 
 
 def test_forecast_dividend() -> None:
-    data = DataFrame(
+    data = pl.DataFrame(
         {
             "Date": [1, 2, 3, 4, 5],
             "Code": [1, 1, 2, 2, 3],
@@ -76,7 +76,7 @@ def test_forecast_dividend() -> None:
 
     result = Statements(data).forecast_dividend()
 
-    expected = DataFrame(
+    expected = pl.DataFrame(
         {
             "Date": [1, 2, 3, 4],
             "Code": [1, 1, 2, 2],
@@ -88,7 +88,7 @@ def test_forecast_dividend() -> None:
 
 
 def test_equity() -> None:
-    data = DataFrame(
+    data = pl.DataFrame(
         {
             "Date": [1, 2, 1],
             "Code": ["A", "A", "B"],
@@ -99,7 +99,7 @@ def test_equity() -> None:
 
     result = Statements(data).equity()
 
-    expected = DataFrame(
+    expected = pl.DataFrame(
         {
             "Date": [1, 1],
             "Code": ["A", "B"],

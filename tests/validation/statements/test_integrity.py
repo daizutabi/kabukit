@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import polars as pl
 import pytest
-from polars import DataFrame
 from polars import col as c
 
 from tests.validation.conftest import pytestmark  # noqa: F401
 
 
-def test_fin_profit_loss(fin: DataFrame, pl_col: str) -> None:
+def test_fin_profit_loss(fin: pl.DataFrame, pl_col: str) -> None:
     """決算の損益計算書の各項目は、ほぼ100%埋まっている"""
     x = fin[pl_col].is_not_null().mean()
     assert isinstance(x, float)
@@ -16,7 +15,7 @@ def test_fin_profit_loss(fin: DataFrame, pl_col: str) -> None:
 
 
 @pytest.mark.parametrize("kind", ["US", "IFRS"])
-def test_fin_ordinary_profit(fin: DataFrame, kind: str) -> None:
+def test_fin_ordinary_profit(fin: pl.DataFrame, kind: str) -> None:
     """US・IFRS基準の決算では、OrdinaryProfitはほとんど存在しない"""
     df = fin.filter(c.TypeOfDocument.str.contains(kind))
     x = df["OrdinaryProfit"].is_not_null().mean()
@@ -24,14 +23,14 @@ def test_fin_ordinary_profit(fin: DataFrame, kind: str) -> None:
     assert 0.0 < x <= 0.025  # ごく一部のみ
 
 
-def test_fin_diluted_earnings_per_share(fin: DataFrame) -> None:
+def test_fin_diluted_earnings_per_share(fin: pl.DataFrame) -> None:
     """DilutedEarningsPerShareは、30%程度が埋まっている"""
     x = fin["DilutedEarningsPerShare"].is_not_null().mean()
     assert isinstance(x, float)
     assert 0.30 < x <= 0.31  # 30% くらい
 
 
-def test_fin_balance_sheet(fin: DataFrame, bs_col: str) -> None:
+def test_fin_balance_sheet(fin: pl.DataFrame, bs_col: str) -> None:
     """決算の貸借対照表の各項目は、ほぼ100%埋まっている。ただし、BookValuePerShareは約45%"""
     x = fin[bs_col].is_not_null().mean()
     assert isinstance(x, float)
@@ -53,7 +52,7 @@ def test_fin_balance_sheet(fin: DataFrame, bs_col: str) -> None:
     ],
 )
 def test_fin_cash_flow(
-    fin: DataFrame,
+    fin: pl.DataFrame,
     cf_col: str,
     period: str,
     low: float,
@@ -88,7 +87,7 @@ def test_fin_cash_flow(
     ],
 )
 def test_fin_result_dividend(
-    fin: DataFrame,
+    fin: pl.DataFrame,
     period: str,
     name: str,
     low: float,
@@ -110,7 +109,7 @@ def test_fin_result_dividend(
     ],
 )
 def test_fin_result_dividend_annual(
-    fin: DataFrame,
+    fin: pl.DataFrame,
     column: str,
     low: float,
     high: float,
@@ -122,7 +121,7 @@ def test_fin_result_dividend_annual(
     assert low <= x <= high
 
 
-def test_fin_result_dividend_other_period(fin: DataFrame) -> None:
+def test_fin_result_dividend_other_period(fin: pl.DataFrame) -> None:
     """OtherPerid決算では、配当実績なし"""
     df = fin.filter(c.TypeOfDocument.str.starts_with("OtherPeriod")).select(
         pl.col("^ResultDividend.*$"),
@@ -152,7 +151,7 @@ def test_fin_result_dividend_other_period(fin: DataFrame) -> None:
     ],
 )
 def test_fin_forecast_dividend(
-    fin: DataFrame,
+    fin: pl.DataFrame,
     period: str,
     name: str,
     low: float,
@@ -172,7 +171,7 @@ def test_fin_forecast_dividend(
     ],
 )
 def test_fin_forecast_dividend_annual(
-    fin: DataFrame,
+    fin: pl.DataFrame,
     column: str,
     low: float,
     high: float,
@@ -191,7 +190,7 @@ def test_fin_forecast_dividend_annual(
         "ForecastPayoutRatioAnnual",
     ],
 )
-def test_forecast_dividend_annual_null(fin: DataFrame, column: str) -> None:
+def test_forecast_dividend_annual_null(fin: pl.DataFrame, column: str) -> None:
     """通期決算以外において、年間配当予想の総額と配当性向はnull"""
     df = fin.filter(~c.TypeOfDocument.str.starts_with("FY"))
     assert df[column].is_null().all()
@@ -207,7 +206,7 @@ def test_forecast_dividend_annual_null(fin: DataFrame, column: str) -> None:
     ],
 )
 def test_fin_next_year_forecast_dividend(
-    fin: DataFrame,
+    fin: pl.DataFrame,
     name: str,
     low: float,
     high: float,
@@ -227,7 +226,7 @@ def test_fin_next_year_forecast_dividend(
     ],
 )
 def test_fin_next_year_forecast_dividend_annual(
-    fin: DataFrame,
+    fin: pl.DataFrame,
     column: str,
     low: float,
     high: float,
@@ -239,7 +238,7 @@ def test_fin_next_year_forecast_dividend_annual(
     assert low <= x <= high
 
 
-def test_fin_next_year_forecast_dividend_annual_column(fin: DataFrame) -> None:
+def test_fin_next_year_forecast_dividend_annual_column(fin: pl.DataFrame) -> None:
     """NextYearForecastTotalDividendPaidAnnualが欠落。"""
     assert "ForecastDividendPerShareAnnual" in fin.columns
     assert "ForecastPayoutRatioAnnual" in fin.columns
@@ -250,7 +249,7 @@ def test_fin_next_year_forecast_dividend_annual_column(fin: DataFrame) -> None:
     assert "NextYearForecastTotalDividendPaidAnnual" not in fin.columns
 
 
-def test_fin_next_year_forecast(fin: DataFrame) -> None:
+def test_fin_next_year_forecast(fin: pl.DataFrame) -> None:
     """FY決算以外では、次期の予想は存在しない"""
     df = fin.filter(~c.TypeOfDocument.str.starts_with("FY")).select(
         pl.col("^NextYear.*$"),
@@ -258,7 +257,7 @@ def test_fin_next_year_forecast(fin: DataFrame) -> None:
     assert all(df[c].is_null().all() for c in df.columns)
 
 
-def test_fin_forecast(fin: DataFrame) -> None:
+def test_fin_forecast(fin: pl.DataFrame) -> None:
     """FY決算では、当期の予想は存在しない。ただし、誤登録の可能性あり"""
     df = fin.filter(c.TypeOfDocument.str.starts_with("FY")).select(
         pl.col("^Forecast.*$"),
@@ -269,7 +268,7 @@ def test_fin_forecast(fin: DataFrame) -> None:
     assert all(0.999 < v <= 1.0 for v in x)
 
 
-def test_fin_forecast_other(fin: DataFrame) -> None:
+def test_fin_forecast_other(fin: pl.DataFrame) -> None:
     """OtherPeriod決算では、当期の予想は存在しない"""
     df = fin.filter(c.TypeOfDocument.str.starts_with("OtherPeriod")).select(
         pl.col("^Forecast.*$"),
@@ -287,7 +286,7 @@ def test_fin_forecast_other(fin: DataFrame) -> None:
     ],
 )
 def test_fin_forecast_profit_loss_2nd_quarter(
-    fin: DataFrame,
+    fin: pl.DataFrame,
     pl_col: str,
     period: str,
     low: float,
@@ -301,7 +300,7 @@ def test_fin_forecast_profit_loss_2nd_quarter(
 
 
 def test_fin_next_year_forecast_profit_loss_2nd_quarter(
-    fin: DataFrame,
+    fin: pl.DataFrame,
     pl_col: str,
 ) -> None:
     """FY決算では、次期の2Q業績予想の損益計算書の各項目が50%程度埋まっている"""
@@ -311,7 +310,7 @@ def test_fin_next_year_forecast_profit_loss_2nd_quarter(
     assert 0.50 <= x <= 0.55
 
 
-def test_fin_forecast_profit_loss(fin: DataFrame, pl_col: str) -> None:
+def test_fin_forecast_profit_loss(fin: pl.DataFrame, pl_col: str) -> None:
     """FY決算以外では、期末業績予想の損益計算書の各項目が90%程度埋まっている"""
     df = fin.filter(
         ~c.TypeOfDocument.str.starts_with("FY"),
@@ -322,7 +321,7 @@ def test_fin_forecast_profit_loss(fin: DataFrame, pl_col: str) -> None:
     assert 0.86 <= x <= 0.95
 
 
-def test_fin_next_year_forecast_profit_loss(fin: DataFrame, pl_col: str) -> None:
+def test_fin_next_year_forecast_profit_loss(fin: pl.DataFrame, pl_col: str) -> None:
     """FY決算では、次期の期末業績予想の損益計算書の各項目が85%程度埋まっている"""
     df = fin.filter(c.TypeOfDocument.str.starts_with("FY"))
     x = df[f"NextYearForecast{pl_col}"].is_not_null().mean()
@@ -339,7 +338,7 @@ def col_shares(request: pytest.FixtureRequest) -> str:
 
 
 @pytest.mark.parametrize("period", ["1Q", "2Q", "3Q", "FY"])
-def test_fin_shares(fin: DataFrame, period: str, col_shares: str) -> None:
+def test_fin_shares(fin: pl.DataFrame, period: str, col_shares: str) -> None:
     """決算の株式数は、ほぼ100%埋まっている"""
     df = fin.filter(c.TypeOfDocument.str.starts_with(period))
     x = df[col_shares].is_not_null().mean()
@@ -347,21 +346,21 @@ def test_fin_shares(fin: DataFrame, period: str, col_shares: str) -> None:
     assert 0.94 < x <= 1.0  # 割合 1 に近い
 
 
-def test_fin_shares_other(fin: DataFrame, col_shares: str) -> None:
+def test_fin_shares_other(fin: pl.DataFrame, col_shares: str) -> None:
     """OtherPeriod決算では、株式数は存在しない"""
     df = fin.filter(c.TypeOfDocument.str.starts_with("OtherPeriod"))
     assert df[col_shares].is_null().all()
 
 
 def test_earn_revision_column_name_starts_with_forecast(
-    earn_revision: DataFrame,
+    earn_revision: pl.DataFrame,
 ) -> None:
     """業績修正のカラム名が "Forecast" で始まる"""
     assert all(c.startswith("Forecast") for c in earn_revision.columns)
 
 
 def test_earn_revision_profit_loss_fiscal_year_end(
-    earn_revision: DataFrame,
+    earn_revision: pl.DataFrame,
     pl_col: str,
 ) -> None:
     """業績修正の期末業績予想の損益項目の各項目がどの程度埋まっているか"""
@@ -371,7 +370,7 @@ def test_earn_revision_profit_loss_fiscal_year_end(
 
 
 def test_earn_revision_profit_loss_2nd_quarter(
-    earn_revision: DataFrame,
+    earn_revision: pl.DataFrame,
     pl_col: str,
 ) -> None:
     """業績修正の2Q業績予想の損益項目の各項目がどの程度埋まっているか"""
@@ -391,7 +390,7 @@ def test_earn_revision_profit_loss_2nd_quarter(
     ],
 )
 def test_earn_revision_dividend(
-    earn_revision: DataFrame,
+    earn_revision: pl.DataFrame,
     name: str,
     high: float,
     low: float,
@@ -413,7 +412,7 @@ def test_earn_revision_dividend(
     ],
 )
 def test_dividend_revision_dividend(
-    dividend_revision: DataFrame,
+    dividend_revision: pl.DataFrame,
     name: str,
     high: float,
     low: float,

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from datetime import date
 
+import polars as pl
 import pytest
-from polars import DataFrame
 
 pytestmark = pytest.mark.system
 
@@ -18,8 +18,8 @@ async def test_get() -> None:
     assert df["docID"].n_unique() == 1229  # 重複あり
 
 
-def callback(df: DataFrame) -> DataFrame:
-    assert isinstance(df, DataFrame)
+def callback(df: pl.DataFrame) -> pl.DataFrame:
+    assert isinstance(df, pl.DataFrame)
     return df
 
 

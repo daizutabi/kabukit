@@ -6,7 +6,7 @@ from enum import StrEnum
 from typing import TYPE_CHECKING
 
 import httpx
-from polars import DataFrame
+import polars as pl
 from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
 
 from kabukit.sources.base import Client
@@ -108,7 +108,7 @@ class EdinetClient(Client):
 
         return metadata["resultset"]["count"]
 
-    async def get_entries(self, date: str | datetime.date) -> DataFrame:
+    async def get_entries(self, date: str | datetime.date) -> pl.DataFrame:
         """指定日の提出書類一覧を取得する (documents.json, type=2)。
 
         Args:
@@ -122,9 +122,9 @@ class EdinetClient(Client):
         data = resp.json()
 
         if "results" not in data:
-            return DataFrame()
+            return pl.DataFrame()
 
-        df = DataFrame(data["results"], infer_schema_length=None)
+        df = pl.DataFrame(data["results"], infer_schema_length=None)
 
         if df.is_empty():
             return df
@@ -144,7 +144,7 @@ class EdinetClient(Client):
         params = get_params(type=doc_type)
         return await self.get(f"/documents/{doc_id}", params)
 
-    async def get_pdf(self, doc_id: str) -> DataFrame:
+    async def get_pdf(self, doc_id: str) -> pl.DataFrame:
         """PDF形式の書類を取得し、テキストを抽出する。
 
         Args:
@@ -183,7 +183,7 @@ class EdinetClient(Client):
         msg = "ZIP is not available."
         raise ValueError(msg)
 
-    async def get_csv(self, doc_id: str) -> DataFrame:
+    async def get_csv(self, doc_id: str) -> pl.DataFrame:
         """CSV形式の書類(XBRL)を取得し、DataFrameに変換する。
 
         書類取得API (`type=5`) で取得したZIPファイルの中からCSVファイルを
@@ -211,7 +211,7 @@ class EdinetClient(Client):
         msg = "CSV is not available."
         raise ValueError(msg)
 
-    async def get_document(self, doc_id: str, *, pdf: bool = False) -> DataFrame:
+    async def get_document(self, doc_id: str, *, pdf: bool = False) -> pl.DataFrame:
         """指定したIDの書類を取得する。
 
         Args:

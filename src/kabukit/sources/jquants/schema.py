@@ -4,12 +4,13 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from polars import DataFrame
+    import polars as pl
+
 
 
 class BaseColumns(Enum):
     @classmethod
-    def rename(cls, df: DataFrame, *, strict: bool = False) -> DataFrame:
+    def rename(cls, df: pl.DataFrame, *, strict: bool = False) -> pl.DataFrame:
         """DataFrameの列名を日本語から英語に変換する。"""
         return df.rename({x.name: x.value for x in cls}, strict=strict)
 
@@ -170,7 +171,7 @@ class StatementColumns(BaseColumns):
     NextYearForecastNonConsolidatedEarningsPerShare = "一株あたり当期純利益_予想_翌事業年度期末_非連結"
 
 
-def rename(df: DataFrame, *, strict: bool = False) -> DataFrame:
+def rename(df: pl.DataFrame, *, strict: bool = False) -> pl.DataFrame:
     """DataFrameの列名を日本語から英語に変換する。"""
     for enum in (InfoColumns, PriceColumns, StatementColumns):
         df = enum.rename(df, strict=strict)

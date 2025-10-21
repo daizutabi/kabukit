@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 import polars as pl
 import pytest
 from httpx import ConnectTimeout, HTTPStatusError, Response
-from polars import DataFrame
 from polars.testing import assert_frame_equal
 
 from kabukit.sources.edinet.client import AuthKey, EdinetClient
@@ -192,7 +191,7 @@ async def test_get_pdf_success(mock_get: AsyncMock, mocker: MockerFixture) -> No
     client = EdinetClient("test_key")
     df = await client.get_pdf("S100TEST")
 
-    expected = DataFrame({"docID": ["S100TEST"], "pdf": [b"pdf content"]})
+    expected = pl.DataFrame({"docID": ["S100TEST"], "pdf": [b"pdf content"]})
 
     assert_frame_equal(df, expected)
     mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 2})
@@ -333,7 +332,7 @@ async def test_get_document_calls_get_csv_by_default(mocker: MockerFixture) -> N
     mock_get_csv = mocker.patch.object(client, "get_csv", new_callable=mocker.AsyncMock)
     mock_get_pdf = mocker.patch.object(client, "get_pdf", new_callable=mocker.AsyncMock)
 
-    expected_df = DataFrame({"col": ["csv_data"]})
+    expected_df = pl.DataFrame({"col": ["csv_data"]})
     mock_get_csv.return_value = expected_df
 
     doc_id = "S100TEST"
@@ -352,7 +351,7 @@ async def test_get_document_calls_get_pdf_when_pdf_is_true(
     mock_get_csv = mocker.patch.object(client, "get_csv", new_callable=mocker.AsyncMock)
     mock_get_pdf = mocker.patch.object(client, "get_pdf", new_callable=mocker.AsyncMock)
 
-    expected_df = DataFrame({"col": ["pdf_data"]})
+    expected_df = pl.DataFrame({"col": ["pdf_data"]})
     mock_get_pdf.return_value = expected_df
 
     doc_id = "S100TEST"

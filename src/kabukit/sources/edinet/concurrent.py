@@ -11,7 +11,7 @@ from .client import EdinetClient
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from polars import DataFrame
+    import polars as pl
 
     from kabukit.utils.concurrent import Callback, Progress
 
@@ -24,7 +24,7 @@ async def get(
     max_concurrency: int | None = None,
     progress: Progress | None = None,
     callback: Callback | None = None,
-) -> DataFrame:
+) -> pl.DataFrame:
     """引数に対応する各種データを取得し、単一のDataFrameにまとめて返す。
 
     Args:
@@ -65,7 +65,7 @@ async def get_entries(
     max_concurrency: int | None = None,
     progress: Progress | None = None,
     callback: Callback | None = None,
-) -> DataFrame:
+) -> pl.DataFrame:
     """過去 days 日または years 年の文書一覧を取得し、単一の DataFrame にまとめて返す。
 
     Args:
@@ -119,7 +119,7 @@ async def get_documents(
     callback: Callback | None = None,
     *,
     pdf: bool = False,
-) -> DataFrame:
+) -> pl.DataFrame:
     """文書をCSV形式あるいはPDF形式で取得し、単一のDataFrameにまとめて返す。
 
     Args:

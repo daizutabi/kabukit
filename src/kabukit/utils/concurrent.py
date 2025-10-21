@@ -18,7 +18,6 @@ if TYPE_CHECKING:
     from typing import Any
 
     from marimo._plugins.stateless.status import progress_bar
-    from polars import DataFrame
     from tqdm.asyncio import tqdm
 
     from kabukit.sources.base import Client
@@ -76,27 +75,27 @@ async def collect_fn[T, R](
 
 
 async def concat(
-    awaitables: Iterable[Awaitable[DataFrame]],
+    awaitables: Iterable[Awaitable[pl.DataFrame]],
     /,
     max_concurrency: int | None = None,
-) -> DataFrame:
+) -> pl.DataFrame:
     dfs = collect(awaitables, max_concurrency=max_concurrency)
     dfs = [df async for df in dfs]
     return pl.concat(df for df in dfs if not df.is_empty())
 
 
 async def concat_fn[T](
-    function: Callable[[T], Awaitable[DataFrame]],
+    function: Callable[[T], Awaitable[pl.DataFrame]],
     args: Iterable[T],
     /,
     max_concurrency: int | None = None,
-) -> DataFrame:
+) -> pl.DataFrame:
     dfs = collect_fn(function, args, max_concurrency=max_concurrency)
     dfs = [df async for df in dfs]
     return pl.concat(df for df in dfs if not df.is_empty())
 
 
-type Callback = Callable[[DataFrame], DataFrame | None]
+type Callback = Callable[[pl.DataFrame], pl.DataFrame | None]
 type Progress = type[progress_bar[Any] | tqdm[Any]] | _Progress
 
 
@@ -105,7 +104,7 @@ async def get_stream(
     resource: str,
     args: list[Any],
     max_concurrency: int | None = None,
-) -> AsyncIterator[DataFrame]:
+) -> AsyncIterator[pl.DataFrame]:
     fn = getattr(client, f"get_{resource}")
 
     async for df in collect_fn(fn, args, max_concurrency):
@@ -121,7 +120,7 @@ async def get(
     max_concurrency: int | None = None,
     progress: Progress | None = None,
     callback: Callback | None = None,
-) -> DataFrame:
+) -> pl.DataFrame:
     """各種データを取得し、単一のDataFrameにまとめて返す。
 
     Args:

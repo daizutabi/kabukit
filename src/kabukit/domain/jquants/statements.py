@@ -1,13 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import polars as pl
 
 from kabukit.domain.base import Base
-
-if TYPE_CHECKING:
-    from polars import DataFrame
 
 
 class Statements(Base):
@@ -22,7 +17,7 @@ class Statements(Base):
         data (pl.DataFrame): 財務諸表の時系列データ。
     """
 
-    def shares(self) -> DataFrame:
+    def shares(self) -> pl.DataFrame:
         """発行済株式数と自己株式数を時系列データとして抽出する。
 
         財務情報の中から、株式数に関連する情報（発行済株式数、自己株式数）を
@@ -41,7 +36,7 @@ class Statements(Base):
             "TreasuryShares",
         )
 
-    def equity(self) -> DataFrame:
+    def equity(self) -> pl.DataFrame:
         """純資産を時系列データとして抽出する。
 
         財務情報の中から、純資産の情報を時系列データとして抽出する。
@@ -53,7 +48,7 @@ class Statements(Base):
             pl.col("Equity").is_not_null(),
         ).select("Date", "Code", "Equity")
 
-    def forecast_profit(self) -> DataFrame:
+    def forecast_profit(self) -> pl.DataFrame:
         """予想純利益を時系列データとして抽出する。
 
         決算種別(`TypeOfDocument`)に応じて、通期決算（FY）の場合は
@@ -74,7 +69,7 @@ class Statements(Base):
             .select("Date", "Code", "ForecastProfit")
         )
 
-    def forecast_dividend(self) -> DataFrame:
+    def forecast_dividend(self) -> pl.DataFrame:
         """予想年間配当総額を時系列データとして抽出する。
 
         J-Quants APIでは配当総額の予想値が直接提供されないため、

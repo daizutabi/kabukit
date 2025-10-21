@@ -5,7 +5,6 @@ from datetime import date
 import polars as pl
 import pytest
 import pytest_asyncio
-from polars import DataFrame
 
 from kabukit.sources.jquants.client import JQuantsClient
 
@@ -31,5 +30,5 @@ async def df():
         (date(2025, 10, 14), False),
     ],
 )
-def test_is_holiday(df: DataFrame, d: date, *, is_holiday: bool) -> None:
+def test_is_holiday(df: pl.DataFrame, d: date, *, is_holiday: bool) -> None:
     assert df.filter(pl.col("Date") == d).item(0, "IsHoliday") == is_holiday

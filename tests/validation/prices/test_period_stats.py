@@ -3,9 +3,9 @@ from __future__ import annotations
 from datetime import date
 from typing import TYPE_CHECKING
 
+import polars as pl
 import pytest
 import pytest_asyncio
-from polars import DataFrame
 from polars import col as c
 
 from kabukit.domain.jquants.prices import Prices
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 @pytest_asyncio.fixture(scope="module")
-async def data(statements: Statements) -> DataFrame:
+async def data(statements: Statements) -> pl.DataFrame:
     codes = ["7203"]  # トヨタのみ
     data = await get("prices", codes)
     return Prices(data).with_yields(statements).period_stats()
@@ -30,7 +30,7 @@ async def data(statements: Statements) -> DataFrame:
     ],
 )
 def test_book_value_yield_period_open_7203(
-    data: DataFrame,
+    data: pl.DataFrame,
     d: date,
     expected: float,
 ) -> None:

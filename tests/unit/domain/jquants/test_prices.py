@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 import pytest
-from polars import DataFrame, Series
 from polars.testing import assert_frame_equal
 
 from kabukit.domain.jquants.prices import Prices
@@ -18,8 +17,8 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.fixture(scope="module")
-def data() -> DataFrame:
-    return DataFrame(
+def data() -> pl.DataFrame:
+    return pl.DataFrame(
         {
             "Date": [
                 date(2023, 1, 1),
@@ -42,13 +41,13 @@ def data() -> DataFrame:
     )
 
 
-def test_truncate_day(data: DataFrame) -> None:
+def test_truncate_day(data: pl.DataFrame) -> None:
     prices = Prices(data)
     df = prices.truncate("1d").data
     assert df.equals(data)
 
 
-def test_truncate_month(data: DataFrame) -> None:
+def test_truncate_month(data: pl.DataFrame) -> None:
     prices = Prices(data)
     df = prices.truncate("1mo").data
     assert df.shape == (4, 8)
@@ -68,7 +67,7 @@ def test_truncate_month(data: DataFrame) -> None:
 
 
 def test_with_adjusted_shares() -> None:
-    prices_df = DataFrame(
+    prices_df = pl.DataFrame(
         {
             "Date": [
                 date(2023, 5, 1),
@@ -83,7 +82,7 @@ def test_with_adjusted_shares() -> None:
         },
     )
 
-    statements_df = DataFrame(
+    statements_df = pl.DataFrame(
         {
             "Date": [
                 date(2023, 3, 31),
@@ -102,7 +101,7 @@ def test_with_adjusted_shares() -> None:
 
     expected = prices_df.with_columns(
         [
-            Series(
+            pl.Series(
                 "ReportDate",
                 [
                     date(2023, 3, 31),
@@ -114,12 +113,12 @@ def test_with_adjusted_shares() -> None:
                 ],
                 dtype=pl.Date,
             ),
-            Series(
+            pl.Series(
                 "AdjustedIssuedShares",
                 [1000, 2400, 12000, None, 2000, 1000],
                 dtype=pl.Int64,
             ),
-            Series(
+            pl.Series(
                 "AdjustedTreasuryShares",
                 [100, 240, 1200, None, 200, 100],
                 dtype=pl.Int64,
@@ -133,7 +132,7 @@ def test_with_adjusted_shares() -> None:
 
 
 def test_with_market_cap() -> None:
-    prices_df = DataFrame(
+    prices_df = pl.DataFrame(
         {
             "Date": [
                 date(2023, 1, 1),
@@ -152,14 +151,14 @@ def test_with_market_cap() -> None:
     result = prices.with_market_cap()
 
     expected = prices_df.with_columns(
-        Series("MarketCap", [90000.0, 99000.0, 216000.0]),
+        pl.Series("MarketCap", [90000.0, 99000.0, 216000.0]),
     )
 
     assert_frame_equal(result.data, expected)
 
 
 def test_with_equity() -> None:
-    prices_df = DataFrame(
+    prices_df = pl.DataFrame(
         {
             "Date": [
                 date(2023, 4, 1),
@@ -172,7 +171,7 @@ def test_with_equity() -> None:
         },
     )
 
-    statements_df = DataFrame(
+    statements_df = pl.DataFrame(
         {
             "Date": [
                 date(2023, 3, 31),
@@ -190,14 +189,14 @@ def test_with_equity() -> None:
     result = prices.with_equity(statements)
 
     expected = prices_df.with_columns(
-        Series("Equity", [1000.0, 1000.0, 1000.0, None, 2000.0], dtype=pl.Float64),
+        pl.Series("Equity", [1000.0, 1000.0, 1000.0, None, 2000.0], dtype=pl.Float64),
     )
 
     assert_frame_equal(result.data, expected)
 
 
 def test_with_book_value_yield() -> None:
-    prices_df = DataFrame(
+    prices_df = pl.DataFrame(
         {
             "Date": [date(2023, 1, 1), date(2023, 1, 2)],
             "Code": ["A", "A"],
@@ -214,8 +213,8 @@ def test_with_book_value_yield() -> None:
 
     expected = prices_df.with_columns(
         [
-            Series("BookValuePerShare", [1111.11, 1111.11]),
-            Series("BookValueYield", [1.1111, 0.8889]),
+            pl.Series("BookValuePerShare", [1111.11, 1111.11]),
+            pl.Series("BookValueYield", [1.1111, 0.8889]),
         ],
     )
 
@@ -223,7 +222,7 @@ def test_with_book_value_yield() -> None:
 
 
 def test_with_forecast_profit() -> None:
-    prices_df = DataFrame(
+    prices_df = pl.DataFrame(
         {
             "Date": [
                 date(2023, 4, 1),
@@ -236,7 +235,7 @@ def test_with_forecast_profit() -> None:
         },
     )
 
-    statements_df = DataFrame(
+    statements_df = pl.DataFrame(
         {
             "Date": [
                 date(2023, 5, 1),
@@ -256,14 +255,14 @@ def test_with_forecast_profit() -> None:
     result = prices.with_forecast_profit(statements)
 
     expected = prices_df.with_columns(
-        Series("ForecastProfit", [None, 100.0, 150.0, None, 200.0]),
+        pl.Series("ForecastProfit", [None, 100.0, 150.0, None, 200.0]),
     )
 
     assert_frame_equal(result.data, expected)
 
 
 def test_with_earnings_yield() -> None:
-    prices_df = DataFrame(
+    prices_df = pl.DataFrame(
         {
             "Date": [date(2023, 1, 1), date(2023, 1, 2)],
             "Code": ["A", "A"],
@@ -280,8 +279,8 @@ def test_with_earnings_yield() -> None:
 
     expected = prices_df.with_columns(
         [
-            Series("EarningsPerShare", [111.1111, 111.1111]),
-            Series("EarningsYield", [0.055556, 0.061728]),
+            pl.Series("EarningsPerShare", [111.1111, 111.1111]),
+            pl.Series("EarningsYield", [0.055556, 0.061728]),
         ],
     )
 
@@ -289,7 +288,7 @@ def test_with_earnings_yield() -> None:
 
 
 def test_with_forecast_dividend() -> None:
-    prices_df = DataFrame(
+    prices_df = pl.DataFrame(
         {
             "Date": [
                 date(2023, 4, 1),
@@ -302,7 +301,7 @@ def test_with_forecast_dividend() -> None:
         },
     ).sort("Code", "Date")
 
-    statements_df = DataFrame(
+    statements_df = pl.DataFrame(
         {
             "Date": [
                 date(2023, 5, 1),
@@ -326,14 +325,14 @@ def test_with_forecast_dividend() -> None:
     result = prices.with_forecast_dividend(statements)
 
     expected = prices_df.with_columns(
-        Series("ForecastDividend", [None, 500.0, 900.0, None, 2000.0]),
+        pl.Series("ForecastDividend", [None, 500.0, 900.0, None, 2000.0]),
     )
 
     assert_frame_equal(result.data, expected)
 
 
 def test_with_dividend_yield() -> None:
-    prices_df = DataFrame(
+    prices_df = pl.DataFrame(
         {
             "Date": [date(2023, 1, 1), date(2023, 1, 2)],
             "Code": ["A", "A"],
@@ -350,8 +349,8 @@ def test_with_dividend_yield() -> None:
 
     expected = prices_df.with_columns(
         [
-            Series("DividendPerShare", [50.0, 50.0]),
-            Series("DividendYield", [0.05, 0.04545454]),
+            pl.Series("DividendPerShare", [50.0, 50.0]),
+            pl.Series("DividendYield", [0.05, 0.04545454]),
         ],
     )
 
@@ -382,7 +381,7 @@ def test_data_loading_methods_are_idempotent(
     statements_return_cols: list[str],
 ) -> None:
     """データロードメソッドがべき等であることを検証する"""
-    prices_df = DataFrame(
+    prices_df = pl.DataFrame(
         {
             "Date": [date(2023, 1, 1)],
             "Code": ["A"],
@@ -392,7 +391,7 @@ def test_data_loading_methods_are_idempotent(
     )
     prices = Prices(prices_df)
 
-    statements = Statements(DataFrame({"Date": [date(2023, 1, 1)], "Code": ["A"]}))
+    statements = Statements(pl.DataFrame({"Date": [date(2023, 1, 1)], "Code": ["A"]}))
 
     mock_data = {}
     for col in statements_return_cols:
@@ -403,7 +402,7 @@ def test_data_loading_methods_are_idempotent(
         else:
             mock_data[col] = [1.0]  # その他のデータカラムはfloat
 
-    mock_return_df = DataFrame(mock_data)
+    mock_return_df = pl.DataFrame(mock_data)
 
     mocker.patch.object(
         statements,
@@ -431,7 +430,7 @@ def test_data_loading_methods_are_idempotent(
 )
 def test_methods_raise_key_error_without_adjusted_shares(method_name: str) -> None:
     """前提条件となる adjusted_shares がない場合にKeyErrorを送出する"""
-    prices_df = DataFrame({"Code": ["A"]})  # `Adjusted...Shares` 列を持たない
+    prices_df = pl.DataFrame({"Code": ["A"]})  # `Adjusted...Shares` 列を持たない
     prices = Prices(prices_df)
 
     method = getattr(prices, method_name)
@@ -441,7 +440,7 @@ def test_methods_raise_key_error_without_adjusted_shares(method_name: str) -> No
 
 
 def test_with_yields() -> None:
-    prices_df = DataFrame(
+    prices_df = pl.DataFrame(
         {
             "Date": [date(2023, 1, 1)],
             "Code": ["A"],
@@ -450,7 +449,7 @@ def test_with_yields() -> None:
         },
     )
 
-    statements_df = DataFrame(
+    statements_df = pl.DataFrame(
         {
             "Date": [date(2023, 1, 1)],
             "Code": ["A"],
@@ -475,18 +474,18 @@ def test_with_yields() -> None:
 
     expected_df = prices_df.with_columns(
         [
-            Series("ReportDate", [date(2023, 1, 1)], dtype=pl.Date),
-            Series("AdjustedIssuedShares", [1000], dtype=pl.Int64),
-            Series("AdjustedTreasuryShares", [100], dtype=pl.Int64),
-            Series("Equity", [900000.0]),
-            Series("BookValuePerShare", [1000.0]),
-            Series("BookValueYield", [1.0]),
-            Series("ForecastProfit", [90000.0]),
-            Series("EarningsPerShare", [100.0]),
-            Series("EarningsYield", [0.1]),
-            Series("ForecastDividend", [45000.0]),
-            Series("DividendPerShare", [50.0]),
-            Series("DividendYield", [0.05]),
+            pl.Series("ReportDate", [date(2023, 1, 1)], dtype=pl.Date),
+            pl.Series("AdjustedIssuedShares", [1000], dtype=pl.Int64),
+            pl.Series("AdjustedTreasuryShares", [100], dtype=pl.Int64),
+            pl.Series("Equity", [900000.0]),
+            pl.Series("BookValuePerShare", [1000.0]),
+            pl.Series("BookValueYield", [1.0]),
+            pl.Series("ForecastProfit", [90000.0]),
+            pl.Series("EarningsPerShare", [100.0]),
+            pl.Series("EarningsYield", [0.1]),
+            pl.Series("ForecastDividend", [45000.0]),
+            pl.Series("DividendPerShare", [50.0]),
+            pl.Series("DividendYield", [0.05]),
         ],
     )
 
@@ -494,7 +493,7 @@ def test_with_yields() -> None:
 
 
 def test_with_period_stats() -> None:
-    prices_df = DataFrame(
+    prices_df = pl.DataFrame(
         {
             "Date": [date(2023, 1, 1)],
             "Code": ["A"],
@@ -503,7 +502,7 @@ def test_with_period_stats() -> None:
             "AdjustmentFactor": [1.0],
         },
     )
-    statements_df = DataFrame(
+    statements_df = pl.DataFrame(
         {
             "Date": [date(2023, 1, 1)],
             "Code": ["A"],
@@ -529,26 +528,26 @@ def test_with_period_stats() -> None:
 
     expected_df = processed_prices.data.with_columns(
         [
-            Series("BookValueYield_PeriodOpen", [1.0]),
-            Series("BookValueYield_PeriodHigh", [1.0]),
-            Series("BookValueYield_PeriodLow", [1.0]),
-            Series("BookValueYield_PeriodClose", [1.0]),
-            Series("BookValueYield_PeriodMean", [1.0]),
-            Series("EarningsYield_PeriodOpen", [1.0]),
-            Series("EarningsYield_PeriodHigh", [1.0]),
-            Series("EarningsYield_PeriodLow", [1.0]),
-            Series("EarningsYield_PeriodClose", [1.0]),
-            Series("EarningsYield_PeriodMean", [1.0]),
-            Series("DividendYield_PeriodOpen", [0.5]),
-            Series("DividendYield_PeriodHigh", [0.5]),
-            Series("DividendYield_PeriodLow", [0.5]),
-            Series("DividendYield_PeriodClose", [0.5]),
-            Series("DividendYield_PeriodMean", [0.5]),
-            Series("Close_PeriodOpen", [100.0]),
-            Series("Close_PeriodHigh", [100.0]),
-            Series("Close_PeriodLow", [100.0]),
-            Series("Close_PeriodClose", [100.0]),
-            Series("Close_PeriodMean", [100.0]),
+            pl.Series("BookValueYield_PeriodOpen", [1.0]),
+            pl.Series("BookValueYield_PeriodHigh", [1.0]),
+            pl.Series("BookValueYield_PeriodLow", [1.0]),
+            pl.Series("BookValueYield_PeriodClose", [1.0]),
+            pl.Series("BookValueYield_PeriodMean", [1.0]),
+            pl.Series("EarningsYield_PeriodOpen", [1.0]),
+            pl.Series("EarningsYield_PeriodHigh", [1.0]),
+            pl.Series("EarningsYield_PeriodLow", [1.0]),
+            pl.Series("EarningsYield_PeriodClose", [1.0]),
+            pl.Series("EarningsYield_PeriodMean", [1.0]),
+            pl.Series("DividendYield_PeriodOpen", [0.5]),
+            pl.Series("DividendYield_PeriodHigh", [0.5]),
+            pl.Series("DividendYield_PeriodLow", [0.5]),
+            pl.Series("DividendYield_PeriodClose", [0.5]),
+            pl.Series("DividendYield_PeriodMean", [0.5]),
+            pl.Series("Close_PeriodOpen", [100.0]),
+            pl.Series("Close_PeriodHigh", [100.0]),
+            pl.Series("Close_PeriodLow", [100.0]),
+            pl.Series("Close_PeriodClose", [100.0]),
+            pl.Series("Close_PeriodMean", [100.0]),
         ],
     )
 
@@ -556,6 +555,6 @@ def test_with_period_stats() -> None:
 
 
 def test_period_stats_raise_key_error_without_required_columns() -> None:
-    prices = Prices(DataFrame({"Code": ["A"]}))
+    prices = Prices(pl.DataFrame({"Code": ["A"]}))
     with pytest.raises(KeyError, match="必要な列が存在しません"):
         prices.with_period_stats()

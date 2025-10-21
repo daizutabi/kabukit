@@ -4,10 +4,9 @@ import datetime
 from zoneinfo import ZoneInfo
 
 import polars as pl
-from polars import DataFrame
 
 
-def clean_entries(df: DataFrame, date: str | datetime.date) -> DataFrame:
+def clean_entries(df: pl.DataFrame, date: str | datetime.date) -> pl.DataFrame:
     if isinstance(date, str):
         date = (
             datetime.datetime.strptime(date, "%Y-%m-%d")
@@ -37,11 +36,11 @@ def clean_entries(df: DataFrame, date: str | datetime.date) -> DataFrame:
     )
 
 
-def clean_pdf(content: bytes, doc_id: str) -> DataFrame:
-    return DataFrame({"docID": [doc_id], "pdf": [content]})
+def clean_pdf(content: bytes, doc_id: str) -> pl.DataFrame:
+    return pl.DataFrame({"docID": [doc_id], "pdf": [content]})
 
 
-def read_csv(data: bytes) -> DataFrame:
+def read_csv(data: bytes) -> pl.DataFrame:
     return pl.read_csv(
         data,
         separator="\t",
@@ -50,7 +49,7 @@ def read_csv(data: bytes) -> DataFrame:
     )
 
 
-def clean_csv(df: DataFrame, doc_id: str) -> DataFrame:
+def clean_csv(df: pl.DataFrame, doc_id: str) -> pl.DataFrame:
     return df.select(
         pl.lit(doc_id).alias("docID"),
         pl.all(),
