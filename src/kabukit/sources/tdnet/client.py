@@ -69,18 +69,37 @@ class TdnetClient(Client):
         for option in daylist.find_all("option"):
             value = option.get("value", "")
             if isinstance(value, str) and (m := pattern.search(value)):
-                date = strpdate(m.group(1), "%Y%m%d")
+                date = strpdate(m.group(1))
                 dates.append(date)
 
         return dates
 
-    async def get_page(self, date: datetime.date, index: int) -> str:
-        date_str = date.strftime("%Y%m%d")
-        url = f"I_list_{index:03}_{date_str}.html"
+    async def get_page(self, date: str | datetime.date, index: int) -> str:
+        """指定した日のTDnet開示情報一覧ページを取得する。
+
+        Args:
+            date (str | datetime.date): 取得する開示日の指定。
+            index (int): 取得するページのインデックス（1から始まる）。
+
+        Returns:
+            str: ページのHTMLコンテンツ。
+        """
+        if not isinstance(date, str):
+            date = date.strftime("%Y%m%d")
+
+        url = f"I_list_{index:03}_{date}.html"
         resp = await self.get(url)
         return resp.text
 
-    async def iter_pages(self, date: datetime.date) -> AsyncIterator[str]:
+    async def iter_pages(self, date: str | datetime.date) -> AsyncIterator[str]:
+        """指定した日のTDnet開示情報一覧ページを非同期に反復処理する。
+
+        Args:
+            date (str | datetime.date): 取得する開示日の指定。
+
+        Yields:
+            str: 各ページのHTMLコンテンツ。
+        """
         html = await self.get_page(date, index=1)
 
         yield html
@@ -89,14 +108,20 @@ class TdnetClient(Client):
             if index != 1:
                 yield await self.get_page(date, index)
 
-    async def get_list(self, date: datetime.date) -> pl.DataFrame:
+    async def get_list(self, date: str | datetime.date) -> pl.DataFrame:
         """TDnetの開示情報一覧を取得する。
 
         Args:
-            date (datetime.date): 取得する開示日の指定。
+            date (str | datetime.date): 取得する開示日の指定。
 
         Returns:
             pl.DataFrame: 開示情報一覧を含むDataFrame。
         """
+        if isinstance(date, str):
+            date = strpdate(date)
+
         items = [parse(page) async for page in self.iter_pages(date)]
-        return pl.concat(items)
+        return pl.concat(items).select(
+            pl.lit(date).alias("Date"),
+            pl.all(),
+        )

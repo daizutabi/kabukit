@@ -58,8 +58,8 @@ def parse(html: str, /) -> pl.DataFrame:
 def iter_cells(tag: Tag, /) -> Iterator[tuple[str, datetime.time | str | None]]:
     tds = tag.find_all("td")
 
+    yield "Code", tds[1].get_text(strip=True)
     yield "時刻", strptime(tds[0].get_text(strip=True))
-    yield "コード", tds[1].get_text(strip=True)
     yield "会社名", tds[2].get_text(strip=True)
     yield "表題", tds[3].get_text(strip=True)
     yield "pdf", get_link(tds[3])
