@@ -35,19 +35,17 @@ def iter_page_numbers(html: str, /) -> Iterator[int]:
         yield int(m.group(1))
 
 
-def get_table(html: str, /) -> Tag:
+def get_table(html: str, /) -> Tag | None:
     soup = get_soup(html)
-    table = soup.find("table", attrs={"id": "main-list-table"})
-
-    if table is None:
-        msg = "Table with id 'main-list-table' not found"
-        raise ValueError(msg)
-
-    return table
+    return soup.find("table", attrs={"id": "main-list-table"})
 
 
 def parse(html: str, /) -> pl.DataFrame:
     table = get_table(html)
+
+    if table is None:
+        return pl.DataFrame()
+
     data = [dict(iter_cells(tr)) for tr in table.find_all("tr")]
     return pl.DataFrame(data).with_columns(
         pl.col("xbrl").cast(pl.String),

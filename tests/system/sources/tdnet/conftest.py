@@ -44,7 +44,9 @@ async def page(date: datetime.date):
 def table(page: str) -> Tag:
     from kabukit.sources.tdnet.page import get_table
 
-    return get_table(page)
+    table = get_table(page)
+    assert table is not None
+    return table
 
 
 @pytest_asyncio.fixture(scope="module")

@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING
 
+import httpx
 import polars as pl
 from bs4 import BeautifulSoup
 
@@ -15,7 +16,6 @@ if TYPE_CHECKING:
     import datetime
     from collections.abc import AsyncIterator
 
-    import httpx
 
 BASE_URL = "https://www.release.tdnet.info/inbs"
 
@@ -100,7 +100,10 @@ class TdnetClient(Client):
         Yields:
             str: 各ページのHTMLコンテンツ。
         """
-        html = await self.get_page(date, index=1)
+        try:
+            html = await self.get_page(date, index=1)
+        except httpx.HTTPStatusError:
+            return
 
         yield html
 
@@ -121,6 +124,11 @@ class TdnetClient(Client):
             date = strpdate(date)
 
         items = [parse(page) async for page in self.iter_pages(date)]
+        items = [item for item in items if not item.is_empty()]
+
+        if not items:
+            return pl.DataFrame()
+
         return pl.concat(items).select(
             pl.lit(date).alias("Date"),
             pl.all(),
