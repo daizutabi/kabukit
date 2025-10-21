@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import marimo as mo
+import polars as pl
 import pytest
-from polars import DataFrame
 
 pytestmark = pytest.mark.system
 
@@ -12,8 +12,8 @@ def resource(request: pytest.FixtureRequest) -> str:
     return request.param
 
 
-def callback(df: DataFrame) -> None:
-    assert isinstance(df, DataFrame)
+def callback(df: pl.DataFrame) -> None:
+    assert isinstance(df, pl.DataFrame)
 
 
 @pytest.mark.asyncio

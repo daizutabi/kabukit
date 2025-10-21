@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import polars as pl
 import pytest
-from polars import DataFrame
 from polars import col as c
 
 if TYPE_CHECKING:
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture(scope="module")
-def data(statements: Statements) -> DataFrame:
+def data(statements: Statements) -> pl.DataFrame:
     return statements.data
 
 
@@ -69,13 +69,13 @@ def cf_col(request: pytest.FixtureRequest) -> str:
 
 
 @pytest.fixture(scope="module")
-def fin(data: DataFrame) -> DataFrame:
+def fin(data: pl.DataFrame) -> pl.DataFrame:
     """決算の行だけ抽出する"""
     return data.filter(c.TypeOfDocument.str.contains("Financial"))
 
 
 @pytest.fixture(scope="module")
-def earn_revision(data: DataFrame) -> DataFrame:
+def earn_revision(data: pl.DataFrame) -> pl.DataFrame:
     """業績修正の行だけ抽出し、共通カラムと全て欠損のカラムを削除"""
     df = data.filter(c.TypeOfDocument == "EarnForecastRevision")
     cols = [c for c in df.columns if df[c].is_null().all() or c in COMMON_COLUMNS]
@@ -83,7 +83,7 @@ def earn_revision(data: DataFrame) -> DataFrame:
 
 
 @pytest.fixture(scope="module")
-def dividend_revision(data: DataFrame) -> DataFrame:
+def dividend_revision(data: pl.DataFrame) -> pl.DataFrame:
     """配当修正の行だけ抽出し、共通カラムと全て欠損のカラムを削除"""
     df = data.filter(c.TypeOfDocument == "DividendForecastRevision")
     cols = [c for c in df.columns if df[c].is_null().all() or c in COMMON_COLUMNS]

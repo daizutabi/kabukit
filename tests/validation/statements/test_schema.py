@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import polars as pl
 import pytest
-from polars import DataFrame, Series
 from polars import col as c
 
 from tests.validation.conftest import pytestmark  # noqa: F401
@@ -10,11 +9,11 @@ from tests.validation.conftest import pytestmark  # noqa: F401
 from .conftest import COMMON_COLUMNS
 
 
-def test_width(data: DataFrame) -> None:
+def test_width(data: pl.DataFrame) -> None:
     assert data.width == 105
 
 
-def test_height(data: DataFrame) -> None:
+def test_height(data: pl.DataFrame) -> None:
     assert data.height > 160_000
 
 
@@ -22,54 +21,54 @@ def test_height(data: DataFrame) -> None:
     "column",
     [c for c in COMMON_COLUMNS if c not in ["DisclosedTime"]],
 )
-def test_is_not_null_all(data: DataFrame, column: str) -> None:
+def test_is_not_null_all(data: pl.DataFrame, column: str) -> None:
     """共通カラムのうち、Time以外は全て非欠損"""
     assert data[column].is_not_null().all()
 
 
 @pytest.mark.parametrize("column", ["DisclosedTime"])
-def test_is_not_null_any(data: DataFrame, column: str) -> None:
+def test_is_not_null_any(data: pl.DataFrame, column: str) -> None:
     """Timeカラムは一部欠損"""
     assert data[column].is_null().any()
 
 
 @pytest.fixture(scope="module")
-def tod(data: DataFrame) -> Series:
+def tod(data: pl.DataFrame) -> pl.Series:
     """TypeOfDocumentのユニークな値一覧"""
     return data["TypeOfDocument"].unique()
 
 
 @pytest.fixture(scope="module")
-def tod_fin(tod: Series) -> Series:
+def tod_fin(tod: pl.Series) -> pl.Series:
     """TypeOfDocumentのうち、決算関連のものだけ抽出"""
     return tod.filter(tod.str.contains("Financial"))
 
 
-def test_type_of_document_financial_period(tod_fin: Series) -> None:
+def test_type_of_document_financial_period(tod_fin: pl.Series) -> None:
     """決算の期間は、(1Q, 2Q, 3Q, FY, OtherPeriod)"""
     x = tod_fin.str.split("Financial").list.first().unique()
     assert sorted(x) == ["1Q", "2Q", "3Q", "FY", "OtherPeriod"]
 
 
-def test_type_of_document_financial_consolidated(tod_fin: Series) -> None:
+def test_type_of_document_financial_consolidated(tod_fin: pl.Series) -> None:
     """決算の連結・非連結の区分は、(Consolidated, NonConsolidated)"""
     x = tod_fin.str.split("_").list[1].unique()
     assert sorted(x) == ["Consolidated", "NonConsolidated"]
 
 
-def test_type_of_document_financial_type(tod_fin: Series) -> None:
+def test_type_of_document_financial_type(tod_fin: pl.Series) -> None:
     """決算の会計基準は、(JP, US, IFRS, Foreign)"""
     x = tod_fin.str.split("_").list.last().unique()
     assert sorted(x) == ["Foreign", "IFRS", "JP", "US"]
 
 
-def test_type_of_document_dividend_and_earn_forecast(tod: Series) -> None:
+def test_type_of_document_dividend_and_earn_forecast(tod: pl.Series) -> None:
     """決算以外のTypeOfDocumentは、(DividendForecastRevision, EarnForecastRevision)"""
     x = tod.filter(tod.str.contains("Financial").not_()).unique()
     assert sorted(x) == ["DividendForecastRevision", "EarnForecastRevision"]
 
 
-def test_type_of_document_other_period(tod_fin: Series) -> None:
+def test_type_of_document_other_period(tod_fin: pl.Series) -> None:
     """OtherPeriodFinancialStatementsの種類を確認。今後増える可能性がある"""
     x = (
         tod_fin.filter(tod_fin.str.starts_with("Other"))
@@ -90,7 +89,7 @@ def test_type_of_document_other_period(tod_fin: Series) -> None:
     ],
 )
 def test_type_of_document_other_period_length(
-    data: DataFrame,
+    data: pl.DataFrame,
     name: str,
     length: int,
 ) -> None:
@@ -102,7 +101,7 @@ def test_type_of_document_other_period_length(
     "column",
     ["NextFiscalYearStartDate", "NextFiscalYearEndDate"],
 )
-def test_next_fiscal_year_start_end(data: DataFrame, column: str) -> None:
+def test_next_fiscal_year_start_end(data: pl.DataFrame, column: str) -> None:
     """次期の期首・期末の欠損状況を確認
 
     - FY決算のうち、次期の期首・期末が存在する割合は99%以上だが、100%ではない。
@@ -120,7 +119,7 @@ def test_next_fiscal_year_start_end(data: DataFrame, column: str) -> None:
 
 
 @pytest.mark.parametrize("period", ["1Q", "2Q", "3Q", "FY"])
-def test_fin_current_period_equality(fin: DataFrame, period: str) -> None:
+def test_fin_current_period_equality(fin: pl.DataFrame, period: str) -> None:
     """決算の期間の分布を確認"""
     df = fin.filter(c.TypeOfDocument.str.starts_with(period))
     x = df["TypeOfCurrentPeriod"].eq(period).mean()
@@ -135,7 +134,7 @@ def test_fin_current_period_equality(fin: DataFrame, period: str) -> None:
     ("period", "days"),
     [("1Q", 90), ("2Q", 180), ("3Q", 270), ("FY", 365)],
 )
-def test_fin_current_period_days(fin: DataFrame, period: str, days: int) -> None:
+def test_fin_current_period_days(fin: pl.DataFrame, period: str, days: int) -> None:
     """決算の期間の日数を確認。例外があるが、ほぼ標準的な日数になっている"""
     df = (
         fin.filter(c.TypeOfDocument.str.starts_with(period))
@@ -149,7 +148,7 @@ def test_fin_current_period_days(fin: DataFrame, period: str, days: int) -> None
     assert 0.994 < x <= 1
 
 
-def test_per_share(data: DataFrame) -> None:
+def test_per_share(data: pl.DataFrame) -> None:
     df = data.select(pl.col("^.*PerShare.*$"))
     assert df.width == 28
 
@@ -158,7 +157,7 @@ def test_per_share(data: DataFrame) -> None:
     "name",
     ["DividendPerShare", "TotalDividendPaid", "PayoutRatio"],
 )
-def test_result_annual(data: DataFrame, name: str) -> None:
+def test_result_annual(data: pl.DataFrame, name: str) -> None:
     df = data.select(pl.col("^Result.*Annual$"))
     assert df.width == 3
     assert f"Result{name}Annual" in df.columns
@@ -168,7 +167,7 @@ def test_result_annual(data: DataFrame, name: str) -> None:
     "name",
     ["DividendPerShare", "TotalDividendPaid", "PayoutRatio"],
 )
-def test_forecast_annual(data: DataFrame, name: str) -> None:
+def test_forecast_annual(data: pl.DataFrame, name: str) -> None:
     df = data.select(pl.col("^Forecast.*Annual$"))
     assert df.width == 3
     assert f"Forecast{name}Annual" in df.columns
@@ -178,16 +177,16 @@ def test_forecast_annual(data: DataFrame, name: str) -> None:
     "name",
     ["DividendPerShare", "PayoutRatio"],
 )
-def test_next_year_forecast_annual(data: DataFrame, name: str) -> None:
+def test_next_year_forecast_annual(data: pl.DataFrame, name: str) -> None:
     """NextYearForecastは、TotalDividendPaidが存在しない"""
     df = data.select(pl.col("^NextYearForecast.*Annual$"))
     assert df.width == 2
     assert f"NextYearForecast{name}Annual" in df.columns
 
 
-def test_earn_revision_width(earn_revision: DataFrame) -> None:
+def test_earn_revision_width(earn_revision: pl.DataFrame) -> None:
     assert earn_revision.width == 25
 
 
-def test_dividend_revision_width(dividend_revision: DataFrame) -> None:
+def test_dividend_revision_width(dividend_revision: pl.DataFrame) -> None:
     assert dividend_revision.width == 5

@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any
 import polars as pl
 import pytest
 from httpx import Response
-from polars import DataFrame
 
 from kabukit.sources.jquants.client import JQuantsClient
 
@@ -54,10 +53,10 @@ async def test_error(client: JQuantsClient) -> None:
 
 
 @pytest.fixture
-def df() -> DataFrame:
+def df() -> pl.DataFrame:
     from kabukit.sources.jquants.prices import clean
 
-    return DataFrame(
+    return pl.DataFrame(
         {
             "Date": ["2023-01-01", "2023-01-02"],
             "Code": ["1300", "1301"],
@@ -79,11 +78,11 @@ def df() -> DataFrame:
     ).pipe(clean)
 
 
-def test_clean_shape(df: DataFrame) -> None:
+def test_clean_shape(df: pl.DataFrame) -> None:
     assert df.shape == (2, 16)
 
 
-def test_clean_date(df: DataFrame) -> None:
+def test_clean_date(df: pl.DataFrame) -> None:
     assert df["Date"].dtype == pl.Date
 
 
@@ -106,5 +105,5 @@ def test_clean_date(df: DataFrame) -> None:
         ("RawVolume", [9, 10]),
     ],
 )
-def test_clean(df: DataFrame, column: str, values: list[Any]) -> None:
+def test_clean(df: pl.DataFrame, column: str, values: list[Any]) -> None:
     assert df[column].to_list() == values

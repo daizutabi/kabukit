@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 import polars as pl
 import pytest
 from httpx import Response
-from polars import DataFrame
 
 from kabukit.sources.jquants.client import JQuantsClient
 
@@ -33,7 +32,7 @@ async def test_get_info(mock_get: AsyncMock, mocker: MockerFixture) -> None:
 def test_clean() -> None:
     from kabukit.sources.jquants.info import clean
 
-    df = DataFrame(
+    df = pl.DataFrame(
         {
             "Date": ["2023-01-01", "2023-01-02"],
             "ACodeName": ["A", "B"],

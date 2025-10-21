@@ -3,9 +3,9 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
+import polars as pl
 import pytest
 from httpx import HTTPStatusError
-from polars import DataFrame
 
 from kabukit.sources.jquants.client import JQuantsClient
 
@@ -74,7 +74,7 @@ async def test_auth_and_get_data(client: JQuantsClient) -> None:
     assert id_token is not None
 
     df = await client.get_info(code="80310")
-    assert isinstance(df, DataFrame)
+    assert isinstance(df, pl.DataFrame)
     assert not df.is_empty()
 
 

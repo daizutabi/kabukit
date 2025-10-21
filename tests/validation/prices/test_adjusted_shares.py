@@ -3,9 +3,9 @@ from __future__ import annotations
 from datetime import date
 from typing import TYPE_CHECKING
 
+import polars as pl
 import pytest
 import pytest_asyncio
-from polars import DataFrame
 from polars import col as c
 
 from kabukit.domain.jquants.prices import Prices
@@ -24,7 +24,7 @@ async def prices(statements: Statements) -> Prices:
 
 
 @pytest.fixture(scope="module")
-def data(prices: Prices) -> DataFrame:
+def data(prices: Prices) -> pl.DataFrame:
     data = prices.data
 
     return (
@@ -46,25 +46,25 @@ def data(prices: Prices) -> DataFrame:
     )
 
 
-def test_adjusted_shares_ratio_min(data: DataFrame) -> None:
+def test_adjusted_shares_ratio_min(data: pl.DataFrame) -> None:
     x = data["Ratio"].mean()
     assert isinstance(x, float)
     assert x < 0.05
 
 
-def test_adjusted_shares_ratio_max(data: DataFrame) -> None:
+def test_adjusted_shares_ratio_max(data: pl.DataFrame) -> None:
     x = data["Ratio"].max()
     assert isinstance(x, float)
     assert x < 0.25
 
 
-def test_adjusted_shares_ratio_ratio_min(data: DataFrame) -> None:
+def test_adjusted_shares_ratio_ratio_min(data: pl.DataFrame) -> None:
     x = data["RatioRatio"].min()
     assert isinstance(x, float)
     assert x > 0.995
 
 
-def test_adjusted_shares_ratio_ratio_max(data: DataFrame) -> None:
+def test_adjusted_shares_ratio_ratio_max(data: pl.DataFrame) -> None:
     x = data["RatioRatio"].max()
     assert isinstance(x, float)
     assert x < 1.05

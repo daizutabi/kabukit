@@ -5,12 +5,12 @@ from typing import TYPE_CHECKING
 import altair as alt
 
 if TYPE_CHECKING:
-    from polars import DataFrame
+    import polars as pl
 
 # pyright: reportUnknownMemberType=false
 
 
-def plot_topix_timeseries(df: DataFrame) -> alt.Chart:
+def plot_topix_timeseries(df: pl.DataFrame) -> alt.Chart:
     """TOPIXの時系列データを折れ線グラフでプロットする。"""
     return (
         alt.Chart(df, title="TOPIX 時系列チャート")

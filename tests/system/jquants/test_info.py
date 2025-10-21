@@ -6,7 +6,6 @@ from zoneinfo import ZoneInfo
 import polars as pl
 import pytest
 import pytest_asyncio
-from polars import DataFrame
 
 from kabukit.sources.jquants.client import JQuantsClient
 
@@ -39,7 +38,7 @@ async def df():
         yield await client.get_info()
 
 
-def test_width(df: DataFrame) -> None:
+def test_width(df: pl.DataFrame) -> None:
     assert df.height > 4000
     assert df.width in [7, 8]  # 7: ライトプラン, 8: スタンダードプラン
 
@@ -56,11 +55,11 @@ def test_width(df: DataFrame) -> None:
         ("MarketCodeName", pl.Categorical),
     ],
 )
-def test_column_dtype(df: DataFrame, name: str, dtype: type) -> None:
+def test_column_dtype(df: pl.DataFrame, name: str, dtype: type) -> None:
     assert df[name].dtype == dtype
 
 
-def test_today(df: DataFrame) -> None:
+def test_today(df: pl.DataFrame) -> None:
     date = df.item(0, "Date")
     assert isinstance(date, datetime.date)
     today = datetime.datetime.now(ZoneInfo("Asia/Tokyo")).date()
@@ -75,7 +74,7 @@ def test_today(df: DataFrame) -> None:
         ("MarketCodeName", 5),
     ],
 )
-def test_categorical_column_uniqueness(df: DataFrame, name: str, n: int) -> None:
+def test_categorical_column_uniqueness(df: pl.DataFrame, name: str, n: int) -> None:
     assert df[name].n_unique() == n
 
 
@@ -90,17 +89,17 @@ def test_categorical_column_uniqueness(df: DataFrame, name: str, n: int) -> None
         "TOPIX Large70",
     ],
 )
-def test_scale_category(df: DataFrame, sc: str) -> None:
+def test_scale_category(df: pl.DataFrame, sc: str) -> None:
     assert sc in df["ScaleCategory"]
 
 
-def test_columns(df: DataFrame) -> None:
+def test_columns(df: pl.DataFrame) -> None:
     from kabukit.sources.jquants.schema import InfoColumns
 
     assert df.columns == [c.name for c in InfoColumns]
 
 
-def test_rename(df: DataFrame) -> None:
+def test_rename(df: pl.DataFrame) -> None:
     from kabukit.sources.jquants.schema import InfoColumns
 
     df_renamed = InfoColumns.rename(df, strict=True)

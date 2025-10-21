@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Any
 import polars as pl
 import pytest
 from httpx import Response
-from polars import DataFrame
 
 from kabukit.sources.jquants.client import JQuantsClient
 
@@ -92,7 +91,7 @@ async def test_get_flags(
 
     mock_clean = mocker.patch(
         "kabukit.sources.jquants.statements.clean",
-        return_value=DataFrame(
+        return_value=pl.DataFrame(
             {
                 "Code": ["7203"],
                 "DisclosedDate": [datetime.date(2023, 1, 5)],
@@ -102,7 +101,7 @@ async def test_get_flags(
     )
     mock_with_date = mocker.patch(
         "kabukit.sources.jquants.statements.with_date",
-        return_value=DataFrame({"Date": [datetime.date(2023, 1, 1)]}),
+        return_value=pl.DataFrame({"Date": [datetime.date(2023, 1, 1)]}),
     )
 
     client = JQuantsClient("test_token")
@@ -124,10 +123,10 @@ async def test_get_flags(
 
 
 @pytest.fixture
-def df() -> DataFrame:
+def df() -> pl.DataFrame:
     from kabukit.sources.jquants.statements import clean
 
-    return DataFrame(
+    return pl.DataFrame(
         {
             "DisclosedDate": ["2023-01-01", "2023-01-20", "2023-01-30"],
             "DisclosedTime": ["09:00", "15:30", "12:00"],
@@ -146,29 +145,29 @@ def df() -> DataFrame:
     ).pipe(clean)
 
 
-def test_clean_shape(df: DataFrame) -> None:
+def test_clean_shape(df: pl.DataFrame) -> None:
     assert df.shape == (3, 9)
 
 
-def test_clean_disclosed_date(df: DataFrame) -> None:
+def test_clean_disclosed_date(df: pl.DataFrame) -> None:
     assert df["DisclosedDate"].dtype == pl.Date
 
 
-def test_clean_disclosed_time(df: DataFrame) -> None:
+def test_clean_disclosed_time(df: pl.DataFrame) -> None:
     assert df["DisclosedTime"].dtype == pl.Time
 
 
-def test_clean_current_period(df: DataFrame) -> None:
+def test_clean_current_period(df: pl.DataFrame) -> None:
     assert df["TypeOfCurrentPeriod"].dtype == pl.Categorical
 
 
 @pytest.mark.parametrize("column", ["ForecastProfit", "AverageOutstandingShares"])
-def test_clean_float(df: DataFrame, column: str) -> None:
+def test_clean_float(df: pl.DataFrame, column: str) -> None:
     assert df[column].dtype == pl.Float64
 
 
 @pytest.mark.parametrize("column", ["IssuedShares", "TreasuryShares"])
-def test_clean_int(df: DataFrame, column: str) -> None:
+def test_clean_int(df: pl.DataFrame, column: str) -> None:
     assert df[column].dtype == pl.Int64
 
 
@@ -182,7 +181,7 @@ def test_clean_int(df: DataFrame, column: str) -> None:
         ("RetrospectiveRestatement", [True, False, None]),
     ],
 )
-def test_clean(df: DataFrame, column: str, values: list[Any]) -> None:
+def test_clean(df: pl.DataFrame, column: str, values: list[Any]) -> None:
     assert df[column].to_list() == values
 
 
@@ -191,7 +190,7 @@ def test_with_date() -> None:
 
     from kabukit.sources.jquants.statements import with_date
 
-    df = DataFrame(
+    df = pl.DataFrame(
         {
             "DisclosedDate": [
                 date(2025, 1, 4),

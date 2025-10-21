@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, final
 from zoneinfo import ZoneInfo
 
 import polars as pl
-from polars import DataFrame
 
 from kabukit.sources.base import Client
 from kabukit.utils.config import get_config_value
@@ -157,7 +156,7 @@ class JQuantsClient(Client):
         url: str,
         params: dict[str, Any] | None,
         name: str,
-    ) -> AsyncIterator[DataFrame]:
+    ) -> AsyncIterator[pl.DataFrame]:
         """ページ分割されたAPIレスポンスを非同期に反復処理する。
 
         J-Quants APIのページネーション仕様（`pagination_key`）に対応し、
@@ -178,7 +177,7 @@ class JQuantsClient(Client):
 
         while True:
             data = await self.get(url, params)
-            yield DataFrame(data[name])
+            yield pl.DataFrame(data[name])
             if "pagination_key" in data:
                 params["pagination_key"] = data["pagination_key"]
             else:
@@ -190,7 +189,7 @@ class JQuantsClient(Client):
         date: str | datetime.date | None = None,
         *,
         clean: bool = True,
-    ) -> DataFrame:
+    ) -> pl.DataFrame:
         """上場銘柄一覧を取得する (listed/info)。
 
         Args:
@@ -207,7 +206,7 @@ class JQuantsClient(Client):
         params = get_params(code=code, date=date)
         url = "/listed/info"
         data = await self.get(url, params)
-        df = DataFrame(data["info"])
+        df = pl.DataFrame(data["info"])
         return info.clean(df) if clean else df
 
     async def get_statements(
@@ -217,7 +216,7 @@ class JQuantsClient(Client):
         *,
         clean: bool = True,
         with_date: bool = True,
-    ) -> DataFrame:
+    ) -> pl.DataFrame:
         """財務情報を取得する (fins/statements)。
 
         Args:
@@ -263,7 +262,7 @@ class JQuantsClient(Client):
         to: str | datetime.date | None = None,
         *,
         clean: bool = True,
-    ) -> DataFrame:
+    ) -> pl.DataFrame:
         """日々の株価四本値を取得する (prices/daily_quotes)。
 
         Args:
@@ -305,7 +304,7 @@ class JQuantsClient(Client):
         num_days: int = 30,
         *,
         clean: bool = True,
-    ) -> DataFrame:
+    ) -> pl.DataFrame:
         """直近利用可能な日付の株価を取得する。
 
         `get_prices` のためのフォールバック処理。今日から過去`num_days`の範囲で
@@ -328,9 +327,9 @@ class JQuantsClient(Client):
             if not df.is_empty():
                 return df
 
-        return DataFrame()
+        return pl.DataFrame()
 
-    async def get_announcement(self) -> DataFrame:
+    async def get_announcement(self) -> pl.DataFrame:
         """翌日発表予定の決算情報を取得する (fins/announcement)。
 
         Returns:
@@ -354,7 +353,7 @@ class JQuantsClient(Client):
         section: str | None = None,
         from_: str | datetime.date | None = None,
         to: str | datetime.date | None = None,
-    ) -> DataFrame:
+    ) -> pl.DataFrame:
         """投資部門別売買状況を取得する (markets/trades_spec)。
 
         Args:
@@ -384,7 +383,7 @@ class JQuantsClient(Client):
         self,
         from_: str | datetime.date | None = None,
         to: str | datetime.date | None = None,
-    ) -> DataFrame:
+    ) -> pl.DataFrame:
         """TOPIXの時系列データを取得する (indices/topix)。
 
         Args:
@@ -414,7 +413,7 @@ class JQuantsClient(Client):
         holidaydivision: str | None = None,
         from_: str | datetime.date | None = None,
         to: str | datetime.date | None = None,
-    ) -> DataFrame:
+    ) -> pl.DataFrame:
         """市場の営業日カレンダーを取得する (markets/trading_calendar)。
 
         Args:

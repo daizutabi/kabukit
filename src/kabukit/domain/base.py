@@ -11,16 +11,16 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Any, Self
 
-    from polars import DataFrame
+    import polars as pl
     from polars._typing import IntoExprColumn
 
 
 class Base:
-    data: DataFrame
+    data: pl.DataFrame
 
     def __init__(
         self,
-        data: DataFrame | None = None,
+        data: pl.DataFrame | None = None,
         *,
         name: str | None = None,
     ) -> None:

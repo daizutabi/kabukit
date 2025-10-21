@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import polars as pl
-from polars import DataFrame
 
 from kabukit.utils import concurrent
 
@@ -11,8 +10,6 @@ from .client import JQuantsClient
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
-
-    from polars import DataFrame
 
     from kabukit.utils.concurrent import Callback, Progress
 
@@ -25,7 +22,7 @@ async def get(
     max_concurrency: int | None = None,
     progress: Progress | None = None,
     callback: Callback | None = None,
-) -> DataFrame:
+) -> pl.DataFrame:
     """複数の銘柄の各種データを取得し、単一のDataFrameにまとめて返す。
 
     Args:
@@ -62,7 +59,7 @@ async def get(
     return data.sort("Code", "Date")
 
 
-async def get_info(code: str | None = None, /) -> DataFrame:
+async def get_info(code: str | None = None, /) -> pl.DataFrame:
     """上場銘柄一覧を取得する。
 
     Returns:
@@ -104,7 +101,7 @@ async def get_statements(
     max_concurrency: int = 12,
     progress: Progress | None = None,
     callback: Callback | None = None,
-) -> DataFrame:
+) -> pl.DataFrame:
     """四半期毎の決算短信サマリーおよび業績・配当の修正に関する開示情報を取得する。
 
     Args:
@@ -147,7 +144,7 @@ async def get_prices(
     max_concurrency: int = 8,
     progress: Progress | None = None,
     callback: Callback | None = None,
-) -> DataFrame:
+) -> pl.DataFrame:
     """日々の株価四本値を取得する。
 
     株価は分割・併合を考慮した調整済み株価（小数点第２位四捨五入）と調整前の株価を取得できる。

@@ -13,8 +13,6 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
 
-    from polars import DataFrame
-
 
 def glob(source: str | None = None, group: str | None = None) -> Iterator[Path]:
     """Glob parquet files in the cache directory.
@@ -64,7 +62,7 @@ def _get_cache_filepath(source: str, group: str, name: str | None = None) -> Pat
     return filename
 
 
-def read(source: str, group: str, name: str | None = None) -> DataFrame:
+def read(source: str, group: str, name: str | None = None) -> pl.DataFrame:
     """Read a polars.DataFrame directly from the cache.
 
     Args:
@@ -83,7 +81,7 @@ def read(source: str, group: str, name: str | None = None) -> DataFrame:
     return pl.read_parquet(filepath)
 
 
-def write(source: str, group: str, df: DataFrame, name: str | None = None) -> Path:
+def write(source: str, group: str, df: pl.DataFrame, name: str | None = None) -> Path:
     """Write a polars.DataFrame directly to the cache.
 
     Args:

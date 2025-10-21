@@ -1,20 +1,16 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING
 
 import polars as pl
 
-if TYPE_CHECKING:
-    from polars import DataFrame
 
-
-def clean(df: DataFrame) -> DataFrame:
+def clean(df: pl.DataFrame) -> pl.DataFrame:
     df = df.select(pl.exclude(r"^.*\(REIT\)$"))
     return df.pipe(_rename).pipe(_cast)
 
 
-def _rename(df: DataFrame) -> DataFrame:
+def _rename(df: pl.DataFrame) -> pl.DataFrame:
     return df.rename(
         {
             "LocalCode": "Code",
@@ -25,7 +21,7 @@ def _rename(df: DataFrame) -> DataFrame:
     )
 
 
-def _cast(df: DataFrame) -> DataFrame:
+def _cast(df: pl.DataFrame) -> pl.DataFrame:
     return (
         df.with_columns(
             pl.col("^.*Date$").str.to_date("%Y-%m-%d", strict=False),
@@ -37,7 +33,7 @@ def _cast(df: DataFrame) -> DataFrame:
     )
 
 
-def _cast_float(df: DataFrame) -> DataFrame:
+def _cast_float(df: pl.DataFrame) -> pl.DataFrame:
     return df.with_columns(
         pl.col(f"^.*{name}.*$").cast(pl.Float64, strict=False)
         for name in [
@@ -63,7 +59,7 @@ def _cast_float(df: DataFrame) -> DataFrame:
     )
 
 
-def _cast_bool(df: DataFrame) -> DataFrame:
+def _cast_bool(df: pl.DataFrame) -> pl.DataFrame:
     columns = df.select(pl.col("^.*Changes.*$")).columns
     columns.append("RetrospectiveRestatement")
 
@@ -78,7 +74,7 @@ def _cast_bool(df: DataFrame) -> DataFrame:
     )
 
 
-def with_date(df: DataFrame, holidays: list[datetime.date]) -> DataFrame:
+def with_date(df: pl.DataFrame, holidays: list[datetime.date]) -> pl.DataFrame:
     """`Date`列を追加する。
 
     開示日が休日のとき、あるいは、開示時刻が15時30分以降の場合、Dateを開示日の翌営業日に設定する。

@@ -5,7 +5,6 @@ import datetime
 import polars as pl
 import pytest
 import pytest_asyncio
-from polars import DataFrame
 
 from kabukit.sources.jquants.client import JQuantsClient
 
@@ -75,7 +74,7 @@ async def df():
         yield await client.get_prices("3671")
 
 
-def test_width(df: DataFrame) -> None:
+def test_width(df: pl.DataFrame) -> None:
     assert df.width == 16
 
 
@@ -100,11 +99,11 @@ def test_width(df: DataFrame) -> None:
         ("RawVolume", pl.Float64),
     ],
 )
-def test_column_dtype(df: DataFrame, name: str, dtype: type) -> None:
+def test_column_dtype(df: pl.DataFrame, name: str, dtype: type) -> None:
     assert df[name].dtype == dtype
 
 
-def test_turnover_value(df: DataFrame) -> None:
+def test_turnover_value(df: pl.DataFrame) -> None:
     a = df["TurnoverValue"]
     b = df["RawHigh"] * df["RawVolume"]
     c = df["RawLow"] * df["RawVolume"]
@@ -112,13 +111,13 @@ def test_turnover_value(df: DataFrame) -> None:
     assert (a >= c).all()
 
 
-def test_columns(df: DataFrame) -> None:
+def test_columns(df: pl.DataFrame) -> None:
     from kabukit.sources.jquants.schema import PriceColumns
 
     assert df.columns == [c.name for c in PriceColumns]
 
 
-def test_rename(df: DataFrame) -> None:
+def test_rename(df: pl.DataFrame) -> None:
     from kabukit.sources.jquants.schema import PriceColumns
 
     df_renamed = PriceColumns.rename(df, strict=True)

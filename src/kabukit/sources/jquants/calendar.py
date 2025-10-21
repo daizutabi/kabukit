@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import polars as pl
-from polars import DataFrame
 
 
-def clean(df: DataFrame) -> DataFrame:
+def clean(df: pl.DataFrame) -> pl.DataFrame:
     return df.with_columns(
         pl.col("Date").str.to_date("%Y-%m-%d"),
         pl.col("HolidayDivision").cast(pl.Categorical),

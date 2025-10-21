@@ -3,8 +3,8 @@ from __future__ import annotations
 from datetime import date
 from typing import TYPE_CHECKING
 
+import polars as pl
 import pytest
-from polars import DataFrame
 from polars import col as c
 
 from tests.validation.conftest import pytestmark  # noqa: F401
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 # 指標が乖離している決算書を確認する必要あり
 
 
-def test_equity_to_asset_ratio(data: DataFrame) -> None:
+def test_equity_to_asset_ratio(data: pl.DataFrame) -> None:
     x = data["EquityToAssetRatio"]
     y = data["Equity"] / data["TotalAssets"]
     r = x / y
@@ -24,7 +24,7 @@ def test_equity_to_asset_ratio(data: DataFrame) -> None:
     assert m > 0.93
 
 
-def test_earnings_per_share(data: DataFrame) -> None:
+def test_earnings_per_share(data: pl.DataFrame) -> None:
     """EPS = 当期純利益 / 期中平均株式数"""
     x = data["EarningsPerShare"]
     y = data["Profit"] / data["AverageOutstandingShares"]
@@ -36,7 +36,11 @@ def test_earnings_per_share(data: DataFrame) -> None:
 
 @pytest.mark.parametrize("prefix", ["", "NextYear"])
 @pytest.mark.parametrize("suffix", ["", "2ndQuarter"])
-def test_forecast_earnings_per_share(data: DataFrame, prefix: str, suffix: str) -> None:
+def test_forecast_earnings_per_share(
+    data: pl.DataFrame,
+    prefix: str,
+    suffix: str,
+) -> None:
     """EPS_予想 = 純利益_予想 / 期中平均株式数"""
     x = data[f"{prefix}ForecastEarningsPerShare{suffix}"]
     y = data[f"{prefix}ForecastProfit{suffix}"] / data["AverageOutstandingShares"]
@@ -46,7 +50,7 @@ def test_forecast_earnings_per_share(data: DataFrame, prefix: str, suffix: str) 
     assert m > 0.94
 
 
-def test_bookvalue_per_share(data: DataFrame) -> None:
+def test_bookvalue_per_share(data: pl.DataFrame) -> None:
     """BPS = 純資産 / 期中平均株式数"""
     x = data["BookValuePerShare"]
     y = data["Equity"] / data["AverageOutstandingShares"]
@@ -56,7 +60,7 @@ def test_bookvalue_per_share(data: DataFrame) -> None:
     assert m > 0.9
 
 
-def test_dividend_per_share(data: DataFrame) -> None:
+def test_dividend_per_share(data: pl.DataFrame) -> None:
     """DPS = 配当金 / 期中平均株式数"""
     x = data["ResultDividendPerShareAnnual"]
     y = data["ResultTotalDividendPaidAnnual"] / data["AverageOutstandingShares"]
@@ -67,7 +71,7 @@ def test_dividend_per_share(data: DataFrame) -> None:
 
 
 @pytest.mark.parametrize("prefix", ["Result", "Forecast", "NextYearForecast"])
-def test_dividend_per_share_sum(data: DataFrame, prefix: str) -> None:
+def test_dividend_per_share_sum(data: pl.DataFrame, prefix: str) -> None:
     x = data[f"{prefix}DividendPerShareAnnual"]
     y = (
         data[f"{prefix}DividendPerShare1stQuarter"]
@@ -88,7 +92,7 @@ def test_dividend_per_share_sum(data: DataFrame, prefix: str) -> None:
         ("ResultTotalDividendPaidAnnual", "Profit"),
     ],
 )
-def test_payout_ratio(data: DataFrame, d: str, e: str) -> None:
+def test_payout_ratio(data: pl.DataFrame, d: str, e: str) -> None:
     """配当性向 = 配当金 / 当期利益 = DPS / EPS"""
     x = data["ResultPayoutRatioAnnual"]
     y = data[d] / data[e]
@@ -98,7 +102,7 @@ def test_payout_ratio(data: DataFrame, d: str, e: str) -> None:
     assert m > 0.97
 
 
-def test_earnings_per_share_consistency(data: DataFrame) -> None:
+def test_earnings_per_share_consistency(data: pl.DataFrame) -> None:
     """
     サマリーの利益額(Profit)は丸められている。
     決算短信の詳細数値を使うと、EPSを再現できることを示す。

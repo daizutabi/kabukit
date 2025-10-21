@@ -9,7 +9,6 @@ from zoneinfo import ZoneInfo
 
 import polars as pl
 import pytest
-from polars import DataFrame
 from polars.testing import assert_frame_equal
 
 if TYPE_CHECKING:
@@ -223,7 +222,7 @@ def test_read(mocker: MockerFixture, tmp_path: Path) -> None:
     cache_dir = tmp_path / "jquants" / "test"
     cache_dir.mkdir(parents=True)
 
-    data = DataFrame({"A": [1, 2], "B": ["x", "y"]})
+    data = pl.DataFrame({"A": [1, 2], "B": ["x", "y"]})
     data.write_parquet(cache_dir / "my_file.parquet")
 
     result = read("jquants", "test", name="my_file")
@@ -236,7 +235,7 @@ def test_write_no_name(mocker: MockerFixture, tmp_path: Path) -> None:
     mock_get_cache_dir = mocker.patch("kabukit.domain.cache.get_cache_dir")
     mock_get_cache_dir.return_value = tmp_path
 
-    data = DataFrame({"A": [1, 2], "B": ["x", "y"]})
+    data = pl.DataFrame({"A": [1, 2], "B": ["x", "y"]})
     path = write("jquants", "test", data)
 
     assert path.exists()
@@ -253,7 +252,7 @@ def test_write_with_name(mocker: MockerFixture, tmp_path: Path) -> None:
     mock_get_cache_dir = mocker.patch("kabukit.domain.cache.get_cache_dir")
     mock_get_cache_dir.return_value = tmp_path
 
-    data = DataFrame({"A": [1, 2], "B": ["x", "y"]})
+    data = pl.DataFrame({"A": [1, 2], "B": ["x", "y"]})
     path = write("jquants", "test", data, name="my_file")
 
     assert path.exists()

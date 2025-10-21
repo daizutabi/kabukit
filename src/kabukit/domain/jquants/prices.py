@@ -10,8 +10,6 @@ if TYPE_CHECKING:
     from datetime import timedelta
     from typing import Self
 
-    from polars import DataFrame, Expr
-
     from .statements import Statements
 
 
@@ -27,7 +25,7 @@ class Prices(Base):
         data (pl.DataFrame): 株価の時系列データ。
     """
 
-    def truncate(self, every: str | timedelta | Expr) -> Self:
+    def truncate(self, every: str | timedelta | pl.Expr) -> Self:
         """時系列データを指定された頻度で集計し、切り詰める。
 
         日次などの時系列データを指定された頻度（例: 月次、週次）で集計し、
@@ -339,7 +337,7 @@ class Prices(Base):
             .with_dividend_yield()
         )
 
-    def period_stats(self) -> DataFrame:
+    def period_stats(self) -> pl.DataFrame:
         """各期ごとの各種利回りおよび調整済み終値の統計量を計算する。
 
         `Code`と`ReportDate`で定義される各期（決算期間）ごとに、

@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 import polars as pl
 import pytest
 from httpx import Response
-from polars import DataFrame
 from polars.testing import assert_frame_equal
 
 from kabukit.sources.jquants.client import JQuantsClient
@@ -41,7 +40,7 @@ async def test_get_calendar(mock_get: AsyncMock, mocker: MockerFixture) -> None:
 
     # 3. Assert the result
     expected_df = (
-        DataFrame(
+        pl.DataFrame(
             {
                 "Date": [
                     datetime.date(2025, 10, 6),
