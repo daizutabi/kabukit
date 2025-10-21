@@ -24,15 +24,6 @@ def callback(df: pl.DataFrame) -> pl.DataFrame:
 
 
 @pytest.mark.asyncio
-async def test_get_entries_dates() -> None:
-    from kabukit.sources.edinet.concurrent import get_entries
-
-    df = await get_entries(["2025-10-09", "2025-10-10"])
-    expected = [date(2025, 10, 9), date(2025, 10, 10)]
-    assert sorted(df["Date"].unique().to_list()) == expected
-
-
-@pytest.mark.asyncio
 async def test_get_entries_single_date() -> None:
     from kabukit.sources.edinet.concurrent import get_entries
 
@@ -40,6 +31,15 @@ async def test_get_entries_single_date() -> None:
     dates = df["Date"].unique().to_list()
     assert len(dates) == 1
     assert dates[0] == date(2025, 10, 9)
+
+
+@pytest.mark.asyncio
+async def test_get_entries_multiple_dates() -> None:
+    from kabukit.sources.edinet.concurrent import get_entries
+
+    df = await get_entries(["2025-10-09", "2025-10-10"])
+    expected = [date(2025, 10, 9), date(2025, 10, 10)]
+    assert sorted(df["Date"].unique().to_list()) == expected
 
 
 @pytest.mark.asyncio
