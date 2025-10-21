@@ -4,7 +4,7 @@ import datetime
 from zoneinfo import ZoneInfo
 
 
-def strpdate(date_string: str, fmt: str | None = None) -> datetime.date:
+def strpdate(date_string: str, fmt: str | None = None, /) -> datetime.date:
     """文字列を日付オブジェクトに変換する。
 
     Args:
@@ -21,6 +21,26 @@ def strpdate(date_string: str, fmt: str | None = None) -> datetime.date:
         datetime.datetime.strptime(date_string, fmt)
         .replace(tzinfo=ZoneInfo("Asia/Tokyo"))
         .date()
+    )
+
+
+def strptime(time_string: str, fmt: str | None = None, /) -> datetime.time:
+    """文字列を時刻オブジェクトに変換する。
+
+    Args:
+        date_string (str): 変換する日時文字列。
+        fmt (str | None, optional): 日時文字列のフォーマット。
+
+    Returns:
+        datetime.time: 変換された時刻オブジェクト。
+    """
+    if fmt is None:
+        fmt = "%H:%M"
+
+    return (
+        datetime.datetime.strptime(time_string, fmt)
+        .replace(tzinfo=ZoneInfo("Asia/Tokyo"))
+        .time()
     )
 
 

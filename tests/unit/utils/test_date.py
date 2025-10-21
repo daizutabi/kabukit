@@ -22,6 +22,20 @@ def test_strpdate(date_str: str, fmt: str | None, date: datetime.date) -> None:
     assert strpdate(date_str, fmt) == date
 
 
+@pytest.mark.parametrize(
+    ("time_str", "fmt", "date"),
+    [
+        ("01:01", "%H:%M", datetime.time(1, 1, 0)),
+        ("23:49", None, datetime.time(23, 49, 0)),
+        ("1030", "%H%M", datetime.time(10, 30, 0)),
+    ],
+)
+def test_strptime(time_str: str, fmt: str | None, date: datetime.date) -> None:
+    from kabukit.utils.date import strptime
+
+    assert strptime(time_str, fmt) == date
+
+
 def test_dates_days() -> None:
     from kabukit.utils.date import get_dates
 

@@ -1,11 +1,21 @@
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING
 
+import polars as pl
+from bs4 import BeautifulSoup
+
 from kabukit.sources.base import Client
+from kabukit.utils.date import strpdate
+
+from .page import iter_page_numbers, parse
 
 if TYPE_CHECKING:
-    from httpx import Response
+    import datetime
+    from collections.abc import AsyncIterator
+
+    import httpx
 
 BASE_URL = "https://www.release.tdnet.info/inbs"
 
@@ -23,7 +33,7 @@ class TdnetClient(Client):
     def __init__(self) -> None:
         super().__init__(BASE_URL)
 
-    async def get(self, url: str) -> Response:
+    async def get(self, url: str) -> httpx.Response:
         """GETリクエストを送信する。
 
         Args:
@@ -39,24 +49,54 @@ class TdnetClient(Client):
         resp.raise_for_status()
         return resp
 
+    async def get_dates(self) -> list[datetime.date]:
+        """TDnetで利用可能な開示日一覧を取得する。
 
-# async def get_dates(self) -> list[date]:
-#     """TDnetで利用可能な開示日一覧を取得する。
+        Returns:
+            list[date]: 利用可能な開示日のリスト。
+        """
+        resp = await self.get("I_main_00.html")
 
-#     Returns:
-#         list[date]: 利用可能な開示日のリスト。
-#     """
-#     resp = await self.get("I_main_00.html")
-#     soup = BeautifulSoup(resp.text, "lxml")
-#     daylist = soup.find("select", attrs={"name": "daylist"})
-#     dates: list[date] = []
-#     if daylist:
-#         # daylist can be a Tag or a NavigableString
-#         if hasattr(daylist, "find_all"):
-#             for option in daylist.find_all("option"):
-#                 if match := re.search(
-#                     r"I_list_001_(\d{8})\.html",
-#                     option.get("value", ""),
-#                 ):
-#                     dates.append(datetime.strptime(match.group(1), "%Y%m%d").date())
-#     return dates
+        soup = BeautifulSoup(resp.text, "lxml")
+        daylist = soup.find("select", attrs={"name": "daylist"})
+
+        if not daylist:
+            return []
+
+        pattern = re.compile(r"I_list_001_(\d{8})\.html")
+        dates: list[datetime.date] = []
+
+        for option in daylist.find_all("option"):
+            value = option.get("value", "")
+            if isinstance(value, str) and (m := pattern.search(value)):
+                date = strpdate(m.group(1), "%Y%m%d")
+                dates.append(date)
+
+        return dates
+
+    async def get_page(self, date: datetime.date, index: int) -> str:
+        date_str = date.strftime("%Y%m%d")
+        url = f"I_list_{index:03}_{date_str}.html"
+        resp = await self.get(url)
+        return resp.text
+
+    async def iter_pages(self, date: datetime.date) -> AsyncIterator[str]:
+        html = await self.get_page(date, index=1)
+
+        yield html
+
+        for index in iter_page_numbers(html):
+            if index != 1:
+                yield await self.get_page(date, index)
+
+    async def get_list(self, date: datetime.date) -> pl.DataFrame:
+        """TDnetの開示情報一覧を取得する。
+
+        Args:
+            date (datetime.date): 取得する開示日の指定。
+
+        Returns:
+            pl.DataFrame: 開示情報一覧を含むDataFrame。
+        """
+        items = [parse(page) async for page in self.iter_pages(date)]
+        return pl.concat(items)
