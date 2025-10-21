@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import re
 
+import pytest
 from bs4.element import Tag
+
+pytestmark = pytest.mark.system
 
 
 def test_page_pager_box_top(page: str) -> None:
