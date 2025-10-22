@@ -56,7 +56,7 @@ async def get(
     )
 
 
-async def get_entries(
+async def get_list(
     dates: Iterable[datetime.date | str] | datetime.date | str | None = None,
     /,
     days: int | None = None,

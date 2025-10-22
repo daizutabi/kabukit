@@ -47,16 +47,16 @@ def mock_get_prices(mocker: MockerFixture) -> AsyncMock:
 
 
 @pytest.fixture
+def mock_get_entries(mocker: MockerFixture) -> AsyncMock:
+    return mocker.patch(
+        "kabukit.sources.edinet.concurrent.get_list",
+        new_callable=mocker.AsyncMock,
+        return_value=MOCK_DF,
+    )
+
+
+@pytest.fixture
 def mock_cache_write(mocker: MockerFixture) -> MagicMock:
     mock_cache_write = mocker.patch("kabukit.domain.cache.write")
     mock_cache_write.return_value = MOCK_PATH
     return mock_cache_write
-
-
-@pytest.fixture
-def mock_get_entries(mocker: MockerFixture) -> AsyncMock:
-    return mocker.patch(
-        "kabukit.sources.edinet.concurrent.get_entries",
-        new_callable=mocker.AsyncMock,
-        return_value=MOCK_DF,
-    )

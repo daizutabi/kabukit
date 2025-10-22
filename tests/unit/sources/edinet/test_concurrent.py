@@ -70,7 +70,7 @@ async def test_get_entries_days(
     mocker: MockerFixture,
     mock_get_dates: MagicMock,
 ) -> None:
-    from kabukit.sources.edinet.concurrent import get_entries
+    from kabukit.sources.edinet.concurrent import get_list
 
     mock_get_dates.return_value = [
         datetime.date(2023, 1, 3),
@@ -83,7 +83,7 @@ async def test_get_entries_days(
     )
     mock_get.return_value = pl.DataFrame({"Date": [2], "Code": ["10000"]})
 
-    result = await get_entries(
+    result = await get_list(
         days=3,
         max_items=2,
         max_concurrency=5,
@@ -112,7 +112,7 @@ async def test_get_entries_years(
     mocker: MockerFixture,
     mock_get_dates: MagicMock,
 ) -> None:
-    from kabukit.sources.edinet.concurrent import get_entries
+    from kabukit.sources.edinet.concurrent import get_list
 
     mock_get_dates.return_value = [
         datetime.date(2023, 1, 1),
@@ -124,7 +124,7 @@ async def test_get_entries_years(
     )
     mock_get.return_value = pl.DataFrame({"Date": [1], "Code": ["10000"]})
 
-    await get_entries(years=2)
+    await get_list(years=2)
 
     mock_get_dates.assert_called_once_with(days=None, years=2)
     mock_get.assert_awaited_once_with(
@@ -142,17 +142,17 @@ async def test_get_entries_years(
 
 @pytest.mark.asyncio
 async def test_get_entries_single_date(mock_edinet_client_context: AsyncMock) -> None:
-    from kabukit.sources.edinet.concurrent import get_entries
+    from kabukit.sources.edinet.concurrent import get_list
 
     target_date = datetime.date(2025, 10, 10)
-    await get_entries(target_date)
+    await get_list(target_date)
 
     mock_edinet_client_context.get_list.assert_awaited_once_with(target_date)
 
 
 @pytest.mark.asyncio
 async def test_get_entries_invalid_date(mocker: MockerFixture) -> None:
-    from kabukit.sources.edinet.concurrent import get_entries
+    from kabukit.sources.edinet.concurrent import get_list
 
     mock_get = mocker.patch(
         "kabukit.sources.edinet.concurrent.get",
@@ -160,7 +160,7 @@ async def test_get_entries_invalid_date(mocker: MockerFixture) -> None:
     )
     mock_get.return_value = pl.DataFrame()
 
-    result = await get_entries(["2025-10-10"])
+    result = await get_list(["2025-10-10"])
     assert result.is_empty()
 
 

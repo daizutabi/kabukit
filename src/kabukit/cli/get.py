@@ -119,13 +119,13 @@ async def entries(
     import tqdm.asyncio
 
     from kabukit.domain import cache
-    from kabukit.sources.edinet.concurrent import get_entries
+    from kabukit.sources.edinet.concurrent import get_list
 
     # if isinstance(date, str) and len(date) == 8 and date.isdigit():
     #     date = f"{date[:4]}-{date[4:6]}-{date[6:]}"
 
     progress = None if date or quiet else tqdm.asyncio.tqdm
-    df = await get_entries(date, years=10, progress=progress, max_items=max_items)
+    df = await get_list(date, years=10, progress=progress, max_items=max_items)
 
     if not quiet:
         typer.echo(df)
