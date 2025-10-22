@@ -7,12 +7,13 @@ from typing import TYPE_CHECKING, final
 
 import polars as pl
 
+import kabukit.sources.datetime
 from kabukit.sources.base import Client
 from kabukit.utils.config import get_config_value
 from kabukit.utils.date import today
 from kabukit.utils.params import get_params
 
-from . import calendar, info, prices, statements, topix
+from .clean import calendar, info, prices, statements, topix
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -252,7 +253,7 @@ class JQuantsClient(Client):
             return df
 
         holidays = await _calendar_cache_manager.get_holidays(self)
-        return statements.with_date(df, holidays=holidays)
+        return kabukit.sources.datetime.with_date(df, holidays=holidays)
 
     async def get_prices(
         self,

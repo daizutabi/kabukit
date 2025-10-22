@@ -90,7 +90,7 @@ async def test_get_flags(
     mock_get.side_effect = get_side_effect
 
     mock_clean = mocker.patch(
-        "kabukit.sources.jquants.statements.clean",
+        "kabukit.sources.jquants.clean.statements.clean",
         return_value=pl.DataFrame(
             {
                 "Code": ["7203"],
@@ -100,7 +100,7 @@ async def test_get_flags(
         ),
     )
     mock_with_date = mocker.patch(
-        "kabukit.sources.jquants.statements.with_date",
+        "kabukit.sources.datetime.with_date",
         return_value=pl.DataFrame({"Date": [datetime.date(2023, 1, 1)]}),
     )
 
@@ -124,7 +124,7 @@ async def test_get_flags(
 
 @pytest.fixture
 def df() -> pl.DataFrame:
-    from kabukit.sources.jquants.statements import clean
+    from kabukit.sources.jquants.clean.statements import clean
 
     return pl.DataFrame(
         {
@@ -183,47 +183,3 @@ def test_clean_int(df: pl.DataFrame, column: str) -> None:
 )
 def test_clean(df: pl.DataFrame, column: str, values: list[Any]) -> None:
     assert df[column].to_list() == values
-
-
-def test_with_date() -> None:
-    from datetime import date, time
-
-    from kabukit.sources.jquants.statements import with_date
-
-    df = pl.DataFrame(
-        {
-            "DisclosedDate": [
-                date(2025, 1, 4),
-                date(2025, 1, 4),
-                date(2025, 1, 10),
-                date(2025, 1, 10),
-                date(2025, 1, 10),
-            ],
-            "DisclosedTime": [
-                time(9, 0),
-                time(16, 0),
-                time(15, 15),
-                time(15, 30),
-                None,
-            ],
-            "EPS": [1, 2, 3, 4, 5],
-        },
-    )
-
-    holidays = [
-        date(2025, 1, 1),
-        date(2025, 1, 4),
-        date(2025, 1, 5),
-        date(2025, 1, 11),
-        date(2025, 1, 12),
-        date(2025, 1, 13),
-    ]
-
-    df = with_date(df, holidays=holidays)
-    assert df.columns == ["Date", "DisclosedDate", "DisclosedTime", "EPS"]
-    x = df["Date"].to_list()
-    assert x[0] == date(2025, 1, 6)
-    assert x[1] == date(2025, 1, 6)
-    assert x[2] == date(2025, 1, 10)
-    assert x[3] == date(2025, 1, 14)
-    assert x[4] == date(2025, 1, 14)
