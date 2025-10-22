@@ -115,11 +115,14 @@ async def entries(
     quiet: Quiet = False,
     max_items: MaxItems = None,
 ) -> None:
-    """書類一覧を取得します。"""
+    """EDINETから書類一覧を取得します。"""
     import tqdm.asyncio
 
     from kabukit.domain import cache
     from kabukit.sources.edinet.concurrent import get_entries
+
+    # if isinstance(date, str) and len(date) == 8 and date.isdigit():
+    #     date = f"{date[:4]}-{date[4:6]}-{date[6:]}"
 
     progress = None if date or quiet else tqdm.asyncio.tqdm
     df = await get_entries(date, years=10, progress=progress, max_items=max_items)
@@ -130,6 +133,33 @@ async def entries(
     if not date:
         path = cache.write("edinet", "entries", df)
         typer.echo(f"書類一覧を '{path}' に保存しました。")
+
+
+# @app.async_command()
+# async def tdnet(
+#     date: Date = None,
+#     *,
+#     quiet: Quiet = False,
+#     max_items: MaxItems = None,
+# ) -> None:
+#     """TDnetから書類一覧を取得します。"""
+#     import tqdm.asyncio
+
+#     from kabukit.domain import cache
+#     from kabukit.sources.tdnet.concurrent import get_list
+
+#     # if isinstance(date, str) and len(date) == 8 and date.isdigit():
+#     #     date = f"{date[:4]}-{date[4:6]}-{date[6:]}"
+
+#     progress = None if date or quiet else tqdm.asyncio.tqdm
+#     df = await get_list(date, progress=progress, max_items=max_items)
+
+#     if not quiet:
+#         typer.echo(df)
+
+#     if not date:
+#         path = cache.write("tdnet", "list", df)
+#         typer.echo(f"書類一覧を '{path}' に保存しました。")
 
 
 @app.async_command(name="all")
