@@ -28,25 +28,44 @@ def mock_cache_dir(tmp_path: Path, mocker: MockerFixture) -> Path:
     return tmp_path
 
 
-def test_get_info_with_code(mocker: MockerFixture):
+def test_get_calendar(mocker: MockerFixture, mock_cache_dir: Path) -> None:
+    mock_df = pl.DataFrame({"code": ["1234"], "name": ["test"]})
+    mock_get = mocker.patch(
+        "kabukit.sources.jquants.client.JQuantsClient.get_calendar",
+        return_value=mock_df,
+    )
+    result = runner.invoke(app, ["get", "calendar"])
+
+    assert result.exit_code == 0
+    assert "営業日カレンダーを" in result.stdout
+    assert mock_get.call_count == 1
+
+    path = next(mock_cache_dir.joinpath("jquants", "calendar").glob("*.parquet"))
+    assert_frame_equal(pl.read_parquet(path), mock_df)
+
+
+def test_get_info_with_code(mocker: MockerFixture) -> None:
     mock_df = pl.DataFrame({"code": ["1234"], "name": ["test"]})
     mock_get = mocker.patch(
         "kabukit.sources.jquants.client.JQuantsClient.get_info",
         return_value=mock_df,
     )
     result = runner.invoke(app, ["get", "info", "1234"])
+
     assert result.exit_code == 0
     assert "test" in result.stdout
+
     mock_get.assert_called_once_with("1234")
 
 
-def test_get_info_all(mocker: MockerFixture, mock_cache_dir: Path):
+def test_get_info_without_code(mocker: MockerFixture, mock_cache_dir: Path) -> None:
     mock_df = pl.DataFrame({"code": ["1234"], "name": ["test"]})
     mock_get = mocker.patch(
         "kabukit.sources.jquants.client.JQuantsClient.get_info",
         return_value=mock_df,
     )
     result = runner.invoke(app, ["get", "info"])
+
     assert result.exit_code == 0
     assert "全銘柄の情報を" in result.stdout
     assert mock_get.call_count == 1
@@ -55,15 +74,20 @@ def test_get_info_all(mocker: MockerFixture, mock_cache_dir: Path):
     assert_frame_equal(pl.read_parquet(path), mock_df)
 
 
-def test_get_statements_all(mocker: MockerFixture, mock_cache_dir: Path):
+def test_get_statements_without_code(
+    mocker: MockerFixture,
+    mock_cache_dir: Path,
+) -> None:
     mock_df = pl.DataFrame({"code": ["1234"], "Profit": [100]})
     mock_get_statements = mocker.patch(
         "kabukit.sources.jquants.concurrent.get_statements",
         return_value=mock_df,
     )
     result = runner.invoke(app, ["get", "statements"])
+
     assert result.exit_code == 0
     assert "全銘柄の財務情報を" in result.stdout
+
     mock_get_statements.assert_called_once_with(
         None,
         max_items=None,
@@ -74,29 +98,33 @@ def test_get_statements_all(mocker: MockerFixture, mock_cache_dir: Path):
     assert_frame_equal(pl.read_parquet(path), mock_df)
 
 
-def test_get_prices_all(mocker: MockerFixture, mock_cache_dir: Path):
+def test_get_prices_without_code(mocker: MockerFixture, mock_cache_dir: Path) -> None:
     mock_df = pl.DataFrame({"code": ["1234"], "Close": [1000]})
     mock_get_prices = mocker.patch(
         "kabukit.sources.jquants.concurrent.get_prices",
         return_value=mock_df,
     )
     result = runner.invoke(app, ["get", "prices"])
+
     assert result.exit_code == 0
     assert "全銘柄の株価情報を" in result.stdout
 
     mock_get_prices.assert_called_once_with(None, max_items=None, progress=mocker.ANY)
-
     path = next(mock_cache_dir.joinpath("jquants", "prices").glob("*.parquet"))
     assert_frame_equal(pl.read_parquet(path), mock_df)
 
 
-def test_get_edinet_list_all(mocker: MockerFixture, mock_cache_dir: Path):
+def test_get_edinet_list_without_date(
+    mocker: MockerFixture,
+    mock_cache_dir: Path,
+) -> None:
     mock_df = pl.DataFrame({"docID": ["doc1"], "filerName": ["test"]})
     mock_get_edinet_list = mocker.patch(
         "kabukit.sources.edinet.concurrent.get_list",
         return_value=mock_df,
     )
     result = runner.invoke(app, ["get", "edinet"])
+
     assert result.exit_code == 0
     assert "書類一覧を" in result.stdout
 
@@ -106,18 +134,21 @@ def test_get_edinet_list_all(mocker: MockerFixture, mock_cache_dir: Path):
         progress=mocker.ANY,
         max_items=None,
     )
-
     path = next(mock_cache_dir.joinpath("edinet", "list").glob("*.parquet"))
     assert_frame_equal(pl.read_parquet(path), mock_df)
 
 
-def test_get_tdnet_list_all(mocker: MockerFixture, mock_cache_dir: Path):
+def test_get_tdnet_list_without_date(
+    mocker: MockerFixture,
+    mock_cache_dir: Path,
+) -> None:
     mock_df = pl.DataFrame({"docID": ["doc1"], "filerName": ["test"]})
     mock_get_tdnet_list = mocker.patch(
         "kabukit.sources.tdnet.concurrent.get_list",
         return_value=mock_df,
     )
     result = runner.invoke(app, ["get", "tdnet"])
+
     assert result.exit_code == 0
     assert "書類一覧を" in result.stdout
 
@@ -126,6 +157,5 @@ def test_get_tdnet_list_all(mocker: MockerFixture, mock_cache_dir: Path):
         progress=mocker.ANY,
         max_items=None,
     )
-
     path = next(mock_cache_dir.joinpath("tdnet", "list").glob("*.parquet"))
     assert_frame_equal(pl.read_parquet(path), mock_df)
