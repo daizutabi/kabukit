@@ -30,7 +30,7 @@ async def test_get_info(mock_get: AsyncMock, mocker: MockerFixture) -> None:
 
 
 def test_clean() -> None:
-    from kabukit.sources.jquants.info import clean
+    from kabukit.sources.jquants.clean.info import clean
 
     df = pl.DataFrame(
         {

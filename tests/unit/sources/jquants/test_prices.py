@@ -54,7 +54,7 @@ async def test_error(client: JQuantsClient) -> None:
 
 @pytest.fixture
 def df() -> pl.DataFrame:
-    from kabukit.sources.jquants.prices import clean
+    from kabukit.sources.jquants.clean.prices import clean
 
     return pl.DataFrame(
         {
