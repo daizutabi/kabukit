@@ -118,6 +118,15 @@ async def test_get_without_codes(
 
 
 @pytest.mark.asyncio
+async def test_get_calendar(mock_jquants_client_context: AsyncMock) -> None:
+    from kabukit.sources.jquants.concurrent import get_calendar
+
+    await get_calendar()
+
+    mock_jquants_client_context.get_calendar.assert_awaited_once()
+
+
+@pytest.mark.asyncio
 async def test_get_info(mock_jquants_client_context: AsyncMock) -> None:
     from kabukit.sources.jquants.concurrent import get_info
 

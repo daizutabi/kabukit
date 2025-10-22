@@ -59,11 +59,24 @@ async def get(
     return data.sort("Code", "Date")
 
 
+async def get_calendar() -> pl.DataFrame:
+    """営業日カレンダーを取得する。
+
+    Returns:
+        pl.DataFrame: 営業日カレンダーを含むDataFrame。
+
+    Raises:
+        HTTPStatusError: APIリクエストが失敗した場合。
+    """
+    async with JQuantsClient() as client:
+        return await client.get_calendar()
+
+
 async def get_info(code: str | None = None, /) -> pl.DataFrame:
     """上場銘柄一覧を取得する。
 
     Returns:
-        銘柄情報を含むDataFrame。
+        pl.DataFrame: 銘柄情報を含むDataFrame。
 
     Raises:
         HTTPStatusError: APIリクエストが失敗した場合。
@@ -80,6 +93,9 @@ async def get_target_codes() -> list[str]:
     - 市場: TOKYO PRO MARKET
     - 業種: その他 -- (投資信託など)
     - 優先株式
+
+    Returns:
+        list[str]: 分析対象となる銘柄コードのリスト。
     """
     info = await get_info()
 
@@ -118,7 +134,7 @@ async def get_statements(
             コールバック関数。指定しないときはそのままのDataFrameが使用される。
 
     Returns:
-        財務情報を含むDataFrame。
+        pl.DataFrame: 財務情報を含むDataFrame。
 
     Raises:
         HTTPStatusError: APIリクエストが失敗した場合。
@@ -163,7 +179,7 @@ async def get_prices(
             コールバック関数。指定しないときはそのままのDataFrameが使用される。
 
     Returns:
-        日々の株価四本値を含むDataFrame。
+        pl.DataFrame: 日々の株価四本値を含むDataFrame。
 
     Raises:
         HTTPStatusError: APIリクエストが失敗した場合。
