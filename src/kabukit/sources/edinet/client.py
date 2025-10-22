@@ -13,7 +13,7 @@ from kabukit.sources.base import Client
 from kabukit.utils.config import get_config_value
 from kabukit.utils.params import get_params
 
-from .doc import clean_csv, clean_entries, clean_pdf, read_csv
+from .doc import clean_csv, clean_list, clean_pdf, read_csv
 
 if TYPE_CHECKING:
     import datetime
@@ -129,7 +129,7 @@ class EdinetClient(Client):
         if df.is_empty():
             return df
 
-        return clean_entries(df, date)
+        return clean_list(df, date)
 
     async def get_response(self, doc_id: str, doc_type: int) -> Response:
         """書類データをレスポンスオブジェクトとして取得する (documents/{docID})。

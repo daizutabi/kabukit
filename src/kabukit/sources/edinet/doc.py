@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     import datetime
 
 
-def clean_entries(df: pl.DataFrame, date: str | datetime.date) -> pl.DataFrame:
+def clean_list(df: pl.DataFrame, date: str | datetime.date) -> pl.DataFrame:
     if isinstance(date, str):
         date = strpdate(date)
 
