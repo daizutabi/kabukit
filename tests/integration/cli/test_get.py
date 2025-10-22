@@ -92,7 +92,7 @@ def test_get_prices_all(mocker: MockerFixture, mock_cache_dir: Path):
 
 def test_get_entries_all(mocker: MockerFixture, mock_cache_dir: Path):
     mock_df = pl.DataFrame({"docID": ["doc1"], "filerName": ["test"]})
-    mock_get_entries = mocker.patch(
+    mock_get_edinet_list = mocker.patch(
         "kabukit.sources.edinet.concurrent.get_list",
         return_value=mock_df,
     )
@@ -100,7 +100,7 @@ def test_get_entries_all(mocker: MockerFixture, mock_cache_dir: Path):
     assert result.exit_code == 0
     assert "書類一覧を" in result.stdout
 
-    mock_get_entries.assert_called_once_with(
+    mock_get_edinet_list.assert_called_once_with(
         None,
         years=10,
         progress=mocker.ANY,

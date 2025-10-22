@@ -102,7 +102,7 @@ def test_get_prices_all_codes(
 
 
 def test_get_entries(
-    mock_get_entries: AsyncMock,
+    mock_get_edinet_list: AsyncMock,
     mock_cache_write: MagicMock,
 ) -> None:
     result = runner.invoke(app, ["get", "entries"])
@@ -110,7 +110,7 @@ def test_get_entries(
     assert result.exit_code == 0
     assert f"書類一覧を '{MOCK_PATH}' に保存しました。" in result.stdout
 
-    mock_get_entries.assert_awaited_once_with(
+    mock_get_edinet_list.assert_awaited_once_with(
         None,
         years=10,
         progress=tqdm.asyncio.tqdm,
@@ -120,7 +120,7 @@ def test_get_entries(
 
 
 def test_get_entries_with_date(
-    mock_get_entries: AsyncMock,
+    mock_get_edinet_list: AsyncMock,
     mock_cache_write: MagicMock,
 ) -> None:
     MOCK_DATE = "2023-01-01"  # noqa: N806
@@ -128,7 +128,7 @@ def test_get_entries_with_date(
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
-    mock_get_entries.assert_awaited_once_with(
+    mock_get_edinet_list.assert_awaited_once_with(
         MOCK_DATE,
         years=10,
         progress=None,
@@ -217,13 +217,13 @@ def test_get_prices_interrupt(mock_get_prices: AsyncMock) -> None:
     )
 
 
-def test_get_entries_interrupt(mock_get_entries: AsyncMock) -> None:
-    mock_get_entries.side_effect = KeyboardInterrupt
+def test_get_entries_interrupt(mock_get_edinet_list: AsyncMock) -> None:
+    mock_get_edinet_list.side_effect = KeyboardInterrupt
 
     result = runner.invoke(app, ["get", "entries"])
 
     assert result.exit_code == 130
-    mock_get_entries.assert_awaited_once_with(
+    mock_get_edinet_list.assert_awaited_once_with(
         None,
         years=10,
         progress=tqdm.asyncio.tqdm,

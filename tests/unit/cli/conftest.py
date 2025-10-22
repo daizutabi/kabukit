@@ -47,7 +47,7 @@ def mock_get_prices(mocker: MockerFixture) -> AsyncMock:
 
 
 @pytest.fixture
-def mock_get_entries(mocker: MockerFixture) -> AsyncMock:
+def mock_get_edinet_list(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
         "kabukit.sources.edinet.concurrent.get_list",
         new_callable=mocker.AsyncMock,
