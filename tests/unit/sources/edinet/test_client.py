@@ -124,7 +124,7 @@ async def test_get_entries_success(mock_get: AsyncMock, mocker: MockerFixture) -
 
     client = EdinetClient("test_key")
     date = "2023-10-26"
-    df = await client.get_entries(date)
+    df = await client.get_list(date)
 
     assert_frame_equal(df, expected_df)
     mock_get.assert_awaited_once_with(
@@ -145,7 +145,7 @@ async def test_get_entries_no_results(
     response.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
-    df = await client.get_entries("2023-10-26")
+    df = await client.get_list("2023-10-26")
 
     assert df.is_empty()
 
@@ -161,7 +161,7 @@ async def test_get_entries_empty_results(
     response.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
-    df = await client.get_entries("2023-10-26")
+    df = await client.get_list("2023-10-26")
 
     assert df.is_empty()
 

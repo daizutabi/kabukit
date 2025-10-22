@@ -108,7 +108,7 @@ class EdinetClient(Client):
 
         return metadata["resultset"]["count"]
 
-    async def get_entries(self, date: str | datetime.date) -> pl.DataFrame:
+    async def get_list(self, date: str | datetime.date) -> pl.DataFrame:
         """指定日の提出書類一覧を取得する (documents.json, type=2)。
 
         Args:

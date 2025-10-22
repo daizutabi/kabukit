@@ -12,7 +12,7 @@ pytestmark = pytest.mark.system
 async def test_get() -> None:
     from kabukit.sources.edinet.concurrent import get
 
-    df = await get("entries", ["2025-09-09", "2025-09-19", "2025-09-22"])
+    df = await get("list", ["2025-09-09", "2025-09-19", "2025-09-22"])
     assert df.shape == (1231, 30)
     assert df["Date"].n_unique() == 3
     assert df["docID"].n_unique() == 1229  # 重複あり

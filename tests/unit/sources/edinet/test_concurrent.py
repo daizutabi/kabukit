@@ -94,7 +94,7 @@ async def test_get_entries_days(
     assert result.equals(pl.DataFrame({"Date": [2], "Code": ["10000"]}))
     mock_get_dates.assert_called_once_with(days=3, years=None)
     mock_get.assert_awaited_once_with(
-        "entries",
+        "list",
         [
             datetime.date(2023, 1, 3),
             datetime.date(2023, 1, 2),
@@ -128,7 +128,7 @@ async def test_get_entries_years(
 
     mock_get_dates.assert_called_once_with(days=None, years=2)
     mock_get.assert_awaited_once_with(
-        "entries",
+        "list",
         [
             datetime.date(2023, 1, 1),
             datetime.date(2022, 1, 1),
@@ -147,7 +147,7 @@ async def test_get_entries_single_date(mock_edinet_client_context: AsyncMock) ->
     target_date = datetime.date(2025, 10, 10)
     await get_entries(target_date)
 
-    mock_edinet_client_context.get_entries.assert_awaited_once_with(target_date)
+    mock_edinet_client_context.get_list.assert_awaited_once_with(target_date)
 
 
 @pytest.mark.asyncio
