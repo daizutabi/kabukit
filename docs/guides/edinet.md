@@ -19,16 +19,16 @@ API を利用するには、事前にコマンドラインで EDINET API の API
 kabukit は、手軽に EDINET API からデータを取得できるモジュールレベル関数を提供します。
 これらの関数は内部で非同期処理を並列実行するため、効率的に情報を取得できます。
 
-### 書類一覧 (`get_entries`)
+### 書類一覧 (`get_edinet_list`)
 
-[`kabukit.get_entries`][] 関数は、提出書類一覧を取得します。
+[`kabukit.get_edinet_list`][] 関数は、提出書類一覧を取得します。
 
 日付 (YYYY-MM-DD) を指定すると、指定した日付に提出された書類一覧を取得できます。
 
 ```python exec="1" source="material-block"
-from kabukit import get_entries
+from kabukit import get_edinet_list
 
-df = await get_entries("2025-10-10")
+df = await get_edinet_list("2025-10-10")
 df.select("Date", "Code", "docID", "filerName", "pdfFlag", "csvFlag").tail()
 ```
 
@@ -36,7 +36,7 @@ df.select("Date", "Code", "docID", "filerName", "pdfFlag", "csvFlag").tail()
 このとき、EDINET API へのリクエストは非同期で並列に行われます。
 
 ```python exec="1" source="material-block"
-df = await get_entries(["2025-10-10", "2025-10-14", "2025-10-15"])
+df = await get_edinet_list(["2025-10-10", "2025-10-14", "2025-10-15"])
 df.select("Date", "Code", "docID", "filerName", "pdfFlag", "csvFlag").tail()
 ```
 
@@ -45,24 +45,24 @@ df.select("Date", "Code", "docID", "filerName", "pdfFlag", "csvFlag").tail()
 過去のある日数あるいは年数に渡る提出日の書類一覧を取得することもできます。
 
 ```python exec="1" source="material-block"
-df = await get_entries(days=10)
+df = await get_edinet_list(days=10)
 df.select("Date", "Code", "docID", "filerName", "pdfFlag", "csvFlag").head()
 ```
 
 ```python exec="1" source="material-block"
-df_years = await get_entries(years=1)
+df_years = await get_edinet_list(years=1)
 df_years.select("Date", "Code", "docID", "filerName", "pdfFlag", "csvFlag").head()
 ```
 
-### 書類本文 (`get_documents`)
+### 書類本文 (`get_edinet_documents`)
 
-[`kabukit.get_documents`][] 関数は、書類本文を取得します。
+[`kabukit.get_edinet_documents`][] 関数は、書類本文を取得します。
 書類一覧で取得した書類 ID (`docID`) を引数にとります。
 
 ```python exec="1" source="material-block"
-from kabukit import get_documents
+from kabukit import get_edinet_documents
 
-df = await get_documents("S100WUKL")
+df = await get_edinet_documents("S100WUKL")
 df.select("docID", "要素ID", "項目名", "値").head()
 ```
 
@@ -72,7 +72,7 @@ df.select("docID", "要素ID", "項目名", "値").head()
 from polars import col as c
 
 doc_ids = df_years.filter(c.csvFlag)["docID"]  # CSV形式を提供する書類を選択
-df = await get_documents(doc_ids, max_items=3)
+df = await get_edinet_documents(doc_ids, max_items=3)
 df.select("docID", "要素ID", "項目名", "値").head()
 ```
 
@@ -92,7 +92,7 @@ pl.Config(fmt_str_lengths=15)
 
 ```python exec="1" source="material-block"
 doc_ids = df_years.filter(c.pdfFlag)["docID"]  # PDF形式を提供する書類を選択
-df = await get_documents(doc_ids, max_items=3, pdf=True)
+df = await get_edinet_documents(doc_ids, max_items=3, pdf=True)
 df.select("docID", "pdf").tail()
 ```
 
@@ -131,9 +131,9 @@ async with EdinetClient() as client:
 # 自動でセッションが閉じられる
 ```
 
-### 書類一覧 (`get_entries`)
+### 書類一覧 (`get_list`)
 
-[`EdinetClient.get_entries`][kabukit.EdinetClient.get_entries]
+[`EdinetClient.get_list`][kabukit.EdinetClient.get_list]
 メソッドは、日付を指定して、提出された書類のメタデータを取得します。
 
 ```python .md#_
@@ -141,7 +141,7 @@ client = EdinetClient()
 ```
 
 ```python exec="1" source="material-block"
-df = await client.get_entries("2025-10-10")
+df = await client.get_list("2025-10-10")
 df.select("Date", "Code", "docID", "filerName", "pdfFlag", "csvFlag").tail()
 ```
 
@@ -172,13 +172,13 @@ pl.Config(fmt_str_lengths=None)
 ```
 
 !!! note
-    モジュール関数は複数の書類を一度に取得できるので、`get_documents`（複数形）です。
+    モジュール関数は複数の書類を一度に取得できるので、`get_edinet_documents`（複数形）です。
     一方、`EdinetClient` のメソッドは単一の書類を取得するので、
     `get_document`（単数形）です。
 
 ## データ形式について
 
-[`kabukit.get_documents`][] 関数および
+[`kabukit.get_edinet_documents`][] 関数および
 [`EdinetClient.get_document`][kabukit.EdinetClient.get_document] メソッドで
 取得される書類本文は、EDINET が提供する CSV 形式のデータ（元のデータは XBRL 形式）を
 Polars DataFrame に変換したものです。

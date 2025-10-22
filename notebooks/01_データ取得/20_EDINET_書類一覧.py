@@ -8,8 +8,8 @@ app = marimo.App(width="medium")
 def _():
     import marimo as mo
 
-    from kabukit import EdinetClient, edinet
-    return EdinetClient, edinet, mo
+    from kabukit import EdinetClient, get_edinet_list
+    return EdinetClient, get_edinet_list, mo
 
 
 @app.cell
@@ -28,14 +28,9 @@ def _(mo):
 
 
 @app.cell
-async def _(button, edinet, mo):
+async def _(button, get_edinet_list, mo):
     if button.value:
-        await edinet.get_list(years=1, progress=mo.status.progress_bar)
-    return
-
-
-@app.cell
-def _():
+        await get_edinet_list(years=1, progress=mo.status.progress_bar)
     return
 
 
