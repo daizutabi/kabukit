@@ -131,7 +131,7 @@ async def edinet(
         typer.echo(df)
 
     if not date:
-        path = cache.write("edinet", "entries", df)
+        path = cache.write("edinet", "list", df)
         typer.echo(f"書類一覧を '{path}' に保存しました。")
 
 

@@ -90,13 +90,13 @@ def test_get_prices_all(mocker: MockerFixture, mock_cache_dir: Path):
     assert_frame_equal(pl.read_parquet(path), mock_df)
 
 
-def mock_get_edinet_list_all(mocker: MockerFixture, mock_cache_dir: Path):
+def test_get_edinet_list_all(mocker: MockerFixture, mock_cache_dir: Path):
     mock_df = pl.DataFrame({"docID": ["doc1"], "filerName": ["test"]})
     mock_get_edinet_list = mocker.patch(
         "kabukit.sources.edinet.concurrent.get_list",
         return_value=mock_df,
     )
-    result = runner.invoke(app, ["get", "entries"])
+    result = runner.invoke(app, ["get", "edinet"])
     assert result.exit_code == 0
     assert "書類一覧を" in result.stdout
 
@@ -107,5 +107,5 @@ def mock_get_edinet_list_all(mocker: MockerFixture, mock_cache_dir: Path):
         max_items=None,
     )
 
-    path = next(mock_cache_dir.joinpath("edinet", "entries").glob("*.parquet"))
+    path = next(mock_cache_dir.joinpath("edinet", "list").glob("*.parquet"))
     assert_frame_equal(pl.read_parquet(path), mock_df)

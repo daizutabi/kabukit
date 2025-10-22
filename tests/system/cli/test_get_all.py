@@ -28,7 +28,7 @@ def test_get_all(mock_cache_dir: Path) -> None:
     # Verify cache directories and files
     expected_cache_dirs = {
         "jquants": ["info", "statements", "prices"],
-        "edinet": ["entries"],
+        "edinet": ["list"],
     }
     for source, groups in expected_cache_dirs.items():
         for group in groups:

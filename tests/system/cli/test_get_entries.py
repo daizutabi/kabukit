@@ -16,23 +16,23 @@ pytestmark = pytest.mark.system
 runner = CliRunner()
 
 
-def mock_get_edinet_list_all(mock_cache_dir: Path) -> None:
-    result = runner.invoke(app, ["get", "entries", "--max-items", "3"])
+def test_get_edinet_list_all(mock_cache_dir: Path) -> None:
+    result = runner.invoke(app, ["get", "edinet", "--max-items", "3"])
     assert result.exit_code == 0
     assert "書類一覧を" in result.stdout
     assert "shape:" in result.stdout
 
-    entries_cache_dir = mock_cache_dir / "edinet" / "entries"
+    entries_cache_dir = mock_cache_dir / "edinet" / "list"
     assert entries_cache_dir.is_dir()
     assert any(entries_cache_dir.iterdir())  # Check if any file exists in the directory
 
 
-def mock_get_edinet_list_specific_date(mock_cache_dir: Path) -> None:
+def test_get_edinet_list_specific_date(mock_cache_dir: Path) -> None:
     """Test 'kabu get entries <date>' to retrieve entries for a specific date."""
     # Use a known date with expected entries
-    result = runner.invoke(app, ["get", "entries", "2023-01-01"])
+    result = runner.invoke(app, ["get", "edinet", "2023-01-01"])
     assert result.exit_code == 0
     assert "shape:" in result.stdout
 
-    entries_cache_dir = mock_cache_dir / "entries"
+    entries_cache_dir = mock_cache_dir / "edinet"
     assert not entries_cache_dir.exists()
