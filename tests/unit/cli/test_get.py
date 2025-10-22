@@ -137,6 +137,40 @@ def test_get_edinet_list_with_date(
     mock_cache_write.assert_not_called()
 
 
+def test_get_tdnet_list(
+    mock_get_tdnet_list: AsyncMock,
+    mock_cache_write: MagicMock,
+) -> None:
+    result = runner.invoke(app, ["get", "tdnet"])
+
+    assert result.exit_code == 0
+    assert f"書類一覧を '{MOCK_PATH}' に保存しました。" in result.stdout
+
+    mock_get_tdnet_list.assert_awaited_once_with(
+        None,
+        progress=tqdm.asyncio.tqdm,
+        max_items=None,
+    )
+    mock_cache_write.assert_called_once_with("tdnet", "list", MOCK_DF)
+
+
+def test_get_tdnet_list_with_date(
+    mock_get_tdnet_list: AsyncMock,
+    mock_cache_write: MagicMock,
+) -> None:
+    MOCK_DATE = "2023-01-01"  # noqa: N806
+    result = runner.invoke(app, ["get", "tdnet", MOCK_DATE])
+
+    assert result.exit_code == 0
+    assert str(MOCK_DF) in result.stdout
+    mock_get_tdnet_list.assert_awaited_once_with(
+        MOCK_DATE,
+        progress=None,
+        max_items=None,
+    )
+    mock_cache_write.assert_not_called()
+
+
 @pytest.fixture
 def mock_cli_info(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch("kabukit.cli.get.info", new_callable=AsyncMock)
