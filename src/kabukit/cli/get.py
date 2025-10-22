@@ -135,31 +135,31 @@ async def edinet(
         typer.echo(f"書類一覧を '{path}' に保存しました。")
 
 
-# @app.async_command()
-# async def tdnet(
-#     date: Date = None,
-#     *,
-#     quiet: Quiet = False,
-#     max_items: MaxItems = None,
-# ) -> None:
-#     """TDnetから書類一覧を取得します。"""
-#     import tqdm.asyncio
+@app.async_command()
+async def tdnet(
+    date: Date = None,
+    *,
+    quiet: Quiet = False,
+    max_items: MaxItems = None,
+) -> None:
+    """TDnetから書類一覧を取得します。"""
+    import tqdm.asyncio
 
-#     from kabukit.domain import cache
-#     from kabukit.sources.tdnet.concurrent import get_list
+    from kabukit.domain import cache
+    from kabukit.sources.tdnet.concurrent import get_list
 
-#     # if isinstance(date, str) and len(date) == 8 and date.isdigit():
-#     #     date = f"{date[:4]}-{date[4:6]}-{date[6:]}"
+    # if isinstance(date, str) and len(date) == 8 and date.isdigit():
+    #     date = f"{date[:4]}-{date[4:6]}-{date[6:]}"
 
-#     progress = None if date or quiet else tqdm.asyncio.tqdm
-#     df = await get_list(date, progress=progress, max_items=max_items)
+    progress = None if date or quiet else tqdm.asyncio.tqdm
+    df = await get_list(date, progress=progress, max_items=max_items)
 
-#     if not quiet:
-#         typer.echo(df)
+    if not quiet:
+        typer.echo(df)
 
-#     if not date:
-#         path = cache.write("tdnet", "list", df)
-#         typer.echo(f"書類一覧を '{path}' に保存しました。")
+    if not date:
+        path = cache.write("tdnet", "list", df)
+        typer.echo(f"書類一覧を '{path}' に保存しました。")
 
 
 @app.async_command(name="all")

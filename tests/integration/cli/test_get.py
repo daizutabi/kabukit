@@ -109,3 +109,23 @@ def test_get_edinet_list_all(mocker: MockerFixture, mock_cache_dir: Path):
 
     path = next(mock_cache_dir.joinpath("edinet", "list").glob("*.parquet"))
     assert_frame_equal(pl.read_parquet(path), mock_df)
+
+
+def test_get_tdnet_list_all(mocker: MockerFixture, mock_cache_dir: Path):
+    mock_df = pl.DataFrame({"docID": ["doc1"], "filerName": ["test"]})
+    mock_get_tdnet_list = mocker.patch(
+        "kabukit.sources.tdnet.concurrent.get_list",
+        return_value=mock_df,
+    )
+    result = runner.invoke(app, ["get", "tdnet"])
+    assert result.exit_code == 0
+    assert "書類一覧を" in result.stdout
+
+    mock_get_tdnet_list.assert_called_once_with(
+        None,
+        progress=mocker.ANY,
+        max_items=None,
+    )
+
+    path = next(mock_cache_dir.joinpath("tdnet", "list").glob("*.parquet"))
+    assert_frame_equal(pl.read_parquet(path), mock_df)
