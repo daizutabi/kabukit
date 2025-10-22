@@ -48,25 +48,12 @@ async def test_error(client: JQuantsClient) -> None:
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize(
-    ("clean_flag", "with_date_flag", "clean_called", "with_date_called"),
-    [
-        (True, True, True, True),
-        (True, False, True, False),
-        (False, True, False, False),
-        (False, False, False, False),
-    ],
-)
-async def test_get_flags(
+@pytest.mark.parametrize("clean_flag", [True, False])
+async def test_get_clean_flag(
     mock_get: AsyncMock,
     mocker: MockerFixture,
     clean_flag: bool,
-    with_date_flag: bool,
-    clean_called: bool,
-    with_date_called: bool,
 ) -> None:
-    """Test the clean and with_date flags in get_statements."""
-
     def get_side_effect(url: str, params: dict[str, Any] | None = None) -> Response:  # noqa: ARG001  # pyright: ignore[reportUnusedParameter]
         if "statements" in url:
             json = {
@@ -90,7 +77,7 @@ async def test_get_flags(
     mock_get.side_effect = get_side_effect
 
     mock_clean = mocker.patch(
-        "kabukit.sources.jquants.clean.statements.clean",
+        "kabukit.sources.jquants.client.statements.clean",
         return_value=pl.DataFrame(
             {
                 "Code": ["7203"],
@@ -100,23 +87,19 @@ async def test_get_flags(
         ),
     )
     mock_with_date = mocker.patch(
-        "kabukit.sources.datetime.with_date",
+        "kabukit.sources.jquants.client.with_date",
         return_value=pl.DataFrame({"Date": [datetime.date(2023, 1, 1)]}),
     )
 
     client = JQuantsClient("test_token")
-    await client.get_statements(
-        code="7203",
-        clean=clean_flag,
-        with_date=with_date_flag,
-    )
+    await client.get_statements(code="7203", clean=clean_flag)
 
-    if clean_called:
+    if clean_flag:
         mock_clean.assert_called_once()
     else:
         mock_clean.assert_not_called()
 
-    if with_date_called:
+    if clean_flag:
         mock_with_date.assert_called_once()
     else:
         mock_with_date.assert_not_called()
