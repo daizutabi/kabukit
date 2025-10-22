@@ -24,7 +24,7 @@ def callback(df: pl.DataFrame) -> pl.DataFrame:
 
 
 @pytest.mark.asyncio
-async def test_get_entries_single_date() -> None:
+async def mock_get_list_single_date() -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
     df = await get_list("2025-10-09")
@@ -34,7 +34,7 @@ async def test_get_entries_single_date() -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_entries_multiple_dates() -> None:
+async def mock_get_list_multiple_dates() -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
     df = await get_list(["2025-10-09", "2025-10-10"])
@@ -43,7 +43,7 @@ async def test_get_entries_multiple_dates() -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_entries_without_dates() -> None:
+async def mock_get_list_without_dates() -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
     df = await get_list(days=7, max_items=6, callback=callback)

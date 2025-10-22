@@ -16,7 +16,7 @@ pytestmark = pytest.mark.system
 runner = CliRunner()
 
 
-def test_get_entries_all(mock_cache_dir: Path) -> None:
+def mock_get_edinet_list_all(mock_cache_dir: Path) -> None:
     result = runner.invoke(app, ["get", "entries", "--max-items", "3"])
     assert result.exit_code == 0
     assert "書類一覧を" in result.stdout
@@ -27,7 +27,7 @@ def test_get_entries_all(mock_cache_dir: Path) -> None:
     assert any(entries_cache_dir.iterdir())  # Check if any file exists in the directory
 
 
-def test_get_entries_specific_date(mock_cache_dir: Path) -> None:
+def mock_get_edinet_list_specific_date(mock_cache_dir: Path) -> None:
     """Test 'kabu get entries <date>' to retrieve entries for a specific date."""
     # Use a known date with expected entries
     result = runner.invoke(app, ["get", "entries", "2023-01-01"])

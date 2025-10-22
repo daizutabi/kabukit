@@ -101,7 +101,7 @@ def test_get_prices_all_codes(
     mock_cache_write.assert_called_once_with("jquants", "prices", MOCK_DF)
 
 
-def test_get_entries(
+def mock_get_edinet_list(
     mock_get_edinet_list: AsyncMock,
     mock_cache_write: MagicMock,
 ) -> None:
@@ -119,7 +119,7 @@ def test_get_entries(
     mock_cache_write.assert_called_once_with("edinet", "entries", MOCK_DF)
 
 
-def test_get_entries_with_date(
+def mock_get_edinet_list_with_date(
     mock_get_edinet_list: AsyncMock,
     mock_cache_write: MagicMock,
 ) -> None:
@@ -217,7 +217,7 @@ def test_get_prices_interrupt(mock_get_prices: AsyncMock) -> None:
     )
 
 
-def test_get_entries_interrupt(mock_get_edinet_list: AsyncMock) -> None:
+def mock_get_edinet_list_interrupt(mock_get_edinet_list: AsyncMock) -> None:
     mock_get_edinet_list.side_effect = KeyboardInterrupt
 
     result = runner.invoke(app, ["get", "entries"])

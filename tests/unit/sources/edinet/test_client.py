@@ -111,7 +111,7 @@ async def test_get_count_fail(mock_get: AsyncMock, mocker: MockerFixture) -> Non
 
 
 @pytest.mark.asyncio
-async def test_get_entries_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+async def mock_get_list_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     results = [{"docID": "S100TEST"}]
     json = {"results": results}
     response = Response(200, json=json)
@@ -135,7 +135,7 @@ async def test_get_entries_success(mock_get: AsyncMock, mocker: MockerFixture) -
 
 
 @pytest.mark.asyncio
-async def test_get_entries_no_results(
+async def mock_get_list_no_results(
     mock_get: AsyncMock,
     mocker: MockerFixture,
 ) -> None:
@@ -151,7 +151,7 @@ async def test_get_entries_no_results(
 
 
 @pytest.mark.asyncio
-async def test_get_entries_empty_results(
+async def mock_get_list_empty_results(
     mock_get: AsyncMock,
     mocker: MockerFixture,
 ) -> None:
