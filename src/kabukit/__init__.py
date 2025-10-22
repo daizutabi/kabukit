@@ -10,7 +10,12 @@ from .sources.edinet.client import EdinetClient
 from .sources.edinet.concurrent import get_documents as get_edinet_documents
 from .sources.edinet.concurrent import get_list as get_edinet_list
 from .sources.jquants.client import JQuantsClient
-from .sources.jquants.concurrent import get_info, get_prices, get_statements
+from .sources.jquants.concurrent import (
+    get_calendar,
+    get_info,
+    get_prices,
+    get_statements,
+)
 from .sources.tdnet.client import TdnetClient
 from .sources.tdnet.concurrent import get_list as get_tdnet_list
 
@@ -24,6 +29,7 @@ __all__ = [
     "TdnetClient",
     "TdnetList",
     "cache",
+    "get_calendar",
     "get_edinet_documents",
     "get_edinet_list",
     "get_info",
