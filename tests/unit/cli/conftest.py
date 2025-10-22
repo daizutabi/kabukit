@@ -22,6 +22,15 @@ def mock_jquants_client(mocker: MockerFixture) -> MagicMock:
 
 
 @pytest.fixture
+def mock_get_calendar(mocker: MockerFixture) -> AsyncMock:
+    return mocker.patch(
+        "kabukit.sources.jquants.concurrent.get_calendar",
+        new_callable=mocker.AsyncMock,
+        return_value=MOCK_DF,
+    )
+
+
+@pytest.fixture
 def mock_get_info(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
         "kabukit.sources.jquants.concurrent.get_info",

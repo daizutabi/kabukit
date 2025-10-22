@@ -45,6 +45,20 @@ MaxItems = Annotated[
 
 
 @app.async_command()
+async def calendar(*, quiet: Quiet = False) -> None:
+    """営業日カレンダーを取得します。"""
+    from kabukit.domain import cache
+    from kabukit.sources.jquants.concurrent import get_calendar
+
+    df = await get_calendar()
+    path = cache.write("jquants", "calendar", df)
+
+    if not quiet:
+        typer.echo(df)
+        typer.echo(f"営業日カレンダーを '{path}' に保存しました。")
+
+
+@app.async_command()
 async def info(code: Code = None, *, quiet: Quiet = False) -> None:
     """上場銘柄一覧を取得します。"""
     from kabukit.domain import cache
