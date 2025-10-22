@@ -66,7 +66,7 @@ def mock_get_dates(mocker: MockerFixture) -> MagicMock:
 
 
 @pytest.mark.asyncio
-async def mock_get_list_days(
+async def test_get_list_days(
     mocker: MockerFixture,
     mock_get_dates: MagicMock,
 ) -> None:
@@ -108,7 +108,7 @@ async def mock_get_list_days(
 
 
 @pytest.mark.asyncio
-async def mock_get_list_years(
+async def test_get_list_years(
     mocker: MockerFixture,
     mock_get_dates: MagicMock,
 ) -> None:
@@ -141,7 +141,7 @@ async def mock_get_list_years(
 
 
 @pytest.mark.asyncio
-async def mock_get_list_single_date(mock_edinet_client_context: AsyncMock) -> None:
+async def test_get_list_single_date(mock_edinet_client_context: AsyncMock) -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
     target_date = datetime.date(2025, 10, 10)
@@ -151,7 +151,7 @@ async def mock_get_list_single_date(mock_edinet_client_context: AsyncMock) -> No
 
 
 @pytest.mark.asyncio
-async def mock_get_list_invalid_date(mocker: MockerFixture) -> None:
+async def test_get_list_invalid_date(mocker: MockerFixture) -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
     mock_get = mocker.patch(

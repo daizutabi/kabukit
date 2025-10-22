@@ -9,4 +9,4 @@ pytestmark = pytest.mark.unit
 
 def test_data_dir() -> None:
     path = List.data_dir()
-    assert path.parts[-3:] == ("kabukit", "tdnet", "list")
+    assert path.parts[-2:] == ("tdnet", "list")

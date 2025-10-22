@@ -111,14 +111,14 @@ async def test_get_count_fail(mock_get: AsyncMock, mocker: MockerFixture) -> Non
 
 
 @pytest.mark.asyncio
-async def mock_get_list_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_list_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     results = [{"docID": "S100TEST"}]
     json = {"results": results}
     response = Response(200, json=json)
     mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
-    mock_clean_documents = mocker.patch("kabukit.sources.edinet.client.clean_entries")
+    mock_clean_documents = mocker.patch("kabukit.sources.edinet.client.clean_list")
     expected_df = pl.DataFrame(results)
     mock_clean_documents.return_value = expected_df
 
@@ -135,7 +135,7 @@ async def mock_get_list_success(mock_get: AsyncMock, mocker: MockerFixture) -> N
 
 
 @pytest.mark.asyncio
-async def mock_get_list_no_results(
+async def test_get_list_no_results(
     mock_get: AsyncMock,
     mocker: MockerFixture,
 ) -> None:
@@ -151,7 +151,7 @@ async def mock_get_list_no_results(
 
 
 @pytest.mark.asyncio
-async def mock_get_list_empty_results(
+async def test_get_list_empty_results(
     mock_get: AsyncMock,
     mocker: MockerFixture,
 ) -> None:
