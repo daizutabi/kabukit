@@ -109,7 +109,7 @@ async def prices(
 
 
 @app.async_command()
-async def entries(
+async def edinet(
     date: Date = None,
     *,
     quiet: Quiet = False,
@@ -184,4 +184,4 @@ async def all_(
     if code is None:
         typer.echo("---")
         typer.echo("書類一覧を取得します。")
-        await entries(quiet=quiet, max_items=max_items)
+        await edinet(quiet=quiet, max_items=max_items)
