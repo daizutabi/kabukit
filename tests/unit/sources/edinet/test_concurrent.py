@@ -27,37 +27,8 @@ def dummy_callback(df: pl.DataFrame) -> pl.DataFrame:
 
 
 @pytest.fixture
-def mock_utils_get(mocker: MockerFixture) -> AsyncMock:
-    return mocker.patch(
-        "kabukit.utils.concurrent.get",
-        new_callable=mocker.AsyncMock,
-    )
-
-
-@pytest.mark.asyncio
-async def test_get(mock_utils_get: AsyncMock) -> None:
-    from kabukit.sources.edinet.concurrent import get
-
-    mock_utils_get.return_value = pl.DataFrame({"a": [1]})
-
-    result = await get(
-        "test_resource",
-        ["arg1", "arg2"],
-        max_concurrency=10,
-        progress=dummy_progress,  # pyright: ignore[reportArgumentType]
-        callback=dummy_callback,
-    )
-
-    assert result.equals(pl.DataFrame({"a": [1]}))
-    mock_utils_get.assert_awaited_once_with(
-        EdinetClient,
-        "test_resource",
-        ["arg1", "arg2"],
-        max_items=None,
-        max_concurrency=10,
-        progress=dummy_progress,
-        callback=dummy_callback,
-    )
+def mock_get(mocker: MockerFixture) -> AsyncMock:
+    return mocker.patch("kabukit.utils.concurrent.get", new_callable=mocker.AsyncMock)
 
 
 @pytest.fixture
@@ -66,10 +37,7 @@ def mock_get_dates(mocker: MockerFixture) -> MagicMock:
 
 
 @pytest.mark.asyncio
-async def test_get_list_days(
-    mocker: MockerFixture,
-    mock_get_dates: MagicMock,
-) -> None:
+async def test_get_list_days(mock_get_dates: MagicMock, mock_get: AsyncMock) -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
     mock_get_dates.return_value = [
@@ -77,10 +45,6 @@ async def test_get_list_days(
         datetime.date(2023, 1, 2),
         datetime.date(2023, 1, 1),
     ]
-    mock_get = mocker.patch(
-        "kabukit.sources.edinet.concurrent.get",
-        new_callable=mocker.AsyncMock,
-    )
     mock_get.return_value = pl.DataFrame({"Date": [2], "Code": ["10000"]})
 
     result = await get_list(
@@ -92,8 +56,10 @@ async def test_get_list_days(
     )
 
     assert result.equals(pl.DataFrame({"Date": [2], "Code": ["10000"]}))
+
     mock_get_dates.assert_called_once_with(days=3, years=None)
     mock_get.assert_awaited_once_with(
+        EdinetClient,
         "list",
         [
             datetime.date(2023, 1, 3),
@@ -108,26 +74,20 @@ async def test_get_list_days(
 
 
 @pytest.mark.asyncio
-async def test_get_list_years(
-    mocker: MockerFixture,
-    mock_get_dates: MagicMock,
-) -> None:
+async def test_get_list_years(mock_get_dates: MagicMock, mock_get: AsyncMock) -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
     mock_get_dates.return_value = [
         datetime.date(2023, 1, 1),
         datetime.date(2022, 1, 1),
     ]
-    mock_get = mocker.patch(
-        "kabukit.sources.edinet.concurrent.get",
-        new_callable=mocker.AsyncMock,
-    )
     mock_get.return_value = pl.DataFrame({"Date": [1], "Code": ["10000"]})
 
     await get_list(years=2)
 
     mock_get_dates.assert_called_once_with(days=None, years=2)
     mock_get.assert_awaited_once_with(
+        EdinetClient,
         "list",
         [
             datetime.date(2023, 1, 1),
@@ -151,13 +111,9 @@ async def test_get_list_single_date(mock_edinet_client_context: AsyncMock) -> No
 
 
 @pytest.mark.asyncio
-async def test_get_list_invalid_date(mocker: MockerFixture) -> None:
+async def test_get_list_invalid_date(mock_get: AsyncMock) -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
-    mock_get = mocker.patch(
-        "kabukit.sources.edinet.concurrent.get",
-        new_callable=mocker.AsyncMock,
-    )
     mock_get.return_value = pl.DataFrame()
 
     result = await get_list(["2025-10-10"])
@@ -165,13 +121,9 @@ async def test_get_list_invalid_date(mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_documents_csv(mocker: MockerFixture) -> None:
+async def test_get_documents_csv(mock_get: AsyncMock) -> None:
     from kabukit.sources.edinet.concurrent import get_documents
 
-    mock_get = mocker.patch(
-        "kabukit.sources.edinet.concurrent.get",
-        new_callable=mocker.AsyncMock,
-    )
     mock_get.return_value = pl.DataFrame({"docID": [3]})
 
     result = await get_documents(
@@ -183,7 +135,9 @@ async def test_get_documents_csv(mocker: MockerFixture) -> None:
     )
 
     assert result.equals(pl.DataFrame({"docID": [3]}))
+
     mock_get.assert_awaited_once_with(
+        EdinetClient,
         "csv",
         ["doc1", "doc2", "doc3"],
         max_items=2,
@@ -194,18 +148,15 @@ async def test_get_documents_csv(mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_documents_pdf(mocker: MockerFixture) -> None:
+async def test_get_documents_pdf(mock_get: AsyncMock) -> None:
     from kabukit.sources.edinet.concurrent import get_documents
 
-    mock_get = mocker.patch(
-        "kabukit.sources.edinet.concurrent.get",
-        new_callable=mocker.AsyncMock,
-    )
     mock_get.return_value = pl.DataFrame({"docID": [1]})
 
     await get_documents(["doc1", "doc2"], pdf=True)
 
     mock_get.assert_awaited_once_with(
+        EdinetClient,
         "pdf",
         ["doc1", "doc2"],
         max_items=None,

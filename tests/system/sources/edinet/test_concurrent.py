@@ -8,23 +8,13 @@ import pytest
 pytestmark = pytest.mark.system
 
 
-@pytest.mark.asyncio
-async def test_get() -> None:
-    from kabukit.sources.edinet.concurrent import get
-
-    df = await get("list", ["2025-09-09", "2025-09-19", "2025-09-22"])
-    assert df.shape == (1231, 30)
-    assert df["Date"].n_unique() == 3
-    assert df["docID"].n_unique() == 1229  # 重複あり
-
-
 def callback(df: pl.DataFrame) -> pl.DataFrame:
     assert isinstance(df, pl.DataFrame)
     return df
 
 
 @pytest.mark.asyncio
-async def mock_get_list_single_date() -> None:
+async def test_get_list_single_date() -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
     df = await get_list("2025-10-09")
@@ -34,7 +24,7 @@ async def mock_get_list_single_date() -> None:
 
 
 @pytest.mark.asyncio
-async def mock_get_list_multiple_dates() -> None:
+async def test_get_list_multiple_dates() -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
     df = await get_list(["2025-10-09", "2025-10-10"])
@@ -43,7 +33,7 @@ async def mock_get_list_multiple_dates() -> None:
 
 
 @pytest.mark.asyncio
-async def mock_get_list_without_dates() -> None:
+async def test_get_list_without_dates() -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
     df = await get_list(days=7, max_items=6, callback=callback)
