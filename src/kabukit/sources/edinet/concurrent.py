@@ -56,7 +56,7 @@ async def get(
     )
 
 
-async def get_entries(
+async def get_list(
     dates: Iterable[datetime.date | str] | datetime.date | str | None = None,
     /,
     days: int | None = None,
@@ -90,13 +90,13 @@ async def get_entries(
     """
     if isinstance(dates, (str, datetime.date)):
         async with EdinetClient() as client:
-            return await client.get_entries(dates)
+            return await client.get_list(dates)
 
     if dates is None:
         dates = get_dates(days=days, years=years)
 
     df = await get(
-        "entries",
+        "list",
         dates,
         max_items=max_items,
         max_concurrency=max_concurrency,

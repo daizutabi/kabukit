@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.16.5"
+__generated_with = "0.17.0"
 app = marimo.App(width="medium")
 
 
@@ -8,14 +8,14 @@ app = marimo.App(width="medium")
 def _():
     import marimo as mo
 
-    from kabukit import EdinetClient, get_entries
-    return EdinetClient, get_entries, mo
+    from kabukit import EdinetClient, get_edinet_list
+    return EdinetClient, get_edinet_list, mo
 
 
 @app.cell
 async def _(EdinetClient):
     async with EdinetClient() as client:
-        df = await client.get_entries("2025-09-22")
+        df = await client.get_list("2025-09-22")
     df
     return
 
@@ -28,9 +28,9 @@ def _(mo):
 
 
 @app.cell
-async def _(button, get_entries, mo):
+async def _(button, get_edinet_list, mo):
     if button.value:
-        await get_entries(years=1, progress=mo.status.progress_bar)
+        await get_edinet_list(years=1, progress=mo.status.progress_bar)
     return
 
 

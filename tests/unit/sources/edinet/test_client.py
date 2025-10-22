@@ -111,20 +111,20 @@ async def test_get_count_fail(mock_get: AsyncMock, mocker: MockerFixture) -> Non
 
 
 @pytest.mark.asyncio
-async def test_get_entries_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_list_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     results = [{"docID": "S100TEST"}]
     json = {"results": results}
     response = Response(200, json=json)
     mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
-    mock_clean_documents = mocker.patch("kabukit.sources.edinet.client.clean_entries")
+    mock_clean_documents = mocker.patch("kabukit.sources.edinet.client.clean_list")
     expected_df = pl.DataFrame(results)
     mock_clean_documents.return_value = expected_df
 
     client = EdinetClient("test_key")
     date = "2023-10-26"
-    df = await client.get_entries(date)
+    df = await client.get_list(date)
 
     assert_frame_equal(df, expected_df)
     mock_get.assert_awaited_once_with(
@@ -135,7 +135,7 @@ async def test_get_entries_success(mock_get: AsyncMock, mocker: MockerFixture) -
 
 
 @pytest.mark.asyncio
-async def test_get_entries_no_results(
+async def test_get_list_no_results(
     mock_get: AsyncMock,
     mocker: MockerFixture,
 ) -> None:
@@ -145,13 +145,13 @@ async def test_get_entries_no_results(
     response.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
-    df = await client.get_entries("2023-10-26")
+    df = await client.get_list("2023-10-26")
 
     assert df.is_empty()
 
 
 @pytest.mark.asyncio
-async def test_get_entries_empty_results(
+async def test_get_list_empty_results(
     mock_get: AsyncMock,
     mocker: MockerFixture,
 ) -> None:
@@ -161,7 +161,7 @@ async def test_get_entries_empty_results(
     response.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
-    df = await client.get_entries("2023-10-26")
+    df = await client.get_list("2023-10-26")
 
     assert df.is_empty()
 

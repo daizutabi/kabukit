@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import datetime
 import shutil
 from typing import TYPE_CHECKING
-from zoneinfo import ZoneInfo
 
 import polars as pl
 
 from kabukit.utils.config import get_cache_dir
+from kabukit.utils.date import today
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -98,7 +97,7 @@ def write(source: str, group: str, df: pl.DataFrame, name: str | None = None) ->
     data_dir.mkdir(parents=True, exist_ok=True)
 
     if name is None:
-        name = datetime.datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y%m%d")
+        name = today().strftime("%Y%m%d")
 
     filename = data_dir / f"{name}.parquet"
     df.write_parquet(filename)

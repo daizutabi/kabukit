@@ -101,34 +101,34 @@ def test_get_prices_all_codes(
     mock_cache_write.assert_called_once_with("jquants", "prices", MOCK_DF)
 
 
-def test_get_entries(
-    mock_get_entries: AsyncMock,
+def test_get_edinet_list(
+    mock_get_edinet_list: AsyncMock,
     mock_cache_write: MagicMock,
 ) -> None:
-    result = runner.invoke(app, ["get", "entries"])
+    result = runner.invoke(app, ["get", "edinet"])
 
     assert result.exit_code == 0
     assert f"書類一覧を '{MOCK_PATH}' に保存しました。" in result.stdout
 
-    mock_get_entries.assert_awaited_once_with(
+    mock_get_edinet_list.assert_awaited_once_with(
         None,
         years=10,
         progress=tqdm.asyncio.tqdm,
         max_items=None,
     )
-    mock_cache_write.assert_called_once_with("edinet", "entries", MOCK_DF)
+    mock_cache_write.assert_called_once_with("edinet", "list", MOCK_DF)
 
 
-def test_get_entries_with_date(
-    mock_get_entries: AsyncMock,
+def test_get_edinet_list_with_date(
+    mock_get_edinet_list: AsyncMock,
     mock_cache_write: MagicMock,
 ) -> None:
     MOCK_DATE = "2023-01-01"  # noqa: N806
-    result = runner.invoke(app, ["get", "entries", MOCK_DATE])
+    result = runner.invoke(app, ["get", "edinet", MOCK_DATE])
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
-    mock_get_entries.assert_awaited_once_with(
+    mock_get_edinet_list.assert_awaited_once_with(
         MOCK_DATE,
         years=10,
         progress=None,
@@ -153,8 +153,8 @@ def mock_cli_prices(mocker: MockerFixture) -> AsyncMock:
 
 
 @pytest.fixture
-def mock_cli_entries(mocker: MockerFixture) -> AsyncMock:
-    return mocker.patch("kabukit.cli.get.entries", new_callable=AsyncMock)
+def mock_cli_edinet(mocker: MockerFixture) -> AsyncMock:
+    return mocker.patch("kabukit.cli.get.edinet", new_callable=AsyncMock)
 
 
 @pytest.mark.parametrize("quiet", [[], ["-q"], ["--quiet"]])
@@ -178,7 +178,7 @@ def test_get_all_all_codes(
     mock_cli_info: AsyncMock,
     mock_cli_statements: AsyncMock,
     mock_cli_prices: AsyncMock,
-    mock_cli_entries: AsyncMock,
+    mock_cli_edinet: AsyncMock,
     quiet: list[str],
 ) -> None:
     result = runner.invoke(app, ["get", "all", *quiet])
@@ -188,7 +188,7 @@ def test_get_all_all_codes(
     mock_cli_info.assert_awaited_once_with(None, quiet=q)
     mock_cli_statements.assert_awaited_once_with(None, quiet=q, max_items=None)
     mock_cli_prices.assert_awaited_once_with(None, quiet=q, max_items=None)
-    mock_cli_entries.assert_awaited_once_with(quiet=q, max_items=None)
+    mock_cli_edinet.assert_awaited_once_with(quiet=q, max_items=None)
 
 
 def test_get_statements_interrupt(mock_get_statements: AsyncMock) -> None:
@@ -217,13 +217,13 @@ def test_get_prices_interrupt(mock_get_prices: AsyncMock) -> None:
     )
 
 
-def test_get_entries_interrupt(mock_get_entries: AsyncMock) -> None:
-    mock_get_entries.side_effect = KeyboardInterrupt
+def test_get_edinet_list_interrupt(mock_get_edinet_list: AsyncMock) -> None:
+    mock_get_edinet_list.side_effect = KeyboardInterrupt
 
-    result = runner.invoke(app, ["get", "entries"])
+    result = runner.invoke(app, ["get", "edinet"])
 
     assert result.exit_code == 130
-    mock_get_entries.assert_awaited_once_with(
+    mock_get_edinet_list.assert_awaited_once_with(
         None,
         years=10,
         progress=tqdm.asyncio.tqdm,
