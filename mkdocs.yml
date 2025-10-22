@@ -76,6 +76,7 @@ nav:
       - CLI: guides/cli.md
       - J-Quants API: guides/jquants.md
       - EDINET API: guides/edinet.md
+      - TDnet: guides/tdnet.md
       - キャッシュの活用: guides/cache.md
   # - "コンセプト":
   #     - "概要": "concept/index.md"
