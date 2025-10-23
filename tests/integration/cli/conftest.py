@@ -23,8 +23,8 @@ def mock_cache_dir(tmp_path: Path, mocker: MockerFixture) -> Path:
     """Create a temporary cache directory and mock get_cache_dir for tests."""
     # For integration tests, we want to mock the cache directory to a temporary path
     # to avoid polluting the actual cache and ensure test isolation.
-    mocker.patch("kabukit.domain.cache.get_cache_dir", return_value=tmp_path)
-    mocker.patch("kabukit.cli.cache.get_cache_dir", return_value=tmp_path)
+    mocker.patch("kabukit.utils.config.get_cache_dir", return_value=tmp_path)
+    mocker.patch("kabukit.utils.cache.get_cache_dir", return_value=tmp_path)
     return tmp_path
 
 
@@ -32,6 +32,5 @@ def mock_cache_dir(tmp_path: Path, mocker: MockerFixture) -> Path:
 def mock_config_path(mocker: MockerFixture, tmp_path: Path) -> Path:
     """設定ファイルのパスを一時的なものに隔離するフィクスチャ"""
     config_file = tmp_path / "config.toml"
-    mocker.patch("kabukit.cli.auth.get_config_path", return_value=config_file)
     mocker.patch("kabukit.utils.config.get_config_path", return_value=config_file)
     return config_file

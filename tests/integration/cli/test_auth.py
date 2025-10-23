@@ -36,7 +36,7 @@ def mock_jquants_client_auth(mocker: MockerFixture) -> AsyncMock:
 @pytest.fixture
 def mock_get_config_value(mocker: MockerFixture) -> MagicMock:
     """kabukit.cli.auth.get_config_value をモックするフィクスチャ"""
-    return mocker.patch("kabukit.cli.auth.get_config_value")
+    return mocker.patch("kabukit.utils.config.get_config_value")
 
 
 @pytest.fixture
