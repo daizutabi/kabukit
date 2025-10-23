@@ -22,15 +22,6 @@ runner = CliRunner()
 
 
 @pytest.fixture
-def mock_config_path(mocker: MockerFixture, tmp_path: Path) -> Path:
-    """設定ファイルのパスを一時的なものに隔離するフィクスチャ"""
-    config_file = tmp_path / "config.toml"
-    mocker.patch("kabukit.cli.auth.get_config_path", return_value=config_file)
-    mocker.patch("kabukit.utils.config.get_config_path", return_value=config_file)
-    return config_file
-
-
-@pytest.fixture
 def mock_jquants_client_auth(mocker: MockerFixture) -> AsyncMock:
     """JQuantsClient.auth メソッドをモックするフィクスチャ
 

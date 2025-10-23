@@ -18,3 +18,12 @@ def mock_cache_dir(tmp_path: Path, mocker: MockerFixture) -> Path:
     mocker.patch("kabukit.domain.cache.get_cache_dir", return_value=tmp_path)
     mocker.patch("kabukit.cli.cache.get_cache_dir", return_value=tmp_path)
     return tmp_path
+
+
+@pytest.fixture
+def mock_config_path(mocker: MockerFixture, tmp_path: Path) -> Path:
+    """システムテスト用の設定ファイルのパスを一時的なものに隔離するフィクスチャ"""
+    config_file = tmp_path / "config.toml"
+    mocker.patch("kabukit.cli.auth.get_config_path", return_value=config_file)
+    mocker.patch("kabukit.utils.config.get_config_path", return_value=config_file)
+    return config_file
