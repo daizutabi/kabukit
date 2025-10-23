@@ -9,7 +9,7 @@ from typer.testing import CliRunner
 
 from kabukit.cli.app import app
 
-from .conftest import MOCK_DF, MOCK_PATH
+from .conftest import MOCK_DATE, MOCK_DATE_OBJ, MOCK_DF, MOCK_PATH
 
 if TYPE_CHECKING:
     from unittest.mock import MagicMock
@@ -34,14 +34,13 @@ def test_get_edinet_list_with_date(
     mock_get_edinet_list: AsyncMock,
     mock_cache_write: MagicMock,
 ) -> None:
-    MOCK_DATE = "2023-01-01"  # noqa: N806
     result = runner.invoke(app, ["get", "edinet", MOCK_DATE])
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
 
     mock_get_edinet_list.assert_awaited_once_with(
-        MOCK_DATE,
+        MOCK_DATE_OBJ,
         years=10,
         progress=None,
         max_items=None,
@@ -49,7 +48,7 @@ def test_get_edinet_list_with_date(
     mock_cache_write.assert_not_called()
 
 
-def test_get_edinet_list_without_date(
+def test_get_edinet_list(
     mock_get_edinet_list: AsyncMock,
     mock_cache_write: MagicMock,
 ) -> None:
