@@ -32,6 +32,7 @@ Quiet = Annotated[
     bool,
     Option("--quiet", "-q", help="プログレスバーおよびメッセージを表示しません。"),
 ]
+All = Annotated[bool, Option("--all", "-a", help="全銘柄を対象にします。")]
 MaxItems = Annotated[
     int | None,
     Option("--max-items", help="取得する銘柄数の上限。全銘柄取得時にのみ有効です。"),
