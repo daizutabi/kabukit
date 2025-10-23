@@ -1,18 +1,8 @@
 from __future__ import annotations
 
-import polars as pl
 import pytest
 
 pytestmark = pytest.mark.system
-
-
-@pytest.fixture(params=["statements", "prices"])
-def resource(request: pytest.FixtureRequest) -> str:
-    return request.param
-
-
-def callback(df: pl.DataFrame) -> None:
-    assert isinstance(df, pl.DataFrame)
 
 
 @pytest.mark.asyncio
@@ -33,7 +23,15 @@ async def test_get_target_codes_all_ends_with_zero() -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_statements() -> None:
+async def test_get_statements_with_code() -> None:
+    from kabukit.sources.jquants.concurrent import get_statements
+
+    df = await get_statements("7203")
+    assert df["Code"].unique().to_list() == ["72030"]
+
+
+@pytest.mark.asyncio
+async def test_get_statements_with_codes() -> None:
     from kabukit.sources.jquants.concurrent import get_statements
 
     df = await get_statements(["7203", "6758"])
@@ -54,14 +52,6 @@ async def test_get_statements_without_codes() -> None:
 
     df = await get_statements(max_items=3)
     assert df["Code"].n_unique() == 3
-
-
-@pytest.mark.asyncio
-async def test_get_statements_with_single_code() -> None:
-    from kabukit.sources.jquants.concurrent import get_statements
-
-    df = await get_statements("7203")
-    assert df["Code"].unique().to_list() == ["72030"]
 
 
 @pytest.mark.asyncio
