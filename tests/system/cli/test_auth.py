@@ -11,7 +11,6 @@ from kabukit.cli.app import app
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest_mock import MockerFixture
 
 pytestmark = pytest.mark.system
 
@@ -20,15 +19,6 @@ runner = CliRunner()
 # 環境変数から認証情報が設定されているかチェック
 is_auth_set = bool(os.getenv("JQUANTS_MAILADDRESS") and os.getenv("JQUANTS_PASSWORD"))
 reason = "JQUANTS_MAILADDRESS and JQUANTS_PASSWORD must be set"
-
-
-@pytest.fixture
-def mock_config_path(mocker: MockerFixture, tmp_path: Path) -> Path:
-    """システムテスト用の設定ファイルのパスを一時的なものに隔離するフィクスチャ"""
-    config_file = tmp_path / "config.toml"
-    mocker.patch("kabukit.cli.auth.get_config_path", return_value=config_file)
-    mocker.patch("kabukit.utils.config.get_config_path", return_value=config_file)
-    return config_file
 
 
 @pytest.fixture
