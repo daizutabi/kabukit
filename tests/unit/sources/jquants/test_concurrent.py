@@ -35,6 +35,7 @@ async def test_get_info(mock_jquants_client: AsyncMock) -> None:
 
     mock_jquants_client.get_info.assert_awaited_once_with(
         "7203",
+        None,
         only_common_stocks=True,
     )
 
@@ -87,7 +88,7 @@ async def test_get_statements_with_code(mock_jquants_client: AsyncMock) -> None:
 
     await get_statements("7203")
 
-    mock_jquants_client.get_statements.assert_awaited_once_with("7203")
+    mock_jquants_client.get_statements.assert_awaited_once_with("7203", None)
 
 
 @pytest.mark.asyncio
@@ -154,7 +155,7 @@ async def test_get_prices_with_code(mock_jquants_client: AsyncMock) -> None:
 
     await get_prices("7203")
 
-    mock_jquants_client.get_prices.assert_awaited_once_with("7203")
+    mock_jquants_client.get_prices.assert_awaited_once_with("7203", None)
 
 
 @pytest.mark.asyncio
