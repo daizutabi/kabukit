@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 import pytest
+from polars.testing import assert_frame_equal
 
 from kabukit.sources.edinet.client import EdinetClient
 
@@ -55,7 +56,7 @@ async def test_get_list_days(mock_get_dates: MagicMock, mock_get: AsyncMock) -> 
         callback=dummy_callback,
     )
 
-    assert result.equals(pl.DataFrame({"Date": [2], "Code": ["10000"]}))
+    assert_frame_equal(result, pl.DataFrame({"Date": [2], "Code": ["10000"]}))
 
     mock_get_dates.assert_called_once_with(days=3, years=None)
     mock_get.assert_awaited_once_with(
@@ -134,7 +135,7 @@ async def test_get_documents_csv(mock_get: AsyncMock) -> None:
         callback=dummy_callback,
     )
 
-    assert result.equals(pl.DataFrame({"docID": [3]}))
+    assert_frame_equal(result, pl.DataFrame({"docID": [3]}))
 
     mock_get.assert_awaited_once_with(
         EdinetClient,
