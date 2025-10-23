@@ -29,6 +29,27 @@ async def test_get_info(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     assert df["Code"].to_list() == ["7203"]
 
 
+@pytest.mark.asyncio
+async def test_get_info_only_common_stocks(
+    mock_get: AsyncMock,
+    mocker: MockerFixture,
+) -> None:
+    json = {"info": [{"Code": "7203"}, {"Code": "9999"}]}
+    response = Response(200, json=json)
+    mock_get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    mock_filter_common_stocks = mocker.patch(
+        "kabukit.sources.jquants.client.info.filter_common_stocks",
+        return_value=pl.DataFrame({"Code": ["7203"]}),
+    )
+
+    client = JQuantsClient("test_token")
+    df = await client.get_info(clean=False, only_common_stocks=True)
+    assert df["Code"].to_list() == ["7203"]
+    mock_filter_common_stocks.assert_called_once()
+
+
 def test_clean() -> None:
     from kabukit.sources.jquants.clean.info import clean
 
