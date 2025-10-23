@@ -66,8 +66,8 @@ async def get_target_codes() -> list[str]:
 
 async def get_statements(
     codes: Iterable[str] | str | None = None,
-    date: str | datetime.date | None = None,
     /,
+    date: str | datetime.date | None = None,
     max_items: int | None = None,
     max_concurrency: int = 12,
     progress: Progress | None = None,
@@ -117,8 +117,8 @@ async def get_statements(
 
 async def get_prices(
     codes: Iterable[str] | str | None = None,
-    date: str | datetime.date | None = None,
     /,
+    date: str | datetime.date | None = None,
     max_items: int | None = None,
     max_concurrency: int = 8,
     progress: Progress | None = None,
