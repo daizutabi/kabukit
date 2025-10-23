@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from kabukit.utils.cache import read, write
 from kabukit.utils.config import get_cache_dir
-
-from . import cache
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -29,7 +28,7 @@ class Base:
             return
 
         source, group = self._get_cache_path_parts()
-        self.data = cache.read(source, group, name)
+        self.data = read(source, group, name)
 
     @classmethod
     def _get_cache_path_parts(cls) -> tuple[str, str]:
@@ -47,7 +46,7 @@ class Base:
 
     def write(self, name: str | None = None) -> Path:
         source, group = self._get_cache_path_parts()
-        return cache.write(source, group, self.data, name)
+        return write(source, group, self.data, name)
 
     def filter(
         self,
