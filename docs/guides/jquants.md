@@ -33,11 +33,22 @@ df.select("Date", "Code", "CompanyName", "MarketCodeName")
 ```
 
 銘柄コードを省略すると、全上場銘柄の情報を取得できます。
+ただし、デフォルトでは、投資信託や優先株式を除きます。
 
 ```python exec="1" source="material-block"
-df = await get_info()  # 全上場銘柄一覧を取得
-df = df.filter(MarketCodeName="プライム")  # 市場区分がプライムの銘柄を選択
+df = await get_info()  # 全上場銘柄一覧を取得 (投資信託や優先株式を除く)
 df.select("Date", "Code", "CompanyName", "MarketCodeName")
+```
+
+`only_common_stocks` キーワード引数を `False` に設定すると、
+J-Quants API から取得できる全銘柄が含まれます。
+
+```python exec="1" source="material-block"
+from polars import col as c
+
+df = await get_info(only_common_stocks=False)  # 全上場銘柄一覧を取得
+df = df.filter(c.Sector17CodeName == "その他")  # 業種区分が「その他」の銘柄を選択
+df.select("Date", "Code", "CompanyName")
 ```
 
 ### 財務情報 (`get_statements`)
@@ -59,7 +70,6 @@ df.select("DisclosedDate", "Code", "TypeOfDocument")
 このとき、J-Quants API へのリクエストは非同期で並列に行われます。
 
 ```python exec="1" source="material-block"
-from polars import col as c
 import polars as pl
 
 # 複数銘柄の財務情報を取得
@@ -186,7 +196,6 @@ df.select("Date", "Code", "CompanyName", "Sector17CodeName")
 
 ```python exec="1" source="material-block"
 df = await client.get_info(date="2020-10-01")
-df = df.filter(c.Sector17CodeName != "その他")  # 投資信託などを除く
 df.select("Date", "Code", "CompanyName", "Sector17CodeName")
 ```
 
@@ -194,8 +203,17 @@ df.select("Date", "Code", "CompanyName", "Sector17CodeName")
 
 ```python exec="1" source="material-block"
 df = await client.get_info()
-df = df.filter(c.Sector17CodeName != "その他")  # 投資信託などを除く
 df.select("Date", "Code", "CompanyName", "Sector33CodeName")
+```
+
+全銘柄情報の取得では、デフォルトでは、投資信託や優先株式は除外されます。
+J-Quants API から取得できる全銘柄を取得するには、
+`only_common_stocks` キーワード引数を `False` に設定します。
+
+```python exec="1" source="material-block"
+df = await client.get_info(only_common_stocks=False)
+df = df.filter(c.Sector17CodeName == "その他")  # 業種区分が「その他」の銘柄を選択
+df.select("Date", "Code", "CompanyName")
 ```
 
 ### 財務情報 (`get_statements`)
