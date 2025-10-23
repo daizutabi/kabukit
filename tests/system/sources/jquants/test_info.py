@@ -13,11 +13,13 @@ pytestmark = pytest.mark.system
 
 
 @pytest.mark.asyncio
-async def test_date(client: JQuantsClient) -> None:
+@pytest.mark.parametrize("only_common_stocks", [True, False])
+async def test_date(client: JQuantsClient, *, only_common_stocks: bool) -> None:
     today = datetime.datetime.now(ZoneInfo("Asia/Tokyo")).date()
     date = today - datetime.timedelta(weeks=12)
-    df = await client.get_info(date=date)
-    assert df.height > 4000
+    df = await client.get_info(date=date, only_common_stocks=only_common_stocks)
+    height = 3700 if only_common_stocks else 4_000
+    assert df.height > height
     df_date = df.item(0, "Date")
     assert isinstance(df_date, datetime.date)
     assert (df_date - date).days <= 7
@@ -39,7 +41,7 @@ async def df():
 
 
 def test_width(df: pl.DataFrame) -> None:
-    assert df.height > 4000
+    assert df.height > 3700
     assert df.width in [7, 8]  # 7: ライトプラン, 8: スタンダードプラン
 
 
@@ -69,9 +71,9 @@ def test_today(df: pl.DataFrame) -> None:
 @pytest.mark.parametrize(
     ("name", "n"),
     [
-        ("Sector17CodeName", 18),
-        ("Sector33CodeName", 34),
-        ("MarketCodeName", 5),
+        ("Sector17CodeName", 17),
+        ("Sector33CodeName", 33),
+        ("MarketCodeName", 3),
     ],
 )
 def test_categorical_column_uniqueness(df: pl.DataFrame, name: str, n: int) -> None:

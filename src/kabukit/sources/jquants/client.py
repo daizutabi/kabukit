@@ -190,6 +190,7 @@ class JQuantsClient(Client):
         date: str | datetime.date | None = None,
         *,
         clean: bool = True,
+        only_common_stocks: bool = True,
     ) -> pl.DataFrame:
         """上場銘柄一覧を取得する (listed/info)。
 
@@ -197,6 +198,8 @@ class JQuantsClient(Client):
             code: 情報を取得する銘柄コード (例: "86970")。
             date: 情報を取得する日付 (例: "2025-10-01")。
             clean: 取得したデータを整形するかどうか。
+            only_common_stocks (bool, optional): 投資信託や優先株式を除く、
+                普通株式のみを対象とするか。デフォルト値はTrue。
 
         Returns:
             pl.DataFrame: 銘柄情報を含むDataFrame。
@@ -208,6 +211,10 @@ class JQuantsClient(Client):
         url = "/listed/info"
         data = await self.get(url, params)
         df = pl.DataFrame(data["info"])
+
+        if only_common_stocks:
+            df = info.filter_common_stocks(df)
+
         return info.clean(df) if clean else df
 
     async def get_statements(

@@ -33,7 +33,10 @@ async def test_get_info(mock_jquants_client: AsyncMock) -> None:
 
     await get_info("7203")
 
-    mock_jquants_client.get_info.assert_awaited_once_with("7203")
+    mock_jquants_client.get_info.assert_awaited_once_with(
+        "7203",
+        only_common_stocks=True,
+    )
 
 
 @pytest.fixture
@@ -48,38 +51,13 @@ def mock_get_info(mocker: MockerFixture) -> AsyncMock:
 async def test_get_target_codes(mock_get_info: AsyncMock) -> None:
     from kabukit.sources.jquants.concurrent import get_target_codes
 
-    mock_df = pl.DataFrame(
-        {
-            "Code": ["0001", "0002", "0003", "0004", "0005"],
-            "MarketCodeName": [
-                "プライム",
-                "TOKYO PRO MARKET",  # フィルタリング対象
-                "スタンダード",
-                "グロース",
-                "プライム",
-            ],
-            "Sector17CodeName": [
-                "情報・通信業",
-                "サービス業",
-                "その他",  # フィルタリング対象
-                "小売業",
-                "銀行業",
-            ],
-            "CompanyName": [
-                "A社",
-                "B社",
-                "C社",
-                "D（優先株式）",  # フィルタリング対象
-                "E社",
-            ],
-        },
-    )
+    mock_df = pl.DataFrame({"Code": ["0001", "0002"]})
     mock_get_info.return_value = mock_df
 
     result = await get_target_codes()
 
-    mock_get_info.assert_awaited_once_with()
-    assert result == ["0001", "0005"]
+    mock_get_info.assert_awaited_once_with(only_common_stocks=True)
+    assert result == ["0001", "0002"]
 
 
 @pytest.fixture

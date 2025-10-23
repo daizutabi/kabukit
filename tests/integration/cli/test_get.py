@@ -55,7 +55,7 @@ def test_get_info_with_code(mocker: MockerFixture) -> None:
     assert result.exit_code == 0
     assert "test" in result.stdout
 
-    mock_get.assert_called_once_with("1234")
+    mock_get.assert_called_once_with("1234", only_common_stocks=True)
 
 
 def test_get_info_without_code(mocker: MockerFixture, mock_cache_dir: Path) -> None:
