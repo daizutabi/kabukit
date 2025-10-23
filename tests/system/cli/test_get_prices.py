@@ -18,6 +18,7 @@ runner = CliRunner()
 
 def test_get_prices_with_code(mock_cache_dir: Path) -> None:
     result = runner.invoke(app, ["get", "prices", "7203"])
+
     assert result.exit_code == 0
     assert "shape:" in result.stdout
 
@@ -25,8 +26,20 @@ def test_get_prices_with_code(mock_cache_dir: Path) -> None:
     assert not prices_cache_dir.exists()
 
 
-def test_get_prices_without_code(mock_cache_dir: Path) -> None:
+def test_get_prices_with_date(mock_cache_dir: Path) -> None:
+    result = runner.invoke(app, ["get", "prices", "20230104"])
+
+    assert result.exit_code == 0
+    assert "shape:" in result.stdout
+    assert "2023-01-04" in result.stdout
+
+    prices_cache_dir = mock_cache_dir / "jquants" / "prices"
+    assert not prices_cache_dir.exists()
+
+
+def test_get_prices(mock_cache_dir: Path) -> None:
     result = runner.invoke(app, ["get", "prices", "--max-items", "3"])
+
     assert result.exit_code == 0
     assert "全銘柄の株価情報を" in result.stdout
     assert "shape:" in result.stdout
