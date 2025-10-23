@@ -31,3 +31,19 @@ def test_date_to_str(d: str | date) -> None:
     from kabukit.utils.params import date_to_str
 
     assert date_to_str(d) == "2023-01-01"
+
+
+@pytest.mark.parametrize(
+    ("arg", "code", "d"),
+    [
+        (None, None, None),
+        ("7203", "7203", None),
+        ("1301A", "1301A", None),
+        ("2023-01-01", None, date(2023, 1, 1)),
+        ("20230101", None, date(2023, 1, 1)),
+    ],
+)
+def test_get_code_date(arg: str, code: str | None, d: date | None) -> None:
+    from kabukit.utils.params import get_code_date
+
+    assert get_code_date(arg) == (code, d)
