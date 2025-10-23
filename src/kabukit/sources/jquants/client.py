@@ -192,12 +192,14 @@ class JQuantsClient(Client):
         clean: bool = True,
         only_common_stocks: bool = True,
     ) -> pl.DataFrame:
-        """上場銘柄一覧を取得する (listed/info)。
+        """上場銘柄一覧を取得する。
 
         Args:
-            code: 情報を取得する銘柄コード (例: "86970")。
-            date: 情報を取得する日付 (例: "2025-10-01")。
-            clean: 取得したデータを整形するかどうか。
+            code (str, optional): 銘柄情報を取得する銘柄コード (例: "7203")。
+            date (str | datetime.date, optional): 銘柄情報を取得する日付
+                (例: "2025-10-01")。
+            clean (bool, optional): 取得したデータを整形するかどうか。
+                デフォルト値はTrue。
             only_common_stocks (bool, optional): 投資信託や優先株式を除く、
                 普通株式のみを対象とするか。デフォルト値はTrue。
 
@@ -224,12 +226,14 @@ class JQuantsClient(Client):
         *,
         clean: bool = True,
     ) -> pl.DataFrame:
-        """財務情報を取得する (fins/statements)。
+        """四半期毎の決算短信サマリーおよび業績・配当の修正に関する開示情報を取得する。
 
         Args:
-            code: 財務情報を取得する銘柄コード。
-            date: 財務情報を取得する日付。
-            clean: 取得したデータを整形するかどうか。
+            code (str, optional): 財務情報を取得する銘柄コード (例: "7203")。
+            date (str | datetime.date, optional): 財務情報を取得する日付
+                (例: "2025-10-01")。
+            clean (bool, optional): 取得したデータを整形するかどうか。
+                デフォルト値はTrue。
 
         Returns:
             pl.DataFrame: 財務情報を含むDataFrame。
@@ -269,11 +273,15 @@ class JQuantsClient(Client):
         """日々の株価四本値を取得する (prices/daily_quotes)。
 
         Args:
-            code: 株価を取得する銘柄コード。
-            date: 株価を取得する日付。`from_`または`to`とは併用不可。
-            from_: 取得期間の開始日。`date`とは併用不可。
-            to: 取得期間の終了日。`date`とは併用不可。
-            clean: 取得したデータを整形するかどうか。
+            code (str, optional): 株価を取得する銘柄コード (例: "7203")。
+            date (str | datetime.date, optional): 株価を取得する日付
+                (例: "2025-10-01")。`from_`または`to`とは併用不可。
+            from_ (str | datetime.date, optional): 取得期間の開始日。
+                `date`とは併用不可。
+            to (str | datetime.date, optional): 取得期間の終了日。
+                `date`とは併用不可。
+            clean (bool, optional): 取得したデータを整形するかどうか。
+                デフォルト値はTrue。
 
         Returns:
             pl.DataFrame: 日々の株価四本値を含むDataFrame。
@@ -314,8 +322,10 @@ class JQuantsClient(Client):
         データが存在する最初の日の全銘柄データを返す。
 
         Args:
-            num_days: 遡って検索する最大日数。
-            clean: 取得したデータを整形するかどうか。
+            num_days (int, optional): 遡って検索する最大日数。
+                デフォルト値は30。
+            clean (bool, optional): 取得したデータを整形するかどうか。
+                デフォルト値はTrue。
 
         Returns:
             pl.DataFrame: データが見つかった場合はその日の株価DataFrame、
@@ -360,9 +370,9 @@ class JQuantsClient(Client):
         """投資部門別売買状況を取得する (markets/trades_spec)。
 
         Args:
-            section: 絞り込み対象のセクション (例: "TSE")。
-            from_: 取得期間の開始日。
-            to: 取得期間の終了日。
+            section (str, optional): 絞り込み対象のセクション (例: "TSE")。
+            from_ (str | datetime.date, optional): 取得期間の開始日。
+            to (str | datetime.date, optional): 取得期間の終了日。
 
         Returns:
             pl.DataFrame: 投資部門別売買状況を含むDataFrame。
@@ -390,8 +400,8 @@ class JQuantsClient(Client):
         """TOPIXの時系列データを取得する (indices/topix)。
 
         Args:
-            from_: 取得期間の開始日。
-            to: 取得期間の終了日。
+            from_ (str | datetime.date, optional): 取得期間の開始日。
+            to (str | datetime.date, optional): 取得期間の終了日。
 
         Returns:
             pl.DataFrame: 日次のTOPIX指数データを含むDataFrame。
@@ -420,9 +430,10 @@ class JQuantsClient(Client):
         """市場の営業日カレンダーを取得する (markets/trading_calendar)。
 
         Args:
-            holidaydivision: 祝日区分 ("0":非営業日, "1":営業日など)。
-            from_: 取得期間の開始日。
-            to: 取得期間の終了日。
+            holidaydivision (str, optional): 祝日区分
+                ("0":非営業日, "1":営業日など)。
+            from_ (str | datetime.date, optional): 取得期間の開始日。
+            to (str | datetime.date, optional): 取得期間の終了日。
 
         Returns:
             pl.DataFrame: 市場の営業日・休業日データを含むDataFrame。
