@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, Any
 
-from .date import strpdate
+from .datetime import strpdate
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

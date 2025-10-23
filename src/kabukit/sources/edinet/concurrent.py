@@ -4,7 +4,7 @@ import datetime
 from typing import TYPE_CHECKING
 
 from kabukit.utils import concurrent
-from kabukit.utils.date import get_dates
+from kabukit.utils.datetime import get_dates
 
 from .client import EdinetClient
 

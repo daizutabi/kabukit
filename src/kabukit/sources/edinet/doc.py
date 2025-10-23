@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from kabukit.utils.date import strpdate
+from kabukit.utils.datetime import strpdate
 
 if TYPE_CHECKING:
     import datetime

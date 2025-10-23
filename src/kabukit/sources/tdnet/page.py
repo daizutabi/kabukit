@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import polars as pl
 from bs4 import BeautifulSoup
 
-from kabukit.utils.date import strptime
+from kabukit.utils.datetime import strptime
 
 if TYPE_CHECKING:
     import datetime

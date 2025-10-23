@@ -17,7 +17,7 @@ pytestmark = pytest.mark.unit
     ],
 )
 def test_strpdate(date_str: str, fmt: str | None, date: datetime.date) -> None:
-    from kabukit.utils.date import strpdate
+    from kabukit.utils.datetime import strpdate
 
     assert strpdate(date_str, fmt) == date
 
@@ -31,19 +31,19 @@ def test_strpdate(date_str: str, fmt: str | None, date: datetime.date) -> None:
     ],
 )
 def test_strptime(time_str: str, fmt: str | None, date: datetime.date) -> None:
-    from kabukit.utils.date import strptime
+    from kabukit.utils.datetime import strptime
 
     assert strptime(time_str, fmt) == date
 
 
 def test_dates_days() -> None:
-    from kabukit.utils.date import get_dates
+    from kabukit.utils.datetime import get_dates
 
     assert len(get_dates(days=5)) == 5
 
 
 def test_dates_years() -> None:
-    from kabukit.utils.date import get_dates
+    from kabukit.utils.datetime import get_dates
 
     assert len(get_dates(years=1)) in [365, 366]
     assert len(get_dates(years=2)) in [365 + 365, 366 + 365]
@@ -51,7 +51,7 @@ def test_dates_years() -> None:
 
 
 def test_dates_error() -> None:
-    from kabukit.utils.date import get_dates
+    from kabukit.utils.datetime import get_dates
 
     with pytest.raises(ValueError, match="daysまたはyears"):
         get_dates()

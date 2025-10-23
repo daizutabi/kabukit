@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import polars as pl
 
 from kabukit.utils.config import get_cache_dir
-from kabukit.utils.date import today
+from kabukit.utils.datetime import today
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
