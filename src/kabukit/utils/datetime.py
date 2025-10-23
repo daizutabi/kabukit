@@ -53,7 +53,10 @@ def today() -> datetime.date:
     return datetime.datetime.now(ZoneInfo("Asia/Tokyo")).date()
 
 
-def get_dates(days: int | None = None, years: int | None = None) -> list[datetime.date]:
+def get_past_dates(
+    days: int | None = None,
+    years: int | None = None,
+) -> list[datetime.date]:
     """過去days日またはyears年の日付リストを返す。
 
     Args:

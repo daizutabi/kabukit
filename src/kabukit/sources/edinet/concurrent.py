@@ -4,7 +4,7 @@ import datetime
 from typing import TYPE_CHECKING
 
 from kabukit.utils import concurrent
-from kabukit.utils.datetime import get_dates
+from kabukit.utils.datetime import get_past_dates
 
 from .client import EdinetClient
 
@@ -53,7 +53,7 @@ async def get_list(
             return await client.get_list(dates)
 
     if dates is None:
-        dates = get_dates(days=days, years=years)
+        dates = get_past_dates(days=days, years=years)
 
     df = await concurrent.get(
         EdinetClient,

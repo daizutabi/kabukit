@@ -33,15 +33,18 @@ def mock_get(mocker: MockerFixture) -> AsyncMock:
 
 
 @pytest.fixture
-def mock_get_dates(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("kabukit.sources.edinet.concurrent.get_dates")
+def mock_get_past_dates(mocker: MockerFixture) -> MagicMock:
+    return mocker.patch("kabukit.sources.edinet.concurrent.get_past_dates")
 
 
 @pytest.mark.asyncio
-async def test_get_list_days(mock_get_dates: MagicMock, mock_get: AsyncMock) -> None:
+async def test_get_list_days(
+    mock_get_past_dates: MagicMock,
+    mock_get: AsyncMock,
+) -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
-    mock_get_dates.return_value = [
+    mock_get_past_dates.return_value = [
         datetime.date(2023, 1, 3),
         datetime.date(2023, 1, 2),
         datetime.date(2023, 1, 1),
@@ -58,7 +61,7 @@ async def test_get_list_days(mock_get_dates: MagicMock, mock_get: AsyncMock) -> 
 
     assert_frame_equal(result, pl.DataFrame({"Date": [2], "Code": ["10000"]}))
 
-    mock_get_dates.assert_called_once_with(days=3, years=None)
+    mock_get_past_dates.assert_called_once_with(days=3, years=None)
     mock_get.assert_awaited_once_with(
         EdinetClient,
         "list",
@@ -75,10 +78,13 @@ async def test_get_list_days(mock_get_dates: MagicMock, mock_get: AsyncMock) -> 
 
 
 @pytest.mark.asyncio
-async def test_get_list_years(mock_get_dates: MagicMock, mock_get: AsyncMock) -> None:
+async def test_get_list_years(
+    mock_get_past_dates: MagicMock,
+    mock_get: AsyncMock,
+) -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
-    mock_get_dates.return_value = [
+    mock_get_past_dates.return_value = [
         datetime.date(2023, 1, 1),
         datetime.date(2022, 1, 1),
     ]
@@ -86,7 +92,7 @@ async def test_get_list_years(mock_get_dates: MagicMock, mock_get: AsyncMock) ->
 
     await get_list(years=2)
 
-    mock_get_dates.assert_called_once_with(days=None, years=2)
+    mock_get_past_dates.assert_called_once_with(days=None, years=2)
     mock_get.assert_awaited_once_with(
         EdinetClient,
         "list",

@@ -36,22 +36,22 @@ def test_strptime(time_str: str, fmt: str | None, date: datetime.date) -> None:
     assert strptime(time_str, fmt) == date
 
 
-def test_dates_days() -> None:
-    from kabukit.utils.datetime import get_dates
+def test_get_past_dates_days() -> None:
+    from kabukit.utils.datetime import get_past_dates
 
-    assert len(get_dates(days=5)) == 5
-
-
-def test_dates_years() -> None:
-    from kabukit.utils.datetime import get_dates
-
-    assert len(get_dates(years=1)) in [365, 366]
-    assert len(get_dates(years=2)) in [365 + 365, 366 + 365]
-    assert len(get_dates(years=4)) == 365 * 4 + 1
+    assert len(get_past_dates(days=5)) == 5
 
 
-def test_dates_error() -> None:
-    from kabukit.utils.datetime import get_dates
+def test_get_past_dates_years() -> None:
+    from kabukit.utils.datetime import get_past_dates
+
+    assert len(get_past_dates(years=1)) in [365, 366]
+    assert len(get_past_dates(years=2)) in [365 + 365, 366 + 365]
+    assert len(get_past_dates(years=4)) == 365 * 4 + 1
+
+
+def test_get_past_dates_error() -> None:
+    from kabukit.utils.datetime import get_past_dates
 
     with pytest.raises(ValueError, match="daysまたはyears"):
-        get_dates()
+        get_past_dates()
