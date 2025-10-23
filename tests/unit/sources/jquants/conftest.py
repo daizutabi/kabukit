@@ -30,7 +30,7 @@ def reset_calendar_cache_manager(mocker: MockerFixture):
 
 
 @pytest.fixture
-def mock_jquants_client_context(mocker: MockerFixture) -> AsyncMock:
+def mock_jquants_client(mocker: MockerFixture) -> AsyncMock:
     """JQuantsClientの非同期コンテキストマネージャをモックするフィクスチャ"""
     mock_client_instance = mocker.AsyncMock()
     mocker.patch(
