@@ -123,13 +123,33 @@ async def prices(
 
 
 @app.async_command()
+async def jquants(
+    code: Code = None,
+    *,
+    quiet: Quiet = False,
+    max_items: MaxItems = None,
+) -> None:
+    """J-Quants APIから全情報を取得します。"""
+    typer.echo("上場銘柄一覧を取得します。")
+    await info(code, quiet=quiet)
+
+    typer.echo("---")
+    typer.echo("財務情報を取得します。")
+    await statements(code, quiet=quiet, max_items=max_items)
+
+    typer.echo("---")
+    typer.echo("株価情報を取得します。")
+    await prices(code, quiet=quiet, max_items=max_items)
+
+
+@app.async_command()
 async def edinet(
     date: Date = None,
     *,
     quiet: Quiet = False,
     max_items: MaxItems = None,
 ) -> None:
-    """EDINETから書類一覧を取得します。"""
+    """EDINET APIから書類一覧を取得します。"""
     import tqdm.asyncio
 
     from kabukit.domain import cache
@@ -174,28 +194,3 @@ async def tdnet(
     if not date:
         path = cache.write("tdnet", "list", df)
         typer.echo(f"書類一覧を '{path}' に保存しました。")
-
-
-@app.async_command(name="all")
-async def all_(
-    code: Code = None,
-    *,
-    quiet: Quiet = False,
-    max_items: MaxItems = None,
-) -> None:
-    """上場銘柄一覧、財務情報、株価情報、書類一覧を連続して取得します。"""
-    typer.echo("上場銘柄一覧を取得します。")
-    await info(code, quiet=quiet)
-
-    typer.echo("---")
-    typer.echo("財務情報を取得します。")
-    await statements(code, quiet=quiet, max_items=max_items)
-
-    typer.echo("---")
-    typer.echo("株価情報を取得します。")
-    await prices(code, quiet=quiet, max_items=max_items)
-
-    if code is None:
-        typer.echo("---")
-        typer.echo("書類一覧を取得します。")
-        await edinet(quiet=quiet, max_items=max_items)

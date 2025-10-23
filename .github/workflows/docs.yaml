@@ -53,7 +53,9 @@ jobs:
           find ~/.cache/kabukit -name "*.parquet" -ls || echo "No parquet files found"
       - name: Get data if cache not found
         if: steps.cache-data.outputs.cache-hit != 'true'
-        run: uv run kabu get all -q
+        run: |
+          uv run kabu get jquants -q
+          uv run kabu get edinet -q
       - name: Debug - Check cache after get
         run: |
           echo "=== Contents of ~/.cache/kabukit after get:"
