@@ -37,7 +37,7 @@ def test_get_info_with_code(mock_get_info: AsyncMock) -> None:
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
 
-    mock_get_info.assert_called_once_with("1234", only_common_stocks=True)
+    mock_get_info.assert_called_once_with("1234", None, only_common_stocks=True)
 
 
 def test_get_info_without_code(mock_get_info: AsyncMock, mock_cache_dir: Path) -> None:
@@ -47,6 +47,6 @@ def test_get_info_without_code(mock_get_info: AsyncMock, mock_cache_dir: Path) -
     assert str(MOCK_DF) in result.stdout
     assert "全銘柄の情報を" in result.stdout
 
-    mock_get_info.assert_called_once_with(None, only_common_stocks=True)
+    mock_get_info.assert_called_once_with(None, None, only_common_stocks=True)
     path = next(mock_cache_dir.joinpath("jquants", "info").glob("*.parquet"))
     assert_frame_equal(pl.read_parquet(path), MOCK_DF)
