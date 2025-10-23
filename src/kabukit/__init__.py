@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from .domain import cache
 from .domain.edinet.list import List as EdinetList
 from .domain.jquants.info import Info
 from .domain.jquants.prices import Prices
@@ -28,7 +27,6 @@ __all__ = [
     "Statements",
     "TdnetClient",
     "TdnetList",
-    "cache",
     "get_calendar",
     "get_edinet_documents",
     "get_edinet_list",
