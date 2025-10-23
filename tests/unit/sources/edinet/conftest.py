@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def mock_edinet_client_context(mocker: MockerFixture) -> AsyncMock:
+def mock_edinet_client(mocker: MockerFixture) -> AsyncMock:
     """EdinetClientの非同期コンテキストマネージャをモックするフィクスチャ"""
     mock_client_instance = mocker.AsyncMock()
     mocker.patch(

@@ -8,7 +8,7 @@ import pytest_asyncio
 from polars import col as c
 
 from kabukit.domain.jquants.prices import Prices
-from kabukit.sources.jquants.concurrent import get
+from kabukit.sources.jquants.concurrent import get_prices
 from tests.validation.conftest import pytestmark  # noqa: F401
 
 if TYPE_CHECKING:
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 @pytest_asyncio.fixture(scope="module")
 async def prices(statements: Statements) -> Prices:
     codes = ["7203"]
-    data = await get("prices", codes)
+    data = await get_prices(codes)
     return Prices(data).with_equity(statements)
 
 

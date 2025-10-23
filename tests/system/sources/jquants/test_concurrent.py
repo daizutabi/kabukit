@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import marimo as mo
 import polars as pl
 import pytest
 
@@ -14,22 +13,6 @@ def resource(request: pytest.FixtureRequest) -> str:
 
 def callback(df: pl.DataFrame) -> None:
     assert isinstance(df, pl.DataFrame)
-
-
-@pytest.mark.asyncio
-async def test_get(resource: str) -> None:
-    from kabukit.sources.jquants.concurrent import get
-
-    df = await get(resource, ["7203", "6758"], progress=mo.status.progress_bar)
-    assert sorted(df["Code"].unique()) == ["67580", "72030"]
-
-
-@pytest.mark.asyncio
-async def test_get_without_codes(resource: str) -> None:
-    from kabukit.sources.jquants.concurrent import get
-
-    df = await get(resource, max_items=3, callback=callback)
-    assert df["Code"].n_unique() == 3
 
 
 @pytest.mark.asyncio

@@ -9,7 +9,7 @@ import pytest_asyncio
 from polars import col as c
 
 from kabukit.domain.jquants.prices import Prices
-from kabukit.sources.jquants.concurrent import get
+from kabukit.sources.jquants.concurrent import get_prices
 from tests.validation.conftest import pytestmark  # noqa: F401
 
 if TYPE_CHECKING:
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 @pytest_asyncio.fixture(scope="module")
 async def data(statements: Statements) -> pl.DataFrame:
     codes = ["7203"]  # トヨタのみ
-    data = await get("prices", codes)
+    data = await get_prices(codes)
     return Prices(data).with_yields(statements).period_stats()
 
 
