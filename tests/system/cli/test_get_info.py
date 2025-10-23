@@ -29,7 +29,19 @@ def test_get_info_with_code(mock_cache_dir: Path) -> None:
     assert not info_cache_dir.exists()
 
 
-def test_get_info_without_code(mock_cache_dir: Path) -> None:
+def test_get_info_with_date(mock_cache_dir: Path) -> None:
+    result = runner.invoke(app, ["get", "info", "20230104"])
+
+    assert result.exit_code == 0
+    assert "Code" in result.stdout
+    assert "CompanyName" in result.stdout
+    assert "2023-01-04" in result.stdout
+
+    info_cache_dir = mock_cache_dir / "jquants" / "info"
+    assert not info_cache_dir.exists()
+
+
+def test_get_info(mock_cache_dir: Path) -> None:
     result = runner.invoke(app, ["get", "info"])
 
     assert result.exit_code == 0
@@ -39,4 +51,4 @@ def test_get_info_without_code(mock_cache_dir: Path) -> None:
 
     info_cache_dir = mock_cache_dir / "jquants" / "info"
     assert info_cache_dir.is_dir()
-    assert any(info_cache_dir.iterdir())  # Check if any file exists in the directory
+    assert any(info_cache_dir.iterdir())

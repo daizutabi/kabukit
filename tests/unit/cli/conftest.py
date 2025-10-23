@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
@@ -13,6 +14,8 @@ if TYPE_CHECKING:
 
 MOCK_DF = pl.DataFrame({"A": [1, 2], "B": [3, 4]})
 MOCK_CODE = "1234"
+MOCK_DATE = "20220101"
+MOCK_DATE_OBJ = datetime.date(2022, 1, 1)
 MOCK_PATH = "fake/path.csv"
 
 

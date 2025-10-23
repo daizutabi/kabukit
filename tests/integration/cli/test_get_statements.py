@@ -9,7 +9,7 @@ from typer.testing import CliRunner
 
 from kabukit.cli.app import app
 
-from .conftest import MOCK_DF
+from .conftest import MOCK_CODE, MOCK_DATE, MOCK_DATE_OBJ, MOCK_DF
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -31,7 +31,49 @@ def mock_get_statements(mocker: MockerFixture) -> AsyncMock:
     )
 
 
-def test_get_statements_without_code(
+def get_cache_files(cache_dir: Path) -> list[Path]:
+    return list(cache_dir.joinpath("jquants", "statements").glob("*.parquet"))
+
+
+def test_get_statements_with_code(
+    mock_get_statements: AsyncMock,
+    mock_cache_dir: Path,
+) -> None:
+    result = runner.invoke(app, ["get", "statements", MOCK_CODE])
+
+    assert result.exit_code == 0
+    assert str(MOCK_DF) in result.stdout
+
+    mock_get_statements.assert_awaited_once_with(
+        MOCK_CODE,
+        None,
+        max_items=None,
+        progress=None,
+    )
+
+    assert not get_cache_files(mock_cache_dir)
+
+
+def test_get_statements_with_date(
+    mock_get_statements: AsyncMock,
+    mock_cache_dir: Path,
+) -> None:
+    result = runner.invoke(app, ["get", "statements", MOCK_DATE])
+
+    assert result.exit_code == 0
+    assert str(MOCK_DF) in result.stdout
+
+    mock_get_statements.assert_awaited_once_with(
+        None,
+        MOCK_DATE_OBJ,
+        max_items=None,
+        progress=None,
+    )
+
+    assert not get_cache_files(mock_cache_dir)
+
+
+def test_get_statements(
     mock_get_statements: AsyncMock,
     mock_cache_dir: Path,
     mocker: MockerFixture,
@@ -42,11 +84,13 @@ def test_get_statements_without_code(
     assert str(MOCK_DF) in result.stdout
     assert "全銘柄の財務情報を" in result.stdout
 
-    mock_get_statements.assert_called_once_with(
+    mock_get_statements.assert_awaited_once_with(
+        None,
         None,
         max_items=None,
         progress=mocker.ANY,
     )
 
-    path = next(mock_cache_dir.joinpath("jquants", "statements").glob("*.parquet"))
-    assert_frame_equal(pl.read_parquet(path), MOCK_DF)
+    cache_files = get_cache_files(mock_cache_dir)
+    assert len(cache_files) == 1
+    assert_frame_equal(pl.read_parquet(cache_files[0]), MOCK_DF)

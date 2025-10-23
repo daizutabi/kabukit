@@ -9,7 +9,7 @@ from typer.testing import CliRunner
 
 from kabukit.cli.app import app
 
-from .conftest import MOCK_CODE, MOCK_DF, MOCK_PATH
+from .conftest import MOCK_CODE, MOCK_DATE, MOCK_DATE_OBJ, MOCK_DF, MOCK_PATH
 
 if TYPE_CHECKING:
     from unittest.mock import MagicMock
@@ -38,12 +38,28 @@ def test_get_statements_with_code(mock_get_statements: AsyncMock) -> None:
 
     mock_get_statements.assert_awaited_once_with(
         MOCK_CODE,
+        None,
         max_items=None,
         progress=None,
     )
 
 
-def test_get_statements_without_code(
+def test_get_statements_with_date(mock_get_statements: AsyncMock) -> None:
+    mock_get_statements.return_value = MOCK_DF
+    result = runner.invoke(app, ["get", "statements", MOCK_DATE])
+
+    assert result.exit_code == 0
+    assert str(MOCK_DF) in result.stdout
+
+    mock_get_statements.assert_awaited_once_with(
+        None,
+        MOCK_DATE_OBJ,
+        max_items=None,
+        progress=None,
+    )
+
+
+def test_get_statements(
     mock_get_statements: AsyncMock,
     mock_cache_write: MagicMock,
 ) -> None:
@@ -55,6 +71,7 @@ def test_get_statements_without_code(
     assert f"全銘柄の財務情報を '{MOCK_PATH}' に保存しました。" in result.stdout
 
     mock_get_statements.assert_awaited_once_with(
+        None,
         None,
         max_items=None,
         progress=tqdm.asyncio.tqdm,
@@ -70,6 +87,7 @@ def test_get_statements_interrupt(mock_get_statements: AsyncMock) -> None:
     assert result.exit_code == 130
 
     mock_get_statements.assert_awaited_once_with(
+        None,
         None,
         max_items=None,
         progress=tqdm.asyncio.tqdm,
