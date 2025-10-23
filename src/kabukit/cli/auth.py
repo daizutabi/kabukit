@@ -38,19 +38,6 @@ Password = Annotated[
 
 @app.async_command()
 async def jquants(mailaddress: Mailaddress = None, password: Password = None) -> None:
-    """J-Quants APIの認証を行い、トークンを設定ファイルに保存します。(エイリアス: j)"""
-    await auth_jquants(mailaddress, password)
-
-
-@app.async_command(name="j", hidden=True)
-async def jquants_alias(
-    mailaddress: Mailaddress = None,
-    password: Password = None,
-) -> None:
-    await auth_jquants(mailaddress, password)
-
-
-async def auth_jquants(mailaddress: str | None, password: str | None) -> None:
     """J-Quants APIの認証を行い、トークンを設定ファイルに保存します。"""
     from kabukit.sources.jquants.client import JQuantsClient
 
@@ -92,16 +79,6 @@ ApiKey = Annotated[
 
 @app.command()
 def edinet(api_key: ApiKey = None) -> None:
-    """EDINET APIのAPIキーを設定ファイルに保存します。(エイリアス: e)"""
-    auth_edinet(api_key)
-
-
-@app.command(name="e", hidden=True)
-def edinet_alias(api_key: ApiKey = None) -> None:
-    auth_edinet(api_key)
-
-
-def auth_edinet(api_key: str | None) -> None:
     """EDINET APIのAPIキーを設定ファイルに保存します。"""
     if api_key is None:
         api_key = typer.prompt("EDINETで取得したAPIキー")
