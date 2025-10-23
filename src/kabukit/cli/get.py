@@ -42,11 +42,11 @@ MaxItems = Annotated[
 @app.async_command()
 async def calendar(*, quiet: Quiet = False) -> None:
     """営業日カレンダーを取得します。"""
-    from kabukit.domain import cache
     from kabukit.sources.jquants.concurrent import get_calendar
+    from kabukit.utils.cache import write
 
     df = await get_calendar()
-    path = cache.write("jquants", "calendar", df)
+    path = write("jquants", "calendar", df)
 
     if not quiet:
         typer.echo(df)
@@ -56,8 +56,8 @@ async def calendar(*, quiet: Quiet = False) -> None:
 @app.async_command()
 async def info(arg: Arg = None, *, quiet: Quiet = False) -> None:
     """上場銘柄一覧を取得します。"""
-    from kabukit.domain import cache
     from kabukit.sources.jquants.concurrent import get_info
+    from kabukit.utils.cache import write
     from kabukit.utils.params import get_code_date
 
     df = await get_info(*get_code_date(arg))
@@ -66,7 +66,7 @@ async def info(arg: Arg = None, *, quiet: Quiet = False) -> None:
         typer.echo(df)
 
     if arg is None:
-        path = cache.write("jquants", "info", df)
+        path = write("jquants", "info", df)
         if not quiet:
             typer.echo(f"全銘柄の情報を '{path}' に保存しました。")
 
@@ -81,8 +81,8 @@ async def statements(
     """財務情報を取得します。"""
     import tqdm.asyncio
 
-    from kabukit.domain import cache
     from kabukit.sources.jquants.concurrent import get_statements
+    from kabukit.utils.cache import write
     from kabukit.utils.params import get_code_date
 
     progress = None if arg or quiet else tqdm.asyncio.tqdm
@@ -96,7 +96,7 @@ async def statements(
         typer.echo(df)
 
     if arg is None:
-        path = cache.write("jquants", "statements", df)
+        path = write("jquants", "statements", df)
         if not quiet:
             typer.echo(f"全銘柄の財務情報を '{path}' に保存しました。")
 
@@ -111,8 +111,8 @@ async def prices(
     """株価情報を取得します。"""
     import tqdm.asyncio
 
-    from kabukit.domain import cache
     from kabukit.sources.jquants.concurrent import get_prices
+    from kabukit.utils.cache import write
     from kabukit.utils.params import get_code_date
 
     progress = None if arg or quiet else tqdm.asyncio.tqdm
@@ -122,7 +122,7 @@ async def prices(
         typer.echo(df)
 
     if arg is None:
-        path = cache.write("jquants", "prices", df)
+        path = write("jquants", "prices", df)
         if not quiet:
             typer.echo(f"全銘柄の株価情報を '{path}' に保存しました。")
 
@@ -157,8 +157,8 @@ async def edinet(
     """EDINET APIから書類一覧を取得します。"""
     import tqdm.asyncio
 
-    from kabukit.domain import cache
     from kabukit.sources.edinet.concurrent import get_list
+    from kabukit.utils.cache import write
     from kabukit.utils.params import get_code_date
 
     _, date_ = get_code_date(date)
@@ -170,7 +170,7 @@ async def edinet(
         typer.echo(df)
 
     if not date:
-        path = cache.write("edinet", "list", df)
+        path = write("edinet", "list", df)
         if not quiet:
             typer.echo(f"書類一覧を '{path}' に保存しました。")
 
@@ -185,8 +185,8 @@ async def tdnet(
     """TDnetから書類一覧を取得します。"""
     import tqdm.asyncio
 
-    from kabukit.domain import cache
     from kabukit.sources.tdnet.concurrent import get_list
+    from kabukit.utils.cache import write
     from kabukit.utils.params import get_code_date
 
     _, date_ = get_code_date(date)
@@ -198,6 +198,6 @@ async def tdnet(
         typer.echo(df)
 
     if not date:
-        path = cache.write("tdnet", "list", df)
+        path = write("tdnet", "list", df)
         if not quiet:
             typer.echo(f"書類一覧を '{path}' に保存しました。")
