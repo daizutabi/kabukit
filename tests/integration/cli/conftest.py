@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 from typing import TYPE_CHECKING
 
 import polars as pl
@@ -10,6 +11,10 @@ if TYPE_CHECKING:
 
     from pytest_mock import MockerFixture
 
+
+MOCK_CODE = "1234"
+MOCK_DATE = "20220101"
+MOCK_DATE_OBJ = datetime.date(2022, 1, 1)
 MOCK_DF = pl.DataFrame({"Date": [1, 2], "Code": [3, 4]})
 
 
