@@ -16,19 +16,17 @@ pytestmark = pytest.mark.system
 runner = CliRunner()
 
 
-def test_get_all(mock_cache_dir: Path) -> None:
-    result = runner.invoke(app, ["get", "all", "--max-items", "3"])
+def test_get_jquants(mock_cache_dir: Path) -> None:
+    result = runner.invoke(app, ["get", "jquants", "--max-items", "3"])
 
     assert result.exit_code == 0
     assert "上場銘柄一覧を取得します。" in result.stdout
     assert "財務情報を取得します。" in result.stdout
     assert "株価情報を取得します。" in result.stdout
-    assert "書類一覧を取得します。" in result.stdout
 
     # Verify cache directories and files
     expected_cache_dirs = {
         "jquants": ["info", "statements", "prices"],
-        "edinet": ["list"],
     }
     for source, groups in expected_cache_dirs.items():
         for group in groups:
