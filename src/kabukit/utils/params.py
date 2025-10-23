@@ -3,6 +3,8 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, Any
 
+from .date import strpdate
+
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
@@ -45,3 +47,23 @@ def date_to_str(date: str | datetime.date) -> str:
         return date.strftime("%Y-%m-%d")
 
     return date
+
+
+def get_code_date(
+    arg: str | None,
+) -> tuple[None, None] | tuple[str, None] | tuple[None, datetime.date]:
+    """銘柄コードあるいは日付文字列を解析し、銘柄コードまたは日付オブジェクトを返す。
+
+    Args:
+        arg: 銘柄コードあるいは日付文字列。
+
+    Returns:
+        銘柄コードまたは日付オブジェクトのタプル。
+    """
+    if arg is None:
+        return None, None
+
+    if len(arg) in [4, 5]:
+        return arg, None
+
+    return None, strpdate(arg)
