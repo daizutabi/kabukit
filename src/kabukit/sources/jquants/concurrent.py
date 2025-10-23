@@ -7,6 +7,7 @@ from kabukit.utils import concurrent
 from .client import JQuantsClient
 
 if TYPE_CHECKING:
+    import datetime
     from collections.abc import Iterable
 
     import polars as pl
@@ -29,13 +30,17 @@ async def get_calendar() -> pl.DataFrame:
 
 async def get_info(
     code: str | None = None,
+    date: str | datetime.date | None = None,
     *,
     only_common_stocks: bool = True,
 ) -> pl.DataFrame:
     """上場銘柄一覧を取得する。
 
     Args:
-        code (str | None): 銘柄コード。指定しない場合、全銘柄が対象となる。
+        code (str, optional): 銘柄情報を取得する銘柄コード (例: "7203")。
+            省略された場合、全銘柄が対象となる。
+        date (str | datetime.date, optional): 銘柄情報を取得する日付
+            (例: "2025-10-01")。
         only_common_stocks (bool, optional): 投資信託や優先株式を除く、
             普通株式のみを対象とするか。デフォルト値はTrue。
 
@@ -46,7 +51,7 @@ async def get_info(
         HTTPStatusError: APIリクエストが失敗した場合。
     """
     async with JQuantsClient() as client:
-        return await client.get_info(code, only_common_stocks=only_common_stocks)
+        return await client.get_info(code, date, only_common_stocks=only_common_stocks)
 
 
 async def get_target_codes() -> list[str]:
@@ -61,6 +66,7 @@ async def get_target_codes() -> list[str]:
 
 async def get_statements(
     codes: Iterable[str] | str | None = None,
+    date: str | datetime.date | None = None,
     /,
     max_items: int | None = None,
     max_concurrency: int = 12,
@@ -70,8 +76,10 @@ async def get_statements(
     """四半期毎の決算短信サマリーおよび業績・配当の修正に関する開示情報を取得する。
 
     Args:
-        codes (Iterable[str] | str | None): 財務情報を取得する銘柄のコード。
-            Noneが指定された場合、全銘柄が対象となる。
+        codes (Iterable[str] | str, optional): 財務情報を取得する銘柄のコード。
+            省略された場合、全銘柄が対象となる。
+        date (str | datetime.date, optional): 銘柄情報を取得する日付
+            (例: "2025-10-01")。
         max_items (int | None, optional): 取得する銘柄数の上限。
             指定しないときはすべての銘柄が対象となる。
         max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
@@ -88,9 +96,9 @@ async def get_statements(
     Raises:
         HTTPStatusError: APIリクエストが失敗した場合。
     """
-    if isinstance(codes, str):
+    if isinstance(codes, str) or (codes is None and date):
         async with JQuantsClient() as client:
-            return await client.get_statements(codes)
+            return await client.get_statements(codes, date)
 
     if codes is None:
         codes = await get_target_codes()
@@ -109,6 +117,7 @@ async def get_statements(
 
 async def get_prices(
     codes: Iterable[str] | str | None = None,
+    date: str | datetime.date | None = None,
     /,
     max_items: int | None = None,
     max_concurrency: int = 8,
@@ -120,8 +129,10 @@ async def get_prices(
     株価は分割・併合を考慮した調整済み株価（小数点第２位四捨五入）と調整前の株価を取得できる。
 
     Args:
-        codes (Iterable[str] | str | None): 財務情報を取得する銘柄のコード。
-            Noneが指定された場合、全銘柄が対象となる。
+        codes (Iterable[str] | str, optional): 株価情報を取得する銘柄のコード。
+            省略された場合、全銘柄が対象となる。
+        date (str | datetime.date, optional): 株価情報を取得する日付
+            (例: "2025-10-01")。
         max_items (int | None, optional): 取得する銘柄数の上限。
             指定しないときはすべての銘柄が対象となる。
         max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
@@ -138,9 +149,9 @@ async def get_prices(
     Raises:
         HTTPStatusError: APIリクエストが失敗した場合。
     """
-    if isinstance(codes, str):
+    if isinstance(codes, str) or (codes is None and date):
         async with JQuantsClient() as client:
-            return await client.get_prices(codes)
+            return await client.get_prices(codes, date)
 
     if codes is None:
         codes = await get_target_codes()
