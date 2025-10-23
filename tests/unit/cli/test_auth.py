@@ -34,12 +34,12 @@ def mock_jquants_client(mocker: MockerFixture) -> MagicMock:
 
 @pytest.fixture
 def mock_get_config_value(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("kabukit.cli.auth.get_config_value")
+    return mocker.patch("kabukit.utils.config.get_config_value")
 
 
 @pytest.fixture
 def mock_save_config_key(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("kabukit.cli.auth.save_config_key")
+    return mocker.patch("kabukit.utils.config.save_config_key")
 
 
 @pytest.fixture
@@ -260,7 +260,7 @@ def mock_get_config_path(mocker: MockerFixture, tmp_path: Path) -> MagicMock:
     mock_path = mocker.MagicMock(spec=Path)
     mock_path.exists.return_value = False
     mock_path.__str__.return_value = str(tmp_path / "config.toml")  # pyright: ignore[reportAttributeAccessIssue]
-    mocker.patch("kabukit.cli.auth.get_config_path", return_value=mock_path)
+    mocker.patch("kabukit.utils.config.get_config_path", return_value=mock_path)
     return mock_path
 
 

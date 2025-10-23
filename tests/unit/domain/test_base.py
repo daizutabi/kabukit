@@ -40,7 +40,7 @@ def test_data_dir(mocker: MockerFixture) -> None:
 def test_write_no_name(mocker: MockerFixture, data: pl.DataFrame) -> None:
     mocker.patch.object(Derived, "__module__", "kabukit.domain.jquants.derived")
     mock_cache_write = mocker.patch(
-        "kabukit.domain.cache.write",
+        "kabukit.domain.base.write",
         return_value=Path("mocked_path.parquet"),
     )
     path = Derived(data).write()
@@ -51,7 +51,7 @@ def test_write_no_name(mocker: MockerFixture, data: pl.DataFrame) -> None:
 def test_write_with_name(mocker: MockerFixture, data: pl.DataFrame) -> None:
     mocker.patch.object(Derived, "__module__", "kabukit.domain.jquants.derived")
     mock_cache_write = mocker.patch(
-        "kabukit.domain.cache.write",
+        "kabukit.domain.base.write",
         return_value=Path("mocked_path.parquet"),
     )
     path = Derived(data).write(name="my_file")
@@ -61,7 +61,7 @@ def test_write_with_name(mocker: MockerFixture, data: pl.DataFrame) -> None:
 
 def test_init_from_cache(mocker: MockerFixture, data: pl.DataFrame) -> None:
     mocker.patch.object(Derived, "__module__", "kabukit.domain.jquants.derived")
-    mock_cache_read = mocker.patch("kabukit.domain.cache.read", return_value=data)
+    mock_cache_read = mocker.patch("kabukit.domain.base.read", return_value=data)
 
     derived = Derived()
     assert isinstance(derived, Derived)
@@ -72,7 +72,7 @@ def test_init_from_cache(mocker: MockerFixture, data: pl.DataFrame) -> None:
 def test_init_from_cache_file_not_found(mocker: MockerFixture) -> None:
     mocker.patch.object(Derived, "__module__", "kabukit.domain.jquants.derived")
     mocker.patch(
-        "kabukit.domain.cache.read",
+        "kabukit.domain.base.read",
         side_effect=FileNotFoundError("No data found in mocked_cache_dir"),
     )
     with pytest.raises(FileNotFoundError, match="No data found in mocked_cache_dir"):

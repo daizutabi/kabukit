@@ -8,7 +8,7 @@ import polars as pl
 from bs4 import BeautifulSoup
 
 from kabukit.sources.base import Client
-from kabukit.utils.date import strpdate
+from kabukit.utils.datetime import strpdate
 
 from .page import iter_page_numbers, parse
 

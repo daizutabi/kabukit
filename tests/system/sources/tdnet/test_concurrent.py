@@ -11,7 +11,7 @@ pytestmark = pytest.mark.system
 @pytest_asyncio.fixture(scope="module")
 async def dates():
     from kabukit.sources.jquants.client import JQuantsClient
-    from kabukit.utils.date import today
+    from kabukit.utils.datetime import today
 
     date = today()
 
@@ -68,7 +68,7 @@ async def test_get_list_invalid_date() -> None:
 @pytest.mark.asyncio
 async def test_get_list_future_date() -> None:
     from kabukit.sources.tdnet.concurrent import get_list
-    from kabukit.utils.date import today
+    from kabukit.utils.datetime import today
 
     date = today() + datetime.timedelta(1)
     df = await get_list(date)

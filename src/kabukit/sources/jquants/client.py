@@ -10,7 +10,7 @@ import polars as pl
 from kabukit.sources.base import Client
 from kabukit.sources.datetime import with_date
 from kabukit.utils.config import get_config_value
-from kabukit.utils.date import today
+from kabukit.utils.datetime import today
 from kabukit.utils.params import get_params
 
 from .clean import calendar, info, prices, statements, topix

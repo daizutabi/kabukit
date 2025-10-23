@@ -7,10 +7,6 @@ from async_typer import AsyncTyper  # pyright: ignore[reportMissingTypeStubs]
 from httpx import HTTPStatusError
 from typer import Exit, Option
 
-from kabukit.sources.edinet.client import AuthKey as EdinetAuthKey
-from kabukit.sources.jquants.client import AuthKey as JQuantsAuthKey
-from kabukit.utils.config import get_config_path, get_config_value, save_config_key
-
 # pyright: reportUnknownMemberType=false
 
 app = AsyncTyper(
@@ -39,9 +35,10 @@ Password = Annotated[
 @app.async_command()
 async def jquants(mailaddress: Mailaddress = None, password: Password = None) -> None:
     """J-Quants APIの認証を行い、トークンを設定ファイルに保存します。"""
-    from kabukit.sources.jquants.client import JQuantsClient
+    from kabukit.sources.jquants.client import AuthKey, JQuantsClient
+    from kabukit.utils.config import get_config_value, save_config_key
 
-    mailaddress = mailaddress or get_config_value(JQuantsAuthKey.MAILADDRESS)
+    mailaddress = mailaddress or get_config_value(AuthKey.MAILADDRESS)
 
     if mailaddress is None:
         mailaddress = typer.prompt("J-Quantsに登録したメールアドレス")
@@ -49,7 +46,7 @@ async def jquants(mailaddress: Mailaddress = None, password: Password = None) ->
             typer.echo("メールアドレスが入力されていません。")
             raise Exit(1)
 
-    password = password or get_config_value(JQuantsAuthKey.PASSWORD)
+    password = password or get_config_value(AuthKey.PASSWORD)
 
     if password is None:
         password = typer.prompt("J-Quantsのパスワード", hide_input=True)
@@ -64,7 +61,7 @@ async def jquants(mailaddress: Mailaddress = None, password: Password = None) ->
             typer.echo("認証に失敗しました。")
             raise Exit(1) from None
 
-    save_config_key(JQuantsAuthKey.ID_TOKEN, id_token)
+    save_config_key(AuthKey.ID_TOKEN, id_token)
     typer.echo("J-QuantsのIDトークンを保存しました。")
 
 
@@ -80,6 +77,9 @@ ApiKey = Annotated[
 @app.command()
 def edinet(api_key: ApiKey = None) -> None:
     """EDINET APIのAPIキーを設定ファイルに保存します。"""
+    from kabukit.sources.edinet.client import AuthKey
+    from kabukit.utils.config import save_config_key
+
     if api_key is None:
         api_key = typer.prompt("EDINETで取得したAPIキー")
 
@@ -87,13 +87,15 @@ def edinet(api_key: ApiKey = None) -> None:
         typer.echo("APIキーが入力されていません。")
         raise Exit(1)
 
-    save_config_key(EdinetAuthKey.API_KEY, api_key)
+    save_config_key(AuthKey.API_KEY, api_key)
     typer.echo("EDINETのAPIキーを保存しました。")
 
 
 @app.command()
 def show() -> None:
     """設定ファイルに保存したJ-Quants IDトークンおよびEDINET APIキーを表示します。"""
+    from kabukit.utils.config import get_config_path
+
     path = get_config_path()
     typer.echo(f"設定ファイル: {path}")
 
