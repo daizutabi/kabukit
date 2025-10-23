@@ -31,11 +31,37 @@ async def test_get_calendar(mock_jquants_client: AsyncMock) -> None:
 async def test_get_info(mock_jquants_client: AsyncMock) -> None:
     from kabukit.sources.jquants.concurrent import get_info
 
+    await get_info()
+
+    mock_jquants_client.get_info.assert_awaited_once_with(
+        None,
+        None,
+        only_common_stocks=True,
+    )
+
+
+@pytest.mark.asyncio
+async def test_get_info_with_code(mock_jquants_client: AsyncMock) -> None:
+    from kabukit.sources.jquants.concurrent import get_info
+
     await get_info("7203")
 
     mock_jquants_client.get_info.assert_awaited_once_with(
         "7203",
         None,
+        only_common_stocks=True,
+    )
+
+
+@pytest.mark.asyncio
+async def test_get_info_with_date(mock_jquants_client: AsyncMock) -> None:
+    from kabukit.sources.jquants.concurrent import get_info
+
+    await get_info(date="2025-10-10")
+
+    mock_jquants_client.get_info.assert_awaited_once_with(
+        None,
+        "2025-10-10",
         only_common_stocks=True,
     )
 
@@ -92,6 +118,15 @@ async def test_get_statements_with_code(mock_jquants_client: AsyncMock) -> None:
 
 
 @pytest.mark.asyncio
+async def test_get_statements_with_date(mock_jquants_client: AsyncMock) -> None:
+    from kabukit.sources.jquants.concurrent import get_statements
+
+    await get_statements(date="2025-10-10")
+
+    mock_jquants_client.get_statements.assert_awaited_once_with(None, "2025-10-10")
+
+
+@pytest.mark.asyncio
 async def test_get_statements_with_codes(mock_get: AsyncMock) -> None:
     from kabukit.sources.jquants.concurrent import get_statements
 
@@ -121,7 +156,7 @@ async def test_get_statements_with_codes(mock_get: AsyncMock) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_statements_without_codes(
+async def test_get_statements(
     mock_get: AsyncMock,
     mock_get_target_codes: AsyncMock,
 ) -> None:
@@ -159,6 +194,15 @@ async def test_get_prices_with_code(mock_jquants_client: AsyncMock) -> None:
 
 
 @pytest.mark.asyncio
+async def test_get_prices_with_date(mock_jquants_client: AsyncMock) -> None:
+    from kabukit.sources.jquants.concurrent import get_prices
+
+    await get_prices(date="2025-10-10")
+
+    mock_jquants_client.get_prices.assert_awaited_once_with(None, "2025-10-10")
+
+
+@pytest.mark.asyncio
 async def test_get_prices_with_codes(mock_get: AsyncMock) -> None:
     from kabukit.sources.jquants.concurrent import get_prices
 
@@ -189,7 +233,7 @@ async def test_get_prices_with_codes(mock_get: AsyncMock) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_prices_without_codes(
+async def test_get_prices(
     mock_get: AsyncMock,
     mock_get_target_codes: AsyncMock,
 ) -> None:
