@@ -18,7 +18,7 @@ runner = CliRunner()
 
 
 def test_cache_tree_not_exist(mocker: MockerFixture) -> None:
-    mock_get_cache_dir = mocker.patch("kabukit.cli.cache.get_cache_dir")
+    mock_get_cache_dir = mocker.patch("kabukit.utils.config.get_cache_dir")
     mock_get_cache_dir.return_value = Path("/non/existent/path")
     result = runner.invoke(app, ["cache", "tree"])
     assert result.exit_code == 0
@@ -30,7 +30,7 @@ def remove_ansi(text: str) -> str:
 
 
 def test_cache_tree_exists(mocker: MockerFixture, tmp_path: Path) -> None:
-    mock_get_cache_dir = mocker.patch("kabukit.cli.cache.get_cache_dir")
+    mock_get_cache_dir = mocker.patch("kabukit.utils.config.get_cache_dir")
     mock_get_cache_dir.return_value = tmp_path
     (tmp_path / "info").mkdir()
     (tmp_path / "info" / "test.parquet").touch()
@@ -45,7 +45,7 @@ def test_cache_tree_exists(mocker: MockerFixture, tmp_path: Path) -> None:
 
 
 def test_cache_clean_not_exist(mocker: MockerFixture) -> None:
-    mock_get_cache_dir = mocker.patch("kabukit.cli.cache.get_cache_dir")
+    mock_get_cache_dir = mocker.patch("kabukit.utils.config.get_cache_dir")
     mock_get_cache_dir.return_value = Path("/non/existent/path")
     result = runner.invoke(app, ["cache", "clean"])
     assert result.exit_code == 0
@@ -53,7 +53,7 @@ def test_cache_clean_not_exist(mocker: MockerFixture) -> None:
 
 
 def test_cache_clean_exists(mocker: MockerFixture, tmp_path: Path) -> None:
-    mock_get_cache_dir = mocker.patch("kabukit.cli.cache.get_cache_dir")
+    mock_get_cache_dir = mocker.patch("kabukit.utils.config.get_cache_dir")
     mock_get_cache_dir.return_value = tmp_path
     mock_rmtree = mocker.patch("shutil.rmtree")
     (tmp_path / "info").mkdir()
@@ -65,7 +65,7 @@ def test_cache_clean_exists(mocker: MockerFixture, tmp_path: Path) -> None:
 
 
 def test_cache_clean_error(mocker: MockerFixture, tmp_path: Path) -> None:
-    mock_get_cache_dir = mocker.patch("kabukit.cli.cache.get_cache_dir")
+    mock_get_cache_dir = mocker.patch("kabukit.utils.config.get_cache_dir")
     mock_get_cache_dir.return_value = tmp_path
     mock_rmtree = mocker.patch("shutil.rmtree", side_effect=OSError("Test error"))
     (tmp_path / "info").mkdir()
