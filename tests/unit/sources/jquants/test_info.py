@@ -24,7 +24,7 @@ async def test_get_info(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     response.raise_for_status = mocker.MagicMock()
 
     client = JQuantsClient("test_token")
-    df = await client.get_info(clean=False)
+    df = await client.get_info(clean=False, only_common_stocks=False)
     assert df["Date"].to_list() == ["2023-01-01"]
     assert df["Code"].to_list() == ["7203"]
 
@@ -50,3 +50,37 @@ def test_clean() -> None:
     assert df["ACodeName"].dtype == pl.Categorical
     assert df["BCodeName"].dtype == pl.Categorical
     assert df["ScaleCategory"].dtype == pl.Categorical
+
+
+def test_filter_common_stocks() -> None:
+    from kabukit.sources.jquants.clean.info import filter_common_stocks
+
+    df = pl.DataFrame(
+        {
+            "Code": ["0001", "0002", "0003", "0004", "0005"],
+            "MarketCodeName": [
+                "プライム",
+                "TOKYO PRO MARKET",  # フィルタリング対象
+                "スタンダード",
+                "グロース",
+                "プライム",
+            ],
+            "Sector17CodeName": [
+                "情報・通信業",
+                "サービス業",
+                "その他",  # フィルタリング対象
+                "小売業",
+                "銀行業",
+            ],
+            "CompanyName": [
+                "A社",
+                "B社",
+                "C社",
+                "D（優先株式）",  # フィルタリング対象
+                "E社",
+            ],
+        },
+    )
+
+    result = filter_common_stocks(df)
+    assert result["Code"].to_list() == ["0001", "0005"]
