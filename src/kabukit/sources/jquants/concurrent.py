@@ -2,14 +2,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import polars as pl
-
 from kabukit.utils import concurrent
 
 from .client import JQuantsClient
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+
+    import polars as pl
 
     from kabukit.utils.concurrent import Callback, Progress
 
@@ -27,8 +27,17 @@ async def get_calendar() -> pl.DataFrame:
         return await client.get_calendar()
 
 
-async def get_info(code: str | None = None, /) -> pl.DataFrame:
+async def get_info(
+    code: str | None = None,
+    *,
+    only_common_stocks: bool = True,
+) -> pl.DataFrame:
     """上場銘柄一覧を取得する。
+
+    Args:
+        code (str | None): 銘柄コード。指定しない場合、全銘柄が対象となる。
+        only_common_stocks (bool, optional): 投資信託や優先株式を除く、
+            普通株式のみを対象とするか。デフォルト値はTrue。
 
     Returns:
         pl.DataFrame: 銘柄情報を含むDataFrame。
@@ -37,32 +46,17 @@ async def get_info(code: str | None = None, /) -> pl.DataFrame:
         HTTPStatusError: APIリクエストが失敗した場合。
     """
     async with JQuantsClient() as client:
-        return await client.get_info(code)
+        return await client.get_info(code, only_common_stocks=only_common_stocks)
 
 
 async def get_target_codes() -> list[str]:
-    """分析対象となる銘柄コードのリストを返す。
-
-    以下の条件を満たす銘柄は対象外とする。
-
-    - 市場: TOKYO PRO MARKET
-    - 業種: その他 -- (投資信託など)
-    - 優先株式
+    """分析対象となる、普通株式の銘柄コードのリストを返す。
 
     Returns:
         list[str]: 分析対象となる銘柄コードのリスト。
     """
-    info = await get_info()
-
-    return (
-        info.filter(
-            pl.col("MarketCodeName") != "TOKYO PRO MARKET",
-            pl.col("Sector17CodeName") != "その他",
-            ~pl.col("CompanyName").str.contains("優先株式"),
-        )
-        .get_column("Code")
-        .to_list()
-    )
+    info = await get_info(only_common_stocks=True)
+    return info.get_column("Code").to_list()
 
 
 async def get_statements(
