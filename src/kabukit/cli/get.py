@@ -36,7 +36,7 @@ Date = Annotated[
 ]
 Quiet = Annotated[
     bool,
-    Option("--quiet", "-q", help="プログレスバーを表示しません。"),
+    Option("--quiet", "-q", help="プログレスバーおよびメッセージを表示しません。"),
 ]
 MaxItems = Annotated[
     int | None,
@@ -66,12 +66,13 @@ async def info(code: Code = None, *, quiet: Quiet = False) -> None:
 
     df = await get_info(code)
 
-    if code or not quiet:
+    if not quiet:
         typer.echo(df)
 
     if code is None:
         path = cache.write("jquants", "info", df)
-        typer.echo(f"全銘柄の情報を '{path}' に保存しました。")
+        if not quiet:
+            typer.echo(f"全銘柄の情報を '{path}' に保存しました。")
 
 
 @app.async_command()
@@ -95,7 +96,8 @@ async def statements(
 
     if code is None:
         path = cache.write("jquants", "statements", df)
-        typer.echo(f"全銘柄の財務情報を '{path}' に保存しました。")
+        if not quiet:
+            typer.echo(f"全銘柄の財務情報を '{path}' に保存しました。")
 
 
 @app.async_command()
@@ -119,7 +121,8 @@ async def prices(
 
     if code is None:
         path = cache.write("jquants", "prices", df)
-        typer.echo(f"全銘柄の株価情報を '{path}' に保存しました。")
+        if not quiet:
+            typer.echo(f"全銘柄の株価情報を '{path}' に保存しました。")
 
 
 @app.async_command()
@@ -166,7 +169,8 @@ async def edinet(
 
     if not date:
         path = cache.write("edinet", "list", df)
-        typer.echo(f"書類一覧を '{path}' に保存しました。")
+        if not quiet:
+            typer.echo(f"書類一覧を '{path}' に保存しました。")
 
 
 @app.async_command()
@@ -193,4 +197,5 @@ async def tdnet(
 
     if not date:
         path = cache.write("tdnet", "list", df)
-        typer.echo(f"書類一覧を '{path}' に保存しました。")
+        if not quiet:
+            typer.echo(f"書類一覧を '{path}' に保存しました。")
