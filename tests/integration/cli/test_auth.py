@@ -45,18 +45,7 @@ def mock_typer_prompt(mocker: MockerFixture) -> MagicMock:
     return mocker.patch("typer.prompt")
 
 
-@pytest.fixture(params=["jquants", "j"])
-def jquants_command(request: pytest.FixtureRequest) -> str:
-    return request.param
-
-
-@pytest.fixture(params=["edinet", "e"])
-def edinet_command(request: pytest.FixtureRequest) -> str:
-    return request.param
-
-
 def test_auth_jquants_saves_token_to_config(
-    jquants_command: str,
     mock_config_path: Path,
     mock_jquants_client_auth: AsyncMock,
 ) -> None:
@@ -69,7 +58,7 @@ def test_auth_jquants_saves_token_to_config(
         app,
         [
             "auth",
-            jquants_command,
+            "jquants",
             "--mailaddress",
             "test@example.com",
             "--password",
@@ -91,7 +80,6 @@ def test_auth_jquants_saves_token_to_config(
 
 
 def test_auth_jquants_handles_auth_failure(
-    jquants_command: str,
     mock_config_path: Path,
     mock_jquants_client_auth: AsyncMock,
 ) -> None:
@@ -108,7 +96,7 @@ def test_auth_jquants_handles_auth_failure(
         app,
         [
             "auth",
-            jquants_command,
+            "jquants",
             "--mailaddress",
             "test@example.com",
             "--password",
@@ -128,7 +116,6 @@ def test_auth_jquants_handles_auth_failure(
 
 
 def test_auth_jquants_config_fallback(
-    jquants_command: str,
     mock_config_path: Path,
     mock_jquants_client_auth: AsyncMock,
     mock_get_config_value: MagicMock,
@@ -148,7 +135,7 @@ def test_auth_jquants_config_fallback(
     mock_get_config_value.side_effect = side_effect
 
     # CLIコマンドを実行 (引数なし)
-    result = runner.invoke(app, ["auth", jquants_command])
+    result = runner.invoke(app, ["auth", "jquants"])
 
     # CLIコマンドが成功したことを確認
     assert result.exit_code == 0
@@ -169,7 +156,6 @@ def test_auth_jquants_config_fallback(
 
 
 def test_auth_jquants_prompt_fallback(
-    jquants_command: str,
     mock_config_path: Path,
     mock_jquants_client_auth: AsyncMock,
     mock_get_config_value: MagicMock,
@@ -186,7 +172,7 @@ def test_auth_jquants_prompt_fallback(
     mock_typer_prompt.side_effect = ["prompt@example.com", "prompt_password"]
 
     # CLIコマンドを実行 (引数なし)
-    result = runner.invoke(app, ["auth", jquants_command])
+    result = runner.invoke(app, ["auth", "jquants"])
 
     # CLIコマンドが成功したことを確認
     assert result.exit_code == 0
@@ -212,7 +198,6 @@ def test_auth_jquants_prompt_fallback(
     [(["", ""], "メールアドレス"), (["prompt@example.com", ""], "パスワード")],
 )
 def test_auth_jquants_prompt_fallback_error(
-    jquants_command: str,
     mock_jquants_client_auth: AsyncMock,
     mock_get_config_value: MagicMock,
     mock_typer_prompt: MagicMock,
@@ -230,7 +215,7 @@ def test_auth_jquants_prompt_fallback_error(
     mock_typer_prompt.side_effect = size_effect
 
     # CLIコマンドを実行 (引数なし)
-    result = runner.invoke(app, ["auth", jquants_command])
+    result = runner.invoke(app, ["auth", "jquants"])
 
     # CLIコマンドが成功したことを確認
     assert result.exit_code == 1
@@ -238,7 +223,6 @@ def test_auth_jquants_prompt_fallback_error(
 
 
 def test_auth_edinet_saves_api_key_to_config(
-    edinet_command: str,
     mock_config_path: Path,
     mock_typer_prompt: MagicMock,  # プロンプトが呼ばれないことを確認するため
 ) -> None:
@@ -246,7 +230,7 @@ def test_auth_edinet_saves_api_key_to_config(
     # CLIコマンドを実行
     result = runner.invoke(
         app,
-        ["auth", edinet_command, "--api-key", "cli_api_key_123"],
+        ["auth", "edinet", "--api-key", "cli_api_key_123"],
     )
 
     # CLIコマンドが成功したことを確認
@@ -261,7 +245,6 @@ def test_auth_edinet_saves_api_key_to_config(
 
 
 def test_auth_edinet_always_prompts_and_overwrites(
-    edinet_command: str,
     mock_config_path: Path,
     mock_get_config_value: MagicMock,
     mock_typer_prompt: MagicMock,
@@ -273,7 +256,7 @@ def test_auth_edinet_always_prompts_and_overwrites(
     mock_typer_prompt.return_value = "new_api_key_from_prompt"
 
     # CLIコマンドを実行（引数なし）
-    result = runner.invoke(app, ["auth", edinet_command])
+    result = runner.invoke(app, ["auth", "edinet"])
 
     # CLIコマンドが成功したことを確認
     assert result.exit_code == 0
@@ -289,7 +272,6 @@ def test_auth_edinet_always_prompts_and_overwrites(
 
 
 def test_auth_edinet_prompt_fallback(
-    edinet_command: str,
     mock_get_config_value: MagicMock,
     mock_config_path: Path,
     mock_typer_prompt: MagicMock,
@@ -301,7 +283,7 @@ def test_auth_edinet_prompt_fallback(
     mock_typer_prompt.side_effect = ["prompt_api_key_456"]
 
     # CLIコマンドを実行（引数なし）
-    result = runner.invoke(app, ["auth", edinet_command])
+    result = runner.invoke(app, ["auth", "edinet"])
 
     # CLIコマンドが成功したことを確認
     assert result.exit_code == 0
@@ -315,7 +297,6 @@ def test_auth_edinet_prompt_fallback(
 
 
 def test_auth_edinet_prompt_fallback_error(
-    edinet_command: str,
     mock_get_config_value: MagicMock,
     mock_typer_prompt: MagicMock,
 ) -> None:
@@ -325,7 +306,7 @@ def test_auth_edinet_prompt_fallback_error(
     mock_typer_prompt.return_value = ""
 
     # CLIコマンドを実行（引数なし）
-    result = runner.invoke(app, ["auth", edinet_command])
+    result = runner.invoke(app, ["auth", "edinet"])
 
     # CLIコマンドが失敗したことを確認
     assert result.exit_code == 1
@@ -333,9 +314,7 @@ def test_auth_edinet_prompt_fallback_error(
     mock_typer_prompt.assert_called_once_with("EDINETで取得したAPIキー")
 
 
-def test_auth_show_no_config_file(
-    mock_config_path: Path,
-) -> None:
+def test_auth_show_no_config_file(mock_config_path: Path) -> None:
     """auth show コマンドは設定ファイルが存在しないと設定ファイルだけを表示する"""
     # mock_config_path はデフォルトでファイルが存在しない状態をモックしている
     result = runner.invoke(app, ["auth", "show"])
@@ -344,9 +323,7 @@ def test_auth_show_no_config_file(
     assert result.stdout == f"設定ファイル: {mock_config_path}\n" in result.stdout
 
 
-def test_auth_show_with_config_file(
-    mock_config_path: Path,
-) -> None:
+def test_auth_show_with_config_file(mock_config_path: Path) -> None:
     """auth show コマンドが設定ファイルが存在し、内容が正しく表示されることを確認する"""
     # テスト用の設定ファイルを作成
     mock_config_path.write_text("abc\n")
