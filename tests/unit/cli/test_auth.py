@@ -47,19 +47,17 @@ def mock_typer_prompt(mocker: MockerFixture) -> MagicMock:
     return mocker.patch("typer.prompt")
 
 
-@pytest.mark.parametrize("command", ["jquants", "j"])
 def test_jquants_success_cli_args(
     mock_jquants_client: MagicMock,
     mock_get_config_value: MagicMock,
     mock_save_config_key: MagicMock,
     mock_typer_prompt: MagicMock,
-    command: str,
 ) -> None:
     result = runner.invoke(
         app,
         [
             "auth",
-            command,
+            "jquants",
             "--mailaddress",
             "cli@example.com",
             "--password",
@@ -81,13 +79,11 @@ def test_jquants_success_cli_args(
     mock_typer_prompt.assert_not_called()
 
 
-@pytest.mark.parametrize("command", ["jquants", "j"])
 def test_jquants_success_config_fallback(
     mock_jquants_client: MagicMock,
     mock_get_config_value: MagicMock,
     mock_save_config_key: MagicMock,
     mock_typer_prompt: MagicMock,
-    command: str,
 ) -> None:
     def side_effect(key: str) -> str | None:
         if key == JQuantsAuthKey.MAILADDRESS:
@@ -98,7 +94,7 @@ def test_jquants_success_config_fallback(
 
     mock_get_config_value.side_effect = side_effect
 
-    result = runner.invoke(app, ["auth", command])
+    result = runner.invoke(app, ["auth", "jquants"])
 
     assert result.exit_code == 0
     assert "J-QuantsのIDトークンを保存しました。" in result.stdout
@@ -115,18 +111,16 @@ def test_jquants_success_config_fallback(
     mock_typer_prompt.assert_not_called()
 
 
-@pytest.mark.parametrize("command", ["jquants", "j"])
 def test_jquants_success_prompt_fallback(
     mock_jquants_client: MagicMock,
     mock_get_config_value: MagicMock,
     mock_save_config_key: MagicMock,
     mock_typer_prompt: MagicMock,
-    command: str,
 ) -> None:
     mock_get_config_value.return_value = None
     mock_typer_prompt.side_effect = ["prompt@example.com", "prompt_password"]
 
-    result = runner.invoke(app, ["auth", command])
+    result = runner.invoke(app, ["auth", "jquants"])
 
     assert result.exit_code == 0
     assert "J-QuantsのIDトークンを保存しました。" in result.stdout
@@ -143,46 +137,40 @@ def test_jquants_success_prompt_fallback(
     assert mock_typer_prompt.call_count == 2
 
 
-@pytest.mark.parametrize("command", ["jquants", "j"])
 def test_jquants_error_empty_prompt(
     mock_jquants_client: MagicMock,
     mock_get_config_value: MagicMock,
     mock_typer_prompt: MagicMock,
-    command: str,
 ) -> None:
     mock_get_config_value.return_value = None
     mock_typer_prompt.side_effect = ["", ""]
 
-    result = runner.invoke(app, ["auth", command])
+    result = runner.invoke(app, ["auth", "jquants"])
 
     assert result.exit_code == 1
     assert "メールアドレスが入力されていません。" in result.stdout
     mock_jquants_client.return_value.auth.assert_not_awaited()
 
 
-@pytest.mark.parametrize("command", ["jquants", "j"])
 def test_jquants_error_empty_password_prompt(
     mock_jquants_client: MagicMock,
     mock_get_config_value: MagicMock,
     mock_typer_prompt: MagicMock,
-    command: str,
 ) -> None:
     mock_get_config_value.return_value = None
     mock_typer_prompt.side_effect = ["test@example.com", ""]
 
-    result = runner.invoke(app, ["auth", command])
+    result = runner.invoke(app, ["auth", "jquants"])
 
     assert result.exit_code == 1
     assert "パスワードが入力されていません。" in result.stdout
     mock_jquants_client.return_value.auth.assert_not_awaited()
 
 
-@pytest.mark.parametrize("command", ["jquants", "j"])
 def test_jquants_error_http_status(
     mock_jquants_client: MagicMock,
     mock_get_config_value: MagicMock,
     mock_typer_prompt: MagicMock,
-    command: str,
 ) -> None:
     mock_get_config_value.return_value = None
     mock_typer_prompt.side_effect = ["prompt@example.com", "prompt_password"]
@@ -192,20 +180,18 @@ def test_jquants_error_http_status(
         response=Response(400),
     )
 
-    result = runner.invoke(app, ["auth", command])
+    result = runner.invoke(app, ["auth", "jquants"])
 
     assert result.exit_code == 1
     assert "認証に失敗しました" in result.stdout
     mock_jquants_client.return_value.auth.assert_awaited_once()
 
 
-@pytest.mark.parametrize("command", ["edinet", "e"])
 def test_edinet_success_cli_arg(
     mock_save_config_key: MagicMock,
     mock_typer_prompt: MagicMock,
-    command: str,
 ) -> None:
-    result = runner.invoke(app, ["auth", command, "--api-key", "cli_api_key"])
+    result = runner.invoke(app, ["auth", "edinet", "--api-key", "cli_api_key"])
 
     assert result.exit_code == 0
     assert "EDINETのAPIキーを保存しました。" in result.stdout
@@ -213,12 +199,10 @@ def test_edinet_success_cli_arg(
     mock_typer_prompt.assert_not_called()
 
 
-@pytest.mark.parametrize("command", ["edinet", "e"])
 def test_edinet_always_prompts_when_no_args(
     mock_get_config_value: MagicMock,
     mock_save_config_key: MagicMock,
     mock_typer_prompt: MagicMock,
-    command: str,
 ) -> None:
     """引数なしの場合、既存のキーがあっても常にプロンプトを表示することをテストする"""
     # 既存のキーが設定されている状況をシミュレート
@@ -226,7 +210,7 @@ def test_edinet_always_prompts_when_no_args(
     # ユーザーがプロンプトに新しいキーを入力する状況をシミュレート
     mock_typer_prompt.return_value = "new_api_key"
 
-    result = runner.invoke(app, ["auth", command])
+    result = runner.invoke(app, ["auth", "edinet"])
 
     assert result.exit_code == 0
     # プロンプトが表示されたことを確認
@@ -237,17 +221,15 @@ def test_edinet_always_prompts_when_no_args(
     assert "EDINETのAPIキーを保存しました。" in result.stdout
 
 
-@pytest.mark.parametrize("command", ["edinet", "e"])
 def test_edinet_success_prompt_fallback(
     mock_get_config_value: MagicMock,
     mock_save_config_key: MagicMock,
     mock_typer_prompt: MagicMock,
-    command: str,
 ) -> None:
     mock_get_config_value.return_value = None
     mock_typer_prompt.return_value = "prompt_api_key"
 
-    result = runner.invoke(app, ["auth", command])
+    result = runner.invoke(app, ["auth", "edinet"])
 
     assert result.exit_code == 0
     assert "EDINETのAPIキーを保存しました。" in result.stdout
@@ -258,17 +240,15 @@ def test_edinet_success_prompt_fallback(
     mock_typer_prompt.assert_called_once_with("EDINETで取得したAPIキー")
 
 
-@pytest.mark.parametrize("command", ["edinet", "e"])
 def test_edinet_error_empty_prompt(
     mock_get_config_value: MagicMock,
     mock_save_config_key: MagicMock,
     mock_typer_prompt: MagicMock,
-    command: str,
 ) -> None:
     mock_get_config_value.return_value = None
     mock_typer_prompt.return_value = ""
 
-    result = runner.invoke(app, ["auth", command])
+    result = runner.invoke(app, ["auth", "edinet"])
 
     assert result.exit_code == 1
     assert "APIキーが入力されていません。" in result.stdout
