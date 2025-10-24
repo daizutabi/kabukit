@@ -21,7 +21,7 @@ hide:
 # はじめに
 
 <p align="center" style="margin-bottom: 40px;">
-日本の株式投資分析を、もっと手軽に、もっと速く
+日本の株式分析を、もっと手軽に、もっと速く
 </p>
 
 **kabukit** は、J-Quants と EDINET のデータを、
