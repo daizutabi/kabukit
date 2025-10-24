@@ -15,8 +15,6 @@ CLI の `kabu get` コマンドで取得された各種情報は、
 ## キャッシュの保存先
 
 キャッシュディレクトリの場所は、OSによって異なります。
-kabukit は [platformdirs](https://platformdirs.readthedocs.io/en/latest/)
-ライブラリを使用しており、
 各 OS の標準的なディレクトリにキャッシュを保存します。
 
 | OS      | キャッシュディレクトリの場所                           |
@@ -66,13 +64,13 @@ $ kabu cache clean
 
 ## Pythonでのキャッシュ利用
 
-[`kabukit.cache`][kabukit.domain.cache] モジュールは、
+[`kabukit.cache`][kabukit.utils.cache] モジュールは、
 Pythonからキャッシュを操作するための関数を提供します。
 
 ### 読み込み (`read`)
 
-[`cache.read`][kabukit.domain.cache.read] 関数を使って、
-キャッシュを読み込めます。
+[`cache.read`][kabukit.utils.cache.read] 関数を使って、
+キャッシュを読み込みます。
 `source` と `group` 引数でキャッシュのグループを指定し、
 `name` 引数で特定のファイルを指定します。
 `name` には拡張子 `.parquet` は含めません。
@@ -100,8 +98,8 @@ cache.read("jquants", "info").tail(3)
 
 ### 書き込み (`write`)
 
-[`cache.write`][kabukit.domain.cache.write] 関数を使って、
-キャッシュを書き込むこともできます。
+[`cache.write`][kabukit.utils.cache.write] 関数を使って、
+キャッシュを書き込みます。
 CLI コマンドでは、実行した日付でファイル名が自動で設定されるのに対し、
 Python コードでは、ユーザーがファイル名を指定することができます。
 
@@ -117,7 +115,7 @@ cache.write("jquants", "info", df, "toyota")
 
 ### 一覧の取得 (`glob`)
 
-[`cache.glob`][kabukit.domain.cache.glob] 関数を使って
+[`cache.glob`][kabukit.utils.cache.glob] 関数を使って
 キャッシュファイルのパス一覧を取得することができます。
 
 引数には`source`と`group`を指定します。
