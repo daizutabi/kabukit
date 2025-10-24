@@ -48,7 +48,21 @@ def test_cache_clean(mock_cache_dir: Path):
     dummy_dir.mkdir()
     (dummy_dir / "dummy_file.txt").touch()
 
-    result = runner.invoke(app, ["cache", "clean"])
+    result = runner.invoke(app, ["cache", "clean", "dummy_dir"])
+    assert result.exit_code == 0
+
+    msg = f"キャッシュディレクトリ '{dummy_dir}' を正常にクリーンアップしました。"
+    assert msg in result.stdout
+    assert not dummy_dir.exists()
+    assert mock_cache_dir.exists()
+
+
+def test_cache_clean_all(mock_cache_dir: Path):
+    dummy_dir = mock_cache_dir / "dummy_dir"
+    dummy_dir.mkdir()
+    (dummy_dir / "dummy_file.txt").touch()
+
+    result = runner.invoke(app, ["cache", "clean", "--all"])
     assert result.exit_code == 0
 
     msg = f"キャッシュディレクトリ '{mock_cache_dir}' を正常にクリーンアップしました。"

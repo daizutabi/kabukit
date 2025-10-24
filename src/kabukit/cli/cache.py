@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import datetime
 import shutil
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Annotated
 from zoneinfo import ZoneInfo
 
 import typer
 from rich.console import Console
 from rich.tree import Tree
+from typer import Argument, Option
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -73,13 +74,29 @@ def format_size(size: int) -> str:
     return f"{size / (1024 * 1024):.1f} MB"
 
 
+SubDir = Annotated[str | None, Argument(help="サブディレクトリ。")]
+All = Annotated[bool, Option("--all", help="全てのキャッシュを消去します。")]
+
+
 @app.command()
-def clean() -> None:
+def clean(sub_dir: SubDir = None, *, all_: All = False) -> None:
     """キャッシュディレクトリを削除します。"""
     from kabukit.utils.config import get_cache_dir
 
     cache_dir = get_cache_dir()
 
+    if sub_dir is None:
+        if all_:
+            clean_cache_dir(cache_dir)
+            return
+
+        typer.echo("サブディレクトリか --all オプションを指定してください。")
+        raise typer.Exit(1)
+
+    clean_cache_dir(cache_dir / sub_dir)
+
+
+def clean_cache_dir(cache_dir: Path) -> None:
     if not cache_dir.exists():
         typer.echo(f"キャッシュディレクトリ '{cache_dir}' は存在しません。")
         return
