@@ -239,7 +239,7 @@ class JQuantsClient(Client):
 
         df = statements.clean(df)
 
-        holidays = await _calendar_cache_manager.get_holidays(self)
+        holidays = await _calendar_cache_manager.get_holidays()
         return with_date(df, holidays=holidays)
 
     async def get_prices(
