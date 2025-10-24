@@ -26,7 +26,7 @@ app = AsyncTyper(
     help="J-QuantsまたはEDINETからデータを取得します。",
 )
 
-Arg = Annotated[str | None, Argument(help="銘柄コード (4桁) あるいは日付 (YYYYMMDD)。")]
+Arg = Annotated[str | None, Argument(help="銘柄コード (4桁) または日付 (YYYYMMDD)。")]
 Date = Annotated[str | None, Argument(help="取得する日付 (YYYYMMDD)。")]
 All = Annotated[bool, Option("--all", help="全銘柄を取得します。")]
 MaxItems = Annotated[

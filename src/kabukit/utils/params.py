@@ -52,10 +52,10 @@ def date_to_str(date: str | datetime.date) -> str:
 def get_code_date(
     arg: str | None,
 ) -> tuple[None, None] | tuple[str, None] | tuple[None, datetime.date]:
-    """銘柄コードあるいは日付文字列を解析し、銘柄コードまたは日付オブジェクトを返す。
+    """銘柄コードまたは日付文字列を解析し、銘柄コードまたは日付オブジェクトを返す。
 
     Args:
-        arg: 銘柄コードあるいは日付文字列。
+        arg: 銘柄コードまたは日付文字列。
 
     Returns:
         銘柄コードまたは日付オブジェクトのタプル。

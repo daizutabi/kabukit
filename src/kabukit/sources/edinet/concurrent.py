@@ -81,7 +81,7 @@ async def get_documents(
     *,
     pdf: bool = False,
 ) -> pl.DataFrame:
-    """文書をCSV形式あるいはPDF形式で取得し、単一のDataFrameにまとめて返す。
+    """文書をCSV形式またはPDF形式で取得し、単一のDataFrameにまとめて返す。
 
     Args:
         doc_ids (Iterable[str] | str): 取得対象の文書IDのリスト。
