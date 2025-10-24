@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+from typing import Literal, overload
 from zoneinfo import ZoneInfo
 
 
@@ -44,13 +45,26 @@ def strptime(time_string: str, fmt: str | None = None, /) -> datetime.time:
     )
 
 
-def today() -> datetime.date:
+@overload
+def today(*, as_str: Literal[True]) -> str: ...
+
+
+@overload
+def today(*, as_str: Literal[False] = False) -> datetime.date: ...
+
+
+def today(*, as_str: Literal[True, False] = False) -> datetime.date | str:
     """今日の日付を取得する。
 
     Returns:
         datetime.date: 今日の日付。
     """
-    return datetime.datetime.now(ZoneInfo("Asia/Tokyo")).date()
+    date = datetime.datetime.now(ZoneInfo("Asia/Tokyo")).date()
+
+    if as_str:
+        return date.strftime("%Y-%m-%d")
+
+    return date
 
 
 def get_past_dates(

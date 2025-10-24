@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <em>日本の株式投資分析を、もっと手軽に、もっと速く</em>
+  <em>日本の株式分析を、もっと手軽に、もっと速く</em>
 </p>
 
 <p align="center">
@@ -20,7 +20,7 @@
 
 ---
 
-**kabukit** は、J-Quants と EDINET のデータを、コマンドラインや Python コードから快適に扱うためのモダンなツールキットです。
+kabukit は、J-Quants と EDINET のデータを、コマンドラインや Python コードから快適に扱うためのモダンなツールキットです。
 
 ## なぜ kabukit なのか？
 

@@ -29,6 +29,23 @@ def mock_get_prices(mocker: MockerFixture) -> AsyncMock:
     )
 
 
+def test_get_prices(mock_get_prices: AsyncMock) -> None:
+    from kabukit.utils.datetime import today
+
+    mock_get_prices.return_value = MOCK_DF
+    result = runner.invoke(app, ["get", "prices"])
+
+    assert result.exit_code == 0
+    assert str(MOCK_DF) in result.stdout
+
+    mock_get_prices.assert_awaited_once_with(
+        None,
+        today(),
+        max_items=None,
+        progress=None,
+    )
+
+
 def test_get_prices_with_code(mock_get_prices: AsyncMock) -> None:
     mock_get_prices.return_value = MOCK_DF
     result = runner.invoke(app, ["get", "prices", MOCK_CODE])
@@ -59,12 +76,12 @@ def test_get_prices_with_date(mock_get_prices: AsyncMock) -> None:
     )
 
 
-def test_get_prices(
+def test_get_prices_all(
     mock_get_prices: AsyncMock,
     mock_cache_write: MagicMock,
 ) -> None:
     mock_get_prices.return_value = MOCK_DF
-    result = runner.invoke(app, ["get", "prices"])
+    result = runner.invoke(app, ["get", "prices", "--all"])
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
@@ -82,7 +99,7 @@ def test_get_prices(
 def test_get_prices_interrupt(mock_get_prices: AsyncMock) -> None:
     mock_get_prices.side_effect = KeyboardInterrupt
 
-    result = runner.invoke(app, ["get", "prices"])
+    result = runner.invoke(app, ["get", "prices", "--all"])
 
     assert result.exit_code == 130
 

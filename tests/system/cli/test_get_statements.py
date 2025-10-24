@@ -16,34 +16,40 @@ pytestmark = pytest.mark.system
 runner = CliRunner()
 
 
-def test_get_statements_with_code(mock_cache_dir: Path) -> None:
+@pytest.fixture
+def mock_sub_dir(mock_cache_dir: Path) -> Path:
+    return mock_cache_dir / "jquants" / "statements"
+
+
+def test_get_statements(mock_sub_dir: Path) -> None:
+    result = runner.invoke(app, ["get", "statements"])
+
+    assert result.exit_code == 0
+    assert "shape:" in result.stdout
+    assert not mock_sub_dir.exists()
+
+
+def test_get_statements_with_code(mock_sub_dir: Path) -> None:
     result = runner.invoke(app, ["get", "statements", "7203"])
 
     assert result.exit_code == 0
     assert "shape:" in result.stdout
+    assert "72030" in result.stdout
+    assert not mock_sub_dir.exists()
 
-    statements_cache_dir = mock_cache_dir / "jquants" / "statements"
-    assert not statements_cache_dir.exists()
 
-
-def test_get_statements_with_date(mock_cache_dir: Path) -> None:
+def test_get_statements_with_date(mock_sub_dir: Path) -> None:
     result = runner.invoke(app, ["get", "statements", "20230104"])
 
     assert result.exit_code == 0
     assert "shape:" in result.stdout
     assert "2023-01-04" in result.stdout
-
-    statements_cache_dir = mock_cache_dir / "jquants" / "statements"
-    assert not statements_cache_dir.exists()
+    assert not mock_sub_dir.exists()
 
 
-def test_get_statements(mock_cache_dir: Path) -> None:
-    result = runner.invoke(app, ["get", "statements", "--max-items", "3"])
+def test_get_statements_all(mock_sub_dir: Path) -> None:
+    result = runner.invoke(app, ["get", "statements", "--all", "--max-items", "3"])
 
     assert result.exit_code == 0
-    assert "全銘柄の財務情報を" in result.stdout
     assert "shape:" in result.stdout
-
-    statements_cache_dir = mock_cache_dir / "jquants" / "statements"
-    assert statements_cache_dir.is_dir()
-    assert any(statements_cache_dir.iterdir())
+    assert not mock_sub_dir.exists()

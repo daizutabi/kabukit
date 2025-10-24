@@ -35,6 +35,27 @@ def get_cache_files(cache_dir: Path) -> list[Path]:
     return list(cache_dir.joinpath("jquants", "statements").glob("*.parquet"))
 
 
+def test_get_statements(
+    mock_get_statements: AsyncMock,
+    mock_cache_dir: Path,
+) -> None:
+    from kabukit.utils.datetime import today
+
+    result = runner.invoke(app, ["get", "statements"])
+
+    assert result.exit_code == 0
+    assert str(MOCK_DF) in result.stdout
+
+    mock_get_statements.assert_awaited_once_with(
+        None,
+        today(),
+        max_items=None,
+        progress=None,
+    )
+
+    assert not get_cache_files(mock_cache_dir)
+
+
 def test_get_statements_with_code(
     mock_get_statements: AsyncMock,
     mock_cache_dir: Path,
@@ -73,12 +94,12 @@ def test_get_statements_with_date(
     assert not get_cache_files(mock_cache_dir)
 
 
-def test_get_statements(
+def test_get_statements_all(
     mock_get_statements: AsyncMock,
     mock_cache_dir: Path,
     mocker: MockerFixture,
 ) -> None:
-    result = runner.invoke(app, ["get", "statements"])
+    result = runner.invoke(app, ["get", "statements", "--all"])
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout

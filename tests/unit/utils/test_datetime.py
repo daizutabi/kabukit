@@ -36,6 +36,18 @@ def test_strptime(time_str: str, fmt: str | None, date: datetime.date) -> None:
     assert strptime(time_str, fmt) == date
 
 
+def test_today_date() -> None:
+    from kabukit.utils.datetime import today
+
+    assert isinstance(today(), datetime.date)
+
+
+def test_today_str() -> None:
+    from kabukit.utils.datetime import today
+
+    assert isinstance(today(as_str=True), str)
+
+
 def test_get_past_dates_days() -> None:
     from kabukit.utils.datetime import get_past_dates
 

@@ -36,6 +36,26 @@ def get_cache_files(cache_dir: Path) -> list[Path]:
     return list(cache_dir.joinpath("tdnet", "list").glob("*.parquet"))
 
 
+def test_get_tdnet_list(
+    mock_get_tdnet_list: AsyncMock,
+    mock_cache_dir: Path,
+) -> None:
+    from kabukit.utils.datetime import today
+
+    result = runner.invoke(app, ["get", "tdnet"])
+
+    assert result.exit_code == 0
+    assert str(MOCK_DF) in result.stdout
+
+    mock_get_tdnet_list.assert_called_once_with(
+        today(),
+        progress=None,
+        max_items=None,
+    )
+
+    assert not get_cache_files(mock_cache_dir)
+
+
 def test_get_tdnet_list_with_date(
     mock_get_tdnet_list: AsyncMock,
     mock_cache_dir: Path,
@@ -54,12 +74,12 @@ def test_get_tdnet_list_with_date(
     assert not get_cache_files(mock_cache_dir)
 
 
-def test_get_tdnet_list(
+def test_get_tdnet_list_all(
     mock_get_tdnet_list: AsyncMock,
     mock_cache_dir: Path,
     mocker: MockerFixture,
 ) -> None:
-    result = runner.invoke(app, ["get", "tdnet"])
+    result = runner.invoke(app, ["get", "tdnet", "--all"])
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout

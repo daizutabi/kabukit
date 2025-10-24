@@ -29,6 +29,23 @@ def mock_get_statements(mocker: MockerFixture) -> AsyncMock:
     )
 
 
+def test_get_statements(mock_get_statements: AsyncMock) -> None:
+    from kabukit.utils.datetime import today
+
+    mock_get_statements.return_value = MOCK_DF
+    result = runner.invoke(app, ["get", "statements"])
+
+    assert result.exit_code == 0
+    assert str(MOCK_DF) in result.stdout
+
+    mock_get_statements.assert_awaited_once_with(
+        None,
+        today(),
+        max_items=None,
+        progress=None,
+    )
+
+
 def test_get_statements_with_code(mock_get_statements: AsyncMock) -> None:
     mock_get_statements.return_value = MOCK_DF
     result = runner.invoke(app, ["get", "statements", MOCK_CODE])
@@ -59,12 +76,12 @@ def test_get_statements_with_date(mock_get_statements: AsyncMock) -> None:
     )
 
 
-def test_get_statements(
+def test_get_statements_all(
     mock_get_statements: AsyncMock,
     mock_cache_write: MagicMock,
 ) -> None:
     mock_get_statements.return_value = MOCK_DF
-    result = runner.invoke(app, ["get", "statements"])
+    result = runner.invoke(app, ["get", "statements", "--all"])
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
@@ -82,7 +99,7 @@ def test_get_statements(
 def test_get_statements_interrupt(mock_get_statements: AsyncMock) -> None:
     mock_get_statements.side_effect = KeyboardInterrupt
 
-    result = runner.invoke(app, ["get", "statements"])
+    result = runner.invoke(app, ["get", "statements", "--all"])
 
     assert result.exit_code == 130
 

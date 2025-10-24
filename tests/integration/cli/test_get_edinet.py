@@ -35,6 +35,27 @@ def get_cache_files(cache_dir: Path) -> list[Path]:
     return list(cache_dir.joinpath("edinet", "list").glob("*.parquet"))
 
 
+def test_get_edinet_list(
+    mock_get_edinet_list: AsyncMock,
+    mock_cache_dir: Path,
+) -> None:
+    from kabukit.utils.datetime import today
+
+    result = runner.invoke(app, ["get", "edinet"])
+
+    assert result.exit_code == 0
+    assert str(MOCK_DF) in result.stdout
+
+    mock_get_edinet_list.assert_called_once_with(
+        today(),
+        years=10,
+        progress=None,
+        max_items=None,
+    )
+
+    assert not get_cache_files(mock_cache_dir)
+
+
 def test_get_edinet_list_with_date(
     mock_get_edinet_list: AsyncMock,
     mock_cache_dir: Path,
@@ -54,12 +75,12 @@ def test_get_edinet_list_with_date(
     assert not get_cache_files(mock_cache_dir)
 
 
-def test_get_edinet_list(
+def test_get_edinet_list_all(
     mock_get_edinet_list: AsyncMock,
     mock_cache_dir: Path,
     mocker: MockerFixture,
 ) -> None:
-    result = runner.invoke(app, ["get", "edinet"])
+    result = runner.invoke(app, ["get", "edinet", "--all"])
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
