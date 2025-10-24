@@ -16,34 +16,40 @@ pytestmark = pytest.mark.system
 runner = CliRunner()
 
 
-def test_get_prices_with_code(mock_cache_dir: Path) -> None:
+@pytest.fixture
+def mock_sub_dir(mock_cache_dir: Path) -> Path:
+    return mock_cache_dir / "jquants" / "prices"
+
+
+def test_get_prices(mock_sub_dir: Path) -> None:
+    result = runner.invoke(app, ["get", "prices"])
+
+    assert result.exit_code == 0
+    assert "shape:" in result.stdout
+    assert not mock_sub_dir.exists()
+
+
+def test_get_prices_with_code(mock_sub_dir: Path) -> None:
     result = runner.invoke(app, ["get", "prices", "7203"])
 
     assert result.exit_code == 0
     assert "shape:" in result.stdout
+    assert "72030" in result.stdout
+    assert not mock_sub_dir.exists()
 
-    prices_cache_dir = mock_cache_dir / "jquants" / "prices"
-    assert not prices_cache_dir.exists()
 
-
-def test_get_prices_with_date(mock_cache_dir: Path) -> None:
+def test_get_prices_with_date(mock_sub_dir: Path) -> None:
     result = runner.invoke(app, ["get", "prices", "20230104"])
 
     assert result.exit_code == 0
     assert "shape:" in result.stdout
     assert "2023-01-04" in result.stdout
-
-    prices_cache_dir = mock_cache_dir / "jquants" / "prices"
-    assert not prices_cache_dir.exists()
+    assert not mock_sub_dir.exists()
 
 
-def test_get_prices(mock_cache_dir: Path) -> None:
-    result = runner.invoke(app, ["get", "prices", "--max-items", "3"])
+def test_get_prices_all(mock_sub_dir: Path) -> None:
+    result = runner.invoke(app, ["get", "prices", "--all", "--max-items", "3"])
 
     assert result.exit_code == 0
-    assert "全銘柄の株価情報を" in result.stdout
     assert "shape:" in result.stdout
-
-    prices_cache_dir = mock_cache_dir / "jquants" / "prices"
-    assert prices_cache_dir.is_dir()
-    assert any(prices_cache_dir.iterdir())
+    assert not mock_sub_dir.exists()

@@ -114,23 +114,33 @@ async def statements(
 async def prices(
     arg: Arg = None,
     *,
-    quiet: Quiet = False,
+    all_: All = False,
     max_items: MaxItems = None,
+    quiet: Quiet = False,
 ) -> None:
     """株価情報を取得します。"""
     import tqdm.asyncio
 
     from kabukit.sources.jquants.concurrent import get_prices
     from kabukit.utils.cache import write
+    from kabukit.utils.datetime import today
     from kabukit.utils.params import get_code_date
 
+    if arg is None and not all_:
+        arg = today(as_str=True)
+
     progress = None if arg or quiet else tqdm.asyncio.tqdm
-    df = await get_prices(*get_code_date(arg), max_items=max_items, progress=progress)
+
+    df = await get_prices(
+        *get_code_date(arg),
+        max_items=max_items,
+        progress=progress,
+    )
 
     if not quiet:
         typer.echo(df)
 
-    if arg is None:
+    if arg is None and max_items is None:
         path = write("jquants", "prices", df)
         if not quiet:
             typer.echo(f"全銘柄の株価情報を '{path}' に保存しました。")

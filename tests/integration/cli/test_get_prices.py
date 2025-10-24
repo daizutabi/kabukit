@@ -35,6 +35,27 @@ def get_cache_files(cache_dir: Path) -> list[Path]:
     return list(cache_dir.joinpath("jquants", "prices").glob("*.parquet"))
 
 
+def test_get_prices(
+    mock_get_prices: AsyncMock,
+    mock_cache_dir: Path,
+) -> None:
+    from kabukit.utils.datetime import today
+
+    result = runner.invoke(app, ["get", "prices"])
+
+    assert result.exit_code == 0
+    assert str(MOCK_DF) in result.stdout
+
+    mock_get_prices.assert_called_once_with(
+        None,
+        today(),
+        max_items=None,
+        progress=None,
+    )
+
+    assert not get_cache_files(mock_cache_dir)
+
+
 def test_get_prices_with_code(
     mock_get_prices: AsyncMock,
     mock_cache_dir: Path,
@@ -73,12 +94,12 @@ def test_get_prices_with_date(
     assert not get_cache_files(mock_cache_dir)
 
 
-def test_get_prices(
+def test_get_prices_all(
     mock_get_prices: AsyncMock,
     mock_cache_dir: Path,
     mocker: MockerFixture,
 ) -> None:
-    result = runner.invoke(app, ["get", "prices"])
+    result = runner.invoke(app, ["get", "prices", "--all"])
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
