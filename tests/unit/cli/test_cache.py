@@ -87,6 +87,6 @@ def test_cache_clean_error(mocker: MockerFixture, tmp_path: Path) -> None:
     ],
 )
 def test_format_size(size: int, expected: str) -> None:
-    from kabukit.cli.clean import format_size
+    from kabukit.cli.cache import format_size
 
     assert format_size(size) == expected
