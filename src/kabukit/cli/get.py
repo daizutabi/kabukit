@@ -150,8 +150,9 @@ async def prices(
 async def jquants(
     arg: Arg = None,
     *,
-    quiet: Quiet = False,
+    all_: All = False,
     max_items: MaxItems = None,
+    quiet: Quiet = False,
 ) -> None:
     """J-Quants APIから全情報を取得します。"""
     typer.echo("上場銘柄一覧を取得します。")
@@ -159,11 +160,11 @@ async def jquants(
 
     typer.echo("---")
     typer.echo("財務情報を取得します。")
-    await statements(arg, quiet=quiet, max_items=max_items)
+    await statements(arg, all_=all_, max_items=max_items, quiet=quiet)
 
     typer.echo("---")
     typer.echo("株価情報を取得します。")
-    await prices(arg, quiet=quiet, max_items=max_items)
+    await prices(arg, all_=all_, max_items=max_items, quiet=quiet)
 
 
 @app.async_command()
