@@ -4,8 +4,12 @@ import polars as pl
 
 
 def clean(df: pl.DataFrame) -> pl.DataFrame:
-    df = df.select(pl.exclude(r"^.*\(REIT\)$"))
-    return df.pipe(_rename).pipe(_cast)
+    return (
+        df.select(pl.exclude(r"^.*\(REIT\)$"))
+        .pipe(_rename)
+        .pipe(_cast)
+        .select(pl.col("Code"), pl.exclude("Code"))
+    )
 
 
 def _rename(df: pl.DataFrame) -> pl.DataFrame:

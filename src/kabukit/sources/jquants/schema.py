@@ -47,9 +47,9 @@ class PriceColumns(BaseColumns):
 
 class StatementColumns(BaseColumns):
     Date = "日付"
+    Code = "銘柄コード"
     DisclosedDate = "開示日"
     DisclosedTime = "開示時刻"
-    Code = "銘柄コード"
     DisclosureNumber = "開示番号"
     TypeOfDocument = "開示書類種別"
     TypeOfCurrentPeriod = "当会計期間の種類"
