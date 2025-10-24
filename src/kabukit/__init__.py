@@ -17,6 +17,7 @@ from .sources.jquants.concurrent import (
 )
 from .sources.tdnet.client import TdnetClient
 from .sources.tdnet.concurrent import get_list as get_tdnet_list
+from .utils import cache
 
 __all__ = [
     "EdinetClient",
@@ -27,6 +28,7 @@ __all__ = [
     "Statements",
     "TdnetClient",
     "TdnetList",
+    "cache",
     "get_calendar",
     "get_edinet_documents",
     "get_edinet_list",
