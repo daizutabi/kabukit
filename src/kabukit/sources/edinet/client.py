@@ -7,13 +7,13 @@ from typing import TYPE_CHECKING
 
 import httpx
 import polars as pl
-from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
+import tenacity
 
 from kabukit.sources.base import Client
 from kabukit.utils.config import get_config_value
 from kabukit.utils.params import get_params
 
-from .doc import clean_csv, clean_list, clean_pdf, read_csv
+from .document import clean_csv, clean_list, clean_pdf, read_csv
 
 if TYPE_CHECKING:
     import datetime
@@ -63,11 +63,11 @@ class EdinetClient(Client):
         if api_key:
             self.client.params = {"Subscription-Key": api_key}
 
-    @retry(
+    @tenacity.retry(
         reraise=True,
-        stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=2, max=10),
-        retry=retry_if_exception(is_retryable),
+        stop=tenacity.stop_after_attempt(3),
+        wait=tenacity.wait_exponential(multiplier=1, min=2, max=10),
+        retry=tenacity.retry_if_exception(is_retryable),
     )
     async def get(self, url: str, params: QueryParamTypes) -> Response:
         """リトライ処理を伴うGETリクエストを送信する。
