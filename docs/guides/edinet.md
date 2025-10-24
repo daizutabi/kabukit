@@ -42,7 +42,7 @@ df.select("Date", "Code", "docID", "filerName", "pdfFlag", "csvFlag").tail()
 
 戻り値のデータフレームは、銘柄コード (`Code`)、日付 (`Date`) の順でソートされます。
 
-過去のある日数あるいは年数に渡る提出日の書類一覧を取得することもできます。
+過去のある日数または年数に渡る提出日の書類一覧を取得することもできます。
 
 ```python exec="1" source="material-block"
 df = await get_edinet_list(days=10)

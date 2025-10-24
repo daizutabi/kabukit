@@ -42,22 +42,27 @@ $ kabu cache tree
 ### 消去 (`clean`)
 
 `kabu cache clean` コマンドを使うと、
-キャッシュ情報をすべて消去できます。
+キャッシュの一部または全部を消去します。
+
+サブディレクトリを指定すると、キャッシュの一部を消去できます。
 
 ```bash
-$ kabu cache clean
+$ kabu cache clean jquants
+キャッシュディレクトリ '/home/my_name/.cache/kabukit/jquants' を正常にクリーンアップしました。
+```
+
+`--all` オプションを指定すると、キャッシュの全部を消去できます。
+
+```bash
+$ kabu cache clean --all
 キャッシュディレクトリ '/home/my_name/.cache/kabukit' を正常にクリーンアップしました。
 ```
 
-!!! warning
-    `cache clean` コマンドを実行すると、ユーザーの意思を確認することなく、
-    キャッシュがすべて消去されます。ご注意ください。
-
 !!! info
     J-Quants API は、データ販売ではなく、データを利用するサービスです。
-    取得したデータを蓄積して利用することは許可されていません。不要になった
-    キャッシュは削除するようお願いします。
-    詳しくは以下に示す J-Quants API の公式 FAQ を参照してください。
+    取得したデータを継続して利用することは許可されていません。
+    不要になったキャッシュは削除してください。
+    詳しくは、以下に示す J-Quants API の FAQ を参照してください。
 
     - [サブスクリプションのキャンセルまたは退会後に、データを利用することは可能ですか？](https://jpx.gitbook.io/j-quants-ja/faq/usage#sabusukuripushonnokyanserumatahanidtawosurukotohadesuka)
     - [プラン変更後、変更前のプランのデータを利用することは可能ですか？](https://jpx.gitbook.io/j-quants-ja/faq/usage#purannopurannodtawosurukotohadesuka)
