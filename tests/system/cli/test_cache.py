@@ -27,8 +27,7 @@ def test_cache_tree_system(mock_cache_dir: Path) -> None:
     Verifies that it correctly lists contents of a real (mocked) cache directory.
     """
     # Populate cache with some dummy data using a 'get' command
-    args = ["get", "statements", "--max-items", "2"]
-    result_get = runner.invoke(app, args)
+    result_get = runner.invoke(app, ["get", "info"])
     assert result_get.exit_code == 0
 
     # Now run cache tree and assert its output
@@ -37,9 +36,9 @@ def test_cache_tree_system(mock_cache_dir: Path) -> None:
 
     output = remove_ansi(result_tree.stdout.replace("\n", ""))
     assert str(mock_cache_dir) in output
-    assert "statements" in result_tree.stdout
-    statements_cache_dir = mock_cache_dir / "jquants" / "statements"
-    files = statements_cache_dir.iterdir()
+    assert "info" in result_tree.stdout
+    sub_dir = mock_cache_dir / "jquants" / "info"
+    files = sub_dir.iterdir()
     assert any(f.name in result_tree.stdout for f in files)
 
 
@@ -49,8 +48,7 @@ def test_cache_clean_system(mock_cache_dir: Path) -> None:
     Verifies that it correctly removes a real (mocked) cache directory.
     """
     # Populate cache with some dummy data using a 'get' command
-    args = ["get", "prices", "--max-items", "2"]
-    result_get = runner.invoke(app, args)
+    result_get = runner.invoke(app, ["get", "info"])
     assert result_get.exit_code == 0
     assert mock_cache_dir.is_dir()
     assert any(mock_cache_dir.iterdir())
