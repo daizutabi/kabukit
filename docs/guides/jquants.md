@@ -181,7 +181,7 @@ J-Quants API の[上場銘柄一覧 (/listed/info)](https://jpx.gitbook.io/j-qua
 に対応します。
 
 引数に銘柄コードを指定して、指定した銘柄の情報を取得します。
-実行した日付あるいは翌営業日の情報となります。
+実行した日付または営業日の情報となります。
 
 ```python exec="1" source="material-block"
 from kabukit import JQuantsClient
