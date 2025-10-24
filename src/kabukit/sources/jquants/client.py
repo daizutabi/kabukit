@@ -1,14 +1,13 @@
 from __future__ import annotations
 
-import asyncio
 import datetime
 from enum import StrEnum
-from typing import TYPE_CHECKING, final
+from typing import TYPE_CHECKING
 
 import polars as pl
 
 from kabukit.sources.base import Client
-from kabukit.sources.datetime import with_date
+from kabukit.sources.datetime import _calendar_cache_manager, with_date
 from kabukit.utils.config import get_config_value
 from kabukit.utils.datetime import today
 from kabukit.utils.params import get_params
@@ -21,24 +20,6 @@ if TYPE_CHECKING:
 
     from httpx import HTTPStatusError  # noqa: F401
     from httpx._types import QueryParamTypes
-
-
-@final
-class _CalendarCacheManager:
-    def __init__(self) -> None:
-        self._holidays: list[datetime.date] | None = None
-        self._lock = asyncio.Lock()
-
-    async def get_holidays(self, client: JQuantsClient) -> list[datetime.date]:
-        async with self._lock:
-            if self._holidays is None:
-                df = await client.get_calendar()
-                holidays = df.filter(pl.col("IsHoliday"))["Date"]
-                self._holidays = holidays.to_list()
-            return self._holidays
-
-
-_calendar_cache_manager = _CalendarCacheManager()
 
 
 API_VERSION = "v1"

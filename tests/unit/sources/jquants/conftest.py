@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING
 import pytest
 import pytest_asyncio
 
-from kabukit.sources.jquants.client import JQuantsClient, _CalendarCacheManager
+from kabukit.sources.datetime import _CalendarCacheManager
+from kabukit.sources.jquants.client import JQuantsClient
 
 if TYPE_CHECKING:
     from unittest.mock import AsyncMock

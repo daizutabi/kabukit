@@ -1,8 +1,33 @@
 from __future__ import annotations
 
+import asyncio
 import datetime
+from typing import TYPE_CHECKING, final
 
 import polars as pl
+
+if TYPE_CHECKING:
+    from kabukit.sources.jquants.client import JQuantsClient
+
+# pyright: reportImportCycles=false
+
+
+@final
+class _CalendarCacheManager:
+    def __init__(self) -> None:
+        self._holidays: list[datetime.date] | None = None
+        self._lock = asyncio.Lock()
+
+    async def get_holidays(self, client: JQuantsClient) -> list[datetime.date]:
+        async with self._lock:
+            if self._holidays is None:
+                df = await client.get_calendar()
+                holidays = df.filter(pl.col("IsHoliday"))["Date"]
+                self._holidays = holidays.to_list()
+            return self._holidays
+
+
+_calendar_cache_manager = _CalendarCacheManager()
 
 
 def with_date(df: pl.DataFrame, holidays: list[datetime.date]) -> pl.DataFrame:
