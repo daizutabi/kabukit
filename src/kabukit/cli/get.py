@@ -171,25 +171,34 @@ async def jquants(
 async def edinet(
     date: Date = None,
     *,
-    quiet: Quiet = False,
+    all_: All = False,
     max_items: MaxItems = None,
+    quiet: Quiet = False,
 ) -> None:
     """EDINET APIから書類一覧を取得します。"""
     import tqdm.asyncio
 
     from kabukit.sources.edinet.concurrent import get_list
     from kabukit.utils.cache import write
+    from kabukit.utils.datetime import today
     from kabukit.utils.params import get_code_date
 
-    _, date_ = get_code_date(date)
+    if date is None and not all_:
+        date = today(as_str=True)
 
     progress = None if date or quiet else tqdm.asyncio.tqdm
-    df = await get_list(date_, years=10, progress=progress, max_items=max_items)
+
+    df = await get_list(
+        get_code_date(date)[1],
+        years=10,
+        progress=progress,
+        max_items=max_items,
+    )
 
     if not quiet:
         typer.echo(df)
 
-    if not date:
+    if date is None and max_items is None:
         path = write("edinet", "list", df)
         if not quiet:
             typer.echo(f"書類一覧を '{path}' に保存しました。")

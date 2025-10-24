@@ -16,23 +16,31 @@ pytestmark = pytest.mark.system
 runner = CliRunner()
 
 
-def test_get_edinet_list_with_date(mock_cache_dir: Path) -> None:
-    result = runner.invoke(app, ["get", "edinet", "2023-01-01"])
+@pytest.fixture
+def mock_sub_dir(mock_cache_dir: Path) -> Path:
+    return mock_cache_dir / "edinet" / "list"
+
+
+def test_get_edinet_list(mock_sub_dir: Path) -> None:
+    result = runner.invoke(app, ["get", "edinet"])
 
     assert result.exit_code == 0
     assert "shape:" in result.stdout
-
-    edinet_list_cache_dir = mock_cache_dir / "edinet" / "list"
-    assert not edinet_list_cache_dir.exists()
+    assert not mock_sub_dir.exists()
 
 
-def test_get_edinet_list_without_date(mock_cache_dir: Path) -> None:
-    result = runner.invoke(app, ["get", "edinet", "--max-items", "3"])
+def test_get_edinet_list_with_date(mock_sub_dir: Path) -> None:
+    result = runner.invoke(app, ["get", "edinet", "20251023"])
 
     assert result.exit_code == 0
-    assert "書類一覧を" in result.stdout
     assert "shape:" in result.stdout
+    assert "2025-10-23" in result.stdout
+    assert not mock_sub_dir.exists()
 
-    edinet_list_cache_dir = mock_cache_dir / "edinet" / "list"
-    assert edinet_list_cache_dir.is_dir()
-    assert any(edinet_list_cache_dir.iterdir())
+
+def test_get_edinet_list_all(mock_sub_dir: Path) -> None:
+    result = runner.invoke(app, ["get", "edinet", "--all", "--max-items", "3"])
+
+    assert result.exit_code == 0
+    assert "shape:" in result.stdout
+    assert not mock_sub_dir.exists()
