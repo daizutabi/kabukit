@@ -1,8 +1,4 @@
-# J-Quants API の使い方
-
-kabukit は、[httpx](https://www.python-httpx.org/) を使った非同期設計になっており、
-[Jupyter](https://jupyter.org/) や [marimo](https://marimo.io/) のような
-非同期処理を直接扱えるノートブック環境で快適に利用できます。
+# J-Quants API
 
 このガイドでは、kabukit が提供する高レベルなモジュール関数と、
 より詳細な制御が可能な [`JQuantsClient`][kabukit.JQuantsClient]
@@ -10,14 +6,11 @@ kabukit は、[httpx](https://www.python-httpx.org/) を使った非同期設計
 
 ## 認証設定
 
-API を利用するには、事前にコマンドラインで J-Quants API の ID トークンを取得
+J-Quants API を利用するには、事前にコマンドラインで J-Quants API の ID トークンを取得
 しておく必要があります。
-詳細は、[CLIの使い方](cli.md)の「認証設定」セクションを参照してください。
+詳細は、[CLIの使い方](../cli.md)の「認証設定」セクションを参照してください。
 
 ## モジュールレベル関数
-
-kabukit は、手軽に J-Quants API からデータを取得できるモジュールレベル関数を提供します。
-これらの関数は内部で非同期処理を並列実行するため、効率的に情報を取得できます。
 
 ### 上場銘柄一覧 (`get_info`)
 
@@ -149,12 +142,9 @@ df.group_by(c.Code).agg(pl.len())
 [`JQuantsClient`][kabukit.JQuantsClient] の各メソッドは、
 [J-Quants APIの仕様](https://jpx.gitbook.io/j-quants-ja/api-reference)
 に対応した実装となっています。
-また、より詳細な制御（例: タイムアウト設定、リトライポリシーの変更など）
-が必要な場合に直接利用します。
-特に、`JQuantsClient.client` 属性は `httpx.AsyncClient` のインスタンスであるため、
-httpx が提供する豊富なメソッドや設定に直接アクセスすることが可能です。
+また、より詳細な制御が必要な場合に直接利用します。
 
-ノートブックで `kabukit.JQuantsClient` をインポートしてインスタンスを作成します。
+`kabukit.JQuantsClient` をインポートしてインスタンスを作成します。
 
 ```python exec="1" source="1"
 from kabukit import JQuantsClient
@@ -278,56 +268,3 @@ df.group_by(c.Date.dt.truncate("1mo"), c.Code).agg(
     c.Volume.sum(),
 ).sort(c.Code, c.Date)
 ```
-
-## DataFrame のカラム名について
-
-kabukit が返す DataFrame のカラム名は、データソース（J-Quants, EDINETなど）によらず、
-一貫した命名規則に従うよう設計されています。
-これにより、利用者はソースの違いを意識することなく、統一された使いやすいインターフェースでデータを扱うことができます。
-
-J-Quants API と同様に、全てのカラム名は PascalCase で記述されます。
-また、J-Quants API から返される JSON データを DataFrame に変換する際、
-後続の分析を行いやすくするために、一部のカラム名が変更されます。
-
-### 上場銘柄一覧
-
-Sector17Code, Sector17CodeName のような、コード値と名前の両方があるカラムでは、
-重複をさけるために、コード値のカラムを削除し、名前のカラムは、より簡潔な Sector17 などに変更します。
-また、一貫性のために、CompanyName を Company に変更します。
-
-### 財務情報
-
-株式数に関するカラム名は、文字数を短縮するため、および、意味を明確にするために、以下のように変更されます。
-
-- 期末発行済株式数（自己株式を含む）
-    - （変更前）NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock
-    - （変更後）IssuedShares
-- 期末自己株式数
-    - （変更前）NumberOfTreasuryStockAtTheEndOfFiscalYear
-    - （変更後）TreasuryShares
-- 期中平均株式数（自己株式を含まない）
-    - （変更前）AverageNumberOfShares
-    - （変更後）AverageOutstandingShares
-
-### 株価情報
-
-株価に関するカラム名が以下のように変更されます。
-
-- J-Quants API では、調整済みの値に `Adjustment` プレフィックスを付けています。
-  kabukit ではカラム名を単純化するために、プレフィックスのない `Open`, `Close` などで、調整済みの値を表します。
-- `Raw` プレフィックスが付いているものが、調整前の実際に取引に使われた値です。
-
-下に対応表を示します。
-
-| J-Quants API | kabukit | 説明 |
-| :--: | :--: | :--: |
-| AdjustmentOpen | Open | 調整済み始値 |
-| AdjustmentHigh | High | 調整済み高値 |
-| AdjustmentLow | Low | 調整済み安値 |
-| AdjustmentClose | Close | 調整済み終値 |
-| AdjustmentVolume | Volume | 調整済み取引高 |
-| Open | RawOpen | 始値（調整前） |
-| High | RawHigh | 高値（調整前） |
-| Low | RawLow | 安値（調整前） |
-| Close | RawClose | 終値（調整前） |
-| Volume | RawVolume | 取引高（調整前） |
