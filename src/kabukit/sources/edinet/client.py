@@ -134,10 +134,17 @@ class EdinetClient(Client):
 
         df = pl.DataFrame(data["results"], infer_schema_length=None)
 
-        if df.is_empty() or not clean:
+        if not clean:
             return df
 
+        if df.is_empty():
+            return pl.DataFrame()
+
         df = clean_list(df, date)
+
+        if df.is_empty():
+            return pl.DataFrame()
+
         return await with_date(df)
 
     async def get_response(self, doc_id: str, doc_type: int) -> Response:

@@ -14,7 +14,7 @@ def clean_list(df: pl.DataFrame, date: str | datetime.date) -> pl.DataFrame:
     df = filter_list(df)
 
     if df.is_empty():
-        return df
+        return pl.DataFrame()
 
     df = rename_list(df)
 
