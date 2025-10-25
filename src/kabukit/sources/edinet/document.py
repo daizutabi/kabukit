@@ -59,7 +59,7 @@ def rename_list(df: pl.DataFrame) -> pl.DataFrame:
     mapping = {
         "secCode": "Code",
         "submitDateTime": "SubmittedDateTime",
-        "filerName": "CompanyName",
+        "filerName": "Company",
         "docID": "DocumentId",
         "docTypeCode": "DocumentTypeCode",
         "docDescription": "DocumentDescription",

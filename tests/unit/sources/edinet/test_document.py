@@ -47,7 +47,7 @@ def test_clean_list_columns(df: pl.DataFrame) -> None:
         "Code",
         "SubmittedDate",
         "SubmittedTime",
-        "CompanyName",
+        "Company",
         "DocumentId",
         "DocumentTypeCode",
         "DocumentDescription",

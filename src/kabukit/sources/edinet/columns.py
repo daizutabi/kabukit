@@ -8,7 +8,7 @@ class ListColumns(BaseColumns):
     Code = "銘柄コード"  # secCode
     SubmittedDate = "提出日"  # submitDateTime (date part)
     SubmittedTime = "提出時刻"  # submitDateTime (time part)
-    CompanyName = "会社名"  # filerName
+    Company = "会社名"  # filerName
     DocumentId = "書類管理番号"  # docID
     DocumentTypeCode = "書類種別コード"  # docTypeCode
     DocumentDescription = "提出書類概要"  # docDescription
