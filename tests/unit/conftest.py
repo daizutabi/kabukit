@@ -12,7 +12,9 @@ if TYPE_CHECKING:
 
 @pytest.fixture
 def mock_async_client(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("kabukit.sources.base.AsyncClient").return_value
+    mock_async_client = mocker.patch("kabukit.sources.base.AsyncClient").return_value
+    mock_async_client.aclose = mocker.AsyncMock()
+    return mock_async_client
 
 
 @pytest.fixture
