@@ -63,9 +63,11 @@ async def test_get_list_no_results(
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("clean", [True, False])
 async def test_get_list_empty_results(
     mock_get: AsyncMock,
     mocker: MockerFixture,
+    clean: bool,
 ) -> None:
     json: dict[str, list[Any]] = {"results": []}
     response = Response(200, json=json)
@@ -73,6 +75,31 @@ async def test_get_list_empty_results(
     response.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
-    df = await client.get_list("2023-10-26")
+    df = await client.get_list("2023-10-26", clean=clean)
 
     assert df.is_empty()
+
+
+@pytest.mark.asyncio
+async def test_get_list_empty_results_by_clean(
+    mock_get: AsyncMock,
+    mocker: MockerFixture,
+) -> None:
+    results = [{"docID": "S100TEST"}]
+    json = {"results": results}
+    response = Response(200, json=json)
+    mock_get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    mock_clean_list = mocker.patch("kabukit.sources.edinet.client.clean_list")
+    mock_clean_list.return_value = pl.DataFrame({"a": []})
+
+    mock_with_date = mocker.patch("kabukit.sources.edinet.client.with_date")
+
+    client = EdinetClient("test_key")
+    df = await client.get_list("2023-10-26")
+
+    assert_frame_equal(df, pl.DataFrame())
+
+    mock_clean_list.assert_called_once()
+    mock_with_date.assert_not_called()
