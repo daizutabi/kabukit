@@ -29,7 +29,7 @@ kabukit は、手軽に J-Quants API からデータを取得できるモジュ�
 from kabukit import get_info
 
 df = await get_info("7203")  # または "72030"
-df.select("Date", "Code", "CompanyName", "MarketCodeName")
+df.select("Date", "Code", "Company", "Market")
 ```
 
 銘柄コードを省略すると、全上場銘柄の情報を取得できます。
@@ -37,7 +37,7 @@ df.select("Date", "Code", "CompanyName", "MarketCodeName")
 
 ```python exec="1" source="material-block"
 df = await get_info()  # 全上場銘柄一覧を取得 (投資信託や優先株式を除く)
-df.select("Date", "Code", "CompanyName", "MarketCodeName")
+df.select("Date", "Code", "Company", "Market")
 ```
 
 `only_common_stocks` キーワード引数を `False` に設定すると、
@@ -47,8 +47,8 @@ J-Quants API から取得できる全銘柄が含まれます。
 from polars import col as c
 
 df = await get_info(only_common_stocks=False)  # 全上場銘柄一覧を取得
-df = df.filter(c.Sector17CodeName == "その他")  # 業種区分が「その他」の銘柄を選択
-df.select("Date", "Code", "CompanyName")
+df = df.filter(c.Sector17 == "その他")  # 業種区分が「その他」の銘柄を選択
+df.select("Date", "Code", "Company")
 ```
 
 ### 財務情報 (`get_statements`)
@@ -189,21 +189,21 @@ from kabukit import JQuantsClient
 client = JQuantsClient()
 
 df = await client.get_info("7203")  # トヨタ自動車
-df.select("Date", "Code", "CompanyName", "Sector17CodeName")
+df.select("Date", "Code", "Company", "Sector17")
 ```
 
 `date` 引数に日付を指定して、指定した日付の全銘柄情報を取得します。
 
 ```python exec="1" source="material-block"
 df = await client.get_info(date="2020-10-01")
-df.select("Date", "Code", "CompanyName", "Sector17CodeName")
+df.select("Date", "Code", "Company", "Sector17")
 ```
 
 引数を指定しない場合、実行した日付の全銘柄情報を取得します。
 
 ```python exec="1" source="material-block"
 df = await client.get_info()
-df.select("Date", "Code", "CompanyName", "Sector33CodeName")
+df.select("Date", "Code", "Company", "Sector33")
 ```
 
 全銘柄情報の取得では、デフォルトでは、投資信託や優先株式は除外されます。
@@ -212,8 +212,8 @@ J-Quants API から取得できる全銘柄を取得するには、
 
 ```python exec="1" source="material-block"
 df = await client.get_info(only_common_stocks=False)
-df = df.filter(c.Sector17CodeName == "その他")  # 業種区分が「その他」の銘柄を選択
-df.select("Date", "Code", "CompanyName")
+df = df.filter(c.Sector17 == "その他")  # 業種区分が「その他」の銘柄を選択
+df.select("Date", "Code", "Company")
 ```
 
 ### 財務情報 (`get_statements`)
