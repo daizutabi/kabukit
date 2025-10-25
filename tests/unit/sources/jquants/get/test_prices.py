@@ -33,6 +33,23 @@ async def test_get_prices(mock_get: AsyncMock, mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
+async def test_get_prices_clean(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+    json = {"daily_quotes": [{"Open": 100}, {"Open": 200}]}
+    response = Response(200, json=json)
+    mock_get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    mock_clean = mocker.patch("kabukit.sources.jquants.client.prices.clean")
+    mock_clean.return_value = pl.DataFrame({"Open": [200, 300]})
+
+    client = JQuantsClient("test_token")
+    df = await client.get_prices("123", clean=True)
+    assert df["Open"].to_list() == [200, 300]
+
+    mock_clean.assert_called_once()
+
+
+@pytest.mark.asyncio
 async def test_empty(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json: dict[str, list[dict[str, str]]] = {"daily_quotes": []}
     response = Response(200, json=json)

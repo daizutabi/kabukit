@@ -3,6 +3,8 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING
 
+import polars as pl
+
 from kabukit.utils import concurrent
 from kabukit.utils.datetime import get_past_dates
 
@@ -10,8 +12,6 @@ from .client import EdinetClient
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
-
-    import polars as pl
 
     from kabukit.utils.concurrent import Callback, Progress
 
@@ -66,7 +66,7 @@ async def get_list(
     )
 
     if df.is_empty():
-        return df
+        return pl.DataFrame()
 
     return df.sort("Code", "Date")
 

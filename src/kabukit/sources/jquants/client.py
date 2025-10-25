@@ -234,8 +234,11 @@ class JQuantsClient(Client):
         dfs = [df async for df in self.iter_pages(url, params, name)]
         df = pl.concat(dfs)
 
-        if df.is_empty() or not clean:
+        if not clean:
             return df
+
+        if df.is_empty():
+            return pl.DataFrame()
 
         df = statements.clean(df)
         return await with_date(df)
@@ -284,10 +287,13 @@ class JQuantsClient(Client):
         dfs = [df async for df in self.iter_pages(url, params, name)]
         df = pl.concat(dfs)
 
-        if df.is_empty():
+        if not clean:
             return df
 
-        return prices.clean(df) if clean else df
+        if df.is_empty():
+            return pl.DataFrame()
+
+        return prices.clean(df)
 
     async def get_latest_available_prices(
         self,
@@ -335,8 +341,9 @@ class JQuantsClient(Client):
 
         dfs = [df async for df in self.iter_pages(url, {}, name)]
         df = pl.concat(dfs)
+
         if df.is_empty():
-            return df
+            return pl.DataFrame()
 
         return df.with_columns(pl.col("Date").str.to_date("%Y-%m-%d"))
 
@@ -366,8 +373,9 @@ class JQuantsClient(Client):
 
         dfs = [df async for df in self.iter_pages(url, params, name)]
         df = pl.concat(dfs)
+
         if df.is_empty():
-            return df
+            return pl.DataFrame()
 
         return df.with_columns(pl.col("^.*Date$").str.to_date("%Y-%m-%d"))
 
@@ -395,8 +403,9 @@ class JQuantsClient(Client):
 
         dfs = [df async for df in self.iter_pages(url, params, name)]
         df = pl.concat(dfs)
+
         if df.is_empty():
-            return df
+            return pl.DataFrame()
 
         return topix.clean(df)
 
@@ -427,7 +436,8 @@ class JQuantsClient(Client):
 
         dfs = [df async for df in self.iter_pages(url, params, name)]
         df = pl.concat(dfs)
+
         if df.is_empty():
-            return df
+            return pl.DataFrame()
 
         return calendar.clean(df)
