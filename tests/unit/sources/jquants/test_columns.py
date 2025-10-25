@@ -3,7 +3,7 @@ from __future__ import annotations
 import polars as pl
 import pytest
 
-from kabukit.sources.jquants.schema import (
+from kabukit.sources.jquants.columns import (
     InfoColumns,
     PriceColumns,
     StatementColumns,
@@ -24,7 +24,7 @@ def test_rename_all_columns() -> None:
     test_data = {
         # InfoColumns
         "Code": ["7203"],
-        "CompanyName": ["トヨタ自動車"],
+        "Company": ["トヨタ自動車"],
         # PriceColumns
         "Open": [3000.0],
         "Close": [3100.0],

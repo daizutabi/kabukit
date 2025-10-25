@@ -8,8 +8,10 @@ import polars as pl
 from bs4 import BeautifulSoup
 
 from kabukit.sources.base import Client
+from kabukit.sources.datetime import with_date
 from kabukit.utils.datetime import strpdate
 
+from .document import clean_list
 from .page import iter_page_numbers, parse
 
 if TYPE_CHECKING:
@@ -112,13 +114,13 @@ class TdnetClient(Client):
                 yield await self.get_page(date, index)
 
     async def get_list(self, date: str | datetime.date) -> pl.DataFrame:
-        """TDnetの開示情報一覧を取得する。
+        """指定した日付の開示書類一覧を取得する。
 
         Args:
-            date (str | datetime.date): 取得する開示日の指定。
+            date (str | datetime.date): 取得する開示日。
 
         Returns:
-            pl.DataFrame: 開示情報一覧を含むDataFrame。
+            pl.DataFrame: 開示書類一覧を含むDataFrame。
         """
         if isinstance(date, str):
             date = strpdate(date)
@@ -129,7 +131,6 @@ class TdnetClient(Client):
         if not items:
             return pl.DataFrame()
 
-        return pl.concat(items).select(
-            pl.lit(date).alias("Date"),
-            pl.all(),
-        )
+        df = pl.concat(items)
+        df = clean_list(df, date)
+        return await with_date(df)

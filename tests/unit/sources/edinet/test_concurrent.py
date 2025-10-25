@@ -131,7 +131,7 @@ async def test_get_list_invalid_date(mock_get: AsyncMock) -> None:
 async def test_get_documents_csv(mock_get: AsyncMock) -> None:
     from kabukit.sources.edinet.concurrent import get_documents
 
-    mock_get.return_value = pl.DataFrame({"docID": [3]})
+    mock_get.return_value = pl.DataFrame({"DocumentId": [3]})
 
     result = await get_documents(
         ["doc1", "doc2", "doc3"],
@@ -141,7 +141,7 @@ async def test_get_documents_csv(mock_get: AsyncMock) -> None:
         callback=dummy_callback,
     )
 
-    assert_frame_equal(result, pl.DataFrame({"docID": [3]}))
+    assert_frame_equal(result, pl.DataFrame({"DocumentId": [3]}))
 
     mock_get.assert_awaited_once_with(
         EdinetClient,
@@ -158,7 +158,7 @@ async def test_get_documents_csv(mock_get: AsyncMock) -> None:
 async def test_get_documents_pdf(mock_get: AsyncMock) -> None:
     from kabukit.sources.edinet.concurrent import get_documents
 
-    mock_get.return_value = pl.DataFrame({"docID": [1]})
+    mock_get.return_value = pl.DataFrame({"DocumentId": [1]})
 
     await get_documents(["doc1", "doc2"], pdf=True)
 

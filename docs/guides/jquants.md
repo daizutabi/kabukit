@@ -29,7 +29,7 @@ kabukit は、手軽に J-Quants API からデータを取得できるモジュ�
 from kabukit import get_info
 
 df = await get_info("7203")  # または "72030"
-df.select("Date", "Code", "CompanyName", "MarketCodeName")
+df.select("Date", "Code", "Company", "Market")
 ```
 
 銘柄コードを省略すると、全上場銘柄の情報を取得できます。
@@ -37,7 +37,7 @@ df.select("Date", "Code", "CompanyName", "MarketCodeName")
 
 ```python exec="1" source="material-block"
 df = await get_info()  # 全上場銘柄一覧を取得 (投資信託や優先株式を除く)
-df.select("Date", "Code", "CompanyName", "MarketCodeName")
+df.select("Date", "Code", "Company", "Market")
 ```
 
 `only_common_stocks` キーワード引数を `False` に設定すると、
@@ -47,8 +47,8 @@ J-Quants API から取得できる全銘柄が含まれます。
 from polars import col as c
 
 df = await get_info(only_common_stocks=False)  # 全上場銘柄一覧を取得
-df = df.filter(c.Sector17CodeName == "その他")  # 業種区分が「その他」の銘柄を選択
-df.select("Date", "Code", "CompanyName")
+df = df.filter(c.Sector17 == "その他")  # 業種区分が「その他」の銘柄を選択
+df.select("Date", "Code", "Company")
 ```
 
 ### 財務情報 (`get_statements`)
@@ -189,21 +189,21 @@ from kabukit import JQuantsClient
 client = JQuantsClient()
 
 df = await client.get_info("7203")  # トヨタ自動車
-df.select("Date", "Code", "CompanyName", "Sector17CodeName")
+df.select("Date", "Code", "Company", "Sector17")
 ```
 
 `date` 引数に日付を指定して、指定した日付の全銘柄情報を取得します。
 
 ```python exec="1" source="material-block"
 df = await client.get_info(date="2020-10-01")
-df.select("Date", "Code", "CompanyName", "Sector17CodeName")
+df.select("Date", "Code", "Company", "Sector17")
 ```
 
 引数を指定しない場合、実行した日付の全銘柄情報を取得します。
 
 ```python exec="1" source="material-block"
 df = await client.get_info()
-df.select("Date", "Code", "CompanyName", "Sector33CodeName")
+df.select("Date", "Code", "Company", "Sector33")
 ```
 
 全銘柄情報の取得では、デフォルトでは、投資信託や優先株式は除外されます。
@@ -212,8 +212,8 @@ J-Quants API から取得できる全銘柄を取得するには、
 
 ```python exec="1" source="material-block"
 df = await client.get_info(only_common_stocks=False)
-df = df.filter(c.Sector17CodeName == "その他")  # 業種区分が「その他」の銘柄を選択
-df.select("Date", "Code", "CompanyName")
+df = df.filter(c.Sector17 == "その他")  # 業種区分が「その他」の銘柄を選択
+df.select("Date", "Code", "Company")
 ```
 
 ### 財務情報 (`get_statements`)
@@ -279,17 +279,25 @@ df.group_by(c.Date.dt.truncate("1mo"), c.Code).agg(
 ).sort(c.Code, c.Date)
 ```
 
-## DataFrameのカラム名について
+## DataFrame のカラム名について
 
-J-Quants API から返される JSON 形式のデータは、
-`JQuantsClient`クラスの各メソッドで Polars DataFrame に変換されます。
-その際、後続の分析を行いやすくするために、一部のカラム名が変更されます。
+kabukit が返す DataFrame のカラム名は、データソース（J-Quants, EDINETなど）によらず、
+一貫した命名規則に従うよう設計されています。
+これにより、利用者はソースの違いを意識することなく、統一された使いやすいインターフェースでデータを扱うことができます。
+
+J-Quants API と同様に、全てのカラム名は PascalCase で記述されます。
+また、J-Quants API から返される JSON データを DataFrame に変換する際、
+後続の分析を行いやすくするために、一部のカラム名が変更されます。
+
+### 上場銘柄一覧
+
+Sector17Code, Sector17CodeName のような、コード値と名前の両方があるカラムでは、
+重複をさけるために、コード値のカラムを削除し、名前のカラムは、より簡潔な Sector17 などに変更します。
+また、一貫性のために、CompanyName を Company に変更します。
 
 ### 財務情報
 
-株式数に関するカラム名は、
-文字数を短縮するため、および、意味を明確にするために、
-以下のように変更されます。
+株式数に関するカラム名は、文字数を短縮するため、および、意味を明確にするために、以下のように変更されます。
 
 - 期末発行済株式数（自己株式を含む）
     - （変更前）NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock
@@ -305,9 +313,8 @@ J-Quants API から返される JSON 形式のデータは、
 
 株価に関するカラム名が以下のように変更されます。
 
-- J-Quants API では、調整済みの値に `Adjustment` プレフィックス
-  を付けています。kabukit ではカラム名を単純化するために、
-  プレフィックスのない `Open`, `Close` などで、調整済みの値を表します。
+- J-Quants API では、調整済みの値に `Adjustment` プレフィックスを付けています。
+  kabukit ではカラム名を単純化するために、プレフィックスのない `Open`, `Close` などで、調整済みの値を表します。
 - `Raw` プレフィックスが付いているものが、調整前の実際に取引に使われた値です。
 
 下に対応表を示します。

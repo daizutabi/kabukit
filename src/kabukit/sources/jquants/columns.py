@@ -1,29 +1,22 @@
 from __future__ import annotations
 
-from enum import Enum
 from typing import TYPE_CHECKING
+
+from kabukit.sources.columns import BaseColumns
 
 if TYPE_CHECKING:
     import polars as pl
 
 
-
-class BaseColumns(Enum):
-    @classmethod
-    def rename(cls, df: pl.DataFrame, *, strict: bool = False) -> pl.DataFrame:
-        """DataFrameの列名を日本語から英語に変換する。"""
-        return df.rename({x.name: x.value for x in cls}, strict=strict)
-
-
 class InfoColumns(BaseColumns):
     Date = "日付"
     Code = "銘柄コード"
-    CompanyName = "会社名"
-    Sector17CodeName = "17業種コード名"
-    Sector33CodeName = "33業種コード名"
+    Company = "会社名"
+    Sector17 = "17業種名"
+    Sector33 = "33業種名"
     ScaleCategory = "規模コード"
-    MarketCodeName = "市場区分名"
-    MarginCodeName = "貸借信用区分名"
+    Market = "市場区分名"
+    Margin = "貸借信用区分名"
 
 
 class PriceColumns(BaseColumns):
@@ -45,6 +38,7 @@ class PriceColumns(BaseColumns):
     RawVolume = "調整前出来高"
 
 
+# fmt: off
 class StatementColumns(BaseColumns):
     Date = "日付"
     Code = "銘柄コード"
@@ -131,9 +125,9 @@ class StatementColumns(BaseColumns):
     ChangesInAccountingEstimates = "会計上の見積りの変更"
     RetrospectiveRestatement = "修正再表示"
 
-    IssuedShares = "期末発行済株式数" # 自己株式を含む (NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock)
-    TreasuryShares = "期末自己株式数" # (NumberOfTreasuryStockAtTheEndOfFiscalYear)
-    AverageOutstandingShares = "期中平均株式数" # 自己株式を除く。EPSなどの計算に使用される (AverageNumberOfShares)
+    IssuedShares = "期末発行済株式数"  # 自己株式を含む (NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock)
+    TreasuryShares = "期末自己株式数"  # (NumberOfTreasuryStockAtTheEndOfFiscalYear)
+    AverageOutstandingShares = "期中平均株式数"  # 自己株式を除く。EPSなどの計算に使用される (AverageNumberOfShares)
 
     NonConsolidatedNetSales = "売上高_非連結"
     NonConsolidatedOperatingProfit = "営業利益_非連結"
@@ -169,6 +163,7 @@ class StatementColumns(BaseColumns):
     NextYearForecastNonConsolidatedOrdinaryProfit = "経常利益_予想_翌事業年度期末_非連結"
     NextYearForecastNonConsolidatedProfit = "当期純利益_予想_翌事業年度期末_非連結"
     NextYearForecastNonConsolidatedEarningsPerShare = "一株あたり当期純利益_予想_翌事業年度期末_非連結"
+# fmt: on
 
 
 def rename(df: pl.DataFrame, *, strict: bool = False) -> pl.DataFrame:

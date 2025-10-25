@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.17.0"
+__generated_with = "0.17.2"
 app = marimo.App(width="medium")
 
 
@@ -31,6 +31,11 @@ def _(mo):
 async def _(button, get_edinet_list, mo):
     if button.value:
         await get_edinet_list(years=1, progress=mo.status.progress_bar)
+    return
+
+
+@app.cell
+def _():
     return
 
 

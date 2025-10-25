@@ -10,6 +10,7 @@ import polars as pl
 import tenacity
 
 from kabukit.sources.base import Client
+from kabukit.sources.datetime import with_date
 from kabukit.utils.config import get_config_value
 from kabukit.utils.params import get_params
 
@@ -90,10 +91,10 @@ class EdinetClient(Client):
         return resp
 
     async def get_count(self, date: str | datetime.date) -> int:
-        """指定日の提出書類数を取得する (documents.json, type=1)。
+        """指定したファイル日付の提出書類の数を取得する。
 
         Args:
-            date: 取得対象の日付 (YYYY-MM-DD)。
+            date (str | datetime.date): 取得するファイル日付。
 
         Returns:
             int: 指定日の提出書類数。
@@ -108,11 +109,18 @@ class EdinetClient(Client):
 
         return metadata["resultset"]["count"]
 
-    async def get_list(self, date: str | datetime.date) -> pl.DataFrame:
-        """指定日の提出書類一覧を取得する (documents.json, type=2)。
+    async def get_list(
+        self,
+        date: str | datetime.date,
+        *,
+        clean: bool = True,
+    ) -> pl.DataFrame:
+        """指定したファイル日付の提出書類一覧を取得する。
 
         Args:
-            date: 取得対象の日付 (YYYY-MM-DD)。
+            date (str | datetime.date): 取得するファイル日付。
+            clean (bool, optional): Trueのとき、取得したデータを整形・加工する。
+                デフォルトはTrue。
 
         Returns:
             pl.DataFrame: 提出書類一覧を格納したDataFrame。
@@ -126,13 +134,14 @@ class EdinetClient(Client):
 
         df = pl.DataFrame(data["results"], infer_schema_length=None)
 
-        if df.is_empty():
+        if df.is_empty() or not clean:
             return df
 
-        return clean_list(df, date)
+        df = clean_list(df, date)
+        return await with_date(df)
 
     async def get_response(self, doc_id: str, doc_type: int) -> Response:
-        """書類データをレスポンスオブジェクトとして取得する (documents/{docID})。
+        """書類データをレスポンスオブジェクトとして取得する。
 
         Args:
             doc_id: EDINETの書類ID。

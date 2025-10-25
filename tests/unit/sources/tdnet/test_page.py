@@ -90,15 +90,14 @@ def test_parse() -> None:
     expected = pl.DataFrame(
         {
             "Code": ["1301", "1302"],
-            "時刻": [datetime.time(10, 0), datetime.time(11, 0)],
-            "会社名": ["極洋", "日清製粉"],
-            "表題": ["自己株式の取得結果", "役員人事"],
-            "pdf": ["some/path.pdf", "other/path.pdf"],
-            "xbrl": ["some/xbrl.zip", None],
-            "上場取引所": ["東証", "東証"],
-            "更新履歴": [None, "更新"],
+            "DisclosedTime": [datetime.time(10, 0), datetime.time(11, 0)],
+            "Company": ["極洋", "日清製粉"],
+            "Title": ["自己株式の取得結果", "役員人事"],
+            "PdfLink": ["some/path.pdf", "other/path.pdf"],
+            "XbrlLink": ["some/xbrl.zip", None],
+            "UpdateStatus": [None, "更新"],
         },
-    ).with_columns(pl.col("xbrl").cast(pl.String), pl.col("更新履歴").cast(pl.String))
+    )
     assert_frame_equal(df, expected)
 
 
@@ -114,13 +113,12 @@ def test_iter_cells() -> None:
     result = dict(page.iter_cells(tr))
     expected = {
         "Code": "1301",
-        "時刻": datetime.time(10, 0),
-        "会社名": "極洋",
-        "表題": "自己株式の取得結果",
-        "pdf": "some/path.pdf",
-        "xbrl": "some/xbrl.zip",
-        "上場取引所": "東証",
-        "更新履歴": None,
+        "DisclosedTime": datetime.time(10, 0),
+        "Company": "極洋",
+        "Title": "自己株式の取得結果",
+        "PdfLink": "some/path.pdf",
+        "XbrlLink": "some/xbrl.zip",
+        "UpdateStatus": None,
     }
     assert result == expected
 

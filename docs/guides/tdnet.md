@@ -23,7 +23,7 @@ kabukit は、手軽に TDnet からデータを取得できるモジュール�
 from kabukit import get_tdnet_list
 
 df = await get_tdnet_list("2025-10-10")
-df.select("Date", "Code", "会社名", "表題").tail()
+df.select("Date", "Code", "Company", "Title").tail()
 ```
 
 複数の日付の書類一覧を一度に取得することもできます。
@@ -31,7 +31,7 @@ df.select("Date", "Code", "会社名", "表題").tail()
 
 ```python exec="1" source="material-block"
 df = await get_tdnet_list(["2025-10-10", "2025-10-14", "2025-10-15"])
-df.select("Date", "Code", "会社名", "表題").tail()
+df.select("Date", "Code", "Company", "Title").tail()
 ```
 
 戻り値のデータフレームは、銘柄コード (`Code`)、日付 (`Date`) の順でソートされます。
@@ -72,5 +72,5 @@ client = TdnetClient()
 
 ```python exec="1" source="material-block"
 df = await client.get_list("2025-10-10")
-df.select("Date", "Code", "会社名", "表題").tail()
+df.select("Date", "Code", "Company", "Title").tail()
 ```

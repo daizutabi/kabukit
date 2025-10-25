@@ -143,16 +143,22 @@ async def test_get_list(mocker: MockerFixture) -> None:
         "kabukit.sources.tdnet.client.parse",
         side_effect=[pl.DataFrame({"a": [1]}), pl.DataFrame({"a": [2]})],
     )
+    mock_clean_list = mocker.patch(
+        "kabukit.sources.tdnet.client.clean_list",
+        return_value=pl.DataFrame({"a": [3]}),
+    )
+    mock_with_date = mocker.patch(
+        "kabukit.sources.tdnet.client.with_date",
+        return_value=pl.DataFrame({"a": [4]}),
+    )
 
     client = TdnetClient()
     result = await client.get_list("20230101")
 
-    expected = pl.DataFrame(
-        {
-            "Date": [datetime.date(2023, 1, 1), datetime.date(2023, 1, 1)],
-            "a": [1, 2],
-        },
-    )
+    mock_clean_list.assert_called_once()
+    mock_with_date.assert_called_once()
+
+    expected = pl.DataFrame({"a": [4]})
     assert mock_parse.call_count == 2
     assert_frame_equal(result, expected)
 
