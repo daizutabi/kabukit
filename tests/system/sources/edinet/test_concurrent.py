@@ -48,7 +48,7 @@ async def test_get_list_without_dates() -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
     df = await get_list(days=7, max_items=6, callback=callback)
-    assert df.width == 24
+    assert df.width == 25
 
 
 @pytest.mark.asyncio
@@ -70,7 +70,7 @@ async def test_get_documents_pdf() -> None:
     df = await get_documents(doc_ids, max_items=2, pdf=True)
     assert df.shape == (2, 2)
     for i in range(2):
-        pdf = df.item(i, "pdf")
+        pdf = df.item(i, "PdfContent")
         assert isinstance(pdf, bytes)
         assert pdf.startswith(b"%PDF-")
 
@@ -83,8 +83,8 @@ async def test_get_documents_single_doc_id() -> None:
     doc_id = df.filter(CsvFlag=True).get_column("DocumentId").first()
     assert isinstance(doc_id, str)
     df = await get_documents(doc_id)
-    assert df["docID"].n_unique() == 1
-    assert df.item(0, "docID") == doc_id
+    assert df["DocumentId"].n_unique() == 1
+    assert df.item(0, "DocumentId") == doc_id
 
 
 @pytest.mark.asyncio

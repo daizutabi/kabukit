@@ -112,4 +112,4 @@ async def get_documents(
         progress=progress,
         callback=callback,
     )
-    return df.sort("docID")
+    return df.sort("DocumentId")

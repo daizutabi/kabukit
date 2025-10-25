@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import datetime
+
 import polars as pl
 import pytest
 import pytest_asyncio
@@ -27,9 +29,12 @@ async def test_count_status_not_200(client: EdinetClient) -> None:
 @pytest.mark.asyncio
 async def test_list(client: EdinetClient) -> None:
     df = await client.get_list("2025-09-04")
-    assert df.shape == (76, 24)
+    assert df.shape == (76, 25)
     assert df.columns[0] == "Date"
     assert df["Date"].dtype == pl.Date
+    assert df.columns[-1] == "FileDate"
+    assert df["FileDate"].dtype == pl.Date
+    assert df["FileDate"].unique().to_list() == [datetime.date(2025, 9, 4)]
 
 
 @pytest.mark.asyncio
@@ -47,7 +52,7 @@ async def test_list_holiday(client: EdinetClient) -> None:
 @pytest.mark.asyncio
 async def test_pdf(client: EdinetClient) -> None:
     df = await client.get_pdf("S100WKHJ")
-    content = df.item(0, "pdf")
+    content = df.item(0, "PdfContent")
     assert isinstance(content, bytes)
     assert content.startswith(b"%PDF-")
 
@@ -72,7 +77,7 @@ async def test_zip_error(client: EdinetClient) -> None:
 @pytest.mark.asyncio
 async def test_csv(client: EdinetClient) -> None:
     df = await client.get_csv("S100WKHJ")
-    assert df.columns[0] == "docID"
+    assert df.columns[0] == "DocumentId"
     assert df.shape == (47, 10)
     assert "値" in df.columns
 
