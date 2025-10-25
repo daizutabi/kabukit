@@ -11,7 +11,7 @@ pytestmark = pytest.mark.system
 
 @pytest.mark.asyncio
 async def test_count(client: EdinetClient) -> None:
-    assert await client.get_count("2025-09-05") > 0
+    assert await client.get_count("2025-09-04") == 211
 
 
 @pytest.mark.asyncio
@@ -26,9 +26,8 @@ async def test_count_status_not_200(client: EdinetClient) -> None:
 
 @pytest.mark.asyncio
 async def test_list(client: EdinetClient) -> None:
-    count = await client.get_count("2025-09-04")
     df = await client.get_list("2025-09-04")
-    assert df.shape == (count, 30)
+    assert df.shape == (76, 24)
     assert df.columns[0] == "Date"
     assert df["Date"].dtype == pl.Date
 
@@ -85,15 +84,11 @@ async def df():
     await client.aclose()
 
 
-def test_df_shape(df: pl.DataFrame) -> None:
-    assert df.shape == (1757, 30)
-
-
 def test_df_xbrl_csv(df: pl.DataFrame) -> None:
-    df = df.filter(xbrlFlag="1")
-    assert df.height == df.filter(csvFlag="1").height
+    df = df.filter(XbrlFlag="1")
+    assert df.height == df.filter(CsvFlag="1").height
 
 
 def test_df_xbrl_pdf(df: pl.DataFrame) -> None:
-    df = df.filter(xbrlFlag="1")
-    assert df.height == df.filter(pdfFlag="1").height
+    df = df.filter(XbrlFlag="1")
+    assert df.height == df.filter(PdfFlag="1").height

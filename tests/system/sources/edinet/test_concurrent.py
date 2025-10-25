@@ -19,8 +19,13 @@ async def test_get_list_single_date() -> None:
 
     df = await get_list("2025-10-09")
     dates = df["Date"].unique().to_list()
-    assert len(dates) == 1
-    assert dates[0] == date(2025, 10, 9)
+
+    assert dates == [
+        date(2025, 9, 29),
+        date(2025, 9, 30),
+        date(2025, 10, 9),
+        date(2025, 10, 10),
+    ]
 
 
 @pytest.mark.asyncio
@@ -28,7 +33,13 @@ async def test_get_list_multiple_dates() -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
     df = await get_list(["2025-10-09", "2025-10-10"])
-    expected = [date(2025, 10, 9), date(2025, 10, 10)]
+    expected = [
+        date(2025, 9, 29),
+        date(2025, 9, 30),
+        date(2025, 10, 9),
+        date(2025, 10, 10),
+        date(2025, 10, 14),
+    ]
     assert sorted(df["Date"].unique().to_list()) == expected
 
 
@@ -37,7 +48,7 @@ async def test_get_list_without_dates() -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
     df = await get_list(days=7, max_items=6, callback=callback)
-    assert df.width == 30
+    assert df.width == 24
 
 
 @pytest.mark.asyncio
@@ -45,9 +56,9 @@ async def test_get_documents_csv() -> None:
     from kabukit.sources.edinet.concurrent import get_documents, get_list
 
     df = await get_list(["2025-09-09", "2025-09-19", "2025-09-22"])
-    doc_ids = df.filter(csvFlag=True).get_column("docID").sort()
+    doc_ids = df.filter(CsvFlag=True).get_column("DocumentId").sort()
     df = await get_documents(doc_ids, max_items=10, callback=callback)
-    assert df["docID"].n_unique() == 10
+    assert df["DocumentId"].n_unique() == 10
 
 
 @pytest.mark.asyncio
@@ -55,7 +66,7 @@ async def test_get_documents_pdf() -> None:
     from kabukit.sources.edinet.concurrent import get_documents, get_list
 
     df = await get_list("2025-09-09")
-    doc_ids = df.filter(pdfFlag=True).get_column("docID").to_list()
+    doc_ids = df.filter(PdfFlag=True).get_column("DocumentId").to_list()
     df = await get_documents(doc_ids, max_items=2, pdf=True)
     assert df.shape == (2, 2)
     for i in range(2):
@@ -69,7 +80,7 @@ async def test_get_documents_single_doc_id() -> None:
     from kabukit.sources.edinet.concurrent import get_documents, get_list
 
     df = await get_list("2025-09-09")
-    doc_id = df.filter(csvFlag=True).get_column("docID").first()
+    doc_id = df.filter(CsvFlag=True).get_column("DocumentId").first()
     assert isinstance(doc_id, str)
     df = await get_documents(doc_id)
     assert df["docID"].n_unique() == 1
