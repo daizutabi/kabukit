@@ -4,28 +4,27 @@ from kabukit.sources.columns import BaseColumns
 
 
 class ListColumns(BaseColumns):
-    Code = "提出者証券コード"  # secCode
+    Date = "日付"
+    Code = "銘柄コード"  # secCode
+    SubmitDate = "提出日"  # submitDateTime (date part)
+    SubmitTime = "提出時刻"  # submitDateTime (time part)
+    CompanyName = "会社名"  # filerName
     DocumentId = "書類管理番号"  # docID
     DocumentTypeCode = "書類種別コード"  # docTypeCode
     DocumentDescription = "提出書類概要"  # docDescription
-    DocumentInfoEditStatus = "書類情報修正区分"  # docInfoEditStatus
-    AttachDocumentFlag = "代替書面・添付文書有無フラグ"  # attachDocFlag
-    EnglishDocumentFlag = "英文ファイル有無フラグ"  # englishDocFlag
-    ParentDocumentId = "親書類管理番号"  # parentDocID
-    EdinetCode = "提出者EDINETコード"  # edinetCode
-    Jcn = "提出者法人番号"  # JCN
-    FilerName = "提出者名"  # filerName
+    CurrentReportReason = "臨報提出事由"  # currentReportReason
     PeriodStart = "期間(自)"  # periodStart
     PeriodEnd = "期間(至)"  # periodEnd
-    SubmitDateTime = "提出日時"  # submitDateTime
+    EdinetCode = "提出者EDINETコード"  # edinetCode
     IssuerEdinetCode = "発行会社EDINETコード"  # issuerEdinetCode
     SubjectEdinetCode = "対象EDINETコード"  # subjectEdinetCode
     SubsidiaryEdinetCode = "子会社EDINETコード"  # subsidiaryEdinetCode
-    CurrentReportReason = "臨報提出事由"  # currentReportReason
-    WithdrawalStatus = "取下区分"  # withdrawalStatus
+    ParentDocumentId = "親書類管理番号"  # parentDocID
     DisclosureStatus = "開示不開示区分"  # disclosureStatus
-    XbrlFlag = "XBRL有無フラグ"  # xbrlFlag
-    PdfFlag = "PDF有無フラグ"  # pdfFlag
-    CsvFlag = "CSV有無フラグ"  # csvFlag
+    DocumentInfoEditStatus = "書類情報修正区分"  # docInfoEditStatus
     LegalStatus = "縦覧区分"  # legalStatus
-    SequenceNumber = "連番"  # seqNumber
+    WithdrawalStatus = "取下区分"  # withdrawalStatus
+    AttachDocumentFlag = "代替書面・添付文書有無フラグ"  # attachDocFlag
+    CsvFlag = "CSV有無フラグ"  # csvFlag
+    PdfFlag = "PDF有無フラグ"  # pdfFlag
+    XbrlFlag = "XBRL有無フラグ"  # xbrlFlag
