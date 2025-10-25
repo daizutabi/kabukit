@@ -9,7 +9,7 @@ pytestmark = pytest.mark.unit
 def test_with_date() -> None:
     from datetime import date, time
 
-    from kabukit.sources.datetime import with_date
+    from kabukit.sources.datetime import _with_date
 
     df = pl.DataFrame(
         {
@@ -40,7 +40,7 @@ def test_with_date() -> None:
         date(2025, 1, 13),
     ]
 
-    df = with_date(df, holidays=holidays)
+    df = _with_date(df, holidays=holidays)
     assert df.columns == ["Date", "DisclosedDate", "DisclosedTime", "EPS"]
     x = df["Date"].to_list()
     assert x[0] == date(2025, 1, 6)

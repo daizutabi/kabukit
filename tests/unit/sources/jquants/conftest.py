@@ -25,7 +25,7 @@ def reset_calendar_cache_manager(mocker: MockerFixture):
     # Patch the global _calendar_cache_manager to a new instance for each test
     # This ensures its lock is created in the context of the test's event loop
     mocker.patch(
-        "kabukit.sources.jquants.client._calendar_cache_manager",
+        "kabukit.sources.datetime._calendar_cache_manager",
         _CalendarCacheManager(),
     )
 
