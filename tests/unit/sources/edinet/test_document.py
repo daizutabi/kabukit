@@ -27,7 +27,7 @@ def df() -> pl.DataFrame:
 def test_clean_list_columns(df: pl.DataFrame) -> None:
     from kabukit.sources.edinet.document import clean_list
 
-    df = clean_list(df, "2025-09-19")
+    df = clean_list(df)
     assert df.columns == [
         "Date",
         "Code",
@@ -40,11 +40,10 @@ def test_clean_list_columns(df: pl.DataFrame) -> None:
     ]
 
 
-@pytest.mark.parametrize("d", ["2025-09-19", date(2025, 9, 19)])
-def test_clean_list_date_time(df: pl.DataFrame, d: str | date) -> None:
+def test_clean_list_date_time(df: pl.DataFrame) -> None:
     from kabukit.sources.edinet.document import clean_list
 
-    df = clean_list(df, d)
+    df = clean_list(df)
     x = df["Date"].to_list()
     assert x[0] == date(2025, 9, 19)
     assert x[1] == date(2025, 9, 19)
@@ -64,7 +63,7 @@ def test_clean_list_date_time_null() -> None:
         },
     )
 
-    df = clean_list(df, "2025-09-19")
+    df = clean_list(df)
     assert df["submitDateTime"].to_list() == [None, None]
     assert df["opeDateTime"].dtype == pl.Datetime
 
@@ -72,7 +71,7 @@ def test_clean_list_date_time_null() -> None:
 def test_clean_list_flag(df: pl.DataFrame) -> None:
     from kabukit.sources.edinet.document import clean_list
 
-    df = clean_list(df, "2025-09-19")
+    df = clean_list(df)
     assert df["csvFlag"].to_list() == [True, False]
     assert df["pdfFlag"].to_list() == [True, False]
 
@@ -80,7 +79,7 @@ def test_clean_list_flag(df: pl.DataFrame) -> None:
 def test_clean_list_period(df: pl.DataFrame) -> None:
     from kabukit.sources.edinet.document import clean_list
 
-    df = clean_list(df, "2025-09-19")
+    df = clean_list(df)
     assert df["periodStart"].to_list() == [None, date(2025, 9, 15)]
     assert df["periodEnd"].to_list() == [date(2025, 9, 30), None]
 
@@ -88,7 +87,7 @@ def test_clean_list_period(df: pl.DataFrame) -> None:
 def test_clean_list_ope_datetime(df: pl.DataFrame) -> None:
     from kabukit.sources.edinet.document import clean_list
 
-    df = clean_list(df, "2025-09-19")
+    df = clean_list(df)
     assert df["opeDateTime"].to_list() == [
         datetime(2025, 9, 30, 15, 0, tzinfo=ZoneInfo("Asia/Tokyo")),
         None,

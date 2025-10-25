@@ -1,57 +1,15 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import polars as pl
 
-from kabukit.utils.datetime import strpdate
 
-if TYPE_CHECKING:
-    import datetime
+def clean_list(df: pl.DataFrame) -> pl.DataFrame:
+    df = filter_list(df)
 
+    if df.is_empty():
+        return df
 
-def rename_list(df: pl.DataFrame) -> pl.DataFrame:
-    """EDINET 書類一覧APIのレスポンスをライブラリの命名規則に沿ってリネームし、
-    不要なカラムを削除する。
-    """
-    # ファンド関連の書類を除外 (fundCodeが存在し、nullでない行は除外)
-    if "fundCode" in df.columns:
-        df = df.filter(pl.col("fundCode").is_null())
-
-    mapping = {
-        "secCode": "Code",
-        "docID": "DocumentId",
-        "docTypeCode": "DocumentTypeCode",
-        "docDescription": "DocumentDescription",
-        "docInfoEditStatus": "DocumentInfoEditStatus",
-        "attachDocFlag": "AttachDocumentFlag",
-        "englishDocFlag": "EnglishDocumentFlag",
-        "parentDocID": "ParentDocumentId",
-        "edinetCode": "EdinetCode",
-        "JCN": "Jcn",
-        "filerName": "FilerName",
-        "periodStart": "PeriodStart",
-        "periodEnd": "PeriodEnd",
-        "submitDateTime": "SubmitDateTime",
-        "issuerEdinetCode": "IssuerEdinetCode",
-        "subjectEdinetCode": "SubjectEdinetCode",
-        "subsidiaryEdinetCode": "SubsidiaryEdinetCode",
-        "currentReportReason": "CurrentReportReason",
-        "withdrawalStatus": "WithdrawalStatus",
-        "disclosureStatus": "DisclosureStatus",
-        "xbrlFlag": "XbrlFlag",
-        "pdfFlag": "PdfFlag",
-        "csvFlag": "CsvFlag",
-        "legalStatus": "LegalStatus",
-        "seqNumber": "SeqNumber",
-    }
-
-    return df.select(mapping.keys()).rename(mapping)
-
-
-def clean_list(df: pl.DataFrame, date: str | datetime.date) -> pl.DataFrame:
-    if isinstance(date, str):
-        date = strpdate(date)
+    df = rename_list(df)
 
     null_columns = [c for c in df.columns if df[c].dtype == pl.Null]
 
@@ -60,19 +18,60 @@ def clean_list(df: pl.DataFrame, date: str | datetime.date) -> pl.DataFrame:
             pl.col(null_columns).cast(pl.String),
         )
         .with_columns(
-            pl.lit(date).alias("Date"),
-            pl.col("^.+DateTime$").str.to_datetime(
+            pl.col("^.*Code$").cast(pl.String),
+            pl.col("SubmitDateTime").str.to_datetime(
                 "%Y-%m-%d %H:%M",
                 strict=False,
                 time_zone="Asia/Tokyo",
             ),
-            pl.col("^period.+$").str.to_date("%Y-%m-%d", strict=False),
+            pl.col("^Period.+$").str.to_date("%Y-%m-%d", strict=False),
+            pl.col("^.+Status$").cast(pl.UInt8),
             pl.col("^.+Flag$").cast(pl.Int8).cast(pl.Boolean),
-            pl.col("^.+Code$").cast(pl.String),
         )
-        .rename({"secCode": "Code"})
-        .select("Date", "Code", pl.exclude("Date", "Code"))
+        .with_columns(
+            pl.col("SubmitDateTime").dt.date().alias("SubmitDate"),
+            pl.col("SubmitDateTime").dt.time().alias("SubmitTime"),
+        )
+        .drop("SubmitDateTime")
+        .select("Code", "^Submit.+$", pl.exclude("Code", "^Submit.+$"))
     )
+
+
+def filter_list(df: pl.DataFrame) -> pl.DataFrame:
+    return df.filter(
+        pl.col("secCode").is_not_null(),
+        pl.col("fundCode").is_null(),
+    )
+
+
+def rename_list(df: pl.DataFrame) -> pl.DataFrame:
+    """書類一覧のカラム名をライブラリの命名規則に沿ってリネームし、不要なカラムを削除する。"""
+    mapping = {
+        "secCode": "Code",
+        "submitDateTime": "SubmitDateTime",
+        "filerName": "CompanyName",
+        "docID": "DocumentId",
+        "docTypeCode": "DocumentTypeCode",
+        "docDescription": "DocumentDescription",
+        "currentReportReason": "CurrentReportReason",
+        "periodStart": "PeriodStart",
+        "periodEnd": "PeriodEnd",
+        "edinetCode": "EdinetCode",
+        "issuerEdinetCode": "IssuerEdinetCode",
+        "subjectEdinetCode": "SubjectEdinetCode",
+        "subsidiaryEdinetCode": "SubsidiaryEdinetCode",
+        "parentDocID": "ParentDocumentId",
+        "disclosureStatus": "DisclosureStatus",
+        "docInfoEditStatus": "DocumentInfoEditStatus",
+        "legalStatus": "LegalStatus",
+        "withdrawalStatus": "WithdrawalStatus",
+        "attachDocFlag": "AttachDocumentFlag",
+        "csvFlag": "CsvFlag",
+        "pdfFlag": "PdfFlag",
+        "xbrlFlag": "XbrlFlag",
+    }
+
+    return df.select(mapping.keys()).rename(mapping)
 
 
 def clean_pdf(content: bytes, doc_id: str) -> pl.DataFrame:

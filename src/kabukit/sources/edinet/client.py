@@ -129,7 +129,7 @@ class EdinetClient(Client):
         if df.is_empty():
             return df
 
-        return clean_list(df, date)
+        return clean_list(df)
 
     async def get_response(self, doc_id: str, doc_type: int) -> Response:
         """書類データをレスポンスオブジェクトとして取得する (documents/{docID})。
