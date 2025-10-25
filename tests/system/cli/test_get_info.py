@@ -23,7 +23,7 @@ def test_get_info_with_code(mock_cache_dir: Path) -> None:
     assert "7203" in result.stdout
     assert "トヨタ自動車" in result.stdout
     assert "Code" in result.stdout
-    assert "CompanyName" in result.stdout
+    assert "Company" in result.stdout
 
     info_cache_dir = mock_cache_dir / "jquants" / "info"
     assert not info_cache_dir.exists()
@@ -34,7 +34,7 @@ def test_get_info_with_date(mock_cache_dir: Path) -> None:
 
     assert result.exit_code == 0
     assert "Code" in result.stdout
-    assert "CompanyName" in result.stdout
+    assert "Company" in result.stdout
     assert "2023-01-04" in result.stdout
 
     info_cache_dir = mock_cache_dir / "jquants" / "info"
@@ -47,7 +47,7 @@ def test_get_info(mock_cache_dir: Path) -> None:
     assert result.exit_code == 0
     assert "全銘柄の情報を" in result.stdout
     assert "Code" in result.stdout
-    assert "CompanyName" in result.stdout
+    assert "Company" in result.stdout
 
     info_cache_dir = mock_cache_dir / "jquants" / "info"
     assert info_cache_dir.is_dir()

@@ -11,12 +11,12 @@ if TYPE_CHECKING:
 class InfoColumns(BaseColumns):
     Date = "日付"
     Code = "銘柄コード"
-    CompanyName = "会社名"
-    Sector17CodeName = "17業種コード名"
-    Sector33CodeName = "33業種コード名"
+    Company = "会社名"
+    Sector17 = "17業種名"
+    Sector33 = "33業種名"
     ScaleCategory = "規模コード"
-    MarketCodeName = "市場区分名"
-    MarginCodeName = "貸借信用区分名"
+    Market = "市場区分名"
+    Margin = "貸借信用区分名"
 
 
 class PriceColumns(BaseColumns):

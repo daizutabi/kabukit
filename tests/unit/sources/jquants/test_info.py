@@ -56,21 +56,25 @@ def test_clean() -> None:
     df = pl.DataFrame(
         {
             "Date": ["2023-01-01", "2023-01-02"],
-            "ACodeName": ["A", "B"],
-            "BCodeName": ["C", "D"],
+            "CompanyName": ["A", "B"],
+            "Sector17CodeName": ["A", "B"],
+            "Sector33CodeName": ["C", "D"],
             "ScaleCategory": ["E", "F"],
-            "ACode": ["G", "H"],
-            "BCode": ["I", "J"],
+            "MarketCodeName": ["G", "H"],
+            "MarginCodeName": ["I", "J"],
             "CompanyNameEnglish": ["K", "L"],
         },
     )
 
     df = clean(df)
-    assert df.shape == (2, 4)
+    assert df.shape == (2, 7)
     assert df["Date"].dtype == pl.Date
-    assert df["ACodeName"].dtype == pl.Categorical
-    assert df["BCodeName"].dtype == pl.Categorical
+    assert df["Company"].dtype == pl.String
+    assert df["Sector17"].dtype == pl.Categorical
+    assert df["Sector33"].dtype == pl.Categorical
     assert df["ScaleCategory"].dtype == pl.Categorical
+    assert df["Market"].dtype == pl.Categorical
+    assert df["Margin"].dtype == pl.Categorical
 
 
 def test_filter_common_stocks() -> None:

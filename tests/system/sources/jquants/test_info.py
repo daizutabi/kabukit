@@ -29,7 +29,7 @@ async def test_date(client: JQuantsClient, *, only_common_stocks: bool) -> None:
 async def test_code(client: JQuantsClient) -> None:
     df = await client.get_info(code="7203")
     assert df.height == 1
-    name = df.item(0, "CompanyName")
+    name = df.item(0, "Company")
     assert isinstance(name, str)
     assert "トヨタ" in name
 
@@ -50,11 +50,12 @@ def test_width(df: pl.DataFrame) -> None:
     [
         ("Date", pl.Date),
         ("Code", pl.String),
-        ("CompanyName", pl.String),
-        ("Sector17CodeName", pl.Categorical),
-        ("Sector33CodeName", pl.Categorical),
+        ("Company", pl.String),
+        ("Sector17", pl.Categorical),
+        ("Sector33", pl.Categorical),
         ("ScaleCategory", pl.Categorical),
-        ("MarketCodeName", pl.Categorical),
+        ("Market", pl.Categorical),
+        ("Margin", pl.Categorical),
     ],
 )
 def test_column_dtype(df: pl.DataFrame, name: str, dtype: type) -> None:
@@ -71,9 +72,10 @@ def test_today(df: pl.DataFrame) -> None:
 @pytest.mark.parametrize(
     ("name", "n"),
     [
-        ("Sector17CodeName", 17),
-        ("Sector33CodeName", 33),
-        ("MarketCodeName", 3),
+        ("Sector17", 17),
+        ("Sector33", 33),
+        ("Market", 3),
+        ("Margin", 3),
     ],
 )
 def test_categorical_column_uniqueness(df: pl.DataFrame, name: str, n: int) -> None:
