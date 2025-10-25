@@ -195,7 +195,9 @@ async def test_get_pdf_success(mock_get: AsyncMock, mocker: MockerFixture) -> No
     client = EdinetClient("test_key")
     df = await client.get_pdf("S100TEST")
 
-    expected = pl.DataFrame({"docID": ["S100TEST"], "pdf": [b"pdf content"]})
+    expected = pl.DataFrame(
+        {"DocumentId": ["S100TEST"], "PdfContent": [b"pdf content"]},
+    )
 
     assert_frame_equal(df, expected)
     mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 2})

@@ -28,3 +28,4 @@ class ListColumns(BaseColumns):
     CsvFlag = "CSV有無フラグ"  # csvFlag
     PdfFlag = "PDF有無フラグ"  # pdfFlag
     XbrlFlag = "XBRL有無フラグ"  # xbrlFlag
+    FileDate = "ファイル日付"  # EDINET APIリクエスト時のdateパラメータ

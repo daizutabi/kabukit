@@ -1,9 +1,16 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import polars as pl
 
+from kabukit.utils.datetime import strpdate
 
-def clean_list(df: pl.DataFrame) -> pl.DataFrame:
+if TYPE_CHECKING:
+    import datetime
+
+
+def clean_list(df: pl.DataFrame, date: str | datetime.date) -> pl.DataFrame:
     df = filter_list(df)
 
     if df.is_empty():
@@ -12,6 +19,8 @@ def clean_list(df: pl.DataFrame) -> pl.DataFrame:
     df = rename_list(df)
 
     null_columns = [c for c in df.columns if df[c].dtype == pl.Null]
+
+    file_date = strpdate(date) if isinstance(date, str) else date
 
     return (
         df.with_columns(
@@ -27,6 +36,7 @@ def clean_list(df: pl.DataFrame) -> pl.DataFrame:
             pl.col("^Period.+$").str.to_date("%Y-%m-%d", strict=False),
             pl.col("^.+Status$").cast(pl.UInt8),
             pl.col("^.+Flag$").cast(pl.Int8).cast(pl.Boolean),
+            pl.lit(file_date).alias("FileDate"),
         )
         .with_columns(
             pl.col("SubmittedDateTime").dt.date().alias("SubmittedDate"),
@@ -75,7 +85,7 @@ def rename_list(df: pl.DataFrame) -> pl.DataFrame:
 
 
 def clean_pdf(content: bytes, doc_id: str) -> pl.DataFrame:
-    return pl.DataFrame({"docID": [doc_id], "pdf": [content]})
+    return pl.DataFrame({"DocumentId": [doc_id], "PdfContent": [content]})
 
 
 def read_csv(data: bytes) -> pl.DataFrame:
@@ -89,6 +99,6 @@ def read_csv(data: bytes) -> pl.DataFrame:
 
 def clean_csv(df: pl.DataFrame, doc_id: str) -> pl.DataFrame:
     return df.select(
-        pl.lit(doc_id).alias("docID"),
+        pl.lit(doc_id).alias("DocumentId"),
         pl.all(),
     )

@@ -137,7 +137,7 @@ class EdinetClient(Client):
         if df.is_empty() or not clean:
             return df
 
-        df = clean_list(df)
+        df = clean_list(df, date)
         return await with_date(df)
 
     async def get_response(self, doc_id: str, doc_type: int) -> Response:
