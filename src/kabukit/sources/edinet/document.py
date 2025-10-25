@@ -19,7 +19,7 @@ def clean_list(df: pl.DataFrame) -> pl.DataFrame:
         )
         .with_columns(
             pl.col("^.*Code$").cast(pl.String),
-            pl.col("SubmitDateTime").str.to_datetime(
+            pl.col("SubmittedDateTime").str.to_datetime(
                 "%Y-%m-%d %H:%M",
                 strict=False,
                 time_zone="Asia/Tokyo",
@@ -29,11 +29,11 @@ def clean_list(df: pl.DataFrame) -> pl.DataFrame:
             pl.col("^.+Flag$").cast(pl.Int8).cast(pl.Boolean),
         )
         .with_columns(
-            pl.col("SubmitDateTime").dt.date().alias("SubmitDate"),
-            pl.col("SubmitDateTime").dt.time().alias("SubmitTime"),
+            pl.col("SubmittedDateTime").dt.date().alias("SubmittedDate"),
+            pl.col("SubmittedDateTime").dt.time().alias("SubmittedTime"),
         )
-        .drop("SubmitDateTime")
-        .select("Code", "^Submit.+$", pl.exclude("Code", "^Submit.+$"))
+        .drop("SubmittedDateTime")
+        .select("Code", "^Submitted.+$", pl.exclude("Code", "^Submitted.+$"))
     )
 
 
@@ -48,7 +48,7 @@ def rename_list(df: pl.DataFrame) -> pl.DataFrame:
     """書類一覧のカラム名をライブラリの命名規則に沿ってリネームし、不要なカラムを削除する。"""
     mapping = {
         "secCode": "Code",
-        "submitDateTime": "SubmitDateTime",
+        "submitDateTime": "SubmittedDateTime",
         "filerName": "CompanyName",
         "docID": "DocumentId",
         "docTypeCode": "DocumentTypeCode",

@@ -10,6 +10,7 @@ import polars as pl
 import tenacity
 
 from kabukit.sources.base import Client
+from kabukit.sources.datetime import with_date
 from kabukit.utils.config import get_config_value
 from kabukit.utils.params import get_params
 
@@ -108,11 +109,18 @@ class EdinetClient(Client):
 
         return metadata["resultset"]["count"]
 
-    async def get_list(self, date: str | datetime.date) -> pl.DataFrame:
+    async def get_list(
+        self,
+        date: str | datetime.date,
+        *,
+        clean: bool = True,
+    ) -> pl.DataFrame:
         """指定日の提出書類一覧を取得する (documents.json, type=2)。
 
         Args:
             date: 取得対象の日付 (YYYY-MM-DD)。
+            clean (bool, optional): 取得したデータを整形するかどうか。
+                デフォルト値はTrue。
 
         Returns:
             pl.DataFrame: 提出書類一覧を格納したDataFrame。
@@ -126,10 +134,11 @@ class EdinetClient(Client):
 
         df = pl.DataFrame(data["results"], infer_schema_length=None)
 
-        if df.is_empty():
+        if df.is_empty() or not clean:
             return df
 
-        return clean_list(df)
+        df = clean_list(df)
+        return await with_date(df)
 
     async def get_response(self, doc_id: str, doc_type: int) -> Response:
         """書類データをレスポンスオブジェクトとして取得する (documents/{docID})。

@@ -118,9 +118,12 @@ async def test_get_list_success(mock_get: AsyncMock, mocker: MockerFixture) -> N
     mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
-    mock_clean_documents = mocker.patch("kabukit.sources.edinet.client.clean_list")
     expected_df = pl.DataFrame(results)
-    mock_clean_documents.return_value = expected_df
+    mock_clean_list = mocker.patch("kabukit.sources.edinet.client.clean_list")
+    mock_clean_list.return_value = expected_df
+
+    mock_with_date = mocker.patch("kabukit.sources.edinet.client.with_date")
+    mock_with_date.return_value = expected_df
 
     client = EdinetClient("test_key")
     date = "2023-10-26"
@@ -131,7 +134,8 @@ async def test_get_list_success(mock_get: AsyncMock, mocker: MockerFixture) -> N
         "/documents.json",
         params={"date": date, "type": 2},
     )
-    mock_clean_documents.assert_called_once()
+    mock_clean_list.assert_called_once()
+    mock_with_date.assert_called_once()
 
 
 @pytest.mark.asyncio

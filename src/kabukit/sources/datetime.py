@@ -40,7 +40,7 @@ async def with_date(df: pl.DataFrame) -> pl.DataFrame:
     日付の境界時刻は、
 
     - DisclosedTime: 15時30分
-    - SubmitTime: 15時00分
+    - SubmittedTime: 15時00分
 
     とする。
     """
@@ -51,11 +51,11 @@ async def with_date(df: pl.DataFrame) -> pl.DataFrame:
 def _with_date(df: pl.DataFrame, holidays: list[datetime.date]) -> pl.DataFrame:
     if "DisclosedDate" in df.columns and "DisclosedTime" in df.columns:
         prefix, limit = "Disclosed", datetime.time(15, 30)
-    elif "SubmitDate" in df.columns and "SubmitTime" in df.columns:
-        prefix, limit = "Submit", datetime.time(15, 0)
+    elif "SubmittedDate" in df.columns and "SubmittedTime" in df.columns:
+        prefix, limit = "Submitted", datetime.time(15, 0)
     else:
         msg = "DataFrame must contain either DisclosedDate and DisclosedTime"
-        msg += " or SubmitDate and SubmitTime columns."
+        msg += " or SubmittedDate and SubmittedTime columns."
         raise ValueError(msg)
 
     is_null = pl.col(f"{prefix}Time").is_null()

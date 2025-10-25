@@ -45,8 +45,8 @@ def test_clean_list_columns(df: pl.DataFrame) -> None:
     df = clean_list(df)
     assert df.columns == [
         "Code",
-        "SubmitDate",
-        "SubmitTime",
+        "SubmittedDate",
+        "SubmittedTime",
         "CompanyName",
         "DocumentId",
         "DocumentTypeCode",
@@ -74,10 +74,10 @@ def test_clean_list_submit_date_time(df: pl.DataFrame) -> None:
     from kabukit.sources.edinet.document import clean_list
 
     df = clean_list(df)
-    x = df["SubmitDate"].to_list()
+    x = df["SubmittedDate"].to_list()
     assert x[0] == datetime.date(2025, 9, 19)
     assert x[1] == datetime.date(2025, 9, 22)
-    x = df["SubmitTime"].to_list()
+    x = df["SubmittedTime"].to_list()
     assert x[0] == datetime.time(15, 0)
     assert x[1] == datetime.time(9, 30)
 

@@ -64,14 +64,14 @@ def test_with_date_submit() -> None:
 
     df = pl.DataFrame(
         {
-            "SubmitDate": [
+            "SubmittedDate": [
                 date(2025, 1, 4),
                 date(2025, 1, 4),
                 date(2025, 1, 10),
                 date(2025, 1, 10),
                 date(2025, 1, 10),
             ],
-            "SubmitTime": [
+            "SubmittedTime": [
                 time(9, 0),
                 time(16, 0),
                 time(15, 15),
@@ -92,7 +92,7 @@ def test_with_date_submit() -> None:
     ]
 
     df = _with_date(df, holidays=holidays)
-    assert df.columns == ["Date", "SubmitDate", "SubmitTime", "EPS"]
+    assert df.columns == ["Date", "SubmittedDate", "SubmittedTime", "EPS"]
     x = df["Date"].to_list()
     assert x[0] == date(2025, 1, 6)
     assert x[1] == date(2025, 1, 6)
