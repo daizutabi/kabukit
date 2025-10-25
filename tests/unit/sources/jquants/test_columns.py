@@ -3,7 +3,7 @@ from __future__ import annotations
 import polars as pl
 import pytest
 
-from kabukit.sources.jquants.schema import (
+from kabukit.sources.jquants.columns import (
     InfoColumns,
     PriceColumns,
     StatementColumns,

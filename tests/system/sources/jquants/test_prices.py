@@ -112,13 +112,13 @@ def test_turnover_value(df: pl.DataFrame) -> None:
 
 
 def test_columns(df: pl.DataFrame) -> None:
-    from kabukit.sources.jquants.schema import PriceColumns
+    from kabukit.sources.jquants.columns import PriceColumns
 
     assert df.columns == [c.name for c in PriceColumns]
 
 
 def test_rename(df: pl.DataFrame) -> None:
-    from kabukit.sources.jquants.schema import PriceColumns
+    from kabukit.sources.jquants.columns import PriceColumns
 
     df_renamed = PriceColumns.rename(df, strict=True)
     assert df_renamed.columns == [c.value for c in PriceColumns]
