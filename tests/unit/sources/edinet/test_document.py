@@ -141,7 +141,7 @@ def test_clean_csv() -> None:
     assert df["DocumentId"].to_list() == ["abc", "abc"]
 
 
-def test_renamest(df: pl.DataFrame) -> None:
+def test_rename(df: pl.DataFrame) -> None:
     from kabukit.sources.edinet.columns import ListColumns
     from kabukit.sources.edinet.document import clean_list
 

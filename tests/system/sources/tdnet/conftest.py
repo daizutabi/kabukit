@@ -42,7 +42,7 @@ async def page(date: datetime.date):
 
 @pytest.fixture(scope="module")
 def table(page: str) -> Tag:
-    from kabukit.sources.tdnet.document import get_table
+    from kabukit.sources.tdnet.page import get_table
 
     table = get_table(page)
     assert table is not None

@@ -12,5 +12,4 @@ class ListColumns(BaseColumns):
     Title = "表題"
     PdfLink = "PDFリンク"
     XbrlLink = "XBRLリンク"
-    Market = "市場名"
     UpdateStatus = "更新履歴"

@@ -31,7 +31,7 @@ async def test_get_list_single_date(dates: list[datetime.date]) -> None:
 
     date = dates[0]
     df = await get_list(date)
-    dates = df["Date"].unique().to_list()
+    dates = df["DisclosedDate"].unique().to_list()
 
     if dates:
         assert len(dates) == 1
@@ -43,7 +43,7 @@ async def test_get_list_multiple_dates(dates: list[datetime.date]) -> None:
     from kabukit.sources.tdnet.concurrent import get_list
 
     df = await get_list(dates)
-    result = df["Date"].unique().to_list()
+    result = df["DisclosedDate"].unique().to_list()
     assert result
     assert all(date in dates for date in result)
 
@@ -53,7 +53,7 @@ async def test_get_list_without_dates() -> None:
     from kabukit.sources.tdnet.concurrent import get_list
 
     df = await get_list()
-    dates = df["Date"].unique().to_list()
+    dates = df["DisclosedDate"].unique().to_list()
     assert len(dates) >= 18
 
 

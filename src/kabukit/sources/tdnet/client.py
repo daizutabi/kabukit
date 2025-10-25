@@ -8,9 +8,11 @@ import polars as pl
 from bs4 import BeautifulSoup
 
 from kabukit.sources.base import Client
+from kabukit.sources.datetime import with_date
 from kabukit.utils.datetime import strpdate
 
-from .document import iter_page_numbers, parse
+from .document import clean_list
+from .page import iter_page_numbers, parse
 
 if TYPE_CHECKING:
     import datetime
@@ -129,8 +131,6 @@ class TdnetClient(Client):
         if not items:
             return pl.DataFrame()
 
-        return pl.concat(items).select(
-            pl.col("Code"),
-            pl.lit(date).alias("DisclosedDate"),
-            pl.exclude("Code"),
-        )
+        df = pl.concat(items)
+        df = clean_list(df, date)
+        return await with_date(df)
