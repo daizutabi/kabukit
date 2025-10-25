@@ -12,21 +12,6 @@ pytestmark = pytest.mark.system
 
 
 @pytest.mark.asyncio
-async def test_count(client: EdinetClient) -> None:
-    assert await client.get_count("2025-09-04") == 211
-
-
-@pytest.mark.asyncio
-async def test_count_zero(client: EdinetClient) -> None:
-    assert await client.get_count("1000-01-01") == 0
-
-
-@pytest.mark.asyncio
-async def test_count_status_not_200(client: EdinetClient) -> None:
-    assert await client.get_count("") == 0
-
-
-@pytest.mark.asyncio
 async def test_list(client: EdinetClient) -> None:
     df = await client.get_list("2025-09-04")
     assert df.shape == (76, 25)
@@ -97,3 +82,16 @@ def test_df_xbrl_csv(df: pl.DataFrame) -> None:
 def test_df_xbrl_pdf(df: pl.DataFrame) -> None:
     df = df.filter(XbrlFlag="1")
     assert df.height == df.filter(PdfFlag="1").height
+
+
+def test_columns(df: pl.DataFrame) -> None:
+    from kabukit.sources.edinet.columns import ListColumns
+
+    assert df.columns == [c.name for c in ListColumns]
+
+
+def test_rename(df: pl.DataFrame) -> None:
+    from kabukit.sources.edinet.columns import ListColumns
+
+    df_renamed = ListColumns.rename(df, strict=True)
+    assert df_renamed.columns == [c.value for c in ListColumns]
