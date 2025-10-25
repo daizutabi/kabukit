@@ -9,7 +9,7 @@ def _():
     import marimo as mo
     import polars as pl
     from kabukit import EdinetClient, get_edinet_documents, EdinetList
-    return EdinetClient, EdinetList, mo, pl
+    return EdinetClient, EdinetList, get_edinet_documents, mo, pl
 
 
 @app.cell
@@ -28,17 +28,12 @@ def _(mo):
 
 
 @app.cell
-async def _(EdinetList, button, get_documents, mo, pl):
+async def _(EdinetList, button, get_edinet_documents, mo, pl):
     if button.value:
         lst = EdinetList().data.filter(pl.col("Code").is_not_null(), pl.col("CsvFlag"))
-        doc_ids = lst["docID"].unique()
-        x = await get_documents(doc_ids, max_items=100, progress=mo.status.progress_bar)
+        doc_ids = lst["DocumentId"].unique()
+        x = await get_edinet_documents(doc_ids, max_items=100, progress=mo.status.progress_bar)
         mo.output.append(x)
-    return
-
-
-@app.cell
-def _():
     return
 
 
