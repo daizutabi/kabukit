@@ -99,10 +99,6 @@ df.group_by(c.Code).agg(pl.len())
 
 銘柄コードを指定すると、指定した銘柄の全期間分の株価情報を取得できます。
 
-```python .md#_
-pl.Config.set_tbl_cols(None)
-```
-
 ```python exec="1" source="material-block"
 from kabukit import get_prices
 
@@ -113,6 +109,7 @@ df.select("Date", "Code", "Open", "High", "Low", "Close", "Volume")
 銘柄コードのリストを指定すると、複数銘柄の全期間分の株価情報を一度に取得できます。
 
 ```python exec="1" source="material-block"
+# 複数銘柄の株価情報を取得
 df = await get_prices(["7203", "9984", "8306", "6758"])
 
 # 銘柄コードごとに集計
@@ -142,7 +139,6 @@ df.group_by(c.Code).agg(pl.len())
 [`JQuantsClient`][kabukit.JQuantsClient] の各メソッドは、
 [J-Quants APIの仕様](https://jpx.gitbook.io/j-quants-ja/api-reference)
 に対応した実装となっています。
-また、より詳細な制御が必要な場合に直接利用します。
 
 `kabukit.JQuantsClient` をインポートしてインスタンスを作成します。
 
@@ -150,17 +146,6 @@ df.group_by(c.Code).agg(pl.len())
 from kabukit import JQuantsClient
 
 client = JQuantsClient()
-# ここで API を呼び出す
-await client.aclose()  # 最後に手動でセッションを閉じる
-```
-
-`async with` 構文を使うことで、セッションを安全に管理できます。
-
-```python exec="1" source="1"
-async with JQuantsClient() as client:
-    # このブロック内で API を呼び出す
-    pass
-# 自動でセッションが閉じられる
 ```
 
 ### 上場銘柄一覧 (`get_info`)
@@ -174,10 +159,6 @@ J-Quants API の[上場銘柄一覧 (/listed/info)](https://jpx.gitbook.io/j-qua
 実行した日付または営業日の情報となります。
 
 ```python exec="1" source="material-block"
-from kabukit import JQuantsClient
-
-client = JQuantsClient()
-
 df = await client.get_info("7203")  # トヨタ自動車
 df.select("Date", "Code", "Company", "Sector17")
 ```

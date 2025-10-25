@@ -36,17 +36,6 @@ df.select("Date", "Code", "Company", "Title").tail()
 from kabukit import TdnetClient
 
 client = TdnetClient()
-# ここでAPIを呼び出す
-await client.aclose()  # 最後に手動でセッションを閉じる
-```
-
-`async with`構文を使うことで、セッションを安全に管理できます。
-
-```python exec="1" source="1"
-async with TdnetClient() as client:
-    # このブロック内でAPIを呼び出す
-    pass
-# 自動でセッションが閉じられる
 ```
 
 ### 書類一覧 (`get_list`)
@@ -54,11 +43,7 @@ async with TdnetClient() as client:
 [`TdnetClient.get_list`][kabukit.TdnetClient.get_list]
 メソッドは、日付を指定して、開示された書類のメタデータを取得します。
 
-```python .md#_
-client = TdnetClient()
-```
-
 ```python exec="1" source="material-block"
 df = await client.get_list("2025-10-10")
-df.select("Date", "Code", "Company", "Title").tail()
+df.select("DisclosedDate", "Code", "Company", "Title").tail()
 ```

@@ -99,23 +99,16 @@ pl.Config(fmt_str_lengths=None)
 
 ## EdinetClient
 
+[`EdinetClient`][kabukit.EdinetClient] の各メソッドは、
+[EDINET APIの仕様](https://disclosure2dl.edinet-fsa.go.jp/guide/static/disclosure/download/ESE140206.pdf)
+に対応した実装となっています。
+
 `kabukit.EdinetClient` をインポートしてインスタンスを作成します。
 
 ```python exec="1" source="1"
 from kabukit import EdinetClient
 
 client = EdinetClient()
-# ここで API を呼び出す
-await client.aclose()  # 最後に手動でセッションを閉じる
-```
-
-`async with` 構文を使うことで、セッションを安全に管理できます。
-
-```python exec="1" source="1"
-async with EdinetClient() as client:
-    # このブロック内で API を呼び出す
-    pass
-# 自動でセッションが閉じられる
 ```
 
 ### 書類一覧 (`get_list`)
@@ -123,13 +116,9 @@ async with EdinetClient() as client:
 [`EdinetClient.get_list`][kabukit.EdinetClient.get_list]
 メソッドは、日付を指定して、提出された書類のメタデータを取得します。
 
-```python .md#_
-client = EdinetClient()
-```
-
 ```python exec="1" source="material-block"
 df = await client.get_list("2025-10-10")
-df.select("Date", "Code", "DocumentId", "Company", "PdfFlag", "CsvFlag").tail()
+df.select("FileDate", "Code", "DocumentId", "Company", "PdfFlag", "CsvFlag").tail()
 ```
 
 ### 書類本文 (`get_document`)
