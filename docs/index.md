@@ -41,7 +41,7 @@ kabukit は、こうした課題を解決します。
     ---
 
     API の認証設定が対話形式で簡単に完了。
-    `kabu get prices` の一行で、全上場銘柄の 10 年分[^1] の株価データが手に入り、
+    `kabu get prices --all` の一行で、全上場銘柄の 10 年分[^1] の株価データが手に入り、
     すぐに分析を始められます。
 
 - **:fontawesome-solid-code: ノートブックで快適な分析体験**
@@ -138,17 +138,10 @@ df_prices = await get_prices("7203")
 
 kabukit の使い方を、以下のガイドで詳しく解説しています。
 
-- **[CLIの使い方](guides/cli.md)**:
+- **[CLI の使い方](guides/cli.md)**:
   認証設定から、データ取得、キャッシュ管理まで、
   コマンドラインインターフェース (CLI) の全機能を解説
 
-- **[J-Quants API の使い方](guides/jquants.md)**:
-  上場銘柄情報、財務情報、株価四本値を、Python から取得する方法。
-  モジュール関数と `JQuantsClient` の使い分け
-
-- **[EDINET API の使い方](guides/edinet.md)**:
-  有価証券報告書などの開示書類を、Python から取得する方法。
-  モジュール関数と `EdinetClient` の使い分け
-
-- **[キャッシュの活用](guides/cache.md)**:
-  キャッシュの仕組みと、CLI および Python からの管理方法
+- **[Python API の使い方](guides/api/index.md)**:
+  各種情報を Python から取得する方法。
+  モジュール関数と Client クラスの使い分け

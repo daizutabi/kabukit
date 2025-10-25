@@ -74,10 +74,14 @@ nav:
   - はじめに: index.md
   - 利用ガイド:
       - CLI: guides/cli.md
-      - J-Quants API: guides/jquants.md
-      - EDINET API: guides/edinet.md
-      - TDnet: guides/tdnet.md
-      - キャッシュの活用: guides/cache.md
+      - Python API:
+          - guides/api/index.md
+          - J-Quants API: guides/api/jquants.md
+          - EDINET API: guides/api/edinet.md
+          - TDnet: guides/api/tdnet.md
+      - キャッシュ: guides/cache.md
+      - DataFrame: guides/dataframe.md
+      - 日付の扱い: guides/date.md
   # - "コンセプト":
   #     - "概要": "concept/index.md"
   #     - "コア指標": "concept/core_indicators.md"
