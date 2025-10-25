@@ -47,9 +47,12 @@ def parse(html: str, /) -> pl.DataFrame:
         return pl.DataFrame()
 
     data = [dict(iter_cells(tr)) for tr in table.find_all("tr")]
-    return pl.DataFrame(data).with_columns(
-        pl.col("xbrl").cast(pl.String),
-        pl.col("更新履歴").cast(pl.String),
+    df = pl.DataFrame(data)
+
+    null_columns = [c for c in df.columns if df[c].dtype == pl.Null]
+
+    return df.with_columns(
+        pl.col(null_columns).cast(pl.String),
     )
 
 
@@ -57,13 +60,13 @@ def iter_cells(tag: Tag, /) -> Iterator[tuple[str, datetime.time | str | None]]:
     tds = tag.find_all("td")
 
     yield "Code", tds[1].get_text(strip=True)
-    yield "時刻", strptime(tds[0].get_text(strip=True))
-    yield "会社名", tds[2].get_text(strip=True)
-    yield "表題", tds[3].get_text(strip=True)
-    yield "pdf", get_link(tds[3])
-    yield "xbrl", get_link(tds[4])
-    yield "上場取引所", tds[5].get_text(strip=True) or None
-    yield "更新履歴", tds[6].get_text(strip=True) or None
+    yield "DisclosedTime", strptime(tds[0].get_text(strip=True))
+    yield "Company", tds[2].get_text(strip=True)
+    yield "Title", tds[3].get_text(strip=True)
+    yield "PdfLink", get_link(tds[3])
+    yield "XbrlLink", get_link(tds[4])
+    yield "Market", tds[5].get_text(strip=True) or None
+    yield "UpdateStatus", tds[6].get_text(strip=True) or None
 
 
 def get_link(tag: Tag, /) -> str | None:
