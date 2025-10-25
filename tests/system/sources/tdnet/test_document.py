@@ -13,7 +13,7 @@ def test_page_pager_box_top(page: str) -> None:
 
 
 def test_iter_page_numbers(page: str) -> None:
-    from kabukit.sources.tdnet.page import iter_page_numbers
+    from kabukit.sources.tdnet.document import iter_page_numbers
 
     pages = list(iter_page_numbers(page))
     assert 1 in pages
