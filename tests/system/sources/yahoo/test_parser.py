@@ -75,10 +75,10 @@ def test_state_keys(state: dict[str, Any], key: str) -> None:
     assert key in state
 
 
-def test_state_values(state: dict[str, Any]) -> None:
-    from kabukit.sources.yahoo.parser import iter_values
+# def test_state_values(state: dict[str, Any]) -> None:
+#     from kabukit.sources.yahoo.parser import iter_values
 
-    for k, v in iter_values(state):
-        print(k, v, v is None)  # noqa: T201
+#     for k, v in iter_values(state):
+#         print(k, v, v is None)
 
-    # pytest.fail("debug")
+#     pytest.fail("debug")
