@@ -65,6 +65,9 @@ class YahooClient(Client):
         """
         resp = await self.get(f"{code[:4]}.T")
 
+        if len(code) == 4:
+            code += "0"
+
         if use_executor:
             loop = asyncio.get_running_loop()
             return await loop.run_in_executor(None, parse, resp.text, code)
