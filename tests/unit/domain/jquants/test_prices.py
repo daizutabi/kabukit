@@ -131,7 +131,18 @@ def test_with_adjusted_shares() -> None:
     assert_frame_equal(result.data, expected)
 
 
-def test_with_market_cap() -> None:
+@pytest.mark.parametrize(
+    ("include_treasury_shares", "expected_values"),
+    [
+        (False, [90000.0, 99000.0, 216000.0]),
+        (True, [100000.0, 110000.0, 240000.0]),
+    ],
+)
+def test_with_market_cap(
+    *,
+    include_treasury_shares: bool,
+    expected_values: list[float],
+) -> None:
     prices_df = pl.DataFrame(
         {
             "Date": [
@@ -148,10 +159,10 @@ def test_with_market_cap() -> None:
 
     prices = Prices(prices_df)
 
-    result = prices.with_market_cap()
+    result = prices.with_market_cap(include_treasury_shares=include_treasury_shares)
 
     expected = prices_df.with_columns(
-        pl.Series("MarketCap", [90000.0, 99000.0, 216000.0]),
+        pl.Series("MarketCap", expected_values),
     )
 
     assert_frame_equal(result.data, expected)
