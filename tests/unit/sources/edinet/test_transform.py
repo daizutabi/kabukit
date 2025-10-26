@@ -40,7 +40,7 @@ def df() -> pl.DataFrame:
 
 
 def test_transform_list_columns(df: pl.DataFrame) -> None:
-    from kabukit.sources.edinet.document import transform_list
+    from kabukit.sources.edinet.transform import transform_list
 
     df = transform_list(df, "2025-09-19")
     assert df.columns == [
@@ -72,7 +72,7 @@ def test_transform_list_columns(df: pl.DataFrame) -> None:
 
 
 def test_transform_list_submit_date_time(df: pl.DataFrame) -> None:
-    from kabukit.sources.edinet.document import transform_list
+    from kabukit.sources.edinet.transform import transform_list
 
     df = transform_list(df, "2025-09-19")
     x = df["SubmittedDate"].to_list()
@@ -84,7 +84,7 @@ def test_transform_list_submit_date_time(df: pl.DataFrame) -> None:
 
 
 def test_transform_list_flag(df: pl.DataFrame) -> None:
-    from kabukit.sources.edinet.document import transform_list
+    from kabukit.sources.edinet.transform import transform_list
 
     df = transform_list(df, "2025-09-19")
     assert df["CsvFlag"].to_list() == [True, False]
@@ -92,7 +92,7 @@ def test_transform_list_flag(df: pl.DataFrame) -> None:
 
 
 def test_transform_list_period(df: pl.DataFrame) -> None:
-    from kabukit.sources.edinet.document import transform_list
+    from kabukit.sources.edinet.transform import transform_list
 
     df = transform_list(df, "2025-09-19")
     assert df["PeriodStart"].to_list() == [None, datetime.date(2025, 9, 15)]
@@ -100,21 +100,21 @@ def test_transform_list_period(df: pl.DataFrame) -> None:
 
 
 def test_transform_list_file_date(df: pl.DataFrame) -> None:
-    from kabukit.sources.edinet.document import transform_list
+    from kabukit.sources.edinet.transform import transform_list
 
     df = transform_list(df, "2025-09-19")
     assert df["FileDate"].unique().to_list() == [datetime.date(2025, 9, 19)]
 
 
 def test_transform_list_empty() -> None:
-    from kabukit.sources.edinet.document import transform_list
+    from kabukit.sources.edinet.transform import transform_list
 
     df = pl.DataFrame({"secCode": [None, "1"], "fundCode": ["1", "2"]})
     assert transform_list(df, "2025-09-19").is_empty()
 
 
 def test_transform_pdf() -> None:
-    from kabukit.sources.edinet.document import transform_pdf
+    from kabukit.sources.edinet.transform import transform_pdf
 
     df = transform_pdf(b"abc", "abc")
     assert df.columns == ["DocumentId", "PdfContent"]
@@ -123,7 +123,7 @@ def test_transform_pdf() -> None:
 
 
 def test_read_csv() -> None:
-    from kabukit.sources.edinet.document import read_csv
+    from kabukit.sources.edinet.transform import read_csv
 
     data = "col1\tcol2\n1\t2\n3\t4".encode("utf-16-le")
     df = read_csv(data)
@@ -133,7 +133,7 @@ def test_read_csv() -> None:
 
 
 def test_transform_csv() -> None:
-    from kabukit.sources.edinet.document import transform_csv
+    from kabukit.sources.edinet.transform import transform_csv
 
     df = pl.DataFrame({"a": [1, 2]})
     df = transform_csv(df, "abc")
@@ -143,7 +143,7 @@ def test_transform_csv() -> None:
 
 def test_rename(df: pl.DataFrame) -> None:
     from kabukit.sources.edinet.columns import ListColumns
-    from kabukit.sources.edinet.document import transform_list
+    from kabukit.sources.edinet.transform import transform_list
 
     df = transform_list(df, "2025-09-19")
     df = df.select(pl.lit(1).alias("Date"), pl.all())
