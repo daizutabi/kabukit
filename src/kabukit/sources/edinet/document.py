@@ -97,7 +97,7 @@ def read_csv(data: bytes) -> pl.DataFrame:
     )
 
 
-def clean_csv(df: pl.DataFrame, doc_id: str) -> pl.DataFrame:
+def transform_csv(df: pl.DataFrame, doc_id: str) -> pl.DataFrame:
     return df.select(
         pl.lit(doc_id).alias("DocumentId"),
         pl.all(),

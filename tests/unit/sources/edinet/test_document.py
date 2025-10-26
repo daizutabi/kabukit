@@ -39,7 +39,7 @@ def df() -> pl.DataFrame:
     )
 
 
-def test_clean_list_columns(df: pl.DataFrame) -> None:
+def test_transform_list_columns(df: pl.DataFrame) -> None:
     from kabukit.sources.edinet.document import transform_list
 
     df = transform_list(df, "2025-09-19")
@@ -71,7 +71,7 @@ def test_clean_list_columns(df: pl.DataFrame) -> None:
     ]
 
 
-def test_clean_list_submit_date_time(df: pl.DataFrame) -> None:
+def test_transform_list_submit_date_time(df: pl.DataFrame) -> None:
     from kabukit.sources.edinet.document import transform_list
 
     df = transform_list(df, "2025-09-19")
@@ -83,7 +83,7 @@ def test_clean_list_submit_date_time(df: pl.DataFrame) -> None:
     assert x[1] == datetime.time(9, 30)
 
 
-def test_clean_list_flag(df: pl.DataFrame) -> None:
+def test_transform_list_flag(df: pl.DataFrame) -> None:
     from kabukit.sources.edinet.document import transform_list
 
     df = transform_list(df, "2025-09-19")
@@ -91,7 +91,7 @@ def test_clean_list_flag(df: pl.DataFrame) -> None:
     assert df["PdfFlag"].to_list() == [True, False]
 
 
-def test_clean_list_period(df: pl.DataFrame) -> None:
+def test_transform_list_period(df: pl.DataFrame) -> None:
     from kabukit.sources.edinet.document import transform_list
 
     df = transform_list(df, "2025-09-19")
@@ -99,21 +99,21 @@ def test_clean_list_period(df: pl.DataFrame) -> None:
     assert df["PeriodEnd"].to_list() == [datetime.date(2025, 9, 30), None]
 
 
-def test_clean_list_file_date(df: pl.DataFrame) -> None:
+def test_transform_list_file_date(df: pl.DataFrame) -> None:
     from kabukit.sources.edinet.document import transform_list
 
     df = transform_list(df, "2025-09-19")
     assert df["FileDate"].unique().to_list() == [datetime.date(2025, 9, 19)]
 
 
-def test_clean_list_empty() -> None:
+def test_transform_list_empty() -> None:
     from kabukit.sources.edinet.document import transform_list
 
     df = pl.DataFrame({"secCode": [None, "1"], "fundCode": ["1", "2"]})
     assert transform_list(df, "2025-09-19").is_empty()
 
 
-def test_clean_pdf() -> None:
+def test_transform_pdf() -> None:
     from kabukit.sources.edinet.document import transform_pdf
 
     df = transform_pdf(b"abc", "abc")
@@ -132,11 +132,11 @@ def test_read_csv() -> None:
     assert df["col2"].to_list() == [2, 4]
 
 
-def test_clean_csv() -> None:
-    from kabukit.sources.edinet.document import clean_csv
+def test_transform_csv() -> None:
+    from kabukit.sources.edinet.document import transform_csv
 
     df = pl.DataFrame({"a": [1, 2]})
-    df = clean_csv(df, "abc")
+    df = transform_csv(df, "abc")
     assert df.columns == ["DocumentId", "a"]
     assert df["DocumentId"].to_list() == ["abc", "abc"]
 

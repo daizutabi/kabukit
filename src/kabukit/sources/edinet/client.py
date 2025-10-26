@@ -14,7 +14,7 @@ from kabukit.sources.datetime import with_date
 from kabukit.utils.config import get_config_value
 from kabukit.utils.params import get_params
 
-from .document import clean_csv, read_csv, transform_list, transform_pdf
+from .document import read_csv, transform_csv, transform_list, transform_pdf
 
 if TYPE_CHECKING:
     import datetime
@@ -222,7 +222,7 @@ class EdinetClient(Client):
                 if info.filename.endswith(".csv"):
                     with zf.open(info) as f:
                         df = read_csv(f.read())
-                        return clean_csv(df, doc_id)
+                        return transform_csv(df, doc_id)
 
         msg = "CSV is not available."
         raise ValueError(msg)

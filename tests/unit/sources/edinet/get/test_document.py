@@ -113,16 +113,16 @@ async def test_get_csv_success(mock_get: AsyncMock, mocker: MockerFixture) -> No
     )
     mock_get.return_value.raise_for_status = mocker.MagicMock()
 
-    mock_clean_csv = mocker.patch("kabukit.sources.edinet.client.clean_csv")
+    mock_transform_csv = mocker.patch("kabukit.sources.edinet.client.transform_csv")
     expected_df = pl.DataFrame({"header1": ["value1"], "header2": ["value2"]})
-    mock_clean_csv.return_value = expected_df
+    mock_transform_csv.return_value = expected_df
 
     client = EdinetClient("test_key")
     df = await client.get_csv("S100TEST")
 
     assert_frame_equal(df, expected_df)
     mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 5})
-    mock_clean_csv.assert_called_once()
+    mock_transform_csv.assert_called_once()
 
 
 @pytest.mark.asyncio
