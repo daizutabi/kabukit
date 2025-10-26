@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import datetime
 from enum import StrEnum
 from typing import TYPE_CHECKING
 
@@ -9,12 +8,12 @@ import polars as pl
 from kabukit.sources.base import Client
 from kabukit.sources.datetime import with_date
 from kabukit.utils.config import get_config_value
-from kabukit.utils.datetime import today
 from kabukit.utils.params import get_params
 
 from .clean import calendar, info, prices, statements, topix
 
 if TYPE_CHECKING:
+    import datetime
     from collections.abc import AsyncIterator
     from typing import Any
 
@@ -272,8 +271,9 @@ class JQuantsClient(Client):
             ValueError: `date`と`from_`/`to`が同時に指定された場合。
             HTTPStatusError: APIリクエストが失敗した場合。
         """
-        if not date and not code:
-            return await self.get_latest_available_prices(clean=clean)
+        if not code and not date:
+            msg = "codeまたはdateのどちらかを指定する必要がある。"
+            raise ValueError(msg)
 
         if date and (from_ or to):
             msg = "dateとfrom/toを同時に指定することはできない。"
@@ -294,38 +294,6 @@ class JQuantsClient(Client):
             return pl.DataFrame()
 
         return prices.clean(df)
-
-    async def get_latest_available_prices(
-        self,
-        num_days: int = 30,
-        *,
-        clean: bool = True,
-    ) -> pl.DataFrame:
-        """直近利用可能な日付の株価を取得する。
-
-        `get_prices` のためのフォールバック処理。今日から過去`num_days`の範囲で
-        データが存在する最初の日の全銘柄データを返す。
-
-        Args:
-            num_days (int, optional): 遡って検索する最大日数。
-                デフォルト値は30。
-            clean (bool, optional): 取得したデータを整形するかどうか。
-                デフォルト値はTrue。
-
-        Returns:
-            pl.DataFrame: データが見つかった場合はその日の株価DataFrame、
-            見つからない場合は空のDataFrame。
-        """
-        start_date = today()
-
-        for days in range(num_days):
-            date = start_date - datetime.timedelta(days)
-            df = await self.get_prices(date=date, clean=clean)
-
-            if not df.is_empty():
-                return df
-
-        return pl.DataFrame()
 
     async def get_announcement(self) -> pl.DataFrame:
         """翌日発表予定の決算情報を取得する (fins/announcement)。

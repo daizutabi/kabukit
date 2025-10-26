@@ -52,20 +52,8 @@ async def test_to(client: JQuantsClient) -> None:
 
 @pytest.mark.asyncio
 async def test_without_code(client: JQuantsClient) -> None:
-    df = await client.get_prices()
-    assert df.height > 3000
-
-
-@pytest.mark.asyncio
-async def test_latest_available_prices(client: JQuantsClient) -> None:
-    df = await client.get_latest_available_prices()
-    assert df.height > 3000
-
-
-@pytest.mark.asyncio
-async def test_latest_available_prices_empty(client: JQuantsClient) -> None:
-    df = await client.get_latest_available_prices(0)
-    assert df.is_empty()
+    with pytest.raises(ValueError, match="codeまたはdate"):
+        await client.get_prices()
 
 
 @pytest_asyncio.fixture(scope="module")

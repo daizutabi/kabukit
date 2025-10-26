@@ -26,10 +26,6 @@ async def test_get_prices(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     client = JQuantsClient("test_token")
     df = await client.get_prices("123", clean=False)
     assert df["Open"].to_list() == [100, 200]
-    df = await client.get_latest_available_prices(clean=False)
-    assert df["Open"].to_list() == [100, 200]
-    df = await client.get_prices(clean=False)
-    assert df["Open"].to_list() == [100, 200]
 
 
 @pytest.mark.asyncio
@@ -59,12 +55,16 @@ async def test_empty(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     client = JQuantsClient("test_token")
     df = await client.get_prices("123")
     assert df.is_empty()
-    df = await client.get_latest_available_prices()
-    assert df.is_empty()
 
 
 @pytest.mark.asyncio
-async def test_error(client: JQuantsClient) -> None:
+async def test_error_code(client: JQuantsClient) -> None:
+    with pytest.raises(ValueError, match="codeまたはdate"):
+        await client.get_prices()
+
+
+@pytest.mark.asyncio
+async def test_error_from(client: JQuantsClient) -> None:
     with pytest.raises(ValueError, match="dateとfrom/to"):
         await client.get_prices(code="7203", date="2025-08-18", to="2025-08-16")
 
