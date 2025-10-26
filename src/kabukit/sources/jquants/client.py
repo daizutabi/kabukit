@@ -239,7 +239,7 @@ class JQuantsClient(Client):
         if df.is_empty():
             return pl.DataFrame()
 
-        df = statements.clean(df)
+        df = statements.transform(df)
         return await with_date(df)
 
     async def get_prices(

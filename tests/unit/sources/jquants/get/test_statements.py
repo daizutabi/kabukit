@@ -76,8 +76,8 @@ async def test_get_transform_flag(
 
     mock_get.side_effect = get_side_effect
 
-    mock_clean = mocker.patch(
-        "kabukit.sources.jquants.client.statements.clean",
+    mock_transform = mocker.patch(
+        "kabukit.sources.jquants.client.statements.transform",
         return_value=pl.DataFrame(
             {
                 "Code": ["7203"],
@@ -95,9 +95,9 @@ async def test_get_transform_flag(
     await client.get_statements(code="7203", transform=transform_flag)
 
     if transform_flag:
-        mock_clean.assert_called_once()
+        mock_transform.assert_called_once()
     else:
-        mock_clean.assert_not_called()
+        mock_transform.assert_not_called()
 
     if transform_flag:
         mock_with_date.assert_called_once()
@@ -107,7 +107,7 @@ async def test_get_transform_flag(
 
 @pytest.fixture
 def df() -> pl.DataFrame:
-    from kabukit.sources.jquants.transform.statements import clean
+    from kabukit.sources.jquants.transform.statements import transform
 
     return pl.DataFrame(
         {
@@ -125,32 +125,32 @@ def df() -> pl.DataFrame:
             "RetrospectiveRestatement": ["true", "false", ""],
             "ForecastProfit": ["1.0", "2.0", ""],
         },
-    ).pipe(clean)
+    ).pipe(transform)
 
 
-def test_clean_shape(df: pl.DataFrame) -> None:
+def test_transform_shape(df: pl.DataFrame) -> None:
     assert df.shape == (3, 9)
 
 
-def test_clean_disclosed_date(df: pl.DataFrame) -> None:
+def test_transform_disclosed_date(df: pl.DataFrame) -> None:
     assert df["DisclosedDate"].dtype == pl.Date
 
 
-def test_clean_disclosed_time(df: pl.DataFrame) -> None:
+def test_transform_disclosed_time(df: pl.DataFrame) -> None:
     assert df["DisclosedTime"].dtype == pl.Time
 
 
-def test_clean_current_period(df: pl.DataFrame) -> None:
+def test_transform_current_period(df: pl.DataFrame) -> None:
     assert df["TypeOfCurrentPeriod"].dtype == pl.Categorical
 
 
 @pytest.mark.parametrize("column", ["ForecastProfit", "AverageOutstandingShares"])
-def test_clean_float(df: pl.DataFrame, column: str) -> None:
+def test_transform_float(df: pl.DataFrame, column: str) -> None:
     assert df[column].dtype == pl.Float64
 
 
 @pytest.mark.parametrize("column", ["IssuedShares", "TreasuryShares"])
-def test_clean_int(df: pl.DataFrame, column: str) -> None:
+def test_transform_int(df: pl.DataFrame, column: str) -> None:
     assert df[column].dtype == pl.Int64
 
 
@@ -164,5 +164,5 @@ def test_clean_int(df: pl.DataFrame, column: str) -> None:
         ("RetrospectiveRestatement", [True, False, None]),
     ],
 )
-def test_clean(df: pl.DataFrame, column: str, values: list[Any]) -> None:
+def test_transform(df: pl.DataFrame, column: str, values: list[Any]) -> None:
     assert df[column].to_list() == values
