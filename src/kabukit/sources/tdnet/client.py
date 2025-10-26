@@ -12,7 +12,7 @@ from kabukit.sources.datetime import with_date
 from kabukit.utils.datetime import strpdate
 
 from .document import clean_list
-from .page import iter_page_numbers, parse
+from .parser import iter_page_numbers, parse
 
 if TYPE_CHECKING:
     import datetime
