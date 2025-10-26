@@ -113,13 +113,13 @@ class EdinetClient(Client):
         self,
         date: str | datetime.date,
         *,
-        clean: bool = True,
+        transform: bool = True,
     ) -> pl.DataFrame:
         """指定したファイル日付の提出書類一覧を取得する。
 
         Args:
             date (str | datetime.date): 取得するファイル日付。
-            clean (bool, optional): Trueのとき、取得したデータを整形・加工する。
+            transform (bool, optional): Trueのとき、取得したデータを整形・加工する。
                 デフォルトはTrue。
 
         Returns:
@@ -134,7 +134,7 @@ class EdinetClient(Client):
 
         df = pl.DataFrame(data["results"], infer_schema_length=None)
 
-        if not clean:
+        if not transform:
             return df
 
         if df.is_empty():

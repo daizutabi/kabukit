@@ -25,7 +25,7 @@ async def test_get_statements(mock_get: AsyncMock, mocker: MockerFixture) -> Non
     response.raise_for_status = mocker.MagicMock()
 
     client = JQuantsClient("test_token")
-    df = await client.get_statements("123", clean=False)
+    df = await client.get_statements("123", transform=False)
     assert df["Profit"].to_list() == [100, 200]
 
 
@@ -48,11 +48,11 @@ async def test_error(client: JQuantsClient) -> None:
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("clean_flag", [True, False])
-async def test_get_clean_flag(
+@pytest.mark.parametrize("transform_flag", [True, False])
+async def test_get_transform_flag(
     mock_get: AsyncMock,
     mocker: MockerFixture,
-    clean_flag: bool,
+    transform_flag: bool,
 ) -> None:
     def get_side_effect(url: str, params: dict[str, Any] | None = None) -> Response:  # noqa: ARG001  # pyright: ignore[reportUnusedParameter]
         if "statements" in url:
@@ -92,14 +92,14 @@ async def test_get_clean_flag(
     )
 
     client = JQuantsClient("test_token")
-    await client.get_statements(code="7203", clean=clean_flag)
+    await client.get_statements(code="7203", transform=transform_flag)
 
-    if clean_flag:
+    if transform_flag:
         mock_clean.assert_called_once()
     else:
         mock_clean.assert_not_called()
 
-    if clean_flag:
+    if transform_flag:
         mock_with_date.assert_called_once()
     else:
         mock_with_date.assert_not_called()

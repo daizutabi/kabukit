@@ -24,7 +24,7 @@ async def test_get_prices(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     response.raise_for_status = mocker.MagicMock()
 
     client = JQuantsClient("test_token")
-    df = await client.get_prices("123", clean=False)
+    df = await client.get_prices("123", transform=False)
     assert df["Open"].to_list() == [100, 200]
 
 
@@ -39,7 +39,7 @@ async def test_get_prices_clean(mock_get: AsyncMock, mocker: MockerFixture) -> N
     mock_clean.return_value = pl.DataFrame({"Open": [200, 300]})
 
     client = JQuantsClient("test_token")
-    df = await client.get_prices("123", clean=True)
+    df = await client.get_prices("123", transform=True)
     assert df["Open"].to_list() == [200, 300]
 
     mock_clean.assert_called_once()

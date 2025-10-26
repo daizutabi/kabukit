@@ -63,11 +63,11 @@ async def test_get_list_no_results(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("clean", [True, False])
+@pytest.mark.parametrize("transform", [True, False])
 async def test_get_list_empty_results(
     mock_get: AsyncMock,
     mocker: MockerFixture,
-    clean: bool,
+    transform: bool,
 ) -> None:
     json: dict[str, list[Any]] = {"results": []}
     response = Response(200, json=json)
@@ -75,7 +75,7 @@ async def test_get_list_empty_results(
     response.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
-    df = await client.get_list("2023-10-26", clean=clean)
+    df = await client.get_list("2023-10-26", transform=transform)
 
     assert df.is_empty()
 
