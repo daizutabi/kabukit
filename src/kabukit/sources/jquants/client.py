@@ -375,7 +375,7 @@ class JQuantsClient(Client):
         if df.is_empty():
             return pl.DataFrame()
 
-        return topix.clean(df)
+        return topix.transform(df)
 
     async def get_calendar(
         self,
