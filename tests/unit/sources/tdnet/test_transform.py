@@ -8,9 +8,9 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
-def test_clean_list() -> None:
+def test_transform_list() -> None:
     from kabukit.sources.tdnet.columns import ListColumns
-    from kabukit.sources.tdnet.transform import clean_list
+    from kabukit.sources.tdnet.transform import transform_list
 
     df = pl.DataFrame(
         {
@@ -20,7 +20,7 @@ def test_clean_list() -> None:
         },
     )
     date = datetime.date(2024, 6, 20)
-    df = clean_list(df, date)
+    df = transform_list(df, date)
     assert df.columns == ["Code", "DisclosedDate", "DisclosedTime", "Title"]
     assert df["DisclosedDate"].unique().to_list() == [date]
 
