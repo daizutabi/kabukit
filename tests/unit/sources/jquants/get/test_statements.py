@@ -25,7 +25,7 @@ async def test_get_statements(mock_get: AsyncMock, mocker: MockerFixture) -> Non
     response.raise_for_status = mocker.MagicMock()
 
     client = JQuantsClient("test_token")
-    df = await client.get_statements("123", clean=False)
+    df = await client.get_statements("123", transform=False)
     assert df["Profit"].to_list() == [100, 200]
 
 
@@ -48,11 +48,11 @@ async def test_error(client: JQuantsClient) -> None:
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("clean_flag", [True, False])
-async def test_get_clean_flag(
+@pytest.mark.parametrize("transform_flag", [True, False])
+async def test_get_transform_flag(
     mock_get: AsyncMock,
     mocker: MockerFixture,
-    clean_flag: bool,
+    transform_flag: bool,
 ) -> None:
     def get_side_effect(url: str, params: dict[str, Any] | None = None) -> Response:  # noqa: ARG001  # pyright: ignore[reportUnusedParameter]
         if "statements" in url:
@@ -76,8 +76,8 @@ async def test_get_clean_flag(
 
     mock_get.side_effect = get_side_effect
 
-    mock_clean = mocker.patch(
-        "kabukit.sources.jquants.client.statements.clean",
+    mock_transform = mocker.patch(
+        "kabukit.sources.jquants.client.statements.transform",
         return_value=pl.DataFrame(
             {
                 "Code": ["7203"],
@@ -92,14 +92,14 @@ async def test_get_clean_flag(
     )
 
     client = JQuantsClient("test_token")
-    await client.get_statements(code="7203", clean=clean_flag)
+    await client.get_statements(code="7203", transform=transform_flag)
 
-    if clean_flag:
-        mock_clean.assert_called_once()
+    if transform_flag:
+        mock_transform.assert_called_once()
     else:
-        mock_clean.assert_not_called()
+        mock_transform.assert_not_called()
 
-    if clean_flag:
+    if transform_flag:
         mock_with_date.assert_called_once()
     else:
         mock_with_date.assert_not_called()
@@ -107,7 +107,7 @@ async def test_get_clean_flag(
 
 @pytest.fixture
 def df() -> pl.DataFrame:
-    from kabukit.sources.jquants.clean.statements import clean
+    from kabukit.sources.jquants.transform.statements import transform
 
     return pl.DataFrame(
         {
@@ -125,32 +125,32 @@ def df() -> pl.DataFrame:
             "RetrospectiveRestatement": ["true", "false", ""],
             "ForecastProfit": ["1.0", "2.0", ""],
         },
-    ).pipe(clean)
+    ).pipe(transform)
 
 
-def test_clean_shape(df: pl.DataFrame) -> None:
+def test_transform_shape(df: pl.DataFrame) -> None:
     assert df.shape == (3, 9)
 
 
-def test_clean_disclosed_date(df: pl.DataFrame) -> None:
+def test_transform_disclosed_date(df: pl.DataFrame) -> None:
     assert df["DisclosedDate"].dtype == pl.Date
 
 
-def test_clean_disclosed_time(df: pl.DataFrame) -> None:
+def test_transform_disclosed_time(df: pl.DataFrame) -> None:
     assert df["DisclosedTime"].dtype == pl.Time
 
 
-def test_clean_current_period(df: pl.DataFrame) -> None:
+def test_transform_current_period(df: pl.DataFrame) -> None:
     assert df["TypeOfCurrentPeriod"].dtype == pl.Categorical
 
 
 @pytest.mark.parametrize("column", ["ForecastProfit", "AverageOutstandingShares"])
-def test_clean_float(df: pl.DataFrame, column: str) -> None:
+def test_transform_float(df: pl.DataFrame, column: str) -> None:
     assert df[column].dtype == pl.Float64
 
 
 @pytest.mark.parametrize("column", ["IssuedShares", "TreasuryShares"])
-def test_clean_int(df: pl.DataFrame, column: str) -> None:
+def test_transform_int(df: pl.DataFrame, column: str) -> None:
     assert df[column].dtype == pl.Int64
 
 
@@ -164,5 +164,5 @@ def test_clean_int(df: pl.DataFrame, column: str) -> None:
         ("RetrospectiveRestatement", [True, False, None]),
     ],
 )
-def test_clean(df: pl.DataFrame, column: str, values: list[Any]) -> None:
+def test_transform(df: pl.DataFrame, column: str, values: list[Any]) -> None:
     assert df[column].to_list() == values

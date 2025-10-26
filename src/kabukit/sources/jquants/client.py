@@ -10,7 +10,7 @@ from kabukit.sources.datetime import with_date
 from kabukit.utils.config import get_config_value
 from kabukit.utils.params import get_params
 
-from .clean import calendar, info, prices, statements, topix
+from .transform import calendar, info, prices, statements, topix
 
 if TYPE_CHECKING:
     import datetime
@@ -169,7 +169,7 @@ class JQuantsClient(Client):
         code: str | None = None,
         date: str | datetime.date | None = None,
         *,
-        clean: bool = True,
+        transform: bool = True,
         only_common_stocks: bool = True,
     ) -> pl.DataFrame:
         """上場銘柄一覧を取得する。
@@ -178,7 +178,7 @@ class JQuantsClient(Client):
             code (str, optional): 銘柄情報を取得する銘柄コード (例: "7203")。
             date (str | datetime.date, optional): 銘柄情報を取得する日付
                 (例: "2025-10-01")。
-            clean (bool, optional): 取得したデータを整形するかどうか。
+            transform (bool, optional): 取得したデータを整形するかどうか。
                 デフォルト値はTrue。
             only_common_stocks (bool, optional): 投資信託や優先株式を除く、
                 普通株式のみを対象とするか。デフォルト値はTrue。
@@ -197,14 +197,14 @@ class JQuantsClient(Client):
         if only_common_stocks:
             df = info.filter_common_stocks(df)
 
-        return info.clean(df) if clean else df
+        return info.transform(df) if transform else df
 
     async def get_statements(
         self,
         code: str | None = None,
         date: str | datetime.date | None = None,
         *,
-        clean: bool = True,
+        transform: bool = True,
     ) -> pl.DataFrame:
         """四半期毎の決算短信サマリーおよび業績・配当の修正に関する開示情報を取得する。
 
@@ -212,7 +212,7 @@ class JQuantsClient(Client):
             code (str, optional): 財務情報を取得する銘柄コード (例: "7203")。
             date (str | datetime.date, optional): 財務情報を取得する日付
                 (例: "2025-10-01")。
-            clean (bool, optional): 取得したデータを整形するかどうか。
+            transform (bool, optional): 取得したデータを整形するかどうか。
                 デフォルト値はTrue。
 
         Returns:
@@ -233,13 +233,13 @@ class JQuantsClient(Client):
         dfs = [df async for df in self.iter_pages(url, params, name)]
         df = pl.concat(dfs)
 
-        if not clean:
+        if not transform:
             return df
 
         if df.is_empty():
             return pl.DataFrame()
 
-        df = statements.clean(df)
+        df = statements.transform(df)
         return await with_date(df)
 
     async def get_prices(
@@ -249,7 +249,7 @@ class JQuantsClient(Client):
         from_: str | datetime.date | None = None,
         to: str | datetime.date | None = None,
         *,
-        clean: bool = True,
+        transform: bool = True,
     ) -> pl.DataFrame:
         """日々の株価四本値を取得する (prices/daily_quotes)。
 
@@ -261,7 +261,7 @@ class JQuantsClient(Client):
                 `date`とは併用不可。
             to (str | datetime.date, optional): 取得期間の終了日。
                 `date`とは併用不可。
-            clean (bool, optional): 取得したデータを整形するかどうか。
+            transform (bool, optional): 取得したデータを整形するかどうか。
                 デフォルト値はTrue。
 
         Returns:
@@ -287,13 +287,13 @@ class JQuantsClient(Client):
         dfs = [df async for df in self.iter_pages(url, params, name)]
         df = pl.concat(dfs)
 
-        if not clean:
+        if not transform:
             return df
 
         if df.is_empty():
             return pl.DataFrame()
 
-        return prices.clean(df)
+        return prices.transform(df)
 
     async def get_announcement(self) -> pl.DataFrame:
         """翌日発表予定の決算情報を取得する (fins/announcement)。
@@ -375,7 +375,7 @@ class JQuantsClient(Client):
         if df.is_empty():
             return pl.DataFrame()
 
-        return topix.clean(df)
+        return topix.transform(df)
 
     async def get_calendar(
         self,
@@ -408,4 +408,4 @@ class JQuantsClient(Client):
         if df.is_empty():
             return pl.DataFrame()
 
-        return calendar.clean(df)
+        return calendar.transform(df)

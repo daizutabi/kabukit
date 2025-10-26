@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     import datetime
 
 
-def clean_list(df: pl.DataFrame, date: datetime.date) -> pl.DataFrame:
+def transform_list(df: pl.DataFrame, date: datetime.date) -> pl.DataFrame:
     return df.select(
         pl.col("Code"),
         pl.lit(date).alias("DisclosedDate"),

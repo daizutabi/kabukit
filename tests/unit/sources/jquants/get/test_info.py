@@ -24,7 +24,7 @@ async def test_get_info(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     response.raise_for_status = mocker.MagicMock()
 
     client = JQuantsClient("test_token")
-    df = await client.get_info(clean=False, only_common_stocks=False)
+    df = await client.get_info(transform=False, only_common_stocks=False)
     assert df["Date"].to_list() == ["2023-01-01"]
     assert df["Code"].to_list() == ["7203"]
 
@@ -45,13 +45,13 @@ async def test_get_info_only_common_stocks(
     )
 
     client = JQuantsClient("test_token")
-    df = await client.get_info(clean=False, only_common_stocks=True)
+    df = await client.get_info(transform=False, only_common_stocks=True)
     assert df["Code"].to_list() == ["7203"]
     mock_filter_common_stocks.assert_called_once()
 
 
-def test_clean() -> None:
-    from kabukit.sources.jquants.clean.info import clean
+def test_transform() -> None:
+    from kabukit.sources.jquants.transform.info import transform
 
     df = pl.DataFrame(
         {
@@ -66,7 +66,7 @@ def test_clean() -> None:
         },
     )
 
-    df = clean(df)
+    df = transform(df)
     assert df.shape == (2, 7)
     assert df["Date"].dtype == pl.Date
     assert df["Company"].dtype == pl.String
@@ -78,7 +78,7 @@ def test_clean() -> None:
 
 
 def test_filter_common_stocks() -> None:
-    from kabukit.sources.jquants.clean.info import filter_common_stocks
+    from kabukit.sources.jquants.transform.info import filter_common_stocks
 
     df = pl.DataFrame(
         {

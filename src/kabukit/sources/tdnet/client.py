@@ -11,8 +11,8 @@ from kabukit.sources.base import Client
 from kabukit.sources.datetime import with_date
 from kabukit.utils.datetime import strpdate
 
-from .document import clean_list
-from .page import iter_page_numbers, parse
+from .parser import iter_page_numbers, parse
+from .transform import transform_list
 
 if TYPE_CHECKING:
     import datetime
@@ -132,5 +132,5 @@ class TdnetClient(Client):
             return pl.DataFrame()
 
         df = pl.concat(items)
-        df = clean_list(df, date)
+        df = transform_list(df, date)
         return await with_date(df)

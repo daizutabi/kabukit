@@ -3,7 +3,7 @@ from __future__ import annotations
 import polars as pl
 
 
-def clean(df: pl.DataFrame) -> pl.DataFrame:
+def transform(df: pl.DataFrame) -> pl.DataFrame:
     return df.select(
         pl.col("Date").str.to_date("%Y-%m-%d"),
         "Code",

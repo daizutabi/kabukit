@@ -14,7 +14,8 @@ from kabukit.sources.datetime import with_date
 from kabukit.utils.config import get_config_value
 from kabukit.utils.params import get_params
 
-from .document import clean_csv, clean_list, clean_pdf, read_csv
+from .document import read_csv
+from .transform import transform_csv, transform_list, transform_pdf
 
 if TYPE_CHECKING:
     import datetime
@@ -113,13 +114,13 @@ class EdinetClient(Client):
         self,
         date: str | datetime.date,
         *,
-        clean: bool = True,
+        transform: bool = True,
     ) -> pl.DataFrame:
         """指定したファイル日付の提出書類一覧を取得する。
 
         Args:
             date (str | datetime.date): 取得するファイル日付。
-            clean (bool, optional): Trueのとき、取得したデータを整形・加工する。
+            transform (bool, optional): Trueのとき、取得したデータを整形・加工する。
                 デフォルトはTrue。
 
         Returns:
@@ -134,13 +135,13 @@ class EdinetClient(Client):
 
         df = pl.DataFrame(data["results"], infer_schema_length=None)
 
-        if not clean:
+        if not transform:
             return df
 
         if df.is_empty():
             return pl.DataFrame()
 
-        df = clean_list(df, date)
+        df = transform_list(df, date)
 
         if df.is_empty():
             return pl.DataFrame()
@@ -174,7 +175,7 @@ class EdinetClient(Client):
         """
         resp = await self.get_response(doc_id, doc_type=2)
         if resp.headers["content-type"] == "application/pdf":
-            return clean_pdf(resp.content, doc_id)
+            return transform_pdf(resp.content, doc_id)
 
         msg = "PDF is not available."
         raise ValueError(msg)
@@ -222,7 +223,7 @@ class EdinetClient(Client):
                 if info.filename.endswith(".csv"):
                     with zf.open(info) as f:
                         df = read_csv(f.read())
-                        return clean_csv(df, doc_id)
+                        return transform_csv(df, doc_id)
 
         msg = "CSV is not available."
         raise ValueError(msg)
