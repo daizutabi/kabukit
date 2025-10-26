@@ -21,7 +21,7 @@ def mock_sub_dir(mock_cache_dir: Path) -> Path:
     return mock_cache_dir / "tdnet" / "list"
 
 
-def test_get_tdnet_list(mock_sub_dir: Path) -> None:
+def test_get_tdnet(mock_sub_dir: Path) -> None:
     result = runner.invoke(app, ["get", "tdnet"])
 
     assert result.exit_code == 0
@@ -29,7 +29,7 @@ def test_get_tdnet_list(mock_sub_dir: Path) -> None:
     assert not mock_sub_dir.exists()
 
 
-def test_get_tdnet_list_with_date(mock_sub_dir: Path) -> None:
+def test_get_tdnet_date(mock_sub_dir: Path) -> None:
     from kabukit.utils.datetime import today
 
     date = today(as_str=True)
@@ -40,7 +40,7 @@ def test_get_tdnet_list_with_date(mock_sub_dir: Path) -> None:
     assert not mock_sub_dir.exists()
 
 
-def test_get_tdnet_list_all(mock_sub_dir: Path) -> None:
+def test_get_tdnet_all(mock_sub_dir: Path) -> None:
     result = runner.invoke(app, ["get", "tdnet", "--all", "--max-items", "3"])
 
     assert result.exit_code == 0

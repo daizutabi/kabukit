@@ -24,7 +24,7 @@ runner = CliRunner()
 
 
 @pytest.fixture
-def mock_get_tdnet_list(mocker: MockerFixture) -> AsyncMock:
+def mock_get_tdnet(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
         "kabukit.sources.tdnet.concurrent.get_list",
         new_callable=mocker.AsyncMock,
@@ -36,10 +36,7 @@ def get_cache_files(cache_dir: Path) -> list[Path]:
     return list(cache_dir.joinpath("tdnet", "list").glob("*.parquet"))
 
 
-def test_get_tdnet_list(
-    mock_get_tdnet_list: AsyncMock,
-    mock_cache_dir: Path,
-) -> None:
+def test_get_tdnet(mock_get_tdnet: AsyncMock, mock_cache_dir: Path) -> None:
     from kabukit.utils.datetime import today
 
     result = runner.invoke(app, ["get", "tdnet"])
@@ -47,35 +44,24 @@ def test_get_tdnet_list(
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
 
-    mock_get_tdnet_list.assert_called_once_with(
-        today(),
-        progress=None,
-        max_items=None,
-    )
+    mock_get_tdnet.assert_called_once_with(today(), progress=None, max_items=None)
 
     assert not get_cache_files(mock_cache_dir)
 
 
-def test_get_tdnet_list_with_date(
-    mock_get_tdnet_list: AsyncMock,
-    mock_cache_dir: Path,
-) -> None:
+def test_get_tdnet_date(mock_get_tdnet: AsyncMock, mock_cache_dir: Path) -> None:
     result = runner.invoke(app, ["get", "tdnet", MOCK_DATE])
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
 
-    mock_get_tdnet_list.assert_called_once_with(
-        MOCK_DATE_OBJ,
-        progress=None,
-        max_items=None,
-    )
+    mock_get_tdnet.assert_called_once_with(MOCK_DATE_OBJ, progress=None, max_items=None)
 
     assert not get_cache_files(mock_cache_dir)
 
 
-def test_get_tdnet_list_all(
-    mock_get_tdnet_list: AsyncMock,
+def test_get_tdnet_all(
+    mock_get_tdnet: AsyncMock,
     mock_cache_dir: Path,
     mocker: MockerFixture,
 ) -> None:
@@ -85,11 +71,7 @@ def test_get_tdnet_list_all(
     assert str(MOCK_DF) in result.stdout
     assert "書類一覧を" in result.stdout
 
-    mock_get_tdnet_list.assert_called_once_with(
-        None,
-        progress=mocker.ANY,
-        max_items=None,
-    )
+    mock_get_tdnet.assert_called_once_with(None, progress=mocker.ANY, max_items=None)
 
     cache_files = get_cache_files(mock_cache_dir)
     assert len(cache_files) == 1
