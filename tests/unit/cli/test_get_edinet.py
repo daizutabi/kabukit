@@ -22,7 +22,7 @@ runner = CliRunner()
 
 
 @pytest.fixture
-def mock_get_edinet_list(mocker: MockerFixture) -> AsyncMock:
+def mock_get_edinet(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
         "kabukit.sources.edinet.concurrent.get_list",
         new_callable=AsyncMock,
@@ -30,10 +30,7 @@ def mock_get_edinet_list(mocker: MockerFixture) -> AsyncMock:
     )
 
 
-def test_get_edinet_list(
-    mock_get_edinet_list: AsyncMock,
-    mock_cache_write: MagicMock,
-) -> None:
+def test_get_edinet(mock_get_edinet: AsyncMock, mock_cache_write: MagicMock) -> None:
     from kabukit.utils.datetime import today
 
     result = runner.invoke(app, ["get", "edinet"])
@@ -41,7 +38,7 @@ def test_get_edinet_list(
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
 
-    mock_get_edinet_list.assert_awaited_once_with(
+    mock_get_edinet.assert_awaited_once_with(
         today(),
         years=10,
         progress=None,
@@ -50,8 +47,8 @@ def test_get_edinet_list(
     mock_cache_write.assert_not_called()
 
 
-def test_get_edinet_list_with_date(
-    mock_get_edinet_list: AsyncMock,
+def test_get_edinet_date(
+    mock_get_edinet: AsyncMock,
     mock_cache_write: MagicMock,
 ) -> None:
     result = runner.invoke(app, ["get", "edinet", MOCK_DATE])
@@ -59,7 +56,7 @@ def test_get_edinet_list_with_date(
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
 
-    mock_get_edinet_list.assert_awaited_once_with(
+    mock_get_edinet.assert_awaited_once_with(
         MOCK_DATE_OBJ,
         years=10,
         progress=None,
@@ -68,8 +65,8 @@ def test_get_edinet_list_with_date(
     mock_cache_write.assert_not_called()
 
 
-def test_get_edinet_list_all(
-    mock_get_edinet_list: AsyncMock,
+def test_get_edinet_all(
+    mock_get_edinet: AsyncMock,
     mock_cache_write: MagicMock,
 ) -> None:
     result = runner.invoke(app, ["get", "edinet", "--all"])
@@ -77,7 +74,7 @@ def test_get_edinet_list_all(
     assert result.exit_code == 0
     assert f"書類一覧を '{MOCK_PATH}' に保存しました。" in result.stdout
 
-    mock_get_edinet_list.assert_awaited_once_with(
+    mock_get_edinet.assert_awaited_once_with(
         None,
         years=10,
         progress=tqdm.asyncio.tqdm,
@@ -86,14 +83,14 @@ def test_get_edinet_list_all(
     mock_cache_write.assert_called_once_with("edinet", "list", MOCK_DF)
 
 
-def test_get_edinet_list_interrupt(mock_get_edinet_list: AsyncMock) -> None:
-    mock_get_edinet_list.side_effect = KeyboardInterrupt
+def test_get_edinet_interrupt(mock_get_edinet: AsyncMock) -> None:
+    mock_get_edinet.side_effect = KeyboardInterrupt
 
     result = runner.invoke(app, ["get", "edinet", "--all"])
 
     assert result.exit_code == 130
 
-    mock_get_edinet_list.assert_awaited_once_with(
+    mock_get_edinet.assert_awaited_once_with(
         None,
         years=10,
         progress=tqdm.asyncio.tqdm,

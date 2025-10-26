@@ -55,14 +55,14 @@ async def test_get_failure(mock_get: AsyncMock, mocker: MockerFixture) -> None:
 
 @pytest.mark.asyncio
 async def test_get_dates(mocker: MockerFixture) -> None:
-    html = """
+    text = """
     <select name="daylist">
         <option value="I_list_001_20230101.html">2023/01/01</option>
         <option value="I_list_001_20230102.html">2023/01/02</option>
     </select>
     """
     mock_get = mocker.patch.object(TdnetClient, "get")
-    mock_get.return_value = Response(200, text=html)
+    mock_get.return_value = Response(200, text=text)
 
     client = TdnetClient()
     dates = await client.get_dates()

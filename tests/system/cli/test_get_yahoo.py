@@ -18,30 +18,29 @@ runner = CliRunner()
 
 @pytest.fixture
 def mock_sub_dir(mock_cache_dir: Path) -> Path:
-    return mock_cache_dir / "tdnet" / "list"
+    return mock_cache_dir / "yahoo" / "quote"
 
 
-def test_get_tdnet(mock_sub_dir: Path) -> None:
-    result = runner.invoke(app, ["get", "tdnet"])
+def test_get_yahoo(mock_sub_dir: Path) -> None:
+    result = runner.invoke(app, ["get", "yahoo"])
 
-    assert result.exit_code == 0
-    assert "shape:" in result.stdout
+    assert result.exit_code == 1
+    assert "--all" in result.stdout
     assert not mock_sub_dir.exists()
 
 
-def test_get_tdnet_date(mock_sub_dir: Path) -> None:
-    from kabukit.utils.datetime import today
-
-    date = today(as_str=True)
-    result = runner.invoke(app, ["get", "tdnet", date])
+@pytest.mark.parametrize("code", ["7203", "72030"])
+def test_get_yahoo_code(mock_sub_dir: Path, code: str) -> None:
+    result = runner.invoke(app, ["get", "yahoo", code])
 
     assert result.exit_code == 0
     assert "shape:" in result.stdout
+    assert "72030" in result.stdout
     assert not mock_sub_dir.exists()
 
 
-def test_get_tdnet_all(mock_sub_dir: Path) -> None:
-    result = runner.invoke(app, ["get", "tdnet", "--all", "--max-items", "3"])
+def test_get_yahoo_all(mock_sub_dir: Path) -> None:
+    result = runner.invoke(app, ["get", "yahoo", "--all", "--max-items", "3"])
 
     assert result.exit_code == 0
     assert "shape:" in result.stdout

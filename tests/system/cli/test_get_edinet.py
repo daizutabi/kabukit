@@ -21,7 +21,7 @@ def mock_sub_dir(mock_cache_dir: Path) -> Path:
     return mock_cache_dir / "edinet" / "list"
 
 
-def test_get_edinet_list(mock_sub_dir: Path) -> None:
+def test_get_edinet(mock_sub_dir: Path) -> None:
     result = runner.invoke(app, ["get", "edinet"])
 
     assert result.exit_code == 0
@@ -29,7 +29,7 @@ def test_get_edinet_list(mock_sub_dir: Path) -> None:
     assert not mock_sub_dir.exists()
 
 
-def test_get_edinet_list_with_date(mock_sub_dir: Path) -> None:
+def test_get_tdnet_date(mock_sub_dir: Path) -> None:
     result = runner.invoke(app, ["get", "edinet", "20251023"])
 
     assert result.exit_code == 0
@@ -38,7 +38,7 @@ def test_get_edinet_list_with_date(mock_sub_dir: Path) -> None:
     assert not mock_sub_dir.exists()
 
 
-def test_get_edinet_list_all(mock_sub_dir: Path) -> None:
+def test_get_tdnet_all(mock_sub_dir: Path) -> None:
     result = runner.invoke(app, ["get", "edinet", "--all", "--max-items", "3"])
 
     assert result.exit_code == 0

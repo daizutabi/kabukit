@@ -27,6 +27,7 @@ app = AsyncTyper(
 )
 
 Arg = Annotated[str | None, Argument(help="銘柄コード (4桁) または日付 (YYYYMMDD)。")]
+Code = Annotated[str | None, Argument(help="銘柄コード (4桁)。")]
 Date = Annotated[str | None, Argument(help="取得する日付 (YYYYMMDD)。")]
 All = Annotated[bool, Option("--all", help="全銘柄を取得します。")]
 MaxItems = Annotated[
@@ -238,3 +239,34 @@ async def tdnet(
         path = write("tdnet", "list", df)
         if not quiet:
             typer.echo(f"書類一覧を '{path}' に保存しました。")
+
+
+@app.async_command()
+async def yahoo(
+    code: Code = None,
+    *,
+    all_: All = False,
+    max_items: MaxItems = None,
+    quiet: Quiet = False,
+) -> None:
+    """Yahooファイナンスから情報を取得します。"""
+    import tqdm.asyncio
+
+    from kabukit.sources.yahoo.concurrent import get_quote
+    from kabukit.utils.cache import write
+
+    if code is None and not all_:
+        typer.echo("銘柄コードか --all オプションを指定してください。")
+        raise typer.Exit(1)
+
+    progress = None if code or quiet else tqdm.asyncio.tqdm
+
+    df = await get_quote(code, progress=progress, max_items=max_items)
+
+    if not quiet:
+        typer.echo(df)
+
+    if code is None and max_items is None:
+        path = write("yahoo", "quote", df)
+        if not quiet:
+            typer.echo(f"銘柄情報を '{path}' に保存しました。")
