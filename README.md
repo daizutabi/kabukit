@@ -117,9 +117,7 @@ df_prices = await get_prices("7203")
 **[kabukit ドキュメント](https://daizutabi.github.io/kabukit/)**
 
 - [CLI の使い方](https://daizutabi.github.io/kabukit/guides/cli/) - 認証設定、データ取得、キャッシュ管理
-- [J-Quants API の使い方](https://daizutabi.github.io/kabukit/guides/jquants/) - 上場銘柄情報、財務情報、株価データの取得
-- [EDINET API の使い方](https://daizutabi.github.io/kabukit/guides/edinet/) - 有価証券報告書などの開示書類の取得
-- [キャッシュの活用](https://daizutabi.github.io/kabukit/guides/cache/) - キャッシュの仕組みと管理方法
+- [Python API の使い方](https://daizutabi.github.io/kabukit/guides/api/) - 各種情報を Python から取得する方法。モジュール関数と Client クラスの使い分け
 
 ## ライセンス
 
