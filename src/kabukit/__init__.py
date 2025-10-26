@@ -17,6 +17,8 @@ from .sources.jquants.concurrent import (
 )
 from .sources.tdnet.client import TdnetClient
 from .sources.tdnet.concurrent import get_list as get_tdnet_list
+from .sources.yahoo.client import YahooClient
+from .sources.yahoo.concurrent import get_quote as get_yahoo_quote
 from .utils import cache
 
 __all__ = [
@@ -28,6 +30,7 @@ __all__ = [
     "Statements",
     "TdnetClient",
     "TdnetList",
+    "YahooClient",
     "cache",
     "get_calendar",
     "get_edinet_documents",
@@ -36,4 +39,5 @@ __all__ = [
     "get_prices",
     "get_statements",
     "get_tdnet_list",
+    "get_yahoo_quote",
 ]
