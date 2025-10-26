@@ -154,6 +154,7 @@ async def test_get_retries_on_failure(
     mocker: MockerFixture,
 ) -> None:
     """Test that the get method retries on retryable failures."""
+    mock_sleep = mocker.patch("asyncio.sleep")
     error = ConnectTimeout("Connection timed out")
     success_response = Response(200, json={"message": "success"})
     success_response.raise_for_status = mocker.MagicMock()
@@ -165,11 +166,16 @@ async def test_get_retries_on_failure(
 
     assert response == success_response
     assert mock_get.call_count == 3
+    assert mock_sleep.call_count == 2
 
 
 @pytest.mark.asyncio
-async def test_get_fails_after_retries(mock_get: AsyncMock) -> None:
+async def test_get_fails_after_retries(
+    mock_get: AsyncMock,
+    mocker: MockerFixture,
+) -> None:
     """Test that the get method fails after exhausting all retries."""
+    mock_sleep = mocker.patch("asyncio.sleep")
     error = ConnectTimeout("Connection timed out")
     mock_get.side_effect = [error, error, error]
 
@@ -179,6 +185,7 @@ async def test_get_fails_after_retries(mock_get: AsyncMock) -> None:
         await client.get("test/path", params={})
 
     assert mock_get.call_count == 3
+    assert mock_sleep.call_count == 2
 
 
 @pytest.mark.asyncio
