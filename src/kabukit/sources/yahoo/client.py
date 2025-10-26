@@ -44,16 +44,29 @@ class YahooClient(Client):
         resp.raise_for_status()
         return resp
 
-    async def get_state(self, code: str) -> pl.DataFrame:
-        """Yahooファイナンスの情報を取得する。
+    async def get_quote(
+        self,
+        code: str,
+        *,
+        use_executor: bool = False,
+    ) -> pl.DataFrame:
+        """銘柄の株価、指標などの市場情報をYahooファイナンスから取得する。
+
+        リアルタイムの株価、四本値、出来高に加え、PERやPBR、配当利回り
+        といった主要な指標を含む包括的なデータを取得します。
 
         Args:
-            code: 取得する銘柄コード。
+            code: 情報を取得する銘柄コード。
+            use_executor: Trueの場合、別スレッドでパース処理を実行し、
+                イベントループのブロッキングを防ぎます。デフォルトはFalse。
 
         Returns:
-            polars.DataFrame: 取得した情報を含むDataFrame。
+            polars.DataFrame: 銘柄の市場情報を含むDataFrame。
         """
         resp = await self.get(f"{code[:4]}.T")
-        # return parse(resp.text, code)
-        loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(None, parse, resp.text, code)
+
+        if use_executor:
+            loop = asyncio.get_running_loop()
+            return await loop.run_in_executor(None, parse, resp.text, code)
+
+        return parse(resp.text, code)

@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from kabukit.utils.concurrent import Callback, Progress
 
 
-async def get_state(
+async def get_quote(
     codes: Iterable[str] | str | None = None,
     /,
     max_items: int | None = None,
@@ -46,7 +46,7 @@ async def get_state(
     """
     if isinstance(codes, str):
         async with YahooClient() as client:
-            return await client.get_state(codes)
+            return await client.get_quote(codes)
 
     if codes is None:
         codes = await get_target_codes()

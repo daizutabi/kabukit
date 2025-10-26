@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import polars as pl
 import pytest
 
 from kabukit.sources.yahoo.state import PRELOADED_STATE_PATTERN
@@ -19,6 +20,6 @@ async def test_response_has_preloaded_state(client: YahooClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_state_dict(client: YahooClient) -> None:
-    state = await client.get_state("72030")
-    assert isinstance(state, dict)
+async def test_get_quote(client: YahooClient) -> None:
+    df = await client.get_quote("72030")
+    assert isinstance(df, pl.DataFrame)
