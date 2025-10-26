@@ -29,20 +29,20 @@ async def test_get_prices(mock_get: AsyncMock, mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_prices_clean(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_prices_transform(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"daily_quotes": [{"Open": 100}, {"Open": 200}]}
     response = Response(200, json=json)
     mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
-    mock_clean = mocker.patch("kabukit.sources.jquants.client.prices.clean")
-    mock_clean.return_value = pl.DataFrame({"Open": [200, 300]})
+    mock_transform = mocker.patch("kabukit.sources.jquants.client.prices.transform")
+    mock_transform.return_value = pl.DataFrame({"Open": [200, 300]})
 
     client = JQuantsClient("test_token")
     df = await client.get_prices("123", transform=True)
     assert df["Open"].to_list() == [200, 300]
 
-    mock_clean.assert_called_once()
+    mock_transform.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -71,7 +71,7 @@ async def test_error_from(client: JQuantsClient) -> None:
 
 @pytest.fixture
 def df() -> pl.DataFrame:
-    from kabukit.sources.jquants.transform.prices import clean
+    from kabukit.sources.jquants.transform.prices import transform
 
     return pl.DataFrame(
         {
@@ -92,14 +92,14 @@ def df() -> pl.DataFrame:
             "AdjustmentClose": [21, 22],
             "AdjustmentVolume": [23, 24],
         },
-    ).pipe(clean)
+    ).pipe(transform)
 
 
-def test_clean_shape(df: pl.DataFrame) -> None:
+def test_transform_shape(df: pl.DataFrame) -> None:
     assert df.shape == (2, 16)
 
 
-def test_clean_date(df: pl.DataFrame) -> None:
+def test_transform_date(df: pl.DataFrame) -> None:
     assert df["Date"].dtype == pl.Date
 
 
@@ -122,5 +122,5 @@ def test_clean_date(df: pl.DataFrame) -> None:
         ("RawVolume", [9, 10]),
     ],
 )
-def test_clean(df: pl.DataFrame, column: str, values: list[Any]) -> None:
+def test_transform(df: pl.DataFrame, column: str, values: list[Any]) -> None:
     assert df[column].to_list() == values

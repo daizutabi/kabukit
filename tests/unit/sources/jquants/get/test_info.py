@@ -50,7 +50,7 @@ async def test_get_info_only_common_stocks(
     mock_filter_common_stocks.assert_called_once()
 
 
-def test_clean() -> None:
+def test_transform() -> None:
     from kabukit.sources.jquants.transform.info import transform
 
     df = pl.DataFrame(

@@ -293,7 +293,7 @@ class JQuantsClient(Client):
         if df.is_empty():
             return pl.DataFrame()
 
-        return prices.clean(df)
+        return prices.transform(df)
 
     async def get_announcement(self) -> pl.DataFrame:
         """翌日発表予定の決算情報を取得する (fins/announcement)。
