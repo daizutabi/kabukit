@@ -54,8 +54,8 @@ jobs:
       - name: Get data if cache not found
         if: steps.cache-data.outputs.cache-hit != 'true'
         run: |
-          uv run kabu get jquants -q
-          uv run kabu get edinet -q
+          uv run kabu get jquants --all -q
+          uv run kabu get edinet --all -q
       - name: Debug - Check cache after get
         run: |
           echo "=== Contents of ~/.cache/kabukit after get:"
