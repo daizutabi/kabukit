@@ -8,7 +8,6 @@ import polars as pl
 from bs4 import BeautifulSoup, Tag
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
     from typing import Any
 
 PRELOADED_STATE_PATTERN = re.compile(r"window\.__PRELOADED_STATE__\s*=\s*(\{.*\})")
@@ -32,7 +31,7 @@ def get_preloaded_state(text: str) -> dict[str, Any]:
     match = PRELOADED_STATE_PATTERN.search(script.text)
 
     if match is None:
-        return {}
+        return {}  # pragma: no cover
 
     return json.loads(match.group(1))
 
@@ -46,20 +45,20 @@ def parse(text: str, code: str) -> pl.DataFrame:
     return pl.DataFrame({"Code": [code], "text": [text]})
 
 
-def iter_values(
-    state: dict[str, Any],
-    prefix: str = "",
-) -> Iterator[tuple[str, Any]]:
-    """状態辞書のすべての値を再帰的に反復処理するジェネレーター。
+# def iter_values(
+#     state: dict[str, Any],
+#     prefix: str = "",
+# ) -> Iterator[tuple[str, Any]]:
+#     """状態辞書のすべての値を再帰的に反復処理するジェネレーター。
 
-    Args:
-        state (dict[str, Any]): 状態辞書。
+#     Args:
+#         state (dict[str, Any]): 状態辞書。
 
-    Yields:
-        辞書内のすべての値。
-    """
-    for key, value in state.items():
-        if isinstance(value, dict):
-            yield from iter_values(value, f"{prefix}{key}.")  # pyright: ignore[reportUnknownArgumentType]
-        else:
-            yield f"{prefix}{key}", value
+#     Yields:
+#         辞書内のすべての値。
+#     """
+#     for key, value in state.items():
+#         if isinstance(value, dict):
+#             yield from iter_values(value, f"{prefix}{key}.")
+#         else:
+#             yield f"{prefix}{key}", value
