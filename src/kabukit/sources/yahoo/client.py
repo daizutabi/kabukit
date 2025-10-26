@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from kabukit.sources.base import Client
 
-from .state import parse
+from .parser import parse
 
 if TYPE_CHECKING:
     import httpx

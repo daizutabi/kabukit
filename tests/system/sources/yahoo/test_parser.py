@@ -22,7 +22,7 @@ async def text():
 
 @pytest.fixture(scope="module")
 def state(text: str):
-    from kabukit.sources.yahoo.state import get_preloaded_state
+    from kabukit.sources.yahoo.parser import get_preloaded_state
 
     return get_preloaded_state(text)
 
@@ -76,7 +76,7 @@ def test_state_keys(state: dict[str, Any], key: str) -> None:
 
 
 def test_state_values(state: dict[str, Any]) -> None:
-    from kabukit.sources.yahoo.state import iter_values
+    from kabukit.sources.yahoo.parser import iter_values
 
     for k, v in iter_values(state):
         print(k, v, v is None)  # noqa: T201

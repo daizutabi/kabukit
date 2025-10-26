@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import polars as pl
 import pytest
 
-from kabukit.sources.yahoo.state import PRELOADED_STATE_PATTERN
+from kabukit.sources.yahoo.parser import PRELOADED_STATE_PATTERN
 
 if TYPE_CHECKING:
     from kabukit.sources.yahoo.client import YahooClient
