@@ -1,22 +1,18 @@
 from __future__ import annotations
 
-import json
-import re
+import asyncio
 from typing import TYPE_CHECKING
-
-from bs4 import BeautifulSoup, Tag
 
 from kabukit.sources.base import Client
 
-if TYPE_CHECKING:
-    from typing import Any
+from .state import parse
 
+if TYPE_CHECKING:
     import httpx
+    import polars as pl
 
 
 BASE_URL = "https://finance.yahoo.co.jp/quote"
-
-PRELOADED_STATE_PATTERN = re.compile(r"window\.__PRELOADED_STATE__\s*=\s*(\{.*\})")
 
 
 class YahooClient(Client):
@@ -48,20 +44,16 @@ class YahooClient(Client):
         resp.raise_for_status()
         return resp
 
-    async def get_state_dict(self, code: str) -> dict[str, Any]:
+    async def get_state(self, code: str) -> pl.DataFrame:
+        """Yahooファイナンスの情報を取得する。
+
+        Args:
+            code: 取得する銘柄コード。
+
+        Returns:
+            polars.DataFrame: 取得した情報を含むDataFrame。
+        """
         resp = await self.get(f"{code[:4]}.T")
-
-        soup = BeautifulSoup(resp.text, "lxml")
-        script = soup.find("script", string=PRELOADED_STATE_PATTERN)  # pyright: ignore[reportCallIssue, reportArgumentType, reportUnknownVariableType], # ty: ignore[no-matching-overload]
-
-        if not isinstance(script, Tag):
-            msg = "Could not find the __PRELOADED_STATE__ script tag."
-            raise TypeError(msg)
-
-        match = PRELOADED_STATE_PATTERN.search(script.text)
-
-        if match is None:
-            msg = "Could not find __PRELOADED_STATE__ JSON data."
-            raise ValueError(msg)
-
-        return json.loads(match.group(1))
+        # return parse(resp.text, code)
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, parse, resp.text, code)

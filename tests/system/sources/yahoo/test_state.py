@@ -14,40 +14,63 @@ pytestmark = pytest.mark.system
 
 
 @pytest_asyncio.fixture(scope="module")
-async def state():
+async def text():
     async with YahooClient() as client:
-        yield await client.get_state_dict("72030")
+        resp = await client.get("7203.T")
+        yield resp.text
 
 
-@pytest.mark.parametrize(
-    "key",
-    [
-        "commonPortfolioAddition",
-        "commonPr",
-        "headerApology",
-        "headerPortfolio",
-        "mainStocksDetail",
-        "mainStocksPriceBoard",
-        "mainIndicatorDetail",
-        "mainItemDetailChartSetting",
-        "mainRelatedItem",
-        "mainYJChart",
-        "mainYJCompareChart",
-        "mainStocksHistory",
-        "mainStocksMarginHistory",
-        "mainStocksHistoryPage",
-        "mainStocksNews",
-        "mainStocksDisclosure",
-        "mainStocksForecast",
-        "mainStocksProfile",
-        "mainStocksPost",
-        "mainStocksDividend",
-        "mainStocksPressReleaseSchedule",
-        "mainStocksPressReleaseSummary",
-        "stockPredictions",
-        "stockPerformance",
-    ],
-)
+@pytest.fixture(scope="module")
+def state(text: str):
+    from kabukit.sources.yahoo.state import get_preloaded_state
+
+    return get_preloaded_state(text)
+
+
+STATE_KEYS = [
+    "commonPortfolioAddition",
+    "commonPr",
+    "headerApology",
+    "headerPortfolio",
+    "mainStocksDetail",
+    "mainStocksPriceBoard",
+    "mainIndicatorDetail",
+    "mainItemDetailChartSetting",
+    "mainRelatedItem",
+    "mainYJChart",
+    "mainYJCompareChart",
+    "mainStocksHistory",
+    "mainStocksMarginHistory",
+    "mainStocksHistoryPage",
+    "mainStocksNews",
+    "mainStocksDisclosure",
+    "mainStocksForecast",
+    "mainStocksProfile",
+    "mainStocksPost",
+    "mainStocksDividend",
+    "mainStocksPressReleaseSchedule",
+    "mainStocksPressReleaseSummary",
+    "stockPredictions",
+    "stockPerformance",
+    "incentive",
+    "pageInfo",
+    "customLogger",
+    "subNewsHeadline",
+    "subRecentAccess",
+    "subStockRanking",
+    "userInfo",
+    "incentiveRankingList",
+    "colorSetting",
+    "feelingGraph",
+    "stockAttentionRanking",
+]
+
+
+def test_state_len(state: dict[str, Any]) -> None:
+    assert len(state) == len(STATE_KEYS)
+
+
+@pytest.mark.parametrize("key", STATE_KEYS)
 def test_state_keys(state: dict[str, Any], key: str) -> None:
     assert key in state
 
@@ -55,8 +78,7 @@ def test_state_keys(state: dict[str, Any], key: str) -> None:
 def test_state_values(state: dict[str, Any]) -> None:
     from kabukit.sources.yahoo.state import iter_values
 
-    assert list(iter_values(state))
+    for k, v in iter_values(state):
+        print(k, v, v is None)  # noqa: T201
 
-    # for k, v in iter_values(state):
-    #     print(k, v)
-    # assert 0
+    pytest.fail("debug")
