@@ -88,15 +88,6 @@ def transform_pdf(content: bytes, doc_id: str) -> pl.DataFrame:
     return pl.DataFrame({"DocumentId": [doc_id], "PdfContent": [content]})
 
 
-def read_csv(data: bytes) -> pl.DataFrame:
-    return pl.read_csv(
-        data,
-        separator="\t",
-        encoding="utf-16-le",
-        infer_schema_length=None,
-    )
-
-
 def transform_csv(df: pl.DataFrame, doc_id: str) -> pl.DataFrame:
     return df.select(
         pl.lit(doc_id).alias("DocumentId"),
