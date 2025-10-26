@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     import datetime
 
 
-def clean_list(df: pl.DataFrame, date: str | datetime.date) -> pl.DataFrame:
+def transform_list(df: pl.DataFrame, date: str | datetime.date) -> pl.DataFrame:
     df = filter_list(df)
 
     if df.is_empty():
@@ -84,7 +84,7 @@ def rename_list(df: pl.DataFrame) -> pl.DataFrame:
     return df.select(mapping.keys()).rename(mapping)
 
 
-def clean_pdf(content: bytes, doc_id: str) -> pl.DataFrame:
+def transform_pdf(content: bytes, doc_id: str) -> pl.DataFrame:
     return pl.DataFrame({"DocumentId": [doc_id], "PdfContent": [content]})
 
 

@@ -14,7 +14,7 @@ from kabukit.sources.datetime import with_date
 from kabukit.utils.config import get_config_value
 from kabukit.utils.params import get_params
 
-from .document import clean_csv, clean_list, clean_pdf, read_csv
+from .document import clean_csv, read_csv, transform_list, transform_pdf
 
 if TYPE_CHECKING:
     import datetime
@@ -140,7 +140,7 @@ class EdinetClient(Client):
         if df.is_empty():
             return pl.DataFrame()
 
-        df = clean_list(df, date)
+        df = transform_list(df, date)
 
         if df.is_empty():
             return pl.DataFrame()
@@ -174,7 +174,7 @@ class EdinetClient(Client):
         """
         resp = await self.get_response(doc_id, doc_type=2)
         if resp.headers["content-type"] == "application/pdf":
-            return clean_pdf(resp.content, doc_id)
+            return transform_pdf(resp.content, doc_id)
 
         msg = "PDF is not available."
         raise ValueError(msg)

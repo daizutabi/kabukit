@@ -40,9 +40,9 @@ def df() -> pl.DataFrame:
 
 
 def test_clean_list_columns(df: pl.DataFrame) -> None:
-    from kabukit.sources.edinet.document import clean_list
+    from kabukit.sources.edinet.document import transform_list
 
-    df = clean_list(df, "2025-09-19")
+    df = transform_list(df, "2025-09-19")
     assert df.columns == [
         "Code",
         "SubmittedDate",
@@ -72,9 +72,9 @@ def test_clean_list_columns(df: pl.DataFrame) -> None:
 
 
 def test_clean_list_submit_date_time(df: pl.DataFrame) -> None:
-    from kabukit.sources.edinet.document import clean_list
+    from kabukit.sources.edinet.document import transform_list
 
-    df = clean_list(df, "2025-09-19")
+    df = transform_list(df, "2025-09-19")
     x = df["SubmittedDate"].to_list()
     assert x[0] == datetime.date(2025, 9, 19)
     assert x[1] == datetime.date(2025, 9, 22)
@@ -84,39 +84,39 @@ def test_clean_list_submit_date_time(df: pl.DataFrame) -> None:
 
 
 def test_clean_list_flag(df: pl.DataFrame) -> None:
-    from kabukit.sources.edinet.document import clean_list
+    from kabukit.sources.edinet.document import transform_list
 
-    df = clean_list(df, "2025-09-19")
+    df = transform_list(df, "2025-09-19")
     assert df["CsvFlag"].to_list() == [True, False]
     assert df["PdfFlag"].to_list() == [True, False]
 
 
 def test_clean_list_period(df: pl.DataFrame) -> None:
-    from kabukit.sources.edinet.document import clean_list
+    from kabukit.sources.edinet.document import transform_list
 
-    df = clean_list(df, "2025-09-19")
+    df = transform_list(df, "2025-09-19")
     assert df["PeriodStart"].to_list() == [None, datetime.date(2025, 9, 15)]
     assert df["PeriodEnd"].to_list() == [datetime.date(2025, 9, 30), None]
 
 
 def test_clean_list_file_date(df: pl.DataFrame) -> None:
-    from kabukit.sources.edinet.document import clean_list
+    from kabukit.sources.edinet.document import transform_list
 
-    df = clean_list(df, "2025-09-19")
+    df = transform_list(df, "2025-09-19")
     assert df["FileDate"].unique().to_list() == [datetime.date(2025, 9, 19)]
 
 
 def test_clean_list_empty() -> None:
-    from kabukit.sources.edinet.document import clean_list
+    from kabukit.sources.edinet.document import transform_list
 
     df = pl.DataFrame({"secCode": [None, "1"], "fundCode": ["1", "2"]})
-    assert clean_list(df, "2025-09-19").is_empty()
+    assert transform_list(df, "2025-09-19").is_empty()
 
 
 def test_clean_pdf() -> None:
-    from kabukit.sources.edinet.document import clean_pdf
+    from kabukit.sources.edinet.document import transform_pdf
 
-    df = clean_pdf(b"abc", "abc")
+    df = transform_pdf(b"abc", "abc")
     assert df.columns == ["DocumentId", "PdfContent"]
     assert df["DocumentId"].to_list() == ["abc"]
     assert df["PdfContent"].to_list() == [b"abc"]
@@ -143,9 +143,9 @@ def test_clean_csv() -> None:
 
 def test_rename(df: pl.DataFrame) -> None:
     from kabukit.sources.edinet.columns import ListColumns
-    from kabukit.sources.edinet.document import clean_list
+    from kabukit.sources.edinet.document import transform_list
 
-    df = clean_list(df, "2025-09-19")
+    df = transform_list(df, "2025-09-19")
     df = df.select(pl.lit(1).alias("Date"), pl.all())
     df = ListColumns.rename(df, strict=True)
     assert "日付" in df.columns

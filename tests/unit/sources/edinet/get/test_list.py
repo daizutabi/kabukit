@@ -27,8 +27,8 @@ async def test_get_list_success(mock_get: AsyncMock, mocker: MockerFixture) -> N
     response.raise_for_status = mocker.MagicMock()
 
     expected_df = pl.DataFrame(results)
-    mock_clean_list = mocker.patch("kabukit.sources.edinet.client.clean_list")
-    mock_clean_list.return_value = expected_df
+    mock_transform_list = mocker.patch("kabukit.sources.edinet.client.transform_list")
+    mock_transform_list.return_value = expected_df
 
     mock_with_date = mocker.patch("kabukit.sources.edinet.client.with_date")
     mock_with_date.return_value = expected_df
@@ -42,7 +42,7 @@ async def test_get_list_success(mock_get: AsyncMock, mocker: MockerFixture) -> N
         "/documents.json",
         params={"date": date, "type": 2},
     )
-    mock_clean_list.assert_called_once()
+    mock_transform_list.assert_called_once()
     mock_with_date.assert_called_once()
 
 
@@ -91,8 +91,8 @@ async def test_get_list_empty_results_by_clean(
     mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
 
-    mock_clean_list = mocker.patch("kabukit.sources.edinet.client.clean_list")
-    mock_clean_list.return_value = pl.DataFrame({"a": []})
+    mock_transform_list = mocker.patch("kabukit.sources.edinet.client.transform_list")
+    mock_transform_list.return_value = pl.DataFrame({"a": []})
 
     mock_with_date = mocker.patch("kabukit.sources.edinet.client.with_date")
 
@@ -101,5 +101,5 @@ async def test_get_list_empty_results_by_clean(
 
     assert_frame_equal(df, pl.DataFrame())
 
-    mock_clean_list.assert_called_once()
+    mock_transform_list.assert_called_once()
     mock_with_date.assert_not_called()
