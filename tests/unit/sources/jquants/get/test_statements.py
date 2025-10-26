@@ -107,7 +107,7 @@ async def test_get_transform_flag(
 
 @pytest.fixture
 def df() -> pl.DataFrame:
-    from kabukit.sources.jquants.clean.statements import clean
+    from kabukit.sources.jquants.transform.statements import clean
 
     return pl.DataFrame(
         {

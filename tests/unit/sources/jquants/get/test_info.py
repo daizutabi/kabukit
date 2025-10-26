@@ -51,7 +51,7 @@ async def test_get_info_only_common_stocks(
 
 
 def test_clean() -> None:
-    from kabukit.sources.jquants.clean.info import clean
+    from kabukit.sources.jquants.transform.info import clean
 
     df = pl.DataFrame(
         {
@@ -78,7 +78,7 @@ def test_clean() -> None:
 
 
 def test_filter_common_stocks() -> None:
-    from kabukit.sources.jquants.clean.info import filter_common_stocks
+    from kabukit.sources.jquants.transform.info import filter_common_stocks
 
     df = pl.DataFrame(
         {

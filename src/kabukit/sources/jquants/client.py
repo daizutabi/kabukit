@@ -10,7 +10,7 @@ from kabukit.sources.datetime import with_date
 from kabukit.utils.config import get_config_value
 from kabukit.utils.params import get_params
 
-from .clean import calendar, info, prices, statements, topix
+from .transform import calendar, info, prices, statements, topix
 
 if TYPE_CHECKING:
     import datetime
