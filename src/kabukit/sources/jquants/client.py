@@ -197,7 +197,7 @@ class JQuantsClient(Client):
         if only_common_stocks:
             df = info.filter_common_stocks(df)
 
-        return info.clean(df) if transform else df
+        return info.transform(df) if transform else df
 
     async def get_statements(
         self,
@@ -408,4 +408,4 @@ class JQuantsClient(Client):
         if df.is_empty():
             return pl.DataFrame()
 
-        return calendar.clean(df)
+        return calendar.transform(df)

@@ -51,7 +51,7 @@ async def test_get_info_only_common_stocks(
 
 
 def test_clean() -> None:
-    from kabukit.sources.jquants.transform.info import clean
+    from kabukit.sources.jquants.transform.info import transform
 
     df = pl.DataFrame(
         {
@@ -66,7 +66,7 @@ def test_clean() -> None:
         },
     )
 
-    df = clean(df)
+    df = transform(df)
     assert df.shape == (2, 7)
     assert df["Date"].dtype == pl.Date
     assert df["Company"].dtype == pl.String
