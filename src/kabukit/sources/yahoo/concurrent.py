@@ -53,7 +53,7 @@ async def get_quote(
 
     data = await concurrent.get(
         YahooClient,
-        "state",
+        "quote",
         codes,
         max_items=max_items,
         max_concurrency=max_concurrency,
