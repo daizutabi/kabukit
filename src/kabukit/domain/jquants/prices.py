@@ -120,55 +120,20 @@ class Prices(Base):
 
         return self.__class__(data)
 
-    @property
-    def _outstanding_shares_expr(self) -> pl.Expr:
+    def _shares_expr(self, *, include_treasury_shares: bool = False) -> pl.Expr:
         """調整済み発行済株式数を計算する Polars 式を返す。
+
+        Args:
+            include_treasury_shares (bool): True の場合、
+                自己株式を時価総額の計算に含める（発行済株式数を使用）。 False の場合、
+                自己株式を計算から除外する（発行済株式数 - 自己株式数 を使用）。
+                デフォルトは False。
 
         Returns:
             pl.Expr: 調整済み発行済株式数を計算する Polars 式。
 
         Raises:
             KeyError: 必要な列が存在しない場合に送出される。
-        """
-        required_cols = {"AdjustedIssuedShares", "AdjustedTreasuryShares"}
-
-        if not required_cols.issubset(self.data.columns):
-            missing = required_cols - set(self.data.columns)
-            msg = f"必要な列が存在しません: {missing}。"
-            msg += "事前に .with_adjusted_shares() を呼び出す必要があります。"
-            raise KeyError(msg)
-
-        return pl.col("AdjustedIssuedShares") - pl.col("AdjustedTreasuryShares")
-
-    def with_market_cap(self, *, include_treasury_shares: bool = False) -> Self:
-        """時価総額を計算し、列として追加する。
-
-        日々の調整前終値 (`RawClose`) と、調整済みの発行済株式数を基に、
-        日次ベースの時価総額を計算する。
-
-        計算式:
-            時価総額 = 調整前終値 * 発行済株式数
-
-        Note:
-            `include_treasury_shares` が `False` (デフォルト) の場合、
-            発行済株式数は自己株式数を差し引いた数（発行済株式数 - 自己株式数）
-            になります。`True` の場合は、発行済株式数全体が使用されます。
-
-        Args:
-            include_treasury_shares (bool):
-                `True` の場合、自己株式を時価総額の計算に含める
-                （発行済株式数を使用）。
-                `False` の場合、自己株式を計算から除外する
-                （発行済株式数 - 自己株式数 を使用）。
-                デフォルトは `False`。
-
-        Returns:
-            Self: `MarketCap` 列が追加された、新しいPricesオブジェクト。
-
-        Raises:
-            KeyError:
-                調整済み株式数列が存在しない場合。
-                事前に `with_adjusted_shares()` を呼び出す必要がある。
         """
         required_cols = {"AdjustedIssuedShares"}
         if not include_treasury_shares:
@@ -180,10 +145,42 @@ class Prices(Base):
             msg += "事前に .with_adjusted_shares() を呼び出す必要があります。"
             raise KeyError(msg)
 
-        shares_expr = (
+        return (
             pl.col("AdjustedIssuedShares")
             if include_treasury_shares
             else (pl.col("AdjustedIssuedShares") - pl.col("AdjustedTreasuryShares"))
+        )
+
+    def with_market_cap(self, *, include_treasury_shares: bool = False) -> Self:
+        """時価総額を計算し、列として追加する。
+
+        日々の調整前終値 (`RawClose`) と、調整済みの発行済株式数を基に、
+        日次ベースの時価総額を計算する。
+
+        計算式:
+            時価総額 = 調整前終値 * 発行済株式数
+
+        Note:
+            `include_treasury_shares` が False (デフォルト) の場合、
+            発行済株式数は自己株式数を差し引いた数（発行済株式数 - 自己株式数）
+            になります。True の場合は、発行済株式数全体が使用されます。
+
+        Args:
+            include_treasury_shares (bool): True の場合、
+                自己株式を時価総額の計算に含める（発行済株式数を使用）。 False の場合、
+                自己株式を計算から除外する（発行済株式数 - 自己株式数 を使用）。
+                デフォルトは False。
+
+        Returns:
+            Self: `MarketCap` 列が追加された、新しいPricesオブジェクト。
+
+        Raises:
+            KeyError:
+                調整済み株式数列が存在しない場合。
+                事前に `with_adjusted_shares()` を呼び出す必要がある。
+        """
+        shares_expr = self._shares_expr(
+            include_treasury_shares=include_treasury_shares,
         )
 
         data = self.data.with_columns(
@@ -231,7 +228,7 @@ class Prices(Base):
                 呼び出す必要がある。
         """
         data = self.data.with_columns(
-            (pl.col("Equity") / self._outstanding_shares_expr).alias(
+            (pl.col("Equity") / self._shares_expr()).alias(
                 "BookValuePerShare",
             ),
         ).with_columns(
@@ -281,7 +278,7 @@ class Prices(Base):
                 を呼び出す必要がある。
         """
         data = self.data.with_columns(
-            (pl.col("ForecastProfit") / self._outstanding_shares_expr).alias(
+            (pl.col("ForecastProfit") / self._shares_expr()).alias(
                 "EarningsPerShare",
             ),
         ).with_columns(
@@ -329,7 +326,7 @@ class Prices(Base):
                 を呼び出す必要がある。
         """
         data = self.data.with_columns(
-            (pl.col("ForecastDividend") / self._outstanding_shares_expr).alias(
+            (pl.col("ForecastDividend") / self._shares_expr()).alias(
                 "DividendPerShare",
             ),
         ).with_columns(
