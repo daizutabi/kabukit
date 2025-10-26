@@ -19,6 +19,6 @@ async def test_response_has_preloaded_state(client: YahooClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_state(client: YahooClient) -> None:
-    state = await client.get_state("72030")
+async def test_get_state_dict(client: YahooClient) -> None:
+    state = await client.get_state_dict("72030")
     assert isinstance(state, dict)

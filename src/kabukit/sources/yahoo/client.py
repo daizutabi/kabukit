@@ -48,7 +48,7 @@ class YahooClient(Client):
         resp.raise_for_status()
         return resp
 
-    async def get_state(self, code: str) -> dict[str, Any]:
+    async def get_state_dict(self, code: str) -> dict[str, Any]:
         resp = await self.get(f"{code[:4]}.T")
 
         soup = BeautifulSoup(resp.text, "lxml")
