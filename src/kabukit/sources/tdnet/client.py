@@ -11,8 +11,8 @@ from kabukit.sources.base import Client
 from kabukit.sources.datetime import with_date
 from kabukit.utils.datetime import strpdate
 
-from .document import clean_list
 from .parser import iter_page_numbers, parse
+from .transform import clean_list
 
 if TYPE_CHECKING:
     import datetime

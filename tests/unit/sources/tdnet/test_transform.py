@@ -10,7 +10,7 @@ pytestmark = pytest.mark.unit
 
 def test_clean_list() -> None:
     from kabukit.sources.tdnet.columns import ListColumns
-    from kabukit.sources.tdnet.document import clean_list
+    from kabukit.sources.tdnet.transform import clean_list
 
     df = pl.DataFrame(
         {
