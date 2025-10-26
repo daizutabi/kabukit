@@ -81,7 +81,7 @@ async def test_get_list_empty_results(
 
 
 @pytest.mark.asyncio
-async def test_get_list_empty_results_by_clean(
+async def test_get_list_empty_results_by_transform(
     mock_get: AsyncMock,
     mocker: MockerFixture,
 ) -> None:
