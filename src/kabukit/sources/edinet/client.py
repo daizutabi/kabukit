@@ -5,9 +5,7 @@ import zipfile
 from enum import StrEnum
 from typing import TYPE_CHECKING
 
-import httpx
 import polars as pl
-import tenacity
 
 from kabukit.sources.client import Client
 from kabukit.sources.datetime import with_date
@@ -21,15 +19,9 @@ if TYPE_CHECKING:
     import datetime
 
     from httpx import Response
-    from httpx._types import QueryParamTypes
 
 API_VERSION = "v2"
 BASE_URL = f"https://api.edinet-fsa.go.jp/api/{API_VERSION}"
-
-
-def is_retryable(e: BaseException) -> bool:
-    """例外がリトライ可能なネットワークエラーであるかを判定する。"""
-    return isinstance(e, (httpx.ConnectTimeout, httpx.ReadTimeout, httpx.ConnectError))
 
 
 class AuthKey(StrEnum):
@@ -65,31 +57,31 @@ class EdinetClient(Client):
         if api_key:
             self.client.params = {"Subscription-Key": api_key}
 
-    @tenacity.retry(
-        reraise=True,
-        stop=tenacity.stop_after_attempt(3),
-        wait=tenacity.wait_exponential(multiplier=1, min=2, max=10),
-        retry=tenacity.retry_if_exception(is_retryable),
-    )
-    async def get(self, url: str, params: QueryParamTypes) -> Response:
-        """リトライ処理を伴うGETリクエストを送信する。
+    # @tenacity.retry(
+    #     reraise=True,
+    #     stop=tenacity.stop_after_attempt(3),
+    #     wait=tenacity.wait_exponential(multiplier=1, min=2, max=10),
+    #     retry=tenacity.retry_if_exception(is_retryable),
+    # )
+    # async def get(self, url: str, params: QueryParamTypes) -> Response:
+    #     """リトライ処理を伴うGETリクエストを送信する。
 
-        ネットワークエラーが発生した場合、指数関数的バックオフを用いて
-        最大3回までリトライする。
+    #     ネットワークエラーが発生した場合、指数関数的バックオフを用いて
+    #     最大3回までリトライする。
 
-        Args:
-            url: GETリクエストのURLパス。
-            params: リクエストのクエリパラメータ。
+    #     Args:
+    #         url: GETリクエストのURLパス。
+    #         params: リクエストのクエリパラメータ。
 
-        Returns:
-            httpx.Response: APIからのレスポンスオブジェクト。
+    #     Returns:
+    #         httpx.Response: APIからのレスポンスオブジェクト。
 
-        Raises:
-            httpx.HTTPStatusError: APIリクエストがHTTPエラーステータスを返した場合。
-        """
-        resp = await self.client.get(url, params=params)
-        resp.raise_for_status()
-        return resp
+    #     Raises:
+    #         httpx.HTTPStatusError: APIリクエストがHTTPエラーステータスを返した場合。
+    #     """
+    #     resp = await self.client.get(url, params=params)
+    #     resp.raise_for_status()
+    #     return resp
 
     async def get_count(self, date: str | datetime.date) -> int:
         """指定したファイル日付の提出書類の数を取得する。
