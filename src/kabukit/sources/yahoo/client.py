@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING
 
-from kabukit.sources.base import Client
+from kabukit.sources.client import Client
 
 from .parser import parse
 

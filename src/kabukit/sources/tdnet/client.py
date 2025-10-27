@@ -7,7 +7,7 @@ import httpx
 import polars as pl
 from bs4 import BeautifulSoup
 
-from kabukit.sources.base import Client
+from kabukit.sources.client import Client
 from kabukit.sources.datetime import with_date
 from kabukit.utils.datetime import strpdate
 

@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from marimo._plugins.stateless.status import progress_bar
     from tqdm.asyncio import tqdm
 
-    from kabukit.sources.base import Client
+    from kabukit.sources.client import Client
 
     class _Progress(Protocol):
         def __call__(

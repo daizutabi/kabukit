@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import polars as pl
 import pytest
 
-from kabukit.sources.base import Client
+from kabukit.sources.client import Client
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterable, AsyncIterator

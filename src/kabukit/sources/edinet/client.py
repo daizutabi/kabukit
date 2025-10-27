@@ -9,7 +9,7 @@ import httpx
 import polars as pl
 import tenacity
 
-from kabukit.sources.base import Client
+from kabukit.sources.client import Client
 from kabukit.sources.datetime import with_date
 from kabukit.utils.config import get_config_value
 from kabukit.utils.params import get_params
