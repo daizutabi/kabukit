@@ -72,9 +72,9 @@ class JQuantsClient(Client):
         Raises:
             HTTPStatusError: APIリクエストがHTTPエラーステータスを返した場合。
         """
-        resp = await self.client.post(url, json=json)
-        resp.raise_for_status()
-        return resp.json()
+        response = await self.client.post(url, json=json)
+        response.raise_for_status()
+        return response.json()
 
     async def auth(
         self,
