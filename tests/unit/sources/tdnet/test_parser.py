@@ -85,8 +85,8 @@ def test_get_table_no_table() -> None:
     assert table is None
 
 
-def test_parse() -> None:
-    df = parser.parse(FAKE_HTML_WITH_TABLE)
+def test_parse_list() -> None:
+    df = parser.parse_list(FAKE_HTML_WITH_TABLE)
     expected = pl.DataFrame(
         {
             "Code": ["1301", "1302"],
@@ -101,8 +101,8 @@ def test_parse() -> None:
     assert_frame_equal(df, expected)
 
 
-def test_parse_no_table() -> None:
-    df = parser.parse(FAKE_HTML_WITHOUT_TABLE)
+def test_parse_list_no_table() -> None:
+    df = parser.parse_list(FAKE_HTML_WITHOUT_TABLE)
     assert df.is_empty()
 
 

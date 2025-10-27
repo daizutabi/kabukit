@@ -35,12 +35,7 @@ def iter_page_numbers(html: str, /) -> Iterator[int]:
         yield int(m.group(1))
 
 
-def get_table(html: str, /) -> Tag | None:
-    soup = get_soup(html)
-    return soup.find("table", attrs={"id": "main-list-table"})
-
-
-def parse(html: str, /) -> pl.DataFrame:
+def parse_list(html: str, /) -> pl.DataFrame:
     table = get_table(html)
 
     if table is None:
@@ -54,6 +49,11 @@ def parse(html: str, /) -> pl.DataFrame:
     return df.with_columns(
         pl.col(null_columns).cast(pl.String),
     )
+
+
+def get_table(html: str, /) -> Tag | None:
+    soup = get_soup(html)
+    return soup.find("table", attrs={"id": "main-list-table"})
 
 
 def iter_cells(tag: Tag, /) -> Iterator[tuple[str, datetime.time | str | None]]:

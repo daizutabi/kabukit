@@ -11,7 +11,7 @@ from kabukit.sources.client import Client
 from kabukit.sources.datetime import with_date
 from kabukit.utils.datetime import strpdate
 
-from .parser import iter_page_numbers, parse
+from .parser import iter_page_numbers, parse_list
 from .transform import transform_list
 
 if TYPE_CHECKING:
@@ -109,7 +109,7 @@ class TdnetClient(Client):
         if isinstance(date, str):
             date = strpdate(date)
 
-        items = [parse(page) async for page in self.iter_pages(date)]
+        items = [parse_list(page) async for page in self.iter_pages(date)]
         items = [item for item in items if not item.is_empty()]
 
         if not items:
