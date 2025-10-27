@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
-from httpx import ConnectTimeout, Response
+from httpx import ConnectTimeout, HTTPStatusError, Response
 
 if TYPE_CHECKING:
     from unittest.mock import AsyncMock
@@ -21,6 +21,44 @@ async def test_async_with() -> None:
         assert not client.client.is_closed
 
     assert client.client.is_closed
+
+
+@pytest.mark.asyncio
+async def test_get_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+    from kabukit.sources.client import Client
+
+    expected_response = Response(200, json={"message": "success"})
+    mock_get.return_value = expected_response
+    expected_response.raise_for_status = mocker.MagicMock()
+
+    client = Client("test_key")
+    response = await client.get("test/path", params={"a": "b"})
+
+    assert response == expected_response
+    mock_get.assert_awaited_once_with("test/path", params={"a": "b"})
+    expected_response.raise_for_status.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_get_failure(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+    from kabukit.sources.client import Client
+
+    error_response = Response(400)
+    mock_get.return_value = error_response
+    error_response.raise_for_status = mocker.MagicMock(
+        side_effect=HTTPStatusError(
+            "Bad Request",
+            request=mocker.MagicMock(),
+            response=error_response,
+        ),
+    )
+
+    client = Client("test_key")
+
+    with pytest.raises(HTTPStatusError):
+        await client.get("test/path", params={})
+
+    error_response.raise_for_status.assert_called_once()
 
 
 @pytest.mark.asyncio

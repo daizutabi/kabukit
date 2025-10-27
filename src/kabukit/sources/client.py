@@ -40,7 +40,7 @@ class Client:
         wait=tenacity.wait_exponential(multiplier=1, min=2, max=10),
         retry=tenacity.retry_if_exception(is_retryable),
     )
-    async def get(self, url: str, params: QueryParamTypes) -> Response:
+    async def get(self, url: str, params: QueryParamTypes | None = None) -> Response:
         """リトライ処理を伴うGETリクエストを送信する。
 
         ネットワークエラーが発生した場合、指数関数的バックオフを用いて
