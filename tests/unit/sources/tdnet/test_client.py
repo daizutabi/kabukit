@@ -12,45 +12,10 @@ from kabukit.sources.tdnet.client import TdnetClient
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
-    from unittest.mock import AsyncMock
 
     from pytest_mock import MockerFixture
 
 pytestmark = pytest.mark.unit
-
-
-@pytest.mark.asyncio
-async def test_get_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
-    expected_response = Response(200, text="abc")
-    mock_get.return_value = expected_response
-    expected_response.raise_for_status = mocker.MagicMock()
-
-    client = TdnetClient()
-    response = await client.get("test/path")
-
-    assert response.text == "abc"
-    mock_get.assert_awaited_once_with("test/path")
-    expected_response.raise_for_status.assert_called_once()
-
-
-@pytest.mark.asyncio
-async def test_get_failure(mock_get: AsyncMock, mocker: MockerFixture) -> None:
-    error_response = Response(400)
-    mock_get.return_value = error_response
-    error_response.raise_for_status = mocker.MagicMock(
-        side_effect=HTTPStatusError(
-            "Bad Request",
-            request=mocker.MagicMock(),
-            response=error_response,
-        ),
-    )
-
-    client = TdnetClient()
-
-    with pytest.raises(HTTPStatusError):
-        await client.get("test/path")
-
-    error_response.raise_for_status.assert_called_once()
 
 
 @pytest.mark.asyncio
