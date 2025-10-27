@@ -12,6 +12,28 @@ from kabukit.sources.tdnet import parser
 pytestmark = pytest.mark.unit
 
 
+def test_iter_dates() -> None:
+    html = """
+    <select name="daylist">
+        <option value="I_list_001_20230101.html">2023/01/01</option>
+        <option value="I_list_001_20230102.html">2023/01/02</option>
+    </select>
+    """
+    result = list(parser.iter_dates(html))
+    expected = [datetime.date(2023, 1, 1), datetime.date(2023, 1, 2)]
+    assert result == expected
+
+
+def test_iter_dates_no_daylist() -> None:
+    html = """
+    <select>
+        <option value="I_list_001_20230101.html">2023/01/01</option>
+        <option value="I_list_001_20230102.html">2023/01/02</option>
+    </select>
+    """
+    assert list(parser.iter_dates(html)) == []
+
+
 FAKE_HTML_WITH_PAGER = """
 <html>
 <body>
