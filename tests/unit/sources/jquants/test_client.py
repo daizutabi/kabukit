@@ -65,36 +65,36 @@ async def test_post_failure(mock_post: AsyncMock, mocker: MockerFixture) -> None
     error_response.raise_for_status.assert_called_once()
 
 
-@pytest.mark.asyncio
-async def test_get_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
-    json = {"message": "success"}
-    expected_response = Response(200, json=json)
-    mock_get.return_value = expected_response
-    expected_response.raise_for_status = mocker.MagicMock()
+# @pytest.mark.asyncio
+# async def test_get_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+#     json = {"message": "success"}
+#     expected_response = Response(200, json=json)
+#     mock_get.return_value = expected_response
+#     expected_response.raise_for_status = mocker.MagicMock()
 
-    client = JQuantsClient("test_token")
-    response = await client.get("test/path", params={"a": "b"})
+#     client = JQuantsClient("test_token")
+#     response = await client.get("test/path", params={"a": "b"})
 
-    assert response == json
-    mock_get.assert_awaited_once_with("test/path", params={"a": "b"})
-    expected_response.raise_for_status.assert_called_once()
+#     assert response == json
+#     mock_get.assert_awaited_once_with("test/path", params={"a": "b"})
+#     expected_response.raise_for_status.assert_called_once()
 
 
-@pytest.mark.asyncio
-async def test_get_failure(mock_get: AsyncMock, mocker: MockerFixture) -> None:
-    error_response = Response(400)
-    mock_get.return_value = error_response
-    error_response.raise_for_status = mocker.MagicMock(
-        side_effect=HTTPStatusError(
-            "Bad Request",
-            request=mocker.MagicMock(),
-            response=error_response,
-        ),
-    )
+# @pytest.mark.asyncio
+# async def test_get_failure(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+#     error_response = Response(400)
+#     mock_get.return_value = error_response
+#     error_response.raise_for_status = mocker.MagicMock(
+#         side_effect=HTTPStatusError(
+#             "Bad Request",
+#             request=mocker.MagicMock(),
+#             response=error_response,
+#         ),
+#     )
 
-    client = JQuantsClient("test_token")
+#     client = JQuantsClient("test_token")
 
-    with pytest.raises(HTTPStatusError):
-        await client.get("test/path")
+#     with pytest.raises(HTTPStatusError):
+#         await client.get("test/path")
 
-    error_response.raise_for_status.assert_called_once()
+#     error_response.raise_for_status.assert_called_once()

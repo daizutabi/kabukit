@@ -3,12 +3,11 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING
 
-from kabukit.sources.base import Client
+from kabukit.sources.client import Client
 
 from .parser import parse
 
 if TYPE_CHECKING:
-    import httpx
     import polars as pl
 
 
@@ -27,22 +26,6 @@ class YahooClient(Client):
 
     def __init__(self) -> None:
         super().__init__(BASE_URL)
-
-    async def get(self, url: str) -> httpx.Response:
-        """GETリクエストを送信する。
-
-        Args:
-            url: GETリクエストのURLパス。
-
-        Returns:
-            httpx.Response: APIからのレスポンスオブジェクト。
-
-        Raises:
-            httpx.HTTPStatusError: APIリクエストがHTTPエラーステータスを返した場合。
-        """
-        resp = await self.client.get(url)
-        resp.raise_for_status()
-        return resp
 
     async def get_quote(
         self,

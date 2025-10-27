@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 import pytest
-from httpx import ConnectTimeout, Response
+from httpx import Response
 from polars.testing import assert_frame_equal
 
 from kabukit.sources.edinet.client import EdinetClient
@@ -17,19 +17,6 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
 pytestmark = pytest.mark.unit
-
-
-@pytest.mark.asyncio
-async def test_get_response(mock_get: AsyncMock, mocker: MockerFixture) -> None:
-    expected_response = Response(200, content=b"file content")
-    mock_get.return_value = expected_response
-    mock_get.return_value.raise_for_status = mocker.MagicMock()
-
-    client = EdinetClient("test_key")
-    response = await client.get_response("S100TEST", doc_type=1)
-
-    assert response == expected_response
-    mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 1})
 
 
 @pytest.mark.asyncio
@@ -146,46 +133,6 @@ async def test_get_csv_no_csv_in_zip(
     msg = "CSV is not available."
     with pytest.raises(ValueError, match=msg):
         await client.get_csv("S100TEST")
-
-
-@pytest.mark.asyncio
-async def test_get_retries_on_failure(
-    mock_get: AsyncMock,
-    mocker: MockerFixture,
-) -> None:
-    """Test that the get method retries on retryable failures."""
-    mock_sleep = mocker.patch("asyncio.sleep")
-    error = ConnectTimeout("Connection timed out")
-    success_response = Response(200, json={"message": "success"})
-    success_response.raise_for_status = mocker.MagicMock()
-
-    mock_get.side_effect = [error, error, success_response]
-
-    client = EdinetClient("test_key")
-    response = await client.get("test/path", params={})
-
-    assert response == success_response
-    assert mock_get.call_count == 3
-    assert mock_sleep.call_count == 2
-
-
-@pytest.mark.asyncio
-async def test_get_fails_after_retries(
-    mock_get: AsyncMock,
-    mocker: MockerFixture,
-) -> None:
-    """Test that the get method fails after exhausting all retries."""
-    mock_sleep = mocker.patch("asyncio.sleep")
-    error = ConnectTimeout("Connection timed out")
-    mock_get.side_effect = [error, error, error]
-
-    client = EdinetClient("test_key")
-
-    with pytest.raises(ConnectTimeout):
-        await client.get("test/path", params={})
-
-    assert mock_get.call_count == 3
-    assert mock_sleep.call_count == 2
 
 
 @pytest.mark.asyncio

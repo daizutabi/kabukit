@@ -5,11 +5,9 @@ import zipfile
 from enum import StrEnum
 from typing import TYPE_CHECKING
 
-import httpx
 import polars as pl
-import tenacity
 
-from kabukit.sources.base import Client
+from kabukit.sources.client import Client
 from kabukit.sources.datetime import with_date
 from kabukit.utils.config import get_config_value
 from kabukit.utils.params import get_params
@@ -20,16 +18,9 @@ from .transform import transform_csv, transform_list, transform_pdf
 if TYPE_CHECKING:
     import datetime
 
-    from httpx import Response
-    from httpx._types import QueryParamTypes
 
 API_VERSION = "v2"
 BASE_URL = f"https://api.edinet-fsa.go.jp/api/{API_VERSION}"
-
-
-def is_retryable(e: BaseException) -> bool:
-    """例外がリトライ可能なネットワークエラーであるかを判定する。"""
-    return isinstance(e, (httpx.ConnectTimeout, httpx.ReadTimeout, httpx.ConnectError))
 
 
 class AuthKey(StrEnum):
@@ -65,32 +56,6 @@ class EdinetClient(Client):
         if api_key:
             self.client.params = {"Subscription-Key": api_key}
 
-    @tenacity.retry(
-        reraise=True,
-        stop=tenacity.stop_after_attempt(3),
-        wait=tenacity.wait_exponential(multiplier=1, min=2, max=10),
-        retry=tenacity.retry_if_exception(is_retryable),
-    )
-    async def get(self, url: str, params: QueryParamTypes) -> Response:
-        """リトライ処理を伴うGETリクエストを送信する。
-
-        ネットワークエラーが発生した場合、指数関数的バックオフを用いて
-        最大3回までリトライする。
-
-        Args:
-            url: GETリクエストのURLパス。
-            params: リクエストのクエリパラメータ。
-
-        Returns:
-            httpx.Response: APIからのレスポンスオブジェクト。
-
-        Raises:
-            httpx.HTTPStatusError: APIリクエストがHTTPエラーステータスを返した場合。
-        """
-        resp = await self.client.get(url, params=params)
-        resp.raise_for_status()
-        return resp
-
     async def get_count(self, date: str | datetime.date) -> int:
         """指定したファイル日付の提出書類の数を取得する。
 
@@ -101,8 +66,8 @@ class EdinetClient(Client):
             int: 指定日の提出書類数。
         """
         params = get_params(date=date, type=1)
-        resp = await self.get("/documents.json", params)
-        data = resp.json()
+        response = await self.get("/documents.json", params)
+        data = response.json()
         metadata = data["metadata"]
 
         if metadata["status"] != "200":
@@ -127,8 +92,8 @@ class EdinetClient(Client):
             pl.DataFrame: 提出書類一覧を格納したDataFrame。
         """
         params = get_params(date=date, type=2)
-        resp = await self.get("/documents.json", params)
-        data = resp.json()
+        response = await self.get("/documents.json", params)
+        data = response.json()
 
         if "results" not in data:
             return pl.DataFrame()
@@ -148,19 +113,6 @@ class EdinetClient(Client):
 
         return await with_date(df)
 
-    async def get_response(self, doc_id: str, doc_type: int) -> Response:
-        """書類データをレスポンスオブジェクトとして取得する。
-
-        Args:
-            doc_id: EDINETの書類ID。
-            doc_type: 書類タイプ (1:本文, 2:PDF, 3:代替書面, 4:英文, 5:CSV)。
-
-        Returns:
-            httpx.Response: APIからのレスポンスオブジェクト。
-        """
-        params = get_params(type=doc_type)
-        return await self.get(f"/documents/{doc_id}", params)
-
     async def get_pdf(self, doc_id: str) -> pl.DataFrame:
         """PDF形式の書類を取得し、テキストを抽出する。
 
@@ -173,9 +125,10 @@ class EdinetClient(Client):
         Raises:
             ValueError: レスポンスがPDF形式でない場合。
         """
-        resp = await self.get_response(doc_id, doc_type=2)
-        if resp.headers["content-type"] == "application/pdf":
-            return transform_pdf(resp.content, doc_id)
+        response = await self.get(f"/documents/{doc_id}", {"type": 2})
+
+        if response.headers["content-type"] == "application/pdf":
+            return transform_pdf(response.content, doc_id)
 
         msg = "PDF is not available."
         raise ValueError(msg)
@@ -193,9 +146,10 @@ class EdinetClient(Client):
         Raises:
             ValueError: レスポンスがZIP形式でない場合。
         """
-        resp = await self.get_response(doc_id, doc_type=doc_type)
-        if resp.headers["content-type"] == "application/octet-stream":
-            return resp.content
+        response = await self.get(f"/documents/{doc_id}", {"type": doc_type})
+
+        if response.headers["content-type"] == "application/octet-stream":
+            return response.content
 
         msg = "ZIP is not available."
         raise ValueError(msg)

@@ -7,7 +7,7 @@ import httpx
 import polars as pl
 from bs4 import BeautifulSoup
 
-from kabukit.sources.base import Client
+from kabukit.sources.client import Client
 from kabukit.sources.datetime import with_date
 from kabukit.utils.datetime import strpdate
 
@@ -34,22 +34,6 @@ class TdnetClient(Client):
 
     def __init__(self) -> None:
         super().__init__(BASE_URL)
-
-    async def get(self, url: str) -> httpx.Response:
-        """GETリクエストを送信する。
-
-        Args:
-            url: GETリクエストのURLパス。
-
-        Returns:
-            httpx.Response: APIからのレスポンスオブジェクト。
-
-        Raises:
-            httpx.HTTPStatusError: APIリクエストがHTTPエラーステータスを返した場合。
-        """
-        resp = await self.client.get(url)
-        resp.raise_for_status()
-        return resp
 
     async def get_dates(self) -> list[datetime.date]:
         """TDnetで利用可能な開示日一覧を取得する。

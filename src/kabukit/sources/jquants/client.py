@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from kabukit.sources.base import Client
+from kabukit.sources.client import Client
 from kabukit.sources.datetime import with_date
 from kabukit.utils.config import get_config_value
 from kabukit.utils.params import get_params
@@ -18,7 +18,6 @@ if TYPE_CHECKING:
     from typing import Any
 
     from httpx import HTTPStatusError  # noqa: F401
-    from httpx._types import QueryParamTypes
 
 
 API_VERSION = "v1"
@@ -77,23 +76,6 @@ class JQuantsClient(Client):
         resp.raise_for_status()
         return resp.json()
 
-    async def get(self, url: str, params: QueryParamTypes | None = None) -> Any:
-        """指定されたURLにGETリクエストを送信する。
-
-        Args:
-            url: GETリクエストのURLパス。
-            params: リクエストのクエリパラメータ。
-
-        Returns:
-            APIからのJSONレスポンス。
-
-        Raises:
-            HTTPStatusError: APIリクエストがHTTPエラーステータスを返した場合。
-        """
-        resp = await self.client.get(url, params=params)
-        resp.raise_for_status()
-        return resp.json()
-
     async def auth(
         self,
         mailaddress: str | None = None,
@@ -122,8 +104,8 @@ class JQuantsClient(Client):
             msg += "環境変数に設定する必要がある。"
             raise ValueError(msg)
 
-        json_data = {"mailaddress": mailaddress, "password": password}
-        data = await self.post("/token/auth_user", json=json_data)
+        json = {"mailaddress": mailaddress, "password": password}
+        data = await self.post("/token/auth_user", json)
         refresh_token = data["refreshToken"]
 
         url = f"/token/auth_refresh?refreshtoken={refresh_token}"
@@ -157,8 +139,11 @@ class JQuantsClient(Client):
         params = params or {}
 
         while True:
-            data = await self.get(url, params)
+            response = await self.get(url, params)
+            data = response.json()
+
             yield pl.DataFrame(data[name])
+
             if "pagination_key" in data:
                 params["pagination_key"] = data["pagination_key"]
             else:
@@ -191,7 +176,9 @@ class JQuantsClient(Client):
         """
         params = get_params(code=code, date=date)
         url = "/listed/info"
-        data = await self.get(url, params)
+        response = await self.get(url, params)
+        data = response.json()
+
         df = pl.DataFrame(data["info"])
 
         if only_common_stocks:
