@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import polars as pl
 from bs4 import BeautifulSoup
 
-from kabukit.utils.datetime import strptime
+from kabukit.utils.datetime import strpdate, strptime
 
 if TYPE_CHECKING:
     import datetime
@@ -19,6 +19,22 @@ if TYPE_CHECKING:
 @cache
 def get_soup(html: str) -> BeautifulSoup:
     return BeautifulSoup(html, "lxml")
+
+
+DATE_PATTERN = re.compile(r"I_list_001_(\d{8})\.html")
+
+
+def iter_dates(html: str, /) -> Iterator[datetime.date]:
+    soup = get_soup(html)
+    daylist = soup.find("select", attrs={"name": "daylist"})
+
+    if not daylist:
+        return
+
+    for option in daylist.find_all("option"):
+        value = option.get("value", "")
+        if isinstance(value, str) and (m := DATE_PATTERN.search(value)):
+            yield strpdate(m.group(1))
 
 
 PAGER_PATTERN = re.compile(r"pagerLink\('I_list_(\d+)_\d+\.html'\)")
