@@ -20,31 +20,20 @@ pytestmark = pytest.mark.unit
 
 @pytest.mark.asyncio
 async def test_get_dates(mocker: MockerFixture) -> None:
-    text = """
-    <select name="daylist">
-        <option value="I_list_001_20230101.html">2023/01/01</option>
-        <option value="I_list_001_20230102.html">2023/01/02</option>
-    </select>
-    """
     mock_get = mocker.patch.object(TdnetClient, "get")
-    mock_get.return_value = Response(200, text=text)
+    mock_get.return_value = Response(200, text="abc")
+
+    mock_iter_dates = mocker.patch(
+        "kabukit.sources.tdnet.client.iter_dates",
+        return_value=iter([1, 2]),
+    )
 
     client = TdnetClient()
     dates = await client.get_dates()
 
-    assert dates == [datetime.date(2023, 1, 1), datetime.date(2023, 1, 2)]
+    assert dates == [1, 2]
     mock_get.assert_awaited_once_with("I_main_00.html")
-
-
-@pytest.mark.asyncio
-async def test_get_dates_no_daylist(mocker: MockerFixture) -> None:
-    mock_get = mocker.patch.object(TdnetClient, "get")
-    mock_get.return_value = Response(200, text="<html></html>")
-
-    client = TdnetClient()
-    dates = await client.get_dates()
-
-    assert dates == []
+    mock_iter_dates.assert_called_once_with("abc")
 
 
 @pytest.mark.asyncio
