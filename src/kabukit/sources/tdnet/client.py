@@ -1,17 +1,15 @@
 from __future__ import annotations
 
-import re
 from typing import TYPE_CHECKING
 
 import httpx
 import polars as pl
-from bs4 import BeautifulSoup
 
 from kabukit.sources.client import Client
 from kabukit.sources.datetime import with_date
 from kabukit.utils.datetime import strpdate
 
-from .parser import iter_page_numbers, parse
+from .parser import iter_dates, iter_page_numbers, parse_list
 from .transform import transform_list
 
 if TYPE_CHECKING:
@@ -41,24 +39,8 @@ class TdnetClient(Client):
         Returns:
             list[date]: 利用可能な開示日のリスト。
         """
-        resp = await self.get("I_main_00.html")
-
-        soup = BeautifulSoup(resp.text, "lxml")
-        daylist = soup.find("select", attrs={"name": "daylist"})
-
-        if not daylist:
-            return []
-
-        pattern = re.compile(r"I_list_001_(\d{8})\.html")
-        dates: list[datetime.date] = []
-
-        for option in daylist.find_all("option"):
-            value = option.get("value", "")
-            if isinstance(value, str) and (m := pattern.search(value)):
-                date = strpdate(m.group(1))
-                dates.append(date)
-
-        return dates
+        response = await self.get("I_main_00.html")
+        return list(iter_dates(response.text))
 
     async def get_page(self, date: str | datetime.date, index: int) -> str:
         """指定した日のTDnet開示情報一覧ページを取得する。
@@ -73,9 +55,8 @@ class TdnetClient(Client):
         if not isinstance(date, str):
             date = date.strftime("%Y%m%d")
 
-        url = f"I_list_{index:03}_{date}.html"
-        resp = await self.get(url)
-        return resp.text
+        response = await self.get(f"I_list_{index:03}_{date}.html")
+        return response.text
 
     async def iter_pages(self, date: str | datetime.date) -> AsyncIterator[str]:
         """指定した日のTDnet開示情報一覧ページを非同期に反復処理する。
@@ -109,7 +90,7 @@ class TdnetClient(Client):
         if isinstance(date, str):
             date = strpdate(date)
 
-        items = [parse(page) async for page in self.iter_pages(date)]
+        items = [parse_list(page) async for page in self.iter_pages(date)]
         items = [item for item in items if not item.is_empty()]
 
         if not items:

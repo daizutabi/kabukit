@@ -105,7 +105,7 @@ async def test_get_list(mocker: MockerFixture) -> None:
 
     mocker.patch.object(TdnetClient, "iter_pages", new=mock_iter_pages)
     mock_parse = mocker.patch(
-        "kabukit.sources.tdnet.client.parse",
+        "kabukit.sources.tdnet.client.parse_list",
         side_effect=[pl.DataFrame({"a": [1]}), pl.DataFrame({"a": [2]})],
     )
     mock_transform_list = mocker.patch(
@@ -139,7 +139,7 @@ async def test_get_list_empty(mocker: MockerFixture) -> None:
         yield "html1"
 
     mocker.patch.object(TdnetClient, "iter_pages", new=mock_iter_pages)
-    mocker.patch("kabukit.sources.tdnet.client.parse", return_value=pl.DataFrame())
+    mocker.patch("kabukit.sources.tdnet.client.parse_list", return_value=pl.DataFrame())
 
     client = TdnetClient()
     result = await client.get_list("20230101")

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import polars as pl
 from bs4 import BeautifulSoup
 
-from kabukit.utils.datetime import strptime
+from kabukit.utils.datetime import strpdate, strptime
 
 if TYPE_CHECKING:
     import datetime
@@ -19,6 +19,22 @@ if TYPE_CHECKING:
 @cache
 def get_soup(html: str) -> BeautifulSoup:
     return BeautifulSoup(html, "lxml")
+
+
+DATE_PATTERN = re.compile(r"I_list_001_(\d{8})\.html")
+
+
+def iter_dates(html: str, /) -> Iterator[datetime.date]:
+    soup = get_soup(html)
+    daylist = soup.find("select", attrs={"name": "daylist"})
+
+    if not daylist:
+        return
+
+    for option in daylist.find_all("option"):
+        value = option.get("value", "")
+        if isinstance(value, str) and (m := DATE_PATTERN.search(value)):
+            yield strpdate(m.group(1))
 
 
 PAGER_PATTERN = re.compile(r"pagerLink\('I_list_(\d+)_\d+\.html'\)")
@@ -35,12 +51,7 @@ def iter_page_numbers(html: str, /) -> Iterator[int]:
         yield int(m.group(1))
 
 
-def get_table(html: str, /) -> Tag | None:
-    soup = get_soup(html)
-    return soup.find("table", attrs={"id": "main-list-table"})
-
-
-def parse(html: str, /) -> pl.DataFrame:
+def parse_list(html: str, /) -> pl.DataFrame:
     table = get_table(html)
 
     if table is None:
@@ -54,6 +65,11 @@ def parse(html: str, /) -> pl.DataFrame:
     return df.with_columns(
         pl.col(null_columns).cast(pl.String),
     )
+
+
+def get_table(html: str, /) -> Tag | None:
+    soup = get_soup(html)
+    return soup.find("table", attrs={"id": "main-list-table"})
 
 
 def iter_cells(tag: Tag, /) -> Iterator[tuple[str, datetime.time | str | None]]:
