@@ -46,13 +46,13 @@ class YahooClient(Client):
         Returns:
             polars.DataFrame: 銘柄の市場情報を含むDataFrame。
         """
-        resp = await self.get(f"{code[:4]}.T")
+        response = await self.get(f"{code[:4]}.T")
 
         if len(code) == 4:
             code += "0"
 
         if use_executor:
             loop = asyncio.get_running_loop()
-            return await loop.run_in_executor(None, parse, resp.text, code)
+            return await loop.run_in_executor(None, parse, response.text, code)
 
-        return parse(resp.text, code)
+        return parse(response.text, code)
