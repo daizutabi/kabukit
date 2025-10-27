@@ -18,7 +18,6 @@ from .transform import transform_csv, transform_list, transform_pdf
 if TYPE_CHECKING:
     import datetime
 
-    from httpx import Response
 
 API_VERSION = "v2"
 BASE_URL = f"https://api.edinet-fsa.go.jp/api/{API_VERSION}"
@@ -114,19 +113,6 @@ class EdinetClient(Client):
 
         return await with_date(df)
 
-    async def get_response(self, doc_id: str, doc_type: int) -> Response:
-        """書類データをレスポンスオブジェクトとして取得する。
-
-        Args:
-            doc_id: EDINETの書類ID。
-            doc_type: 書類タイプ (1:本文, 2:PDF, 3:代替書面, 4:英文, 5:CSV)。
-
-        Returns:
-            httpx.Response: APIからのレスポンスオブジェクト。
-        """
-        params = get_params(type=doc_type)
-        return await self.get(f"/documents/{doc_id}", params)
-
     async def get_pdf(self, doc_id: str) -> pl.DataFrame:
         """PDF形式の書類を取得し、テキストを抽出する。
 
@@ -139,7 +125,8 @@ class EdinetClient(Client):
         Raises:
             ValueError: レスポンスがPDF形式でない場合。
         """
-        response = await self.get_response(doc_id, doc_type=2)
+        response = await self.get(f"/documents/{doc_id}", {"type": 2})
+
         if response.headers["content-type"] == "application/pdf":
             return transform_pdf(response.content, doc_id)
 
@@ -159,7 +146,8 @@ class EdinetClient(Client):
         Raises:
             ValueError: レスポンスがZIP形式でない場合。
         """
-        response = await self.get_response(doc_id, doc_type=doc_type)
+        response = await self.get(f"/documents/{doc_id}", {"type": doc_type})
+
         if response.headers["content-type"] == "application/octet-stream":
             return response.content
 

@@ -20,19 +20,6 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.asyncio
-async def test_get_response(mock_get: AsyncMock, mocker: MockerFixture) -> None:
-    expected_response = Response(200, content=b"file content")
-    mock_get.return_value = expected_response
-    mock_get.return_value.raise_for_status = mocker.MagicMock()
-
-    client = EdinetClient("test_key")
-    response = await client.get_response("S100TEST", doc_type=1)
-
-    assert response == expected_response
-    mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 1})
-
-
-@pytest.mark.asyncio
 async def test_get_pdf_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     mock_get.return_value = Response(
         200,
