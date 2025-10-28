@@ -38,12 +38,13 @@ def test_parse() -> None:
             window.__PRELOADED_STATE__ = {"key": "value"};
         </script>
     """
-    df = parse(text, "12340")
-    assert df["Code"].unique().to_list() == ["12340"]
+    df = parse(text)
+    # assert df["Code"].unique().to_list() == ["12340"]
+    assert not df.is_empty()
 
 
 def test_parse_empty() -> None:
     from kabukit.sources.yahoo.parser import parse
 
-    df = parse("", "12340")
+    df = parse("")
     assert_frame_equal(df, pl.DataFrame())

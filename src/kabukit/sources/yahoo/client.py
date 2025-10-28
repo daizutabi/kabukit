@@ -1,15 +1,12 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING
+
+import polars as pl
 
 from kabukit.sources.client import Client
 
 from .parser import parse
-
-if TYPE_CHECKING:
-    import polars as pl
-
 
 BASE_URL = "https://finance.yahoo.co.jp/quote"
 
@@ -48,11 +45,16 @@ class YahooClient(Client):
         """
         response = await self.get(f"{code[:4]}.T")
 
+        if use_executor:
+            loop = asyncio.get_running_loop()
+            df = await loop.run_in_executor(None, parse, response.text)
+        else:
+            df = parse(response.text)
+
+        if df.is_empty():
+            return pl.DataFrame()
+
         if len(code) == 4:
             code += "0"
 
-        if use_executor:
-            loop = asyncio.get_running_loop()
-            return await loop.run_in_executor(None, parse, response.text, code)
-
-        return parse(response.text, code)
+        return df.select(pl.lit(code).alias("Code"), pl.all())

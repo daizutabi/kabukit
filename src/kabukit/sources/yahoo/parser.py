@@ -36,13 +36,13 @@ def get_preloaded_state(text: str) -> dict[str, Any]:
     return json.loads(match.group(1))
 
 
-def parse(text: str, code: str) -> pl.DataFrame:
+def parse(text: str) -> pl.DataFrame:
     state = get_preloaded_state(text)
 
     if not state:
         return pl.DataFrame()
 
-    return pl.DataFrame({"Code": [code], "text": [text]})
+    return pl.DataFrame({"text": [text]})
 
 
 # def iter_values(
