@@ -16,7 +16,7 @@ J-Quants API を利用するには、事前にコマンドラインで J-Quants 
 
 [`kabukit.get_info`][] 関数は、上場銘柄の情報を取得します。
 
-銘柄コード (4 桁または 5 桁の文字列) を指定すると、指定した銘柄の情報を取得できます。
+銘柄コード (4 桁の文字列) を指定すると、指定した銘柄の情報を取得できます。
 
 ```python exec="1" source="material-block"
 from kabukit import get_info
