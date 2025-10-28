@@ -14,7 +14,6 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.system
 
 
-@pytest.mark.asyncio
 async def test_get_list(client: TdnetClient, date: datetime.date) -> None:
     df1 = await client.get_list(date)
     assert df1.width == 9

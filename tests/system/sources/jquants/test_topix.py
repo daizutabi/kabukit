@@ -11,7 +11,6 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.system
 
 
-@pytest.mark.asyncio
 async def test_get(client: JQuantsClient) -> None:
     df = await client.get_topix(from_="2025-01-01", to="2025-01-31")
     assert df.shape == (19, 6)
@@ -20,7 +19,6 @@ async def test_get(client: JQuantsClient) -> None:
     assert df["Code"].eq("TOPIX").all()
 
 
-@pytest.mark.asyncio
 async def test_empty(client: JQuantsClient) -> None:
     df = await client.get_topix(from_="2025-01-01", to="2025-01-01")
     assert df.is_empty()

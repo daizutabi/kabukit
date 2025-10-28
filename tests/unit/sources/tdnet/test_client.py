@@ -18,7 +18,6 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.asyncio
 async def test_get_dates(mocker: MockerFixture) -> None:
     mock_get = mocker.patch.object(TdnetClient, "get")
     mock_get.return_value = Response(200, text="abc")
@@ -36,7 +35,6 @@ async def test_get_dates(mocker: MockerFixture) -> None:
     mock_iter_dates.assert_called_once_with("abc")
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("date", ["20230101", datetime.date(2023, 1, 1)])
 async def test_get_page(mocker: MockerFixture, date: str | datetime.date) -> None:
     mock_get = mocker.patch.object(TdnetClient, "get")
@@ -49,7 +47,6 @@ async def test_get_page(mocker: MockerFixture, date: str | datetime.date) -> Non
     mock_get.assert_awaited_once_with("I_list_001_20230101.html")
 
 
-@pytest.mark.asyncio
 async def test_iter_pages(mocker: MockerFixture) -> None:
     mocker.patch(
         "kabukit.sources.tdnet.client.iter_page_numbers",
@@ -65,7 +62,6 @@ async def test_iter_pages(mocker: MockerFixture) -> None:
     assert mock_get_page.call_count == 2
 
 
-@pytest.mark.asyncio
 async def test_iter_pages_http_error(mocker: MockerFixture) -> None:
     mocker.patch.object(
         TdnetClient,
@@ -81,7 +77,6 @@ async def test_iter_pages_http_error(mocker: MockerFixture) -> None:
     assert pages == []
 
 
-@pytest.mark.asyncio
 async def test_get_list(mocker: MockerFixture) -> None:
     async def mock_iter_pages(
         self: TdnetClient,
@@ -117,7 +112,6 @@ async def test_get_list(mocker: MockerFixture) -> None:
     assert_frame_equal(result, expected)
 
 
-@pytest.mark.asyncio
 async def test_get_list_empty(mocker: MockerFixture) -> None:
     async def mock_iter_pages(
         self: TdnetClient,

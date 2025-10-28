@@ -18,7 +18,6 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.asyncio
 async def test_get_calendar(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     """Test get_calendar method."""
     # 1. Mock the API response
@@ -70,7 +69,6 @@ async def test_get_calendar(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     mock_get.assert_awaited_once_with("/markets/trading_calendar", params={})
 
 
-@pytest.mark.asyncio
 async def test_get_calendar_empty(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     """Test get_calendar method with an empty response."""
     # 1. Mock the API response

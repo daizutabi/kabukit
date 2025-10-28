@@ -25,7 +25,6 @@ async def dates():
     return df["Date"].to_list()
 
 
-@pytest.mark.asyncio
 async def test_get_list_single_date(dates: list[datetime.date]) -> None:
     from kabukit.sources.tdnet.concurrent import get_list
 
@@ -38,7 +37,6 @@ async def test_get_list_single_date(dates: list[datetime.date]) -> None:
         assert dates[0] == date
 
 
-@pytest.mark.asyncio
 async def test_get_list_multiple_dates(dates: list[datetime.date]) -> None:
     from kabukit.sources.tdnet.concurrent import get_list
 
@@ -48,7 +46,6 @@ async def test_get_list_multiple_dates(dates: list[datetime.date]) -> None:
     assert all(date in dates for date in result)
 
 
-@pytest.mark.asyncio
 async def test_get_list_without_dates() -> None:
     from kabukit.sources.tdnet.concurrent import get_list
 
@@ -57,7 +54,6 @@ async def test_get_list_without_dates() -> None:
     assert len(dates) >= 18
 
 
-@pytest.mark.asyncio
 async def test_get_list_invalid_date() -> None:
     from kabukit.sources.tdnet.concurrent import get_list
 
@@ -65,7 +61,6 @@ async def test_get_list_invalid_date() -> None:
     assert df.is_empty()
 
 
-@pytest.mark.asyncio
 async def test_get_list_future_date() -> None:
     from kabukit.sources.tdnet.concurrent import get_list
     from kabukit.utils.datetime import today

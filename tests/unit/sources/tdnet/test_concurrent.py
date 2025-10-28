@@ -16,7 +16,6 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.asyncio
 async def test_get_list_single_date(mocker: MockerFixture) -> None:
     mock_df = pl.DataFrame({"Code": [1], "Date": [datetime.date(2023, 1, 1)]})
     mock_get_list_method = mocker.AsyncMock(return_value=mock_df)
@@ -28,7 +27,6 @@ async def test_get_list_single_date(mocker: MockerFixture) -> None:
     assert_frame_equal(result, mock_df)
 
 
-@pytest.mark.asyncio
 async def test_get_list_multiple_dates(mocker: MockerFixture) -> None:
     dates = [datetime.date(2023, 1, 1), datetime.date(2023, 1, 2)]
     mock_df_concat = pl.DataFrame(
@@ -57,7 +55,6 @@ async def test_get_list_multiple_dates(mocker: MockerFixture) -> None:
     assert_frame_equal(result, mock_df_concat.sort("Code", "Date"))
 
 
-@pytest.mark.asyncio
 async def test_get_list_no_dates_specified(mocker: MockerFixture) -> None:
     available_dates = [datetime.date(2023, 1, 1), datetime.date(2023, 1, 2)]
     mock_get_dates_method = mocker.AsyncMock(return_value=available_dates)
@@ -90,7 +87,6 @@ async def test_get_list_no_dates_specified(mocker: MockerFixture) -> None:
     assert_frame_equal(result, mock_df_concat.sort("Code", "Date"))
 
 
-@pytest.mark.asyncio
 async def test_get_list_returns_empty_dataframe(mocker: MockerFixture) -> None:
     mock_concurrent_get = mocker.AsyncMock(return_value=pl.DataFrame())
     mocker.patch(

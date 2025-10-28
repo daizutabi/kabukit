@@ -21,14 +21,12 @@ reason = "JQUANTS_MAILADDRESS and JQUANTS_PASSWORD must be set"
 
 
 @pytest.mark.skipif(not is_auth_set, reason=reason)
-@pytest.mark.asyncio
 async def test_auth_from_config(client: JQuantsClient) -> None:
     id_token = await client.auth()
     assert id_token is not None
 
 
 @pytest.mark.skipif(not is_auth_set, reason=reason)
-@pytest.mark.asyncio
 async def test_auth_from_args(client: JQuantsClient) -> None:
     mailaddress = os.getenv("JQUANTS_MAILADDRESS")
     password = os.getenv("JQUANTS_PASSWORD")
@@ -36,14 +34,12 @@ async def test_auth_from_args(client: JQuantsClient) -> None:
     assert id_token is not None
 
 
-@pytest.mark.asyncio
 async def test_auth_invalid(client: JQuantsClient) -> None:
     with pytest.raises(HTTPStatusError):
         await client.auth("invalid_email", "invalid_password")
 
 
 @pytest.mark.skipif(not is_auth_set, reason=reason)
-@pytest.mark.asyncio
 async def test_auth_and_reread_from_config(
     client: JQuantsClient,
     mocker: MockerFixture,
@@ -68,7 +64,6 @@ async def test_auth_and_reread_from_config(
 
 
 @pytest.mark.skipif(not is_auth_set, reason=reason)
-@pytest.mark.asyncio
 async def test_auth_and_get_data(client: JQuantsClient) -> None:
     id_token = await client.auth()
     assert id_token is not None
@@ -82,7 +77,6 @@ async def test_auth_and_get_data(client: JQuantsClient) -> None:
     is_auth_set,
     reason="JQUANTS_MAILADDRESS and JQUANTS_PASSWORD are set",
 )
-@pytest.mark.asyncio
 async def test_auth_error(client: JQuantsClient) -> None:
     with pytest.raises(ValueError, match="メールアドレス"):
         await client.auth()

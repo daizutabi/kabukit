@@ -11,13 +11,11 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.system
 
 
-@pytest.mark.asyncio
 async def test_get(client: JQuantsClient) -> None:
     df = await client.get_trades_spec()
     assert df.width == 56
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "section",
     [
@@ -39,7 +37,6 @@ async def test_section(client: JQuantsClient, section: str) -> None:
     assert s[0] == section
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "from_",
     [
@@ -57,7 +54,6 @@ async def test_from(
     assert date == datetime.date(2025, 8, 1)
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "to",
     [
@@ -72,7 +68,6 @@ async def test_to(client: JQuantsClient, to: str | datetime.date) -> None:
     assert date == datetime.date(2025, 7, 25)
 
 
-@pytest.mark.asyncio
 async def test_empty(client: JQuantsClient) -> None:
     df = await client.get_trades_spec(from_="2025-01-01", to="2025-01-01")
     assert df.is_empty()

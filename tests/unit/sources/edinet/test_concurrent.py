@@ -37,7 +37,6 @@ def mock_get_past_dates(mocker: MockerFixture) -> MagicMock:
     return mocker.patch("kabukit.sources.edinet.concurrent.get_past_dates")
 
 
-@pytest.mark.asyncio
 async def test_get_list_days(
     mock_get_past_dates: MagicMock,
     mock_get: AsyncMock,
@@ -77,7 +76,6 @@ async def test_get_list_days(
     )
 
 
-@pytest.mark.asyncio
 async def test_get_list_years(
     mock_get_past_dates: MagicMock,
     mock_get: AsyncMock,
@@ -107,7 +105,6 @@ async def test_get_list_years(
     )
 
 
-@pytest.mark.asyncio
 async def test_get_list_single_date(mock_edinet_client: AsyncMock) -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
@@ -117,7 +114,6 @@ async def test_get_list_single_date(mock_edinet_client: AsyncMock) -> None:
     mock_edinet_client.get_list.assert_awaited_once_with(target_date)
 
 
-@pytest.mark.asyncio
 async def test_get_list_invalid_date(mock_get: AsyncMock) -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
@@ -127,7 +123,6 @@ async def test_get_list_invalid_date(mock_get: AsyncMock) -> None:
     assert result.is_empty()
 
 
-@pytest.mark.asyncio
 async def test_get_documents_csv(mock_get: AsyncMock) -> None:
     from kabukit.sources.edinet.concurrent import get_documents
 
@@ -154,7 +149,6 @@ async def test_get_documents_csv(mock_get: AsyncMock) -> None:
     )
 
 
-@pytest.mark.asyncio
 async def test_get_documents_pdf(mock_get: AsyncMock) -> None:
     from kabukit.sources.edinet.concurrent import get_documents
 
@@ -173,7 +167,6 @@ async def test_get_documents_pdf(mock_get: AsyncMock) -> None:
     )
 
 
-@pytest.mark.asyncio
 async def test_get_documents_single_doc_id(
     mock_edinet_client: AsyncMock,
 ) -> None:

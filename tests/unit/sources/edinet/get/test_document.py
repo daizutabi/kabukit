@@ -19,7 +19,6 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.asyncio
 async def test_get_pdf_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     mock_get.return_value = Response(
         200,
@@ -39,7 +38,6 @@ async def test_get_pdf_success(mock_get: AsyncMock, mocker: MockerFixture) -> No
     mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 2})
 
 
-@pytest.mark.asyncio
 async def test_get_pdf_fail(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     mock_get.return_value = Response(
         200,
@@ -54,7 +52,6 @@ async def test_get_pdf_fail(mock_get: AsyncMock, mocker: MockerFixture) -> None:
         await client.get_pdf("S100TEST")
 
 
-@pytest.mark.asyncio
 async def test_get_zip_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     mock_get.return_value = Response(
         200,
@@ -70,7 +67,6 @@ async def test_get_zip_success(mock_get: AsyncMock, mocker: MockerFixture) -> No
     mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 5})
 
 
-@pytest.mark.asyncio
 async def test_get_zip_fail(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     mock_get.return_value = Response(
         200,
@@ -85,7 +81,6 @@ async def test_get_zip_fail(mock_get: AsyncMock, mocker: MockerFixture) -> None:
         await client.get_zip("S100TEST", doc_type=5)
 
 
-@pytest.mark.asyncio
 async def test_get_csv_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     csv_content = "header1\theader2\nvalue1\tvalue2"
     zip_buffer = io.BytesIO()
@@ -112,7 +107,6 @@ async def test_get_csv_success(mock_get: AsyncMock, mocker: MockerFixture) -> No
     mock_transform_csv.assert_called_once()
 
 
-@pytest.mark.asyncio
 async def test_get_csv_no_csv_in_zip(
     mock_get: AsyncMock,
     mocker: MockerFixture,
@@ -135,7 +129,6 @@ async def test_get_csv_no_csv_in_zip(
         await client.get_csv("S100TEST")
 
 
-@pytest.mark.asyncio
 async def test_get_document_calls_get_csv_by_default(mocker: MockerFixture) -> None:
     client = EdinetClient("test_key")
     mock_get_csv = mocker.patch.object(client, "get_csv", new_callable=mocker.AsyncMock)
@@ -152,7 +145,6 @@ async def test_get_document_calls_get_csv_by_default(mocker: MockerFixture) -> N
     mock_get_pdf.assert_not_awaited()
 
 
-@pytest.mark.asyncio
 async def test_get_document_calls_get_pdf_when_pdf_is_true(
     mocker: MockerFixture,
 ) -> None:

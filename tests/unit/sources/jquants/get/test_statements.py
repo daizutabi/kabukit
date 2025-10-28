@@ -17,7 +17,6 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.asyncio
 async def test_get_statements(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"statements": [{"Profit": 100}, {"Profit": 200}]}
     response = Response(200, json=json)
@@ -29,7 +28,6 @@ async def test_get_statements(mock_get: AsyncMock, mocker: MockerFixture) -> Non
     assert df["Profit"].to_list() == [100, 200]
 
 
-@pytest.mark.asyncio
 async def test_empty(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json: dict[str, list[dict[str, str]]] = {"statements": []}
     response = Response(200, json=json)
@@ -41,13 +39,11 @@ async def test_empty(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     assert df.is_empty()
 
 
-@pytest.mark.asyncio
 async def test_error(client: JQuantsClient) -> None:
     with pytest.raises(ValueError, match="codeまたはdate"):
         await client.get_statements()
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("transform_flag", [True, False])
 async def test_get_transform_flag(
     mock_get: AsyncMock,

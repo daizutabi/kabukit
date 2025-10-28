@@ -16,7 +16,6 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.asyncio
 async def test_get_prices(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"daily_quotes": [{"Open": 100}, {"Open": 200}]}
     response = Response(200, json=json)
@@ -28,7 +27,6 @@ async def test_get_prices(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     assert df["Open"].to_list() == [100, 200]
 
 
-@pytest.mark.asyncio
 async def test_get_prices_transform(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"daily_quotes": [{"Open": 100}, {"Open": 200}]}
     response = Response(200, json=json)
@@ -45,7 +43,6 @@ async def test_get_prices_transform(mock_get: AsyncMock, mocker: MockerFixture) 
     mock_transform.assert_called_once()
 
 
-@pytest.mark.asyncio
 async def test_empty(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json: dict[str, list[dict[str, str]]] = {"daily_quotes": []}
     response = Response(200, json=json)
@@ -57,13 +54,11 @@ async def test_empty(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     assert df.is_empty()
 
 
-@pytest.mark.asyncio
 async def test_error_code(client: JQuantsClient) -> None:
     with pytest.raises(ValueError, match="codeまたはdate"):
         await client.get_prices()
 
 
-@pytest.mark.asyncio
 async def test_error_from(client: JQuantsClient) -> None:
     with pytest.raises(ValueError, match="dateとfrom/to"):
         await client.get_prices(code="7203", date="2025-08-18", to="2025-08-16")

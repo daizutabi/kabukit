@@ -136,7 +136,6 @@ def MockJQuantsClient(mock_jquants_client: AsyncMock, mocker: MockerFixture):
     )
 
 
-@pytest.mark.asyncio
 async def test_calendar_cache_manager_fetch_and_cache(
     mock_jquants_client: AsyncMock,
     MockJQuantsClient: MagicMock,  # noqa: N803
@@ -161,7 +160,6 @@ async def test_calendar_cache_manager_fetch_and_cache(
     mock_jquants_client.get_calendar.assert_awaited_once()
 
 
-@pytest.mark.asyncio
 async def test_calendar_cache_manager_concurrency(
     mock_jquants_client: AsyncMock,
     MockJQuantsClient: MagicMock,  # noqa: N803
@@ -191,7 +189,6 @@ async def test_calendar_cache_manager_concurrency(
     mock_jquants_client.get_calendar.assert_awaited_once()
 
 
-@pytest.mark.asyncio
 async def test_async_with_date(mocker: MockerFixture) -> None:
     """非同期関数 with_date が、依存する関数を正しく呼び出すことをテストする"""
     from kabukit.sources.datetime import with_date

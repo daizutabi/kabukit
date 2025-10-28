@@ -18,7 +18,6 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.asyncio
 async def test_get_topix(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"topix": [{"Date": "2025-01-01", "Open": 100}]}
     response = Response(200, json=json)
@@ -39,7 +38,6 @@ async def test_get_topix(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     assert_frame_equal(result, expected)
 
 
-@pytest.mark.asyncio
 async def test_empty(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json: dict[str, list[dict[str, str]]] = {"topix": []}
     response = Response(200, json=json)

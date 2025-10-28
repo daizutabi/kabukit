@@ -13,7 +13,6 @@ def callback(df: pl.DataFrame) -> pl.DataFrame:
     return df
 
 
-@pytest.mark.asyncio
 async def test_get_list_single_date() -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
@@ -28,7 +27,6 @@ async def test_get_list_single_date() -> None:
     ]
 
 
-@pytest.mark.asyncio
 async def test_get_list_multiple_dates() -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
@@ -43,7 +41,6 @@ async def test_get_list_multiple_dates() -> None:
     assert sorted(df["Date"].unique().to_list()) == expected
 
 
-@pytest.mark.asyncio
 async def test_get_list_without_dates() -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
@@ -51,7 +48,6 @@ async def test_get_list_without_dates() -> None:
     assert df.width == 25
 
 
-@pytest.mark.asyncio
 async def test_get_documents_csv() -> None:
     from kabukit.sources.edinet.concurrent import get_documents, get_list
 
@@ -61,7 +57,6 @@ async def test_get_documents_csv() -> None:
     assert df["DocumentId"].n_unique() == 10
 
 
-@pytest.mark.asyncio
 async def test_get_documents_pdf() -> None:
     from kabukit.sources.edinet.concurrent import get_documents, get_list
 
@@ -75,7 +70,6 @@ async def test_get_documents_pdf() -> None:
         assert pdf.startswith(b"%PDF-")
 
 
-@pytest.mark.asyncio
 async def test_get_documents_single_doc_id() -> None:
     from kabukit.sources.edinet.concurrent import get_documents, get_list
 
@@ -87,7 +81,6 @@ async def test_get_documents_single_doc_id() -> None:
     assert df.item(0, "DocumentId") == doc_id
 
 
-@pytest.mark.asyncio
 async def test_get_documents_invalid_id_raises_error() -> None:
     from kabukit.sources.edinet.concurrent import get_documents
 

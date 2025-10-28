@@ -18,7 +18,6 @@ def test_dates(dates: list[datetime.date]) -> None:
     assert len(dates) >= 28
 
 
-@pytest.mark.asyncio
 async def test_iter_pages(client: TdnetClient, date: datetime.date) -> None:
     index = 0
 

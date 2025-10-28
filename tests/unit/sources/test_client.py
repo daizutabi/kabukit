@@ -13,7 +13,6 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.asyncio
 async def test_async_with() -> None:
     from kabukit.sources.client import Client
 
@@ -23,7 +22,6 @@ async def test_async_with() -> None:
     assert client.client.is_closed
 
 
-@pytest.mark.asyncio
 async def test_get_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     from kabukit.sources.client import Client
 
@@ -39,7 +37,6 @@ async def test_get_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     expected_response.raise_for_status.assert_called_once()
 
 
-@pytest.mark.asyncio
 async def test_get_failure(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     from kabukit.sources.client import Client
 
@@ -61,7 +58,6 @@ async def test_get_failure(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     error_response.raise_for_status.assert_called_once()
 
 
-@pytest.mark.asyncio
 async def test_get_retries_on_failure(
     mock_get: AsyncMock,
     mocker: MockerFixture,
@@ -84,7 +80,6 @@ async def test_get_retries_on_failure(
     assert mock_sleep.call_count == 2
 
 
-@pytest.mark.asyncio
 async def test_get_fails_after_retries(
     mock_get: AsyncMock,
     mocker: MockerFixture,

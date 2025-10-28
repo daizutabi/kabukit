@@ -13,7 +13,6 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("use_executor", [True, False])
 async def test_get_quote(mocker: MockerFixture, *, use_executor: bool) -> None:
     text = """\

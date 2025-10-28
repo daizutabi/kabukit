@@ -16,7 +16,6 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.asyncio
 async def test_get_info(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"info": [{"Date": "2023-01-01", "Code": "7203"}]}
     response = Response(200, json=json)
@@ -29,7 +28,6 @@ async def test_get_info(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     assert df["Code"].to_list() == ["7203"]
 
 
-@pytest.mark.asyncio
 async def test_get_info_only_common_stocks(
     mock_get: AsyncMock,
     mocker: MockerFixture,

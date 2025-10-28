@@ -11,19 +11,16 @@ from kabukit.sources.jquants.client import JQuantsClient
 pytestmark = pytest.mark.system
 
 
-@pytest.mark.asyncio
 async def test_code(client: JQuantsClient) -> None:
     df = await client.get_statements(code="7203")
     assert df.width == 105
 
 
-@pytest.mark.asyncio
 async def test_date(client: JQuantsClient) -> None:
     df = await client.get_statements(date="2025-08-29")
     assert df.height == 18
 
 
-@pytest.mark.asyncio
 async def test_empty(client: JQuantsClient) -> None:
     df = await client.get_statements(date="2025-08-30")
     assert df.shape == (0, 0)
@@ -71,7 +68,6 @@ def test_rename(df: pl.DataFrame) -> None:
     assert df_renamed.columns == [c.value for c in StatementColumns]
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("prefix", ["1Q", "2Q", "3Q", "FY"])
 async def test_column_names(prefix: str) -> None:
     async with JQuantsClient() as client:
