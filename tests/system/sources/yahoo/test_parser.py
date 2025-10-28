@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 from typing import TYPE_CHECKING
 
 import pytest
@@ -82,3 +83,60 @@ def test_state_keys(state: dict[str, Any], key: str) -> None:
 #         print(k, v, v is None)
 
 #     pytest.fail("debug")
+
+
+@pytest.fixture(scope="module")
+def press_release(state: dict[str, Any]):
+    from kabukit.sources.yahoo.parser import iter_press_release
+
+    return dict(iter_press_release(state))
+
+
+def test_press_release_len(press_release: dict[str, Any]) -> None:
+    assert len(press_release) == 3
+
+
+@pytest.mark.parametrize(
+    ("key", "type_"),
+    [
+        ("PressReleaseSummary", str),
+        ("PressReleaseDisclosedDate", datetime.date),
+        ("PressReleaseDisclosedTime", datetime.time),
+    ],
+)
+def test_press_release_type(
+    press_release: dict[str, Any],
+    key: str,
+    type_: type,
+) -> None:
+    assert isinstance(press_release[key], type_)
+
+
+@pytest.fixture(scope="module")
+def performance(state: dict[str, Any]):
+    from kabukit.sources.yahoo.parser import iter_performance
+
+    return dict(iter_performance(state))
+
+
+def test_performance_len(performance: dict[str, Any]) -> None:
+    assert len(performance) == 6
+
+
+@pytest.mark.parametrize(
+    ("key", "type_"),
+    [
+        ("PerformanceSummary", str),
+        ("PerformancePotential", str),
+        ("PerformanceStability", str),
+        ("PerformanceProfitability", str),
+        ("PerformanceUpdateDate", datetime.date),
+        ("PerformanceUpdateTime", datetime.time),
+    ],
+)
+def test_performance_type(
+    performance: dict[str, Any],
+    key: str,
+    type_: type,
+) -> None:
+    assert isinstance(performance[key], type_)
