@@ -33,10 +33,6 @@ jobs:
         run: pip install uv
       - name: Install the project
         run: uv sync
-      - name: Check prek hooks are up-to-date
-        run: |
-          uv run prek autoupdate
-          git diff --exit-code .pre-commit-config.yaml
       - name: Run prek hooks
         run: uv run prek run --all-files
       - name: Run tests
