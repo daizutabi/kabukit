@@ -11,7 +11,6 @@ from kabukit.sources.edinet.client import EdinetClient
 pytestmark = pytest.mark.system
 
 
-@pytest.mark.asyncio
 async def test_list(client: EdinetClient) -> None:
     df = await client.get_list("2025-09-04")
     assert df.shape == (76, 25)
@@ -22,13 +21,11 @@ async def test_list(client: EdinetClient) -> None:
     assert df["FileDate"].unique().to_list() == [datetime.date(2025, 9, 4)]
 
 
-@pytest.mark.asyncio
 async def test_list_invalid_date(client: EdinetClient) -> None:
     df = await client.get_list("1000-01-01")
     assert df.shape == (0, 0)
 
 
-@pytest.mark.asyncio
 async def test_list_holiday(client: EdinetClient) -> None:
     df = await client.get_list("2025-09-23")
     assert df.shape == (0, 0)

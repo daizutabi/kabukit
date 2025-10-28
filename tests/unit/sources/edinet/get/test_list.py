@@ -18,7 +18,6 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.asyncio
 async def test_get_list_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     results = [{"docID": "S100TEST"}]
     json = {"results": results}
@@ -46,7 +45,6 @@ async def test_get_list_success(mock_get: AsyncMock, mocker: MockerFixture) -> N
     mock_with_date.assert_called_once()
 
 
-@pytest.mark.asyncio
 async def test_get_list_no_results(
     mock_get: AsyncMock,
     mocker: MockerFixture,
@@ -62,7 +60,6 @@ async def test_get_list_no_results(
     assert df.is_empty()
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("transform", [True, False])
 async def test_get_list_empty_results(
     mock_get: AsyncMock,
@@ -80,7 +77,6 @@ async def test_get_list_empty_results(
     assert df.is_empty()
 
 
-@pytest.mark.asyncio
 async def test_get_list_empty_results_by_transform(
     mock_get: AsyncMock,
     mocker: MockerFixture,

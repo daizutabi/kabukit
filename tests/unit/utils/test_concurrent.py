@@ -21,14 +21,12 @@ async def sleep(seconds: list[float]):
         yield await i
 
 
-@pytest.mark.asyncio
 async def test_sleep() -> None:
     ait = sleep([0.03, 0.02, 0.01])
     result = [s async for s in ait]
     assert result == [0.01, 0.02, 0.03]
 
 
-@pytest.mark.asyncio
 async def test_collect() -> None:
     from kabukit.utils.concurrent import collect
 
@@ -38,7 +36,6 @@ async def test_collect() -> None:
     assert sorted(result) == [0.01, 0.02, 0.03]
 
 
-@pytest.mark.asyncio
 async def test_collect_fn() -> None:
     from kabukit.utils.concurrent import collect_fn
 
@@ -55,7 +52,6 @@ async def sleep_df(second: float) -> pl.DataFrame:
     return pl.DataFrame({"a": [second]})
 
 
-@pytest.mark.asyncio
 async def test_concat() -> None:
     from kabukit.utils.concurrent import concat
 
@@ -64,7 +60,6 @@ async def test_concat() -> None:
     assert df.sort("a").to_series().to_list() == [0.01, 0.02, 0.03]
 
 
-@pytest.mark.asyncio
 async def test_concat_fn() -> None:
     from kabukit.utils.concurrent import concat_fn
 
@@ -78,7 +73,6 @@ class MockClient(Client):
         return pl.DataFrame({"Code": [code]})
 
 
-@pytest.mark.asyncio
 async def test_stream() -> None:
     from kabukit.utils.concurrent import get_stream
 
@@ -89,7 +83,6 @@ async def test_stream() -> None:
         assert sorted(df["Code"].to_list() for df in dfs) == [[1], [2], [3]]
 
 
-@pytest.mark.asyncio
 async def test_get() -> None:
     from kabukit.utils.concurrent import get
 
@@ -105,7 +98,6 @@ async def progress(
         yield x.with_columns(pl.col("Code") * total)
 
 
-@pytest.mark.asyncio
 async def test_get_progress() -> None:
     from kabukit.utils.concurrent import get
 
@@ -117,7 +109,6 @@ def callback(df: pl.DataFrame) -> pl.DataFrame:
     return df.with_columns(pl.col("Code") * 10)
 
 
-@pytest.mark.asyncio
 async def test_get_callback() -> None:
     from kabukit.utils.concurrent import get
 
@@ -125,7 +116,6 @@ async def test_get_callback() -> None:
     assert df["Code"].sort().to_list() == [10, 20, 30]
 
 
-@pytest.mark.asyncio
 async def test_get_with_max_items() -> None:
     from kabukit.utils.concurrent import get
 

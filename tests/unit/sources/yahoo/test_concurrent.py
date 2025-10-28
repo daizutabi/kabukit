@@ -15,7 +15,6 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.asyncio
 async def test_get_quote_single_code(mocker: MockerFixture) -> None:
     mock_df = pl.DataFrame({"Code": [1]})
     mock_get_quote_method = mocker.AsyncMock(return_value=mock_df)
@@ -27,7 +26,6 @@ async def test_get_quote_single_code(mocker: MockerFixture) -> None:
     assert_frame_equal(result, mock_df)
 
 
-@pytest.mark.asyncio
 async def test_get_quote_multiple_codes(mocker: MockerFixture) -> None:
     mock_df = pl.DataFrame({"Code": [3, 2, 1]})
     mock_concurrent_get = mocker.AsyncMock(return_value=mock_df)
@@ -51,7 +49,6 @@ async def test_get_quote_multiple_codes(mocker: MockerFixture) -> None:
     assert_frame_equal(result, mock_df.sort("Code"))
 
 
-@pytest.mark.asyncio
 async def test_get_quote_no_codes_specified(mocker: MockerFixture) -> None:
     codes = ["1", "2", "3"]
     mock_get_target_codes = mocker.AsyncMock(return_value=codes)

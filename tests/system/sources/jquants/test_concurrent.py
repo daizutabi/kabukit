@@ -8,7 +8,6 @@ import pytest
 pytestmark = pytest.mark.system
 
 
-@pytest.mark.asyncio
 async def test_get_calender() -> None:
     from kabukit.sources.jquants.concurrent import get_calendar
 
@@ -17,7 +16,6 @@ async def test_get_calender() -> None:
     assert datetime.date(2026, 12, 31) in df["Date"]
 
 
-@pytest.mark.asyncio
 async def test_get_info() -> None:
     from kabukit.sources.jquants.concurrent import get_info
 
@@ -27,7 +25,6 @@ async def test_get_info() -> None:
     assert "99840" in df["Code"]
 
 
-@pytest.mark.asyncio
 async def test_get_info_with_code() -> None:
     from kabukit.sources.jquants.concurrent import get_info
 
@@ -36,7 +33,6 @@ async def test_get_info_with_code() -> None:
     assert df.height == 1
 
 
-@pytest.mark.asyncio
 async def test_get_info_with_date() -> None:
     from kabukit.sources.jquants.concurrent import get_info
 
@@ -46,7 +42,6 @@ async def test_get_info_with_date() -> None:
     assert "99840" in df["Code"]
 
 
-@pytest.mark.asyncio
 async def test_get_info_with_code_date() -> None:
     from kabukit.sources.jquants.concurrent import get_info
 
@@ -56,7 +51,6 @@ async def test_get_info_with_code_date() -> None:
     assert df.height == 1
 
 
-@pytest.mark.asyncio
 async def test_get_target_codes() -> None:
     from kabukit.sources.jquants.concurrent import get_target_codes
 
@@ -65,7 +59,6 @@ async def test_get_target_codes() -> None:
     assert "99840" in codes
 
 
-@pytest.mark.asyncio
 async def test_get_target_codes_all_ends_with_zero() -> None:
     from kabukit.sources.jquants.concurrent import get_target_codes
 
@@ -73,7 +66,6 @@ async def test_get_target_codes_all_ends_with_zero() -> None:
     assert all(code.endswith("0") for code in codes)
 
 
-@pytest.mark.asyncio
 async def test_get_statements() -> None:
     from kabukit.sources.jquants.concurrent import get_statements
 
@@ -81,7 +73,6 @@ async def test_get_statements() -> None:
     assert df["Code"].n_unique() == 3
 
 
-@pytest.mark.asyncio
 async def test_get_statements_with_code() -> None:
     from kabukit.sources.jquants.concurrent import get_statements
 
@@ -90,7 +81,6 @@ async def test_get_statements_with_code() -> None:
     assert df["Code"].unique().to_list() == ["72030"]
 
 
-@pytest.mark.asyncio
 async def test_get_statements_with_date() -> None:
     from kabukit.sources.jquants.concurrent import get_statements
 
@@ -104,7 +94,6 @@ async def test_get_statements_with_date() -> None:
     assert "99140" in df["Code"]
 
 
-@pytest.mark.asyncio
 async def test_get_statements_with_codes() -> None:
     from kabukit.sources.jquants.concurrent import get_statements
 
@@ -112,7 +101,6 @@ async def test_get_statements_with_codes() -> None:
     assert sorted(df["Code"].unique()) == ["67580", "72030"]
 
 
-@pytest.mark.asyncio
 async def test_get_statements_with_max_items() -> None:
     from kabukit.sources.jquants.concurrent import get_statements
 
@@ -120,7 +108,6 @@ async def test_get_statements_with_max_items() -> None:
     assert df["Code"].unique().to_list() == ["72030"]
 
 
-@pytest.mark.asyncio
 async def test_get_prices() -> None:
     from kabukit.sources.jquants.concurrent import get_prices
 
@@ -128,7 +115,6 @@ async def test_get_prices() -> None:
     assert df["Code"].n_unique() == 3
 
 
-@pytest.mark.asyncio
 async def test_get_prices_with_code() -> None:
     from kabukit.sources.jquants.concurrent import get_prices
 
@@ -137,7 +123,6 @@ async def test_get_prices_with_code() -> None:
     assert df["Date"].n_unique() > 2000
 
 
-@pytest.mark.asyncio
 async def test_get_prices_with_date() -> None:
     from kabukit.sources.jquants.concurrent import get_prices
 
@@ -146,7 +131,6 @@ async def test_get_prices_with_date() -> None:
     assert df["Code"].n_unique() > 3000
 
 
-@pytest.mark.asyncio
 async def test_get_prices_with_codes() -> None:
     from kabukit.sources.jquants.concurrent import get_prices
 
@@ -154,7 +138,6 @@ async def test_get_prices_with_codes() -> None:
     assert sorted(df["Code"].unique()) == ["67580", "72030"]
 
 
-@pytest.mark.asyncio
 async def test_get_prices_with_max_items() -> None:
     from kabukit.sources.jquants.concurrent import get_prices
 

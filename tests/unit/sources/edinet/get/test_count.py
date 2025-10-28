@@ -15,7 +15,6 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.asyncio
 async def test_get_count_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"metadata": {"status": "200", "resultset": {"count": 123}}}
     response = Response(200, json=json)
@@ -32,7 +31,6 @@ async def test_get_count_success(mock_get: AsyncMock, mocker: MockerFixture) -> 
     )
 
 
-@pytest.mark.asyncio
 async def test_get_count_fail(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"metadata": {"status": "404", "message": "error"}}
     response = Response(200, json=json)

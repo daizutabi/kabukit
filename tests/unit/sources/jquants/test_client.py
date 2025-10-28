@@ -30,7 +30,6 @@ def test_set_id_token_none(mocker: MockerFixture) -> None:
     mock_get_config_value.assert_called_once_with(AuthKey.ID_TOKEN)
 
 
-@pytest.mark.asyncio
 async def test_post_success(mock_post: AsyncMock, mocker: MockerFixture) -> None:
     json = {"message": "success"}
     expected_response = Response(200, json=json)
@@ -45,7 +44,6 @@ async def test_post_success(mock_post: AsyncMock, mocker: MockerFixture) -> None
     expected_response.raise_for_status.assert_called_once()
 
 
-@pytest.mark.asyncio
 async def test_post_failure(mock_post: AsyncMock, mocker: MockerFixture) -> None:
     error_response = Response(400)
     mock_post.return_value = error_response
@@ -65,8 +63,7 @@ async def test_post_failure(mock_post: AsyncMock, mocker: MockerFixture) -> None
     error_response.raise_for_status.assert_called_once()
 
 
-# @pytest.mark.asyncio
-# async def test_get_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+# # async def test_get_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
 #     json = {"message": "success"}
 #     expected_response = Response(200, json=json)
 #     mock_get.return_value = expected_response
@@ -80,8 +77,7 @@ async def test_post_failure(mock_post: AsyncMock, mocker: MockerFixture) -> None
 #     expected_response.raise_for_status.assert_called_once()
 
 
-# @pytest.mark.asyncio
-# async def test_get_failure(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+# # async def test_get_failure(mock_get: AsyncMock, mocker: MockerFixture) -> None:
 #     error_response = Response(400)
 #     mock_get.return_value = error_response
 #     error_response.raise_for_status = mocker.MagicMock(

@@ -12,7 +12,6 @@ from kabukit.sources.jquants.client import JQuantsClient
 pytestmark = pytest.mark.system
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("only_common_stocks", [True, False])
 async def test_date(client: JQuantsClient, *, only_common_stocks: bool) -> None:
     today = datetime.datetime.now(ZoneInfo("Asia/Tokyo")).date()
@@ -25,7 +24,6 @@ async def test_date(client: JQuantsClient, *, only_common_stocks: bool) -> None:
     assert (df_date - date).days <= 7
 
 
-@pytest.mark.asyncio
 async def test_code(client: JQuantsClient) -> None:
     df = await client.get_info(code="7203")
     assert df.height == 1

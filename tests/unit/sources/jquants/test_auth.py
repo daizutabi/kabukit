@@ -15,7 +15,6 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.asyncio
 async def test_auth_returns_token(
     mock_post: AsyncMock,
     mocker: MockerFixture,
@@ -37,7 +36,6 @@ async def test_auth_returns_token(
     assert client.client.headers["Authorization"] == "Bearer test_id_token"
 
 
-@pytest.mark.asyncio
 async def test_auth_value_error_missing_mailaddress(mocker: MockerFixture) -> None:
     def side_effect(key: str) -> str | None:
         if key == AuthKey.PASSWORD:
@@ -54,7 +52,6 @@ async def test_auth_value_error_missing_mailaddress(mocker: MockerFixture) -> No
         await client.auth(password="test_pass")  # noqa: S106
 
 
-@pytest.mark.asyncio
 async def test_auth_value_error_missing_password(mocker: MockerFixture) -> None:
     def side_effect(key: str) -> str | None:
         if key == AuthKey.MAILADDRESS:
@@ -71,7 +68,6 @@ async def test_auth_value_error_missing_password(mocker: MockerFixture) -> None:
         await client.auth(mailaddress="test@example.com")
 
 
-@pytest.mark.asyncio
 async def test_auth_success_with_config_mailaddress(
     mock_post: AsyncMock,
     mocker: MockerFixture,
@@ -103,7 +99,6 @@ async def test_auth_success_with_config_mailaddress(
     )
 
 
-@pytest.mark.asyncio
 async def test_auth_success_with_config_password(
     mock_post: AsyncMock,
     mocker: MockerFixture,
@@ -135,7 +130,6 @@ async def test_auth_success_with_config_password(
     )
 
 
-@pytest.mark.asyncio
 async def test_auth_http_status_error_auth_user(
     mock_post: AsyncMock,
     mocker: MockerFixture,
@@ -156,7 +150,6 @@ async def test_auth_http_status_error_auth_user(
         await client.auth("test@example.com", "password")
 
 
-@pytest.mark.asyncio
 async def test_auth_http_status_error_auth_refresh(
     mock_post: AsyncMock,
     mocker: MockerFixture,
@@ -180,7 +173,6 @@ async def test_auth_http_status_error_auth_refresh(
         await client.auth("test@example.com", "password")
 
 
-@pytest.mark.asyncio
 async def test_auth_set_id_token_called(
     mock_post: AsyncMock,
     mocker: MockerFixture,
@@ -202,7 +194,6 @@ async def test_auth_set_id_token_called(
     set_id_token_spy.assert_called_once_with("expected_id_token")
 
 
-@pytest.mark.asyncio
 async def test_iter_pages(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     def side_effect(_url: str, params: dict[str, str]) -> Response:
         if "pagination_key" not in params:

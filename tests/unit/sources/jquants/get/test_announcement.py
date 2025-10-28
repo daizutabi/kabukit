@@ -17,7 +17,6 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.asyncio
 async def test_get_announcement(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json = {"announcement": [{"Date": "2025-01-01"}]}
     response = Response(200, json=json)
@@ -29,7 +28,6 @@ async def test_get_announcement(mock_get: AsyncMock, mocker: MockerFixture) -> N
     assert df["Date"].to_list() == [datetime.date(2025, 1, 1)]
 
 
-@pytest.mark.asyncio
 async def test_empty(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     json: dict[str, list[dict[str, str]]] = {"announcement": []}
     response = Response(200, json=json)
