@@ -11,7 +11,10 @@ if TYPE_CHECKING:
 
 
 def transform_list(df: pl.DataFrame, date: str | datetime.date) -> pl.DataFrame:
-    df = filter_list(df)
+    df = df.filter(
+        pl.col("secCode").is_not_null(),
+        pl.col("fundCode").is_null(),
+    )
 
     if df.is_empty():
         return pl.DataFrame()
@@ -44,13 +47,6 @@ def transform_list(df: pl.DataFrame, date: str | datetime.date) -> pl.DataFrame:
         )
         .drop("SubmittedDateTime")
         .select("Code", "^Submitted.+$", pl.exclude("Code", "^Submitted.+$"))
-    )
-
-
-def filter_list(df: pl.DataFrame) -> pl.DataFrame:
-    return df.filter(
-        pl.col("secCode").is_not_null(),
-        pl.col("fundCode").is_null(),
     )
 
 
