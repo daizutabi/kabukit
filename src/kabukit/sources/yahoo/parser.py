@@ -88,7 +88,7 @@ def iter_performance(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
 
 
 def _parse_datetime(date_str: str) -> tuple[datetime.date, datetime.time]:
-    """Yahoo Financeの日付/時刻文字列を解釈する。"""
+    """日付/時刻文字列を解釈する。"""
     if "/" in date_str:
         # "10/29" のような日付形式の場合
         return parse_month_day(date_str), datetime.time(15, 30)  # 取引終了時刻を想定
