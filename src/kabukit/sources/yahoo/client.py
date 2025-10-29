@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import asyncio
-
 import polars as pl
 
 from kabukit.sources.client import Client
@@ -24,12 +22,7 @@ class YahooClient(Client):
     def __init__(self) -> None:
         super().__init__(BASE_URL)
 
-    async def get_quote(
-        self,
-        code: str,
-        *,
-        use_executor: bool = False,
-    ) -> pl.DataFrame:
+    async def get_quote(self, code: str) -> pl.DataFrame:
         """銘柄の株価、指標などの市場情報をYahooファイナンスから取得する。
 
         リアルタイムの株価、四本値、出来高に加え、PERやPBR、配当利回り
@@ -37,19 +30,13 @@ class YahooClient(Client):
 
         Args:
             code: 情報を取得する銘柄コード。
-            use_executor: Trueの場合、別スレッドでパース処理を実行し、
-                イベントループのブロッキングを防ぎます。デフォルトはFalse。
 
         Returns:
             polars.DataFrame: 銘柄の市場情報を含むDataFrame。
         """
         response = await self.get(f"{code[:4]}.T")
 
-        if use_executor:
-            loop = asyncio.get_running_loop()
-            df = await loop.run_in_executor(None, parse, response.text)
-        else:
-            df = parse(response.text)
+        df = parse(response.text)
 
         if df.is_empty():
             return pl.DataFrame()
