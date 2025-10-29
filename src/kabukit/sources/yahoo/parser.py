@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import datetime
 import json
 import re
 from typing import TYPE_CHECKING
@@ -9,7 +8,6 @@ import polars as pl
 from bs4 import BeautifulSoup, Tag
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
     from typing import Any
 
 
@@ -67,42 +65,42 @@ def parse(text: str) -> pl.DataFrame:
 #             yield f"{prefix}{key}", value
 
 
-def iter_press_release(
-    state: dict[str, Any],
-) -> Iterator[tuple[str, Any]]:
-    """状態辞書の mainStocksPressReleaseSummary セクションの主な値を生成する。
+# def iter_press_release(
+#     state: dict[str, Any],
+# ) -> Iterator[tuple[str, Any]]:
+#     """状態辞書の mainStocksPressReleaseSummary セクションの主な値を生成する。
 
-    Args:
-        state (dict[str, Any]): 状態辞書。
+#     Args:
+#         state (dict[str, Any]): 状態辞書。
 
-    Yields:
-        tuple[str, Any]: mainStocksPressReleaseSummary セクション内の主な値。
-    """
-    summary: dict[str, Any] = state["mainStocksPressReleaseSummary"]
+#     Yields:
+#         tuple[str, Any]: mainStocksPressReleaseSummary セクション内の主な値。
+#     """
+#     summary: dict[str, Any] = state["mainStocksPressReleaseSummary"]
 
-    yield "PressReleaseSummary", summary["summary"]
-    disclosed_datetime = datetime.datetime.fromisoformat(summary["disclosedTime"])
-    yield "PressReleaseDisclosedDate", disclosed_datetime.date()
-    yield "PressReleaseDisclosedTime", disclosed_datetime.time()
+#     yield "PressReleaseSummary", summary["summary"]
+#     disclosed_datetime = datetime.datetime.fromisoformat(summary["disclosedTime"])
+#     yield "PressReleaseDisclosedDate", disclosed_datetime.date()
+#     yield "PressReleaseDisclosedTime", disclosed_datetime.time()
 
 
-def iter_performance(
-    state: dict[str, Any],
-) -> Iterator[tuple[str, Any]]:
-    """状態辞書の stockPerformance セクションの主な値を生成する。
+# def iter_performance(
+#     state: dict[str, Any],
+# ) -> Iterator[tuple[str, Any]]:
+#     """状態辞書の stockPerformance セクションの主な値を生成する。
 
-    Args:
-        state (dict[str, Any]): 状態辞書。
+#     Args:
+#         state (dict[str, Any]): 状態辞書。
 
-    Yields:
-        tuple[str, Any]: stockPerformance セクション内の主な値。
-    """
-    info: dict[str, Any] = state["stockPerformance"]["summaryInfo"]
+#     Yields:
+#         tuple[str, Any]: stockPerformance セクション内の主な値。
+#     """
+#     info: dict[str, Any] = state["stockPerformance"]["summaryInfo"]
 
-    yield "PerformanceSummary", info["summary"]
-    yield "PerformancePotential", info["potential"]
-    yield "PerformanceStability", info["stability"]
-    yield "PerformanceProfitability", info["profitability"]
-    update_datetime = datetime.datetime.fromisoformat(info["updateTime"])
-    yield "PerformanceUpdateDate", update_datetime.date()
-    yield "PerformanceUpdateTime", update_datetime.time()
+#     yield "PerformanceSummary", info["summary"]
+#     yield "PerformancePotential", info["potential"]
+#     yield "PerformanceStability", info["stability"]
+#     yield "PerformanceProfitability", info["profitability"]
+#     update_datetime = datetime.datetime.fromisoformat(info["updateTime"])
+#     yield "PerformanceUpdateDate", update_datetime.date()
+#     yield "PerformanceUpdateTime", update_datetime.time()

@@ -7,7 +7,6 @@ Python API 提供します。
 
 - [J-Quants API](https://jpx-jquants.com/)
 - [EDINET API](https://disclosure2dl.edinet-fsa.go.jp/guide/static/disclosure/WZEK0110.html)
-- [TDnet](https://www.release.tdnet.info/inbs/I_main_00.html)
 
 ## ノートブックでの非同期処理
 
