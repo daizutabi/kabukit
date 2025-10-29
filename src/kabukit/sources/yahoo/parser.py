@@ -41,6 +41,16 @@ def get_preloaded_state(text: str) -> dict[str, Any]:
     return json.loads(match.group(1))
 
 
+def _parse_datetime(date_str: str) -> tuple[datetime.date, datetime.time]:
+    """日付/時刻文字列を解釈する。"""
+    if "/" in date_str:
+        # "10/29" のような日付形式の場合
+        return parse_month_day(date_str), datetime.time(15, 30)  # 取引終了時刻を想定
+
+    # "14:45" のような時刻形式の場合
+    return today(), parse_time(date_str)
+
+
 def parse_quote(text: str) -> pl.DataFrame:
     state = get_preloaded_state(text)
 
@@ -48,6 +58,26 @@ def parse_quote(text: str) -> pl.DataFrame:
         return pl.DataFrame()
 
     return pl.DataFrame({"text": [text]})
+
+
+def iter_price(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
+    """状態辞書から最新の株価を生成する。
+
+    Args:
+        state (dict[str, Any]): 状態辞書。
+
+    Yields:
+        tuple[str, Any]: 最新の株価と日時。
+    """
+    detail: dict[str, Any] = state["mainStocksDetail"]["detail"]
+
+    yield "PreviousPrice", float(detail["previousPrice"].replace(",", ""))
+
+    date_str = detail["previousPriceDate"]
+    date, time = _parse_datetime(date_str)
+
+    yield "PreviousPriceDate", date
+    yield "PreviousPriceTime", time
 
 
 def iter_press_release(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
@@ -85,33 +115,3 @@ def iter_performance(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
     update_datetime = datetime.datetime.fromisoformat(info["updateTime"])
     yield "PerformanceUpdateDate", update_datetime.date()
     yield "PerformanceUpdateTime", update_datetime.time()
-
-
-def _parse_datetime(date_str: str) -> tuple[datetime.date, datetime.time]:
-    """日付/時刻文字列を解釈する。"""
-    if "/" in date_str:
-        # "10/29" のような日付形式の場合
-        return parse_month_day(date_str), datetime.time(15, 30)  # 取引終了時刻を想定
-
-    # "14:45" のような時刻形式の場合
-    return today(), parse_time(date_str)
-
-
-def iter_price(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
-    """状態辞書から最新の株価を生成する。
-
-    Args:
-        state (dict[str, Any]): 状態辞書。
-
-    Yields:
-        tuple[str, Any]: 最新の株価と日時。
-    """
-    detail: dict[str, Any] = state["mainStocksDetail"]["detail"]
-
-    yield "PreviousPrice", float(detail["previousPrice"].replace(",", ""))
-
-    date_str = detail["previousPriceDate"]
-    date, time = _parse_datetime(date_str)
-
-    yield "PreviousPriceDate", date
-    yield "PreviousPriceTime", time
