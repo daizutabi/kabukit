@@ -37,7 +37,7 @@ def get_preloaded_state(text: str) -> dict[str, Any]:
     return json.loads(match.group(1))
 
 
-def parse(text: str) -> pl.DataFrame:
+def parse_quote(text: str) -> pl.DataFrame:
     state = get_preloaded_state(text)
 
     if not state:

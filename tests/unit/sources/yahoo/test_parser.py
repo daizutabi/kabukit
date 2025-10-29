@@ -30,21 +30,21 @@ def test_get_preloaded_state_no_tag() -> None:
     assert get_preloaded_state(text) == {}
 
 
-def test_parse() -> None:
-    from kabukit.sources.yahoo.parser import parse
+def test_parse_quote() -> None:
+    from kabukit.sources.yahoo.parser import parse_quote
 
     text = """\
         <script>
             window.__PRELOADED_STATE__ = {"key": "value"};
         </script>
     """
-    df = parse(text)
+    df = parse_quote(text)
     # assert df["Code"].unique().to_list() == ["12340"]
     assert not df.is_empty()
 
 
-def test_parse_empty() -> None:
-    from kabukit.sources.yahoo.parser import parse
+def test_parse_quote_empty() -> None:
+    from kabukit.sources.yahoo.parser import parse_quote
 
-    df = parse("")
+    df = parse_quote("")
     assert_frame_equal(df, pl.DataFrame())
