@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, Any
 
-from .datetime import strpdate
+from .datetime import parse_date
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -66,4 +66,4 @@ def get_code_date(
     if len(arg) in [4, 5]:
         return arg, None
 
-    return None, strpdate(arg)
+    return None, parse_date(arg)

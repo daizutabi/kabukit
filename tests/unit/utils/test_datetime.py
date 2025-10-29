@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import datetime
+from typing import TYPE_CHECKING
 
 import pytest
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 pytestmark = pytest.mark.unit
 
@@ -16,24 +20,37 @@ pytestmark = pytest.mark.unit
         ("20231015", None, datetime.date(2023, 10, 15)),
     ],
 )
-def test_strpdate(date_str: str, fmt: str | None, date: datetime.date) -> None:
-    from kabukit.utils.datetime import strpdate
+def test_parse_date(date_str: str, fmt: str | None, date: datetime.date) -> None:
+    from kabukit.utils.datetime import parse_date
 
-    assert strpdate(date_str, fmt) == date
+    assert parse_date(date_str, fmt) == date
+
+
+def test_parse_month_day(mocker: MockerFixture) -> None:
+    from kabukit.utils.datetime import parse_month_day
+
+    mocker.patch(
+        "kabukit.utils.datetime.today",
+        return_value=datetime.date(2024, 6, 15),
+    )
+
+    assert parse_month_day("6/14") == datetime.date(2024, 6, 14)
+    assert parse_month_day("6/15") == datetime.date(2024, 6, 15)
+    assert parse_month_day("6/16") == datetime.date(2023, 6, 16)
 
 
 @pytest.mark.parametrize(
-    ("time_str", "fmt", "date"),
+    ("time_str", "fmt", "time"),
     [
         ("01:01", "%H:%M", datetime.time(1, 1, 0)),
         ("23:49", None, datetime.time(23, 49, 0)),
         ("1030", "%H%M", datetime.time(10, 30, 0)),
     ],
 )
-def test_strptime(time_str: str, fmt: str | None, date: datetime.date) -> None:
-    from kabukit.utils.datetime import strptime
+def test_parse_time(time_str: str, fmt: str | None, time: datetime.time) -> None:
+    from kabukit.utils.datetime import parse_time
 
-    assert strptime(time_str, fmt) == date
+    assert parse_time(time_str, fmt) == time
 
 
 def test_today_date() -> None:

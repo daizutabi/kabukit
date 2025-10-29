@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from kabukit.utils.datetime import strpdate
+from kabukit.utils.datetime import parse_date
 
 if TYPE_CHECKING:
     import datetime
@@ -23,7 +23,7 @@ def transform_list(df: pl.DataFrame, date: str | datetime.date) -> pl.DataFrame:
 
     null_columns = [c for c in df.columns if df[c].dtype == pl.Null]
 
-    file_date = strpdate(date) if isinstance(date, str) else date
+    file_date = parse_date(date) if isinstance(date, str) else date
 
     return (
         df.with_columns(

@@ -5,7 +5,7 @@ from typing import Literal, overload
 from zoneinfo import ZoneInfo
 
 
-def strpdate(date_string: str, fmt: str | None = None, /) -> datetime.date:
+def parse_date(date_string: str, fmt: str | None = None, /) -> datetime.date:
     """文字列を日付オブジェクトに変換する。
 
     Args:
@@ -25,11 +25,31 @@ def strpdate(date_string: str, fmt: str | None = None, /) -> datetime.date:
     )
 
 
-def strptime(time_string: str, fmt: str | None = None, /) -> datetime.time:
+def parse_month_day(month_day_string: str, /) -> datetime.date:
+    """'月/日'の文字列を日付オブジェクトに変換する。
+
+    当日より未来の日付の場合、前年の日付として扱う。
+
+    Args:
+        month_day_string (str): 変換する日付文字列。
+
+    Returns:
+        datetime.date: 変換された日付オブジェクト。
+    """
+    ref = today()
+    date = parse_date(f"{ref.year}/{month_day_string}", "%Y/%m/%d")
+
+    if date > ref:
+        return date.replace(year=ref.year - 1)
+
+    return date
+
+
+def parse_time(time_string: str, fmt: str | None = None, /) -> datetime.time:
     """文字列を時刻オブジェクトに変換する。
 
     Args:
-        date_string (str): 変換する日時文字列。
+        time_string (str): 変換する日時文字列。
         fmt (str | None, optional): 日時文字列のフォーマット。
 
     Returns:
