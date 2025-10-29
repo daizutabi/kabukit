@@ -78,7 +78,7 @@ nav:
           - guides/api/index.md
           - J-Quants API: guides/api/jquants.md
           - EDINET API: guides/api/edinet.md
-          - TDnet: guides/api/tdnet.md
+          # - TDnet: guides/api/tdnet.md
       - キャッシュ: guides/cache.md
       - DataFrame: guides/dataframe.md
       - 日付の扱い: guides/date.md
