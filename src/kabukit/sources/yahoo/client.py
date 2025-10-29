@@ -4,7 +4,7 @@ import polars as pl
 
 from kabukit.sources.client import Client
 
-from .parsers import quote
+from .parser import parse_quote
 
 BASE_URL = "https://finance.yahoo.co.jp/quote"
 
@@ -36,7 +36,7 @@ class YahooClient(Client):
         """
         response = await self.get(f"{code[:4]}.T")
 
-        df = quote.parse(response.text)
+        df = parse_quote(response.text)
 
         if df.is_empty():
             return pl.DataFrame()
