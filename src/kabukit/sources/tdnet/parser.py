@@ -17,15 +17,15 @@ if TYPE_CHECKING:
 
 
 @cache
-def get_soup(html: str) -> BeautifulSoup:
-    return BeautifulSoup(html, "lxml")
+def get_soup(text: str) -> BeautifulSoup:
+    return BeautifulSoup(text, "lxml")
 
 
 DATE_PATTERN = re.compile(r"I_list_001_(\d{8})\.html")
 
 
-def iter_dates(html: str, /) -> Iterator[datetime.date]:
-    soup = get_soup(html)
+def iter_dates(text: str, /) -> Iterator[datetime.date]:
+    soup = get_soup(text)
     daylist = soup.find("select", attrs={"name": "daylist"})
 
     if not daylist:
@@ -40,8 +40,8 @@ def iter_dates(html: str, /) -> Iterator[datetime.date]:
 PAGER_PATTERN = re.compile(r"pagerLink\('I_list_(\d+)_\d+\.html'\)")
 
 
-def iter_page_numbers(html: str, /) -> Iterator[int]:
-    soup = get_soup(html)
+def iter_page_numbers(text: str, /) -> Iterator[int]:
+    soup = get_soup(text)
     div = soup.find("div", attrs={"id": "pager-box-top"})
 
     if div is None:
@@ -51,8 +51,8 @@ def iter_page_numbers(html: str, /) -> Iterator[int]:
         yield int(m.group(1))
 
 
-def parse_list(html: str, /) -> pl.DataFrame:
-    table = get_table(html)
+def parse_list(text: str, /) -> pl.DataFrame:
+    table = get_table(text)
 
     if table is None:
         return pl.DataFrame()
@@ -67,8 +67,8 @@ def parse_list(html: str, /) -> pl.DataFrame:
     )
 
 
-def get_table(html: str, /) -> Tag | None:
-    soup = get_soup(html)
+def get_table(text: str, /) -> Tag | None:
+    soup = get_soup(text)
     return soup.find("table", attrs={"id": "main-list-table"})
 
 

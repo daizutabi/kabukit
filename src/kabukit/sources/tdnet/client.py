@@ -68,13 +68,13 @@ class TdnetClient(Client):
             str: 各ページのHTMLコンテンツ。
         """
         try:
-            html = await self.get_page(date, index=1)
+            text = await self.get_page(date, index=1)
         except httpx.HTTPStatusError:
             return
 
-        yield html
+        yield text
 
-        for index in iter_page_numbers(html):
+        for index in iter_page_numbers(text):
             if index != 1:
                 yield await self.get_page(date, index)
 
