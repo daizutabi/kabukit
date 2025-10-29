@@ -1,0 +1,11 @@
+from __future__ import annotations
+
+import pytest_asyncio
+
+from kabukit.sources.jquants.client import JQuantsClient
+
+
+@pytest_asyncio.fixture
+async def client():
+    async with JQuantsClient("test_token") as client:
+        yield client
