@@ -192,29 +192,3 @@ async def test_auth_set_id_token_called(
     await client.auth("test@example.com", "password")
 
     set_id_token_spy.assert_called_once_with("expected_id_token")
-
-
-async def test_iter_pages(mock_get: AsyncMock, mocker: MockerFixture) -> None:
-    def side_effect(_url: str, params: dict[str, str]) -> Response:
-        if "pagination_key" not in params:
-            response = Response(
-                200,
-                json={
-                    "info": [{"Code": "1"}, {"Code": "2"}],
-                    "pagination_key": "2",
-                },
-            )
-        else:
-            response = Response(
-                200,
-                json={"info": [{"Code": "3"}, {"Code": "4"}]},
-            )
-        response.raise_for_status = mocker.MagicMock()
-        return response
-
-    mock_get.side_effect = side_effect
-
-    client = JQuantsClient("test_token")
-    dfs = [df async for df in client.iter_pages("/test", {}, "info")]
-    assert dfs[0]["Code"].to_list() == ["1", "2"]
-    assert dfs[1]["Code"].to_list() == ["3", "4"]
