@@ -37,6 +37,37 @@ def mock_get_past_dates(mocker: MockerFixture) -> MagicMock:
     return mocker.patch("kabukit.sources.edinet.concurrent.get_past_dates")
 
 
+@pytest.fixture
+def mock_edinet_client(mocker: MockerFixture) -> AsyncMock:
+    """EdinetClientの非同期コンテキストマネージャをモックするフィクスチャ"""
+    mock_client_instance = mocker.AsyncMock()
+    mocker.patch(
+        "kabukit.sources.edinet.concurrent.EdinetClient",
+        return_value=mocker.MagicMock(
+            __aenter__=mocker.AsyncMock(return_value=mock_client_instance),
+            __aexit__=mocker.AsyncMock(),
+        ),
+    )
+    return mock_client_instance
+
+
+async def test_get_list_single_date(mock_edinet_client: AsyncMock) -> None:
+    from kabukit.sources.edinet.concurrent import get_list
+
+    target_date = datetime.date(2025, 10, 10)
+    await get_list(target_date)
+
+    mock_edinet_client.get_list.assert_awaited_once_with(target_date)
+
+
+async def test_get_documents_single_doc_id(mock_edinet_client: AsyncMock) -> None:
+    from kabukit.sources.edinet.concurrent import get_documents
+
+    await get_documents("doc1", pdf=True)
+
+    mock_edinet_client.get_document.assert_awaited_once_with("doc1", pdf=True)
+
+
 async def test_get_list_days(
     mock_get_past_dates: MagicMock,
     mock_get: AsyncMock,
@@ -105,15 +136,6 @@ async def test_get_list_years(
     )
 
 
-async def test_get_list_single_date(mock_edinet_client: AsyncMock) -> None:
-    from kabukit.sources.edinet.concurrent import get_list
-
-    target_date = datetime.date(2025, 10, 10)
-    await get_list(target_date)
-
-    mock_edinet_client.get_list.assert_awaited_once_with(target_date)
-
-
 async def test_get_list_invalid_date(mock_get: AsyncMock) -> None:
     from kabukit.sources.edinet.concurrent import get_list
 
@@ -165,13 +187,3 @@ async def test_get_documents_pdf(mock_get: AsyncMock) -> None:
         progress=None,
         callback=None,
     )
-
-
-async def test_get_documents_single_doc_id(
-    mock_edinet_client: AsyncMock,
-) -> None:
-    from kabukit.sources.edinet.concurrent import get_documents
-
-    await get_documents("doc1", pdf=True)
-
-    mock_edinet_client.get_document.assert_awaited_once_with("doc1", pdf=True)
