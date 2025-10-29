@@ -4,7 +4,7 @@ import polars as pl
 
 from kabukit.sources.client import Client
 
-from .parser import parse
+from .parsers.parser import parse
 
 BASE_URL = "https://finance.yahoo.co.jp/quote"
 
