@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import polars as pl
 from bs4 import BeautifulSoup
 
-from kabukit.utils.datetime import strpdate, strptime
+from kabukit.utils.datetime import parse_date, parse_time
 
 if TYPE_CHECKING:
     import datetime
@@ -34,7 +34,7 @@ def iter_dates(text: str, /) -> Iterator[datetime.date]:
     for option in daylist.find_all("option"):
         value = option.get("value", "")
         if isinstance(value, str) and (m := DATE_PATTERN.search(value)):
-            yield strpdate(m.group(1))
+            yield parse_date(m.group(1))
 
 
 PAGER_PATTERN = re.compile(r"pagerLink\('I_list_(\d+)_\d+\.html'\)")
@@ -76,7 +76,7 @@ def iter_cells(tag: Tag, /) -> Iterator[tuple[str, datetime.time | str | None]]:
     tds = tag.find_all("td")
 
     yield "Code", tds[1].get_text(strip=True)
-    yield "DisclosedTime", strptime(tds[0].get_text(strip=True))
+    yield "DisclosedTime", parse_time(tds[0].get_text(strip=True))
     yield "Company", tds[2].get_text(strip=True)
     yield "Title", tds[3].get_text(strip=True)
     yield "PdfLink", get_link(tds[3])

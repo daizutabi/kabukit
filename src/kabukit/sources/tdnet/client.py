@@ -7,7 +7,7 @@ import polars as pl
 
 from kabukit.sources.client import Client
 from kabukit.sources.datetime import with_date
-from kabukit.utils.datetime import strpdate
+from kabukit.utils.datetime import parse_date
 
 from .parser import iter_dates, iter_page_numbers, parse_list
 from .transform import transform_list
@@ -88,7 +88,7 @@ class TdnetClient(Client):
             pl.DataFrame: 開示書類一覧を含むDataFrame。
         """
         if isinstance(date, str):
-            date = strpdate(date)
+            date = parse_date(date)
 
         items = [parse_list(page) async for page in self.iter_pages(date)]
         items = [item for item in items if not item.is_empty()]
