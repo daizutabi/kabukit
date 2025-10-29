@@ -18,6 +18,20 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture
+def mock_jquants_client(mocker: MockerFixture) -> AsyncMock:
+    """JQuantsClientの非同期コンテキストマネージャをモックするフィクスチャ"""
+    mock_client_instance = mocker.AsyncMock()
+    mocker.patch(
+        "kabukit.sources.jquants.concurrent.JQuantsClient",
+        return_value=mocker.MagicMock(
+            __aenter__=mocker.AsyncMock(return_value=mock_client_instance),
+            __aexit__=mocker.AsyncMock(),
+        ),
+    )
+    return mock_client_instance
+
+
 async def test_get_calendar(mock_jquants_client: AsyncMock) -> None:
     from kabukit.sources.jquants.concurrent import get_calendar
 
