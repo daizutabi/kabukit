@@ -79,8 +79,29 @@ def test_parse_quote_empty() -> None:
     assert_frame_equal(df, pl.DataFrame())
 
 
-def test_iter_prices() -> None:
+def test_iter_price() -> None:
     from kabukit.sources.yahoo.parser import iter_price
+    from kabukit.utils.datetime import today
+
+    state = {
+        "mainStocksPriceBoard": {
+            "priceBoard": {
+                "price": "1,000.5",
+                "priceDateTime": "14:30",
+            },
+        },
+    }
+
+    results = list(iter_price(state))
+    assert results == [
+        ("Price", 1000.5),
+        ("PriceDate", today()),
+        ("PriceTime", datetime.time(14, 30)),
+    ]
+
+
+def test_iter_previous_price() -> None:
+    from kabukit.sources.yahoo.parser import iter_previous_price
     from kabukit.utils.datetime import today
 
     state = {
@@ -92,7 +113,7 @@ def test_iter_prices() -> None:
         },
     }
 
-    results = list(iter_price(state))
+    results = list(iter_previous_price(state))
     assert results == [
         ("PreviousPrice", 1000.5),
         ("PreviousPriceDate", today()),

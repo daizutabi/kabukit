@@ -61,13 +61,33 @@ def parse_quote(text: str) -> pl.DataFrame:
 
 
 def iter_price(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
-    """状態辞書から最新の株価を生成する。
+    """状態辞書から現在の株価を生成する。
 
     Args:
         state (dict[str, Any]): 状態辞書。
 
     Yields:
-        tuple[str, Any]: 最新の株価と日時。
+        tuple[str, Any]: 現在の株価と日時。
+    """
+    detail: dict[str, Any] = state["mainStocksPriceBoard"]["priceBoard"]
+
+    yield "Price", float(detail["price"].replace(",", ""))
+
+    date_str = detail["priceDateTime"]
+    date, time = _parse_datetime(date_str)
+
+    yield "PriceDate", date
+    yield "PriceTime", time
+
+
+def iter_previous_price(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
+    """状態辞書から前日の株価を生成する。
+
+    Args:
+        state (dict[str, Any]): 状態辞書。
+
+    Yields:
+        tuple[str, Any]: 前日の株価と日時。
     """
     detail: dict[str, Any] = state["mainStocksDetail"]["detail"]
 
