@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock
 
 import pytest
-import tqdm.asyncio
 from typer.testing import CliRunner
 
 from kabukit.cli.app import app
+from kabukit.cli.get import CustomTqdm
 
 from .conftest import MOCK_DATE, MOCK_DATE_OBJ, MOCK_DF, MOCK_PATH
 
@@ -65,11 +65,7 @@ def test_get_tdnet_all(mock_get_tdnet: AsyncMock, mock_cache_write: MagicMock) -
     assert result.exit_code == 0
     assert f"書類一覧を '{MOCK_PATH}' に保存しました。" in result.stdout
 
-    mock_get_tdnet.assert_awaited_once_with(
-        None,
-        progress=tqdm.asyncio.tqdm,
-        max_items=None,
-    )
+    mock_get_tdnet.assert_awaited_once_with(None, progress=CustomTqdm, max_items=None)
     mock_cache_write.assert_called_once_with("tdnet", "list", MOCK_DF)
 
 
@@ -80,8 +76,4 @@ def test_get_tdnet_interrupt(mock_get_tdnet: AsyncMock) -> None:
 
     assert result.exit_code == 130
 
-    mock_get_tdnet.assert_awaited_once_with(
-        None,
-        progress=tqdm.asyncio.tqdm,
-        max_items=None,
-    )
+    mock_get_tdnet.assert_awaited_once_with(None, progress=CustomTqdm, max_items=None)

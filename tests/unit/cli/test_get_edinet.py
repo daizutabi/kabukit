@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock
 
 import pytest
-import tqdm.asyncio
 from typer.testing import CliRunner
 
 from kabukit.cli.app import app
+from kabukit.cli.get import CustomTqdm
 
 from .conftest import MOCK_DATE, MOCK_DATE_OBJ, MOCK_DF, MOCK_PATH
 
@@ -77,8 +77,8 @@ def test_get_edinet_all(
     mock_get_edinet.assert_awaited_once_with(
         None,
         years=10,
-        progress=tqdm.asyncio.tqdm,
         max_items=None,
+        progress=CustomTqdm,
     )
     mock_cache_write.assert_called_once_with("edinet", "list", MOCK_DF)
 
@@ -93,6 +93,6 @@ def test_get_edinet_interrupt(mock_get_edinet: AsyncMock) -> None:
     mock_get_edinet.assert_awaited_once_with(
         None,
         years=10,
-        progress=tqdm.asyncio.tqdm,
         max_items=None,
+        progress=CustomTqdm,
     )
