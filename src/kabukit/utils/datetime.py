@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import calendar
 import datetime
 from typing import Literal, overload
 from zoneinfo import ZoneInfo
@@ -23,6 +24,22 @@ def parse_date(date_string: str, fmt: str | None = None, /) -> datetime.date:
         .replace(tzinfo=ZoneInfo("Asia/Tokyo"))
         .date()
     )
+
+
+def parse_year_month(year_month_string: str, /) -> datetime.date:
+    """'年/月'の文字列を日付オブジェクトに変換する。
+
+    月末日を日付として扱う。
+
+     Args:
+         year_month_string (str): 変換する日付文字列。
+
+     Returns:
+         datetime.date: 変換された日付オブジェクト。
+    """
+    year, month = map(int, year_month_string.split("/"))
+    day = calendar.monthrange(year, month)[1]
+    return datetime.date(year, month, day)
 
 
 def parse_month_day(month_day_string: str, /) -> datetime.date:
