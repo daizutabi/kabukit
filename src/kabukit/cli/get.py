@@ -1,13 +1,20 @@
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Any
 
+import tqdm.asyncio
 import typer
 from async_typer import AsyncTyper
 from typer import Argument, Option
 
 # pyright: reportMissingTypeStubs=false
 # pyright: reportUnknownMemberType=false
+
+
+class CustomTqdm(tqdm.asyncio.tqdm):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        kwargs.setdefault("ncols", 80)
+        super().__init__(*args, **kwargs)
 
 
 def set_table() -> None:
@@ -84,8 +91,6 @@ async def statements(
     quiet: Quiet = False,
 ) -> None:
     """財務情報を取得します。"""
-    import tqdm.asyncio
-
     from kabukit.sources.jquants.concurrent import get_statements
     from kabukit.utils.cache import write
     from kabukit.utils.datetime import today
@@ -94,12 +99,10 @@ async def statements(
     if arg is None and not all_:
         arg = today(as_str=True)
 
-    progress = None if arg or quiet else tqdm.asyncio.tqdm
-
     df = await get_statements(
         *get_code_date(arg),
         max_items=max_items,
-        progress=progress,
+        progress=None if arg or quiet else CustomTqdm,
     )
 
     if not quiet:
@@ -120,8 +123,6 @@ async def prices(
     quiet: Quiet = False,
 ) -> None:
     """株価情報を取得します。"""
-    import tqdm.asyncio
-
     from kabukit.sources.jquants.concurrent import get_prices
     from kabukit.utils.cache import write
     from kabukit.utils.datetime import today
@@ -130,12 +131,10 @@ async def prices(
     if arg is None and not all_:
         arg = today(as_str=True)
 
-    progress = None if arg or quiet else tqdm.asyncio.tqdm
-
     df = await get_prices(
         *get_code_date(arg),
         max_items=max_items,
-        progress=progress,
+        progress=None if arg or quiet else CustomTqdm,
     )
 
     if not quiet:
@@ -177,8 +176,6 @@ async def edinet(
     quiet: Quiet = False,
 ) -> None:
     """EDINET APIから書類一覧を取得します。"""
-    import tqdm.asyncio
-
     from kabukit.sources.edinet.concurrent import get_list
     from kabukit.utils.cache import write
     from kabukit.utils.datetime import today
@@ -187,13 +184,11 @@ async def edinet(
     if date is None and not all_:
         date = today(as_str=True)
 
-    progress = None if date or quiet else tqdm.asyncio.tqdm
-
     df = await get_list(
         get_code_date(date)[1],
         years=10,
-        progress=progress,
         max_items=max_items,
+        progress=None if date or quiet else CustomTqdm,
     )
 
     if not quiet:
@@ -214,8 +209,6 @@ async def tdnet(
     quiet: Quiet = False,
 ) -> None:
     """TDnetから書類一覧を取得します。"""
-    import tqdm.asyncio
-
     from kabukit.sources.tdnet.concurrent import get_list
     from kabukit.utils.cache import write
     from kabukit.utils.datetime import today
@@ -224,12 +217,10 @@ async def tdnet(
     if date is None and not all_:
         date = today(as_str=True)
 
-    progress = None if date or quiet else tqdm.asyncio.tqdm
-
     df = await get_list(
         get_code_date(date)[1],
-        progress=progress,
         max_items=max_items,
+        progress=None if date or quiet else CustomTqdm,
     )
 
     if not quiet:
@@ -250,8 +241,6 @@ async def yahoo(
     quiet: Quiet = False,
 ) -> None:
     """Yahooファイナンスから情報を取得します。"""
-    import tqdm.asyncio
-
     from kabukit.sources.yahoo.concurrent import get_quote
     from kabukit.utils.cache import write
 
@@ -259,9 +248,11 @@ async def yahoo(
         typer.echo("銘柄コードか --all オプションを指定してください。")
         raise typer.Exit(1)
 
-    progress = None if code or quiet else tqdm.asyncio.tqdm
-
-    df = await get_quote(code, progress=progress, max_items=max_items)
+    df = await get_quote(
+        code,
+        max_items=max_items,
+        progress=None if code or quiet else CustomTqdm,
+    )
 
     if not quiet:
         typer.echo(df)

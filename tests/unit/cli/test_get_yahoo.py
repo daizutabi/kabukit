@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock
 
 import pytest
-import tqdm.asyncio
 from typer.testing import CliRunner
 
 from kabukit.cli.app import app
+from kabukit.cli.get import CustomTqdm
 
 from .conftest import MOCK_CODE, MOCK_DF, MOCK_PATH
 
@@ -56,11 +56,7 @@ def test_get_yahoo_all(mock_get_yahoo: AsyncMock, mock_cache_write: MagicMock) -
     assert result.exit_code == 0
     assert f"銘柄情報を '{MOCK_PATH}' に保存しました。" in result.stdout
 
-    mock_get_yahoo.assert_awaited_once_with(
-        None,
-        progress=tqdm.asyncio.tqdm,
-        max_items=None,
-    )
+    mock_get_yahoo.assert_awaited_once_with(None, max_items=None, progress=CustomTqdm)
     mock_cache_write.assert_called_once_with("yahoo", "quote", MOCK_DF)
 
 
@@ -71,8 +67,4 @@ def test_get_yaho_interrupt(mock_get_yahoo: AsyncMock) -> None:
 
     assert result.exit_code == 130
 
-    mock_get_yahoo.assert_awaited_once_with(
-        None,
-        progress=tqdm.asyncio.tqdm,
-        max_items=None,
-    )
+    mock_get_yahoo.assert_awaited_once_with(None, max_items=None, progress=CustomTqdm)

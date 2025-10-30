@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock
 
 import pytest
-import tqdm.asyncio
 from typer.testing import CliRunner
 
 from kabukit.cli.app import app
+from kabukit.cli.get import CustomTqdm
 
 from .conftest import MOCK_CODE, MOCK_DATE, MOCK_DATE_OBJ, MOCK_DF, MOCK_PATH
 
@@ -91,7 +91,7 @@ def test_get_prices_all(
         None,
         None,
         max_items=None,
-        progress=tqdm.asyncio.tqdm,
+        progress=CustomTqdm,
     )
     mock_cache_write.assert_called_once_with("jquants", "prices", MOCK_DF)
 
@@ -107,5 +107,5 @@ def test_get_prices_interrupt(mock_get_prices: AsyncMock) -> None:
         None,
         None,
         max_items=None,
-        progress=tqdm.asyncio.tqdm,
+        progress=CustomTqdm,
     )
