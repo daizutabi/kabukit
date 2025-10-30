@@ -34,7 +34,7 @@ def test_parse_date(date_str: str, fmt: str | None, date: datetime.date) -> None
         ("2023/02", datetime.date(2023, 2, 28)),
         ("2020/02", datetime.date(2020, 2, 29)),
         ("2000/02", datetime.date(2000, 2, 29)),
-        ("2100/02", datetime.date(2000, 2, 28)),
+        ("2100/02", datetime.date(2100, 2, 28)),
     ],
 )
 def test_parse_year_month(date_str: str, date: datetime.date) -> None:
