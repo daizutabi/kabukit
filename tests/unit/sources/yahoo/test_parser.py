@@ -134,8 +134,8 @@ def test_iter_press_release() -> None:
     results = list(iter_press_release(state))
     assert results == [
         ("PressReleaseSummary", "abc"),
-        ("PressReleaseDisclosedDate", datetime.date(2025, 8, 7)),
-        ("PressReleaseDisclosedTime", datetime.time(14, 0)),
+        ("PressReleaseDate", datetime.date(2025, 8, 7)),
+        ("PressReleaseTime", datetime.time(14, 0)),
     ]
 
 
@@ -160,6 +160,6 @@ def test_iter_performance() -> None:
         ("PerformancePotential", 80),
         ("PerformanceStability", 90),
         ("PerformanceProfitability", 70),
-        ("PerformanceUpdateDate", datetime.date(2024, 6, 14)),
-        ("PerformanceUpdateTime", datetime.time(10, 0)),
+        ("PerformanceDate", datetime.date(2024, 6, 14)),
+        ("PerformanceTime", datetime.time(10, 0)),
     ]

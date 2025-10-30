@@ -60,7 +60,7 @@ def parse_quote(text: str) -> pl.DataFrame:
     return pl.DataFrame({"text": [text]})
 
 
-def iter_price(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
+def iter_price(state: dict[str, Any], /) -> Iterator[tuple[str, Any]]:
     """状態辞書から現在の株価を生成する。
 
     Args:
@@ -80,7 +80,7 @@ def iter_price(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
     yield "PriceTime", time
 
 
-def iter_previous_price(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
+def iter_previous_price(state: dict[str, Any], /) -> Iterator[tuple[str, Any]]:
     """状態辞書から前日の株価を生成する。
 
     Args:
@@ -100,7 +100,7 @@ def iter_previous_price(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
     yield "PreviousPriceTime", time
 
 
-def iter_press_release(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
+def iter_press_release(state: dict[str, Any], /) -> Iterator[tuple[str, Any]]:
     """状態辞書の mainStocksPressReleaseSummary セクションの主な値を生成する。
 
     Args:
@@ -113,8 +113,8 @@ def iter_press_release(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
 
     yield "PressReleaseSummary", pr["summary"]
     disclosed_datetime = datetime.datetime.fromisoformat(pr["disclosedTime"])
-    yield "PressReleaseDisclosedDate", disclosed_datetime.date()
-    yield "PressReleaseDisclosedTime", disclosed_datetime.time()
+    yield "PressReleaseDate", disclosed_datetime.date()
+    yield "PressReleaseTime", disclosed_datetime.time()
 
 
 def iter_performance(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
@@ -133,5 +133,5 @@ def iter_performance(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
     yield "PerformanceStability", info["stability"]
     yield "PerformanceProfitability", info["profitability"]
     update_datetime = datetime.datetime.fromisoformat(info["updateTime"])
-    yield "PerformanceUpdateDate", update_datetime.date()
-    yield "PerformanceUpdateTime", update_datetime.time()
+    yield "PerformanceDate", update_datetime.date()
+    yield "PerformanceTime", update_datetime.time()
