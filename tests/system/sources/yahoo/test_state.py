@@ -20,6 +20,18 @@ def test_quote_previous_price(quote: dict[str, Any]) -> None:
     assert re.match(r"^\d+/\d+$", x["previousPriceDate"])
 
 
+def test_quote_index(quote: dict[str, Any]) -> None:
+    x = quote["mainStocksDetail"]["referenceIndex"]
+    assert len(x) == 38
+    assert "sharesIssued" in x
+    assert "sharesIssuedDate" in x
+    assert re.match(r"^\d+/\d+$", x["sharesIssuedDate"])
+    for p in ["b", "e", "d"]:
+        assert f"{p}ps" in x
+        assert f"{p}psDate" in x
+        assert re.match(r"^\d{4}/\d{2}$", x[f"{p}psDate"])
+
+
 def test_quote_press_release(quote: dict[str, Any]) -> None:
     x = quote["mainStocksPressReleaseSummary"]
     assert len(x) == 2
