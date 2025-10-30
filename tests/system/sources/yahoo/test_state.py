@@ -15,12 +15,17 @@ def code(request: pytest.FixtureRequest) -> str:
 
 
 @pytest_asyncio.fixture(scope="module")
-async def quote(code: str):
-    from kabukit.sources.yahoo.parser import get_preloaded_state
-
+async def state(code: str):
     async with YahooClient() as client:
         response = await client.get(f"{code}.T")
-        yield get_preloaded_state(response.text)
+        yield response.text
+
+
+@pytest.fixture(scope="module")
+async def quote(state: str):
+    from kabukit.sources.yahoo.parser import get_preloaded_state
+
+    return get_preloaded_state(state)
 
 
 def test_quote_press_release(quote: dict[str, Any]) -> None:
@@ -47,13 +52,15 @@ def test_quote_performance(quote: dict[str, Any]) -> None:
     assert "updateTime" in x
 
 
-def test_quote_detail(quote: dict[str, Any]) -> None:
+def test_quote_price(quote: dict[str, Any]) -> None:
+    x = quote["mainStocksPriceBoard"]["priceBoard"]
+    assert "price" in x
+    assert "priceDateTime" in x
+    assert re.match(r"^\d+[/:]\d+$", x["priceDateTime"])
+
+
+def test_quote_previous_price(quote: dict[str, Any]) -> None:
     x = quote["mainStocksDetail"]["detail"]
-    assert len(x) == 24
     assert "previousPrice" in x
     assert "previousPriceDate" in x
-
-
-def test_quote_previous_price_date(quote: dict[str, Any]) -> None:
-    x = quote["mainStocksDetail"]["detail"]["previousPriceDate"]
-    assert re.match(r"^\d+[/:]\d+$", x)
+    assert re.match(r"^\d+[/:]\d+$", x["previousPriceDate"])
