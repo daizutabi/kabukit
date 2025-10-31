@@ -14,7 +14,7 @@ def callback(df: pl.DataFrame) -> pl.DataFrame:
 
 
 async def test_get_list_single_date() -> None:
-    from kabukit.sources.edinet.concurrent import get_list
+    from kabukit.sources.edinet.batch import get_list
 
     df = await get_list("2025-10-09")
     dates = df["Date"].unique().to_list()
@@ -28,7 +28,7 @@ async def test_get_list_single_date() -> None:
 
 
 async def test_get_list_multiple_dates() -> None:
-    from kabukit.sources.edinet.concurrent import get_list
+    from kabukit.sources.edinet.batch import get_list
 
     df = await get_list(["2025-10-09", "2025-10-10"])
     expected = [
@@ -42,14 +42,14 @@ async def test_get_list_multiple_dates() -> None:
 
 
 async def test_get_list_without_dates() -> None:
-    from kabukit.sources.edinet.concurrent import get_list
+    from kabukit.sources.edinet.batch import get_list
 
     df = await get_list(days=7, max_items=6, callback=callback)
     assert df.width == 25
 
 
 async def test_get_documents_csv() -> None:
-    from kabukit.sources.edinet.concurrent import get_documents, get_list
+    from kabukit.sources.edinet.batch import get_documents, get_list
 
     df = await get_list(["2025-09-09", "2025-09-19", "2025-09-22"])
     doc_ids = df.filter(CsvFlag=True).get_column("DocumentId").sort()
@@ -58,7 +58,7 @@ async def test_get_documents_csv() -> None:
 
 
 async def test_get_documents_pdf() -> None:
-    from kabukit.sources.edinet.concurrent import get_documents, get_list
+    from kabukit.sources.edinet.batch import get_documents, get_list
 
     df = await get_list("2025-09-09")
     doc_ids = df.filter(PdfFlag=True).get_column("DocumentId").to_list()
@@ -71,7 +71,7 @@ async def test_get_documents_pdf() -> None:
 
 
 async def test_get_documents_single_doc_id() -> None:
-    from kabukit.sources.edinet.concurrent import get_documents, get_list
+    from kabukit.sources.edinet.batch import get_documents, get_list
 
     df = await get_list("2025-09-09")
     doc_id = df.filter(CsvFlag=True).get_column("DocumentId").first()
@@ -82,7 +82,7 @@ async def test_get_documents_single_doc_id() -> None:
 
 
 async def test_get_documents_invalid_id_raises_error() -> None:
-    from kabukit.sources.edinet.concurrent import get_documents
+    from kabukit.sources.edinet.batch import get_documents
 
     with pytest.raises(ValueError, match="ZIP is not available"):
         await get_documents("E00000")
