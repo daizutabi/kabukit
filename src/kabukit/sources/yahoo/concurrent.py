@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from kabukit.sources.jquants.concurrent import get_target_codes
+from kabukit.sources.jquants.batch import get_target_codes
 from kabukit.utils import gather
 
 from .client import YahooClient

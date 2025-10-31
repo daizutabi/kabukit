@@ -23,7 +23,7 @@ def mock_jquants_client(mocker: MockerFixture) -> AsyncMock:
     """JQuantsClientの非同期コンテキストマネージャをモックするフィクスチャ"""
     mock_client_instance = mocker.AsyncMock()
     mocker.patch(
-        "kabukit.sources.jquants.concurrent.JQuantsClient",
+        "kabukit.sources.jquants.batch.JQuantsClient",
         return_value=mocker.MagicMock(
             __aenter__=mocker.AsyncMock(return_value=mock_client_instance),
             __aexit__=mocker.AsyncMock(),
@@ -33,7 +33,7 @@ def mock_jquants_client(mocker: MockerFixture) -> AsyncMock:
 
 
 async def test_get_calendar(mock_jquants_client: AsyncMock) -> None:
-    from kabukit.sources.jquants.concurrent import get_calendar
+    from kabukit.sources.jquants.batch import get_calendar
 
     await get_calendar()
 
@@ -41,7 +41,7 @@ async def test_get_calendar(mock_jquants_client: AsyncMock) -> None:
 
 
 async def test_get_info(mock_jquants_client: AsyncMock) -> None:
-    from kabukit.sources.jquants.concurrent import get_info
+    from kabukit.sources.jquants.batch import get_info
 
     await get_info()
 
@@ -53,7 +53,7 @@ async def test_get_info(mock_jquants_client: AsyncMock) -> None:
 
 
 async def test_get_info_with_code(mock_jquants_client: AsyncMock) -> None:
-    from kabukit.sources.jquants.concurrent import get_info
+    from kabukit.sources.jquants.batch import get_info
 
     await get_info("7203")
 
@@ -65,7 +65,7 @@ async def test_get_info_with_code(mock_jquants_client: AsyncMock) -> None:
 
 
 async def test_get_info_with_date(mock_jquants_client: AsyncMock) -> None:
-    from kabukit.sources.jquants.concurrent import get_info
+    from kabukit.sources.jquants.batch import get_info
 
     await get_info(date="2025-10-10")
 
@@ -79,13 +79,13 @@ async def test_get_info_with_date(mock_jquants_client: AsyncMock) -> None:
 @pytest.fixture
 def mock_get_info(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.sources.jquants.concurrent.get_info",
+        "kabukit.sources.jquants.batch.get_info",
         new_callable=mocker.AsyncMock,
     )
 
 
 async def test_get_target_codes(mock_get_info: AsyncMock) -> None:
-    from kabukit.sources.jquants.concurrent import get_target_codes
+    from kabukit.sources.jquants.batch import get_target_codes
 
     mock_df = pl.DataFrame({"Code": ["0001", "0002"]})
     mock_get_info.return_value = mock_df
@@ -99,7 +99,7 @@ async def test_get_target_codes(mock_get_info: AsyncMock) -> None:
 @pytest.fixture
 def mock_get_target_codes(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.sources.jquants.concurrent.get_target_codes",
+        "kabukit.sources.jquants.batch.get_target_codes",
         new_callable=mocker.AsyncMock,
     )
 
@@ -113,7 +113,7 @@ def dummy_callback(df: pl.DataFrame) -> pl.DataFrame:
 
 
 async def test_get_statements_with_code(mock_jquants_client: AsyncMock) -> None:
-    from kabukit.sources.jquants.concurrent import get_statements
+    from kabukit.sources.jquants.batch import get_statements
 
     await get_statements("7203")
 
@@ -121,7 +121,7 @@ async def test_get_statements_with_code(mock_jquants_client: AsyncMock) -> None:
 
 
 async def test_get_statements_with_date(mock_jquants_client: AsyncMock) -> None:
-    from kabukit.sources.jquants.concurrent import get_statements
+    from kabukit.sources.jquants.batch import get_statements
 
     await get_statements(date="2025-10-10")
 
@@ -129,7 +129,7 @@ async def test_get_statements_with_date(mock_jquants_client: AsyncMock) -> None:
 
 
 async def test_get_statements_with_codes(mock_gather_get: AsyncMock) -> None:
-    from kabukit.sources.jquants.concurrent import get_statements
+    from kabukit.sources.jquants.batch import get_statements
 
     mock_gather_get.return_value = pl.DataFrame(
         {"Date": [4, 3, 2, 1], "Code": [2, 1, 2, 1]},
@@ -162,7 +162,7 @@ async def test_get_statements(
     mock_get_target_codes: AsyncMock,
     mock_gather_get: AsyncMock,
 ) -> None:
-    from kabukit.sources.jquants.concurrent import get_statements
+    from kabukit.sources.jquants.batch import get_statements
 
     mock_get_target_codes.return_value = ["1111", "2222", "3333"]
     mock_gather_get.return_value = pl.DataFrame(
@@ -189,7 +189,7 @@ async def test_get_statements(
 
 
 async def test_get_prices_with_code(mock_jquants_client: AsyncMock) -> None:
-    from kabukit.sources.jquants.concurrent import get_prices
+    from kabukit.sources.jquants.batch import get_prices
 
     await get_prices("7203")
 
@@ -197,7 +197,7 @@ async def test_get_prices_with_code(mock_jquants_client: AsyncMock) -> None:
 
 
 async def test_get_prices_with_date(mock_jquants_client: AsyncMock) -> None:
-    from kabukit.sources.jquants.concurrent import get_prices
+    from kabukit.sources.jquants.batch import get_prices
 
     await get_prices(date="2025-10-10")
 
@@ -205,7 +205,7 @@ async def test_get_prices_with_date(mock_jquants_client: AsyncMock) -> None:
 
 
 async def test_get_prices_with_codes(mock_gather_get: AsyncMock) -> None:
-    from kabukit.sources.jquants.concurrent import get_prices
+    from kabukit.sources.jquants.batch import get_prices
 
     mock_gather_get.return_value = pl.DataFrame(
         {"Date": [4, 3, 2, 1], "Code": [2, 1, 2, 1]},
@@ -239,7 +239,7 @@ async def test_get_prices(
     mock_get_target_codes: AsyncMock,
     mock_gather_get: AsyncMock,
 ) -> None:
-    from kabukit.sources.jquants.concurrent import get_prices
+    from kabukit.sources.jquants.batch import get_prices
 
     mock_get_target_codes.return_value = ["1111", "2222", "3333"]
     mock_gather_get.return_value = pl.DataFrame(

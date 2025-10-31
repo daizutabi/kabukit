@@ -53,7 +53,7 @@ Quiet = Annotated[
 @app.async_command()
 async def calendar(*, quiet: Quiet = False) -> None:
     """営業日カレンダーを取得します。"""
-    from kabukit.sources.jquants.concurrent import get_calendar
+    from kabukit.sources.jquants.batch import get_calendar
     from kabukit.utils.cache import write
 
     df = await get_calendar()
@@ -67,7 +67,7 @@ async def calendar(*, quiet: Quiet = False) -> None:
 @app.async_command()
 async def info(arg: Arg = None, *, quiet: Quiet = False) -> None:
     """上場銘柄一覧を取得します。"""
-    from kabukit.sources.jquants.concurrent import get_info
+    from kabukit.sources.jquants.batch import get_info
     from kabukit.utils.cache import write
     from kabukit.utils.params import get_code_date
 
@@ -91,7 +91,7 @@ async def statements(
     quiet: Quiet = False,
 ) -> None:
     """財務情報を取得します。"""
-    from kabukit.sources.jquants.concurrent import get_statements
+    from kabukit.sources.jquants.batch import get_statements
     from kabukit.utils.cache import write
     from kabukit.utils.datetime import today
     from kabukit.utils.params import get_code_date
@@ -123,7 +123,7 @@ async def prices(
     quiet: Quiet = False,
 ) -> None:
     """株価情報を取得します。"""
-    from kabukit.sources.jquants.concurrent import get_prices
+    from kabukit.sources.jquants.batch import get_prices
     from kabukit.utils.cache import write
     from kabukit.utils.datetime import today
     from kabukit.utils.params import get_code_date
