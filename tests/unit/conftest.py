@@ -33,4 +33,5 @@ def mock_get(mock_async_client: MagicMock, mocker: MockerFixture) -> AsyncMock:
 
 @pytest.fixture
 def mock_gather_get(mocker: MockerFixture) -> AsyncMock:
-    return mocker.patch("kabukit.utils.gather.get", new_callable=mocker.AsyncMock)
+    # return mocker.patch("kabukit.utils.gather.get", new_callable=mocker.AsyncMock)
+    return mocker.patch("kabukit.utils.gather.get")
