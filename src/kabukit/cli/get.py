@@ -241,7 +241,7 @@ async def yahoo(
     quiet: Quiet = False,
 ) -> None:
     """Yahooファイナンスから情報を取得します。"""
-    from kabukit.sources.yahoo.concurrent import get_quote
+    from kabukit.sources.yahoo.batch import get_quote
     from kabukit.utils.cache import write
 
     if code is None and not all_:
