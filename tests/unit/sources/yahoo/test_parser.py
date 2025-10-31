@@ -42,6 +42,7 @@ def test_get_preloaded_state_no_tag() -> None:
         ("6/14", datetime.date(2024, 6, 14), datetime.time(15, 30)),
         ("6/15", datetime.date(2023, 6, 15), datetime.time(15, 30)),
         ("12:30", datetime.date(2024, 6, 14), datetime.time(12, 30)),
+        ("2025/10", datetime.date(2025, 10, 31), datetime.time(0, 0)),
     ],
 )
 def test_parse_datetime(
@@ -121,6 +122,38 @@ def test_iter_previous_price() -> None:
     ]
 
 
+def test_iter_index() -> None:
+    from kabukit.sources.yahoo.parser import iter_index
+    from kabukit.utils.datetime import today
+
+    state = {
+        "mainStocksDetail": {
+            "referenceIndex": {
+                "sharesIssued": "12,345",
+                "sharesIssuedDate": "10/10",
+                "bps": "1,235.5",
+                "bpsDate": "2020/11",
+                "eps": "3.4",
+                "epsDate": "2020/10",
+                "dps": "1.2",
+                "dpsDate": "2020/09",
+            },
+        },
+    }
+
+    results = list(iter_index(state))
+    assert results == [
+        ("IssuedShares", 12345),
+        ("IssuedSharesDate", datetime.date(today().year, 10, 10)),
+        ("BookValuePerShare", 1235.5),
+        ("BookValuePerShareDate", datetime.date(2020, 11, 30)),
+        ("EarningsPerShare", 3.4),
+        ("EarningsPerShareDate", datetime.date(2020, 10, 31)),
+        ("DividendPerShare", 1.2),
+        ("DividendPerShareDate", datetime.date(2020, 9, 30)),
+    ]
+
+
 def test_iter_press_release() -> None:
     from kabukit.sources.yahoo.parser import iter_press_release
 
@@ -134,8 +167,8 @@ def test_iter_press_release() -> None:
     results = list(iter_press_release(state))
     assert results == [
         ("PressReleaseSummary", "abc"),
-        ("PressReleaseDisclosedDate", datetime.date(2025, 8, 7)),
-        ("PressReleaseDisclosedTime", datetime.time(14, 0)),
+        ("PressReleaseDate", datetime.date(2025, 8, 7)),
+        ("PressReleaseTime", datetime.time(14, 0)),
     ]
 
 
@@ -160,6 +193,6 @@ def test_iter_performance() -> None:
         ("PerformancePotential", 80),
         ("PerformanceStability", 90),
         ("PerformanceProfitability", 70),
-        ("PerformanceUpdateDate", datetime.date(2024, 6, 14)),
-        ("PerformanceUpdateTime", datetime.time(10, 0)),
+        ("PerformanceDate", datetime.date(2024, 6, 14)),
+        ("PerformanceTime", datetime.time(10, 0)),
     ]

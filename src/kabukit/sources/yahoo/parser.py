@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 import polars as pl
 from bs4 import BeautifulSoup, Tag
 
-from kabukit.utils.datetime import parse_month_day, parse_time, today
+from kabukit.utils.datetime import parse_month_day, parse_time, parse_year_month, today
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -42,7 +42,11 @@ def get_preloaded_state(text: str) -> dict[str, Any]:
 
 
 def _parse_datetime(date_str: str) -> tuple[datetime.date, datetime.time]:
-    """日付/時刻文字列を解釈する。"""
+    """月日/日付/時刻文字列を解釈する。"""
+    if re.match(r"^\d{4}/\d{2}$", date_str):
+        # "2023/10" のような年月形式の場合
+        return parse_year_month(date_str), datetime.time(0, 0)
+
     if "/" in date_str:
         # "10/29" のような日付形式の場合
         return parse_month_day(date_str), datetime.time(15, 30)  # 取引終了時刻を想定
@@ -60,7 +64,7 @@ def parse_quote(text: str) -> pl.DataFrame:
     return pl.DataFrame({"text": [text]})
 
 
-def iter_price(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
+def iter_price(state: dict[str, Any], /) -> Iterator[tuple[str, Any]]:
     """状態辞書から現在の株価を生成する。
 
     Args:
@@ -80,7 +84,7 @@ def iter_price(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
     yield "PriceTime", time
 
 
-def iter_previous_price(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
+def iter_previous_price(state: dict[str, Any], /) -> Iterator[tuple[str, Any]]:
     """状態辞書から前日の株価を生成する。
 
     Args:
@@ -100,7 +104,29 @@ def iter_previous_price(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
     yield "PreviousPriceTime", time
 
 
-def iter_press_release(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
+def iter_index(state: dict[str, Any], /) -> Iterator[tuple[str, Any]]:
+    """状態辞書の mainStocksDetail セクションの指標値を生成する。
+
+    Args:
+        state (dict[str, Any]): 状態辞書。
+
+    Yields:
+        tuple[str, Any]: mainStocksDetail セクション内の主な指標値。
+    """
+    index: dict[str, Any] = state["mainStocksDetail"]["referenceIndex"]
+
+    yield "IssuedShares", int(index["sharesIssued"].replace(",", ""))
+    date_str = index["sharesIssuedDate"]
+    date, _ = _parse_datetime(date_str)
+    yield "IssuedSharesDate", date
+
+    for p, name in [("b", "BookValue"), ("e", "Earnings"), ("d", "Dividend")]:
+        yield f"{name}PerShare", float(index[f"{p}ps"].replace(",", ""))
+        date, _ = _parse_datetime(index[f"{p}psDate"])
+        yield f"{name}PerShareDate", date
+
+
+def iter_press_release(state: dict[str, Any], /) -> Iterator[tuple[str, Any]]:
     """状態辞書の mainStocksPressReleaseSummary セクションの主な値を生成する。
 
     Args:
@@ -113,8 +139,8 @@ def iter_press_release(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
 
     yield "PressReleaseSummary", pr["summary"]
     disclosed_datetime = datetime.datetime.fromisoformat(pr["disclosedTime"])
-    yield "PressReleaseDisclosedDate", disclosed_datetime.date()
-    yield "PressReleaseDisclosedTime", disclosed_datetime.time()
+    yield "PressReleaseDate", disclosed_datetime.date()
+    yield "PressReleaseTime", disclosed_datetime.time()
 
 
 def iter_performance(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
@@ -133,5 +159,5 @@ def iter_performance(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
     yield "PerformanceStability", info["stability"]
     yield "PerformanceProfitability", info["profitability"]
     update_datetime = datetime.datetime.fromisoformat(info["updateTime"])
-    yield "PerformanceUpdateDate", update_datetime.date()
-    yield "PerformanceUpdateTime", update_datetime.time()
+    yield "PerformanceDate", update_datetime.date()
+    yield "PerformanceTime", update_datetime.time()

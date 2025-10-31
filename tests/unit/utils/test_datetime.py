@@ -26,6 +26,23 @@ def test_parse_date(date_str: str, fmt: str | None, date: datetime.date) -> None
     assert parse_date(date_str, fmt) == date
 
 
+@pytest.mark.parametrize(
+    ("date_str", "date"),
+    [
+        ("2023/03", datetime.date(2023, 3, 31)),
+        ("2023/12", datetime.date(2023, 12, 31)),
+        ("2023/02", datetime.date(2023, 2, 28)),
+        ("2020/02", datetime.date(2020, 2, 29)),
+        ("2000/02", datetime.date(2000, 2, 29)),
+        ("2100/02", datetime.date(2100, 2, 28)),
+    ],
+)
+def test_parse_year_month(date_str: str, date: datetime.date) -> None:
+    from kabukit.utils.datetime import parse_year_month
+
+    assert parse_year_month(date_str) == date
+
+
 def test_parse_month_day(mocker: MockerFixture) -> None:
     from kabukit.utils.datetime import parse_month_day
 
