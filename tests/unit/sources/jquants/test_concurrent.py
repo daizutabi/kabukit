@@ -97,11 +97,6 @@ async def test_get_target_codes(mock_get_info: AsyncMock) -> None:
 
 
 @pytest.fixture
-def mock_get(mocker: MockerFixture) -> AsyncMock:
-    return mocker.patch("kabukit.utils.gather.get", new_callable=mocker.AsyncMock)
-
-
-@pytest.fixture
 def mock_get_target_codes(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
         "kabukit.sources.jquants.concurrent.get_target_codes",
@@ -133,10 +128,12 @@ async def test_get_statements_with_date(mock_jquants_client: AsyncMock) -> None:
     mock_jquants_client.get_statements.assert_awaited_once_with(None, "2025-10-10")
 
 
-async def test_get_statements_with_codes(mock_get: AsyncMock) -> None:
+async def test_get_statements_with_codes(mock_gather_get: AsyncMock) -> None:
     from kabukit.sources.jquants.concurrent import get_statements
 
-    mock_get.return_value = pl.DataFrame({"Date": [4, 3, 2, 1], "Code": [2, 1, 2, 1]})
+    mock_gather_get.return_value = pl.DataFrame(
+        {"Date": [4, 3, 2, 1], "Code": [2, 1, 2, 1]},
+    )
 
     result = await get_statements(
         ["1111", "2222"],
@@ -150,7 +147,7 @@ async def test_get_statements_with_codes(mock_get: AsyncMock) -> None:
         pl.DataFrame({"Date": [1, 3, 2, 4], "Code": [1, 1, 2, 2]}),
     )
 
-    mock_get.assert_awaited_once_with(
+    mock_gather_get.assert_awaited_once_with(
         JQuantsClient,
         "statements",
         ["1111", "2222"],
@@ -162,13 +159,15 @@ async def test_get_statements_with_codes(mock_get: AsyncMock) -> None:
 
 
 async def test_get_statements(
-    mock_get: AsyncMock,
     mock_get_target_codes: AsyncMock,
+    mock_gather_get: AsyncMock,
 ) -> None:
     from kabukit.sources.jquants.concurrent import get_statements
 
     mock_get_target_codes.return_value = ["1111", "2222", "3333"]
-    mock_get.return_value = pl.DataFrame({"Date": [4, 3, 2, 1], "Code": [2, 1, 2, 1]})
+    mock_gather_get.return_value = pl.DataFrame(
+        {"Date": [4, 3, 2, 1], "Code": [2, 1, 2, 1]},
+    )
 
     result = await get_statements()
 
@@ -178,7 +177,7 @@ async def test_get_statements(
     )
 
     mock_get_target_codes.assert_awaited_once()
-    mock_get.assert_awaited_once_with(
+    mock_gather_get.assert_awaited_once_with(
         JQuantsClient,
         "statements",
         ["1111", "2222", "3333"],
@@ -205,10 +204,12 @@ async def test_get_prices_with_date(mock_jquants_client: AsyncMock) -> None:
     mock_jquants_client.get_prices.assert_awaited_once_with(None, "2025-10-10")
 
 
-async def test_get_prices_with_codes(mock_get: AsyncMock) -> None:
+async def test_get_prices_with_codes(mock_gather_get: AsyncMock) -> None:
     from kabukit.sources.jquants.concurrent import get_prices
 
-    mock_get.return_value = pl.DataFrame({"Date": [4, 3, 2, 1], "Code": [2, 1, 2, 1]})
+    mock_gather_get.return_value = pl.DataFrame(
+        {"Date": [4, 3, 2, 1], "Code": [2, 1, 2, 1]},
+    )
 
     result = await get_prices(
         ["3333", "4444"],
@@ -223,7 +224,7 @@ async def test_get_prices_with_codes(mock_get: AsyncMock) -> None:
         pl.DataFrame({"Date": [1, 3, 2, 4], "Code": [1, 1, 2, 2]}),
     )
 
-    mock_get.assert_awaited_once_with(
+    mock_gather_get.assert_awaited_once_with(
         JQuantsClient,
         "prices",
         ["3333", "4444"],
@@ -235,13 +236,15 @@ async def test_get_prices_with_codes(mock_get: AsyncMock) -> None:
 
 
 async def test_get_prices(
-    mock_get: AsyncMock,
     mock_get_target_codes: AsyncMock,
+    mock_gather_get: AsyncMock,
 ) -> None:
     from kabukit.sources.jquants.concurrent import get_prices
 
     mock_get_target_codes.return_value = ["1111", "2222", "3333"]
-    mock_get.return_value = pl.DataFrame({"Date": [4, 3, 2, 1], "Code": [2, 1, 2, 1]})
+    mock_gather_get.return_value = pl.DataFrame(
+        {"Date": [4, 3, 2, 1], "Code": [2, 1, 2, 1]},
+    )
 
     result = await get_prices()
 
@@ -251,7 +254,7 @@ async def test_get_prices(
     )
 
     mock_get_target_codes.assert_awaited_once()
-    mock_get.assert_awaited_once_with(
+    mock_gather_get.assert_awaited_once_with(
         JQuantsClient,
         "prices",
         ["1111", "2222", "3333"],
