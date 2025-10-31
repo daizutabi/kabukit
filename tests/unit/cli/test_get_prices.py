@@ -24,7 +24,7 @@ runner = CliRunner()
 @pytest.fixture
 def mock_get_prices(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.sources.jquants.concurrent.get_prices",
+        "kabukit.sources.jquants.batch.get_prices",
         new_callable=AsyncMock,
     )
 

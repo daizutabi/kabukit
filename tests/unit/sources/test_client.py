@@ -65,7 +65,7 @@ async def test_get_retries_on_failure(
     """Test that the get method retries on retryable failures."""
     from kabukit.sources.client import Client
 
-    mock_sleep = mocker.patch("asyncio.sleep")
+    mock_sleep = mocker.patch("asyncio.sleep", new_callable=mocker.AsyncMock)
     error = ConnectTimeout("Connection timed out")
     success_response = Response(200, json={"message": "success"})
     success_response.raise_for_status = mocker.MagicMock()
@@ -87,7 +87,7 @@ async def test_get_fails_after_retries(
     """Test that the get method fails after exhausting all retries."""
     from kabukit.sources.client import Client
 
-    mock_sleep = mocker.patch("asyncio.sleep")
+    mock_sleep = mocker.patch("asyncio.sleep", new_callable=mocker.AsyncMock)
     error = ConnectTimeout("Connection timed out")
     mock_get.side_effect = [error, error, error]
 

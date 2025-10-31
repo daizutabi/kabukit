@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from kabukit.utils import concurrent
+from kabukit.utils import gather
 from kabukit.utils.datetime import get_past_dates
 
 from .client import EdinetClient
@@ -13,7 +13,7 @@ from .client import EdinetClient
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from kabukit.utils.concurrent import Callback, Progress
+    from kabukit.utils.gather import Callback, Progress
 
 
 async def get_list(
@@ -55,7 +55,7 @@ async def get_list(
     if dates is None:
         dates = get_past_dates(days=days, years=years)
 
-    df = await concurrent.get(
+    df = await gather.get(
         EdinetClient,
         "list",
         dates,
@@ -103,7 +103,7 @@ async def get_documents(
         async with EdinetClient() as client:
             return await client.get_document(doc_ids, pdf=pdf)
 
-    df = await concurrent.get(
+    df = await gather.get(
         EdinetClient,
         "pdf" if pdf else "csv",
         doc_ids,

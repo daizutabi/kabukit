@@ -24,7 +24,7 @@ runner = CliRunner()
 @pytest.fixture
 def mock_get_yahoo(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.sources.yahoo.concurrent.get_quote",
+        "kabukit.sources.yahoo.batch.get_quote",
         new_callable=AsyncMock,
         return_value=MOCK_DF,
     )

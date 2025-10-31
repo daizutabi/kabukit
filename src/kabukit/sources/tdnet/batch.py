@@ -5,14 +5,14 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from kabukit.utils import concurrent
+from kabukit.utils import gather
 
 from .client import TdnetClient
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from kabukit.utils.concurrent import Callback, Progress
+    from kabukit.utils.gather import Callback, Progress
 
 
 async def get_list(
@@ -49,7 +49,7 @@ async def get_list(
         async with TdnetClient() as client:
             dates = await client.get_dates()
 
-    df = await concurrent.get(
+    df = await gather.get(
         TdnetClient,
         "list",
         dates,
