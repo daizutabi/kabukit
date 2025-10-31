@@ -7,6 +7,7 @@ import pytest
 from httpx import Response
 
 from kabukit.sources.jquants.client import JQuantsClient
+from kabukit.sources.jquants.transform.prices import transform
 
 if TYPE_CHECKING:
     from unittest.mock import AsyncMock
@@ -66,8 +67,6 @@ async def test_error_from(client: JQuantsClient) -> None:
 
 @pytest.fixture
 def df() -> pl.DataFrame:
-    from kabukit.sources.jquants.transform.prices import transform
-
     return pl.DataFrame(
         {
             "Date": ["2023-01-01", "2023-01-02"],

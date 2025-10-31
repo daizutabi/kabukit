@@ -7,6 +7,7 @@ import polars as pl
 import pytest
 
 from kabukit.sources.client import Client
+from kabukit.utils.gather import collect, collect_fn, concat, concat_fn, get, get_stream
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterable, AsyncIterator
@@ -28,8 +29,6 @@ async def test_sleep() -> None:
 
 
 async def test_collect() -> None:
-    from kabukit.utils.gather import collect
-
     x = (asyncio.sleep(s, s) for s in [0.03, 0.02, 0.01])
     ait = collect(x, max_concurrency=2)
     result = [s async for s in ait]
@@ -37,8 +36,6 @@ async def test_collect() -> None:
 
 
 async def test_collect_fn() -> None:
-    from kabukit.utils.gather import collect_fn
-
     async def sleep(s: float) -> float:
         return await asyncio.sleep(s, s)
 
@@ -53,16 +50,12 @@ async def sleep_df(second: float) -> pl.DataFrame:
 
 
 async def test_concat() -> None:
-    from kabukit.utils.gather import concat
-
     x = (sleep_df(s) for s in [0.03, 0.02, 0.01])
     df = await concat(x, max_concurrency=2)
     assert df.sort("a").to_series().to_list() == [0.01, 0.02, 0.03]
 
 
 async def test_concat_fn() -> None:
-    from kabukit.utils.gather import concat_fn
-
     df = await concat_fn(sleep_df, [0.03, 0.02, 0.01], max_concurrency=2)
     assert df.sort("a").to_series().to_list() == [0.01, 0.02, 0.03]
 
@@ -74,8 +67,6 @@ class MockClient(Client):
 
 
 async def test_stream() -> None:
-    from kabukit.utils.gather import get_stream
-
     async with MockClient() as client:
         stream = get_stream(client, "data", args=[1, 2, 3])
 
@@ -84,8 +75,6 @@ async def test_stream() -> None:
 
 
 async def test_get() -> None:
-    from kabukit.utils.gather import get
-
     df = await get(MockClient, "data", [1, 2, 3], max_concurrency=2)
     assert df["Code"].sort().to_list() == [1, 2, 3]
 
@@ -99,8 +88,6 @@ async def progress(
 
 
 async def test_get_progress() -> None:
-    from kabukit.utils.gather import get
-
     df = await get(MockClient, "data", [1, 2, 3], progress=progress)
     assert df["Code"].sort().to_list() == [3, 6, 9]
 
@@ -110,14 +97,10 @@ def callback(df: pl.DataFrame) -> pl.DataFrame:
 
 
 async def test_get_callback() -> None:
-    from kabukit.utils.gather import get
-
     df = await get(MockClient, "data", [1, 2, 3], callback=callback)
     assert df["Code"].sort().to_list() == [10, 20, 30]
 
 
 async def test_get_with_max_items() -> None:
-    from kabukit.utils.gather import get
-
     df = await get(MockClient, "data", range(10), max_items=3, max_concurrency=2)
     assert df["Code"].sort().to_list() == [0, 1, 2]

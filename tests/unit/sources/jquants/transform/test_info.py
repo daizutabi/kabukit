@@ -3,12 +3,12 @@ from __future__ import annotations
 import polars as pl
 import pytest
 
+from kabukit.sources.jquants.transform.info import filter_common_stocks, transform
+
 pytestmark = pytest.mark.unit
 
 
 def test_transform() -> None:
-    from kabukit.sources.jquants.transform.info import transform
-
     df = pl.DataFrame(
         {
             "Date": ["2023-01-01", "2023-01-02"],
@@ -34,8 +34,6 @@ def test_transform() -> None:
 
 
 def test_filter_common_stocks() -> None:
-    from kabukit.sources.jquants.transform.info import filter_common_stocks
-
     df = pl.DataFrame(
         {
             "Code": ["0001", "0002", "0003", "0004", "0005"],

@@ -4,6 +4,7 @@ import pytest
 import pytest_asyncio
 
 from kabukit.sources.yahoo.client import YahooClient
+from kabukit.sources.yahoo.parser import get_preloaded_state
 
 
 @pytest.fixture(scope="module", params=["7203"])
@@ -20,6 +21,4 @@ async def state(code: str):
 
 @pytest.fixture(scope="module")
 async def quote(state: str):
-    from kabukit.sources.yahoo.parser import get_preloaded_state
-
     return get_preloaded_state(state)

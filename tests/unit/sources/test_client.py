@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING
 import pytest
 from httpx import ConnectTimeout, HTTPStatusError, Response
 
+from kabukit.sources.client import Client
+
 if TYPE_CHECKING:
     from unittest.mock import AsyncMock
 
@@ -14,8 +16,6 @@ pytestmark = pytest.mark.unit
 
 
 async def test_async_with() -> None:
-    from kabukit.sources.client import Client
-
     async with Client() as client:
         assert not client.client.is_closed
 
@@ -23,8 +23,6 @@ async def test_async_with() -> None:
 
 
 async def test_get_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
-    from kabukit.sources.client import Client
-
     expected_response = Response(200, json={"message": "success"})
     mock_get.return_value = expected_response
     expected_response.raise_for_status = mocker.MagicMock()
@@ -38,8 +36,6 @@ async def test_get_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
 
 
 async def test_get_failure(mock_get: AsyncMock, mocker: MockerFixture) -> None:
-    from kabukit.sources.client import Client
-
     error_response = Response(400)
     mock_get.return_value = error_response
     error_response.raise_for_status = mocker.MagicMock(
@@ -63,8 +59,6 @@ async def test_get_retries_on_failure(
     mocker: MockerFixture,
 ) -> None:
     """Test that the get method retries on retryable failures."""
-    from kabukit.sources.client import Client
-
     mock_sleep = mocker.patch("asyncio.sleep", new_callable=mocker.AsyncMock)
     error = ConnectTimeout("Connection timed out")
     success_response = Response(200, json={"message": "success"})
@@ -85,8 +79,6 @@ async def test_get_fails_after_retries(
     mocker: MockerFixture,
 ) -> None:
     """Test that the get method fails after exhausting all retries."""
-    from kabukit.sources.client import Client
-
     mock_sleep = mocker.patch("asyncio.sleep", new_callable=mocker.AsyncMock)
     error = ConnectTimeout("Connection timed out")
     mock_get.side_effect = [error, error, error]

@@ -6,6 +6,8 @@ import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
 
+from kabukit.sources.tdnet.columns import ListColumns
+
 if TYPE_CHECKING:
     import datetime
 
@@ -71,13 +73,9 @@ def test_list_history(data: pl.DataFrame) -> None:
 
 
 def test_columns(data: pl.DataFrame) -> None:
-    from kabukit.sources.tdnet.columns import ListColumns
-
     assert data.columns == [c.name for c in ListColumns]
 
 
 def test_rename(data: pl.DataFrame) -> None:
-    from kabukit.sources.tdnet.columns import ListColumns
-
     df_renamed = ListColumns.rename(data, strict=True)
     assert df_renamed.columns == [c.value for c in ListColumns]
