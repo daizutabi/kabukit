@@ -47,3 +47,13 @@ def test_quote_performance(quote: dict[str, Any]) -> None:
     assert "stability" in x
     assert "summary" in x
     assert "updateTime" in x
+
+
+def test_performance(performance: dict[str, Any]) -> None:
+    assert "performance" in performance
+    # for k in performance["performance"]["performance"]:
+    #     print(k)
+    # for k in performance["performance"]["forecast"]:
+    #     print(k)
+
+    # assert 0

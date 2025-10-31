@@ -18,6 +18,16 @@ if TYPE_CHECKING:
 PRELOADED_STATE_PATTERN = re.compile(r"window\.__PRELOADED_STATE__\s*=\s*(\{.*\})")
 
 
+def _get(text: str, pattern: re.Pattern[str]) -> re.Match[str] | None:
+    soup = BeautifulSoup(text, "lxml")
+    script = soup.find("script", string=pattern)  # pyright: ignore[reportCallIssue, reportArgumentType, reportUnknownVariableType], # ty: ignore[no-matching-overload]
+
+    if not isinstance(script, Tag):
+        return None
+
+    return pattern.search(script.text)
+
+
 def get_preloaded_state(text: str) -> dict[str, Any]:
     """HTMLテキストから `__PRELOADED_STATE__` を抽出して辞書として返す。
 
@@ -27,32 +37,10 @@ def get_preloaded_state(text: str) -> dict[str, Any]:
     Returns:
         抽出した状態辞書。見つからなかった場合は空の辞書。
     """
-    soup = BeautifulSoup(text, "lxml")
-    script = soup.find("script", string=PRELOADED_STATE_PATTERN)  # pyright: ignore[reportCallIssue, reportArgumentType, reportUnknownVariableType], # ty: ignore[no-matching-overload]
+    if match := _get(text, PRELOADED_STATE_PATTERN):
+        return json.loads(match.group(1))
 
-    if not isinstance(script, Tag):
-        return {}
-
-    match = PRELOADED_STATE_PATTERN.search(script.text)
-
-    if match is None:
-        return {}  # pragma: no cover
-
-    return json.loads(match.group(1))
-
-
-def _parse_datetime(date_str: str) -> tuple[datetime.date, datetime.time]:
-    """月日/日付/時刻文字列を解釈する。"""
-    if re.match(r"^\d{4}/\d{2}$", date_str):
-        # "2023/10" のような年月形式の場合
-        return parse_year_month(date_str), datetime.time(0, 0)
-
-    if "/" in date_str:
-        # "10/29" のような日付形式の場合
-        return parse_month_day(date_str), datetime.time(15, 30)  # 取引終了時刻を想定
-
-    # "14:45" のような時刻形式の場合
-    return today(), parse_time(date_str)
+    return {}
 
 
 def parse_quote(text: str) -> pl.DataFrame:
@@ -161,3 +149,58 @@ def iter_performance(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
     update_datetime = datetime.datetime.fromisoformat(info["updateTime"])
     yield "PerformanceDate", update_datetime.date()
     yield "PerformanceTime", update_datetime.time()
+
+
+PRELOADED_STORE_PATTERN = re.compile(r'\\"preloadedStore\\":(.*)')
+
+
+def get_preloaded_store(text: str) -> dict[str, Any]:
+    """HTMLテキストから `preloadedStore` を抽出して辞書として返す。
+
+    Args:
+        text: HTMLテキスト。
+
+    Returns:
+        抽出した状態辞書。見つからなかった場合は空の辞書。
+    """
+    if match := _get(text, PRELOADED_STORE_PATTERN):
+        if store := _extract_content(match.group(1)):
+            store = store.replace('\\"', '"')
+            return json.loads(store)
+
+    return {}
+
+
+def _parse_datetime(date_str: str) -> tuple[datetime.date, datetime.time]:
+    """月日/日付/時刻文字列を解釈する。"""
+    if re.match(r"^\d{4}/\d{2}$", date_str):
+        # "2023/10" のような年月形式の場合
+        return parse_year_month(date_str), datetime.time(0, 0)
+
+    if "/" in date_str:
+        # "10/29" のような日付形式の場合
+        return parse_month_day(date_str), datetime.time(15, 30)  # 取引終了時刻を想定
+
+    # "14:45" のような時刻形式の場合
+    return today(), parse_time(date_str)
+
+
+def _extract_content(text: str) -> str:
+    start_index = text.find("{")
+    if start_index == -1:
+        return ""
+
+    brace_count = 0
+    end_index = -1
+    for i, char in enumerate(text[start_index:]):
+        if char == "{":
+            brace_count += 1
+        elif char == "}":
+            brace_count -= 1
+            if brace_count == 0:
+                end_index = start_index + i
+                break
+
+    if end_index == -1:
+        return ""
+    return text[start_index : end_index + 1]
