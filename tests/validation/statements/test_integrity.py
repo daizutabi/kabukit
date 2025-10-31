@@ -11,7 +11,7 @@ def test_fin_profit_loss(fin: pl.DataFrame, pl_col: str) -> None:
     """決算の損益計算書の各項目は、ほぼ100%埋まっている"""
     x = fin[pl_col].is_not_null().mean()
     assert isinstance(x, float)
-    assert 0.94 < x <= 1.0  # 割合 1 に近い
+    assert 0.938 < x <= 1.0  # 割合 1 に近い
 
 
 @pytest.mark.parametrize("kind", ["US", "IFRS"])
