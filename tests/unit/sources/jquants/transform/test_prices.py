@@ -5,13 +5,13 @@ from typing import Any
 import polars as pl
 import pytest
 
+from kabukit.sources.jquants.transform.prices import transform
+
 pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
 def df() -> pl.DataFrame:
-    from kabukit.sources.jquants.transform.prices import transform
-
     return pl.DataFrame(
         {
             "Date": ["2023-01-01", "2023-01-02"],

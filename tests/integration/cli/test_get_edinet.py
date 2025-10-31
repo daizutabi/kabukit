@@ -8,6 +8,7 @@ from polars.testing import assert_frame_equal
 from typer.testing import CliRunner
 
 from kabukit.cli.app import app
+from kabukit.utils.datetime import today
 
 from .conftest import MOCK_DATE, MOCK_DATE_OBJ, MOCK_DF
 
@@ -36,8 +37,6 @@ def get_cache_files(cache_dir: Path) -> list[Path]:
 
 
 def test_get_edinet(mock_get_edinet: AsyncMock, mock_cache_dir: Path) -> None:
-    from kabukit.utils.datetime import today
-
     result = runner.invoke(app, ["get", "edinet"])
 
     assert result.exit_code == 0

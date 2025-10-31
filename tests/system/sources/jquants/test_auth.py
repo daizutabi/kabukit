@@ -7,7 +7,8 @@ import polars as pl
 import pytest
 from httpx import HTTPStatusError
 
-from kabukit.sources.jquants.client import JQuantsClient
+from kabukit.sources.jquants.client import AuthKey, JQuantsClient
+from kabukit.utils.config import save_config_key
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -45,9 +46,6 @@ async def test_auth_and_reread_from_config(
     mocker: MockerFixture,
     tmp_path: Path,
 ) -> None:
-    from kabukit.sources.jquants.client import AuthKey
-    from kabukit.utils.config import save_config_key
-
     mocker.patch(
         "kabukit.utils.config.get_config_path",
         return_value=tmp_path / "config.toml",

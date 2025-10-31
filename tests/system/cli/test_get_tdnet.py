@@ -6,6 +6,7 @@ import pytest
 from typer.testing import CliRunner
 
 from kabukit.cli.app import app
+from kabukit.utils.datetime import today
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -30,8 +31,6 @@ def test_get_tdnet(mock_sub_dir: Path) -> None:
 
 
 def test_get_tdnet_date(mock_sub_dir: Path) -> None:
-    from kabukit.utils.datetime import today
-
     date = today(as_str=True)
     result = runner.invoke(app, ["get", "tdnet", date])
 

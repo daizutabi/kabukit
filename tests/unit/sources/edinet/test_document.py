@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+from kabukit.sources.edinet.document import read_csv
+
 
 def test_read_csv() -> None:
-    from kabukit.sources.edinet.document import read_csv
-
     data = "col1\tcol2\n1\t2\n3\t4".encode("utf-16-le")
     df = read_csv(data)
     assert df.columns == ["col1", "col2"]

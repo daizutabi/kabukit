@@ -7,6 +7,7 @@ import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
 
+from kabukit.sources.edinet.batch import get_documents, get_list
 from kabukit.sources.edinet.client import EdinetClient
 
 if TYPE_CHECKING:
@@ -47,8 +48,6 @@ def mock_edinet_client(mocker: MockerFixture) -> AsyncMock:
 
 
 async def test_get_list_single_date(mock_edinet_client: AsyncMock) -> None:
-    from kabukit.sources.edinet.batch import get_list
-
     target_date = datetime.date(2025, 10, 10)
     await get_list(target_date)
 
@@ -56,8 +55,6 @@ async def test_get_list_single_date(mock_edinet_client: AsyncMock) -> None:
 
 
 async def test_get_documents_single_doc_id(mock_edinet_client: AsyncMock) -> None:
-    from kabukit.sources.edinet.batch import get_documents
-
     await get_documents("doc1", pdf=True)
 
     mock_edinet_client.get_document.assert_awaited_once_with("doc1", pdf=True)
@@ -67,8 +64,6 @@ async def test_get_list_days(
     mock_get_past_dates: MagicMock,
     mock_gather_get: AsyncMock,
 ) -> None:
-    from kabukit.sources.edinet.batch import get_list
-
     mock_get_past_dates.return_value = [
         datetime.date(2023, 1, 3),
         datetime.date(2023, 1, 2),
@@ -106,8 +101,6 @@ async def test_get_list_years(
     mock_get_past_dates: MagicMock,
     mock_gather_get: AsyncMock,
 ) -> None:
-    from kabukit.sources.edinet.batch import get_list
-
     mock_get_past_dates.return_value = [
         datetime.date(2023, 1, 1),
         datetime.date(2022, 1, 1),
@@ -132,8 +125,6 @@ async def test_get_list_years(
 
 
 async def test_get_list_invalid_date(mock_gather_get: AsyncMock) -> None:
-    from kabukit.sources.edinet.batch import get_list
-
     mock_gather_get.return_value = pl.DataFrame()
 
     result = await get_list(["2025-10-10"])
@@ -141,8 +132,6 @@ async def test_get_list_invalid_date(mock_gather_get: AsyncMock) -> None:
 
 
 async def test_get_documents_csv(mock_gather_get: AsyncMock) -> None:
-    from kabukit.sources.edinet.batch import get_documents
-
     mock_gather_get.return_value = pl.DataFrame({"DocumentId": [3]})
 
     result = await get_documents(
@@ -167,8 +156,6 @@ async def test_get_documents_csv(mock_gather_get: AsyncMock) -> None:
 
 
 async def test_get_documents_pdf(mock_gather_get: AsyncMock) -> None:
-    from kabukit.sources.edinet.batch import get_documents
-
     mock_gather_get.return_value = pl.DataFrame({"DocumentId": [1]})
 
     await get_documents(["doc1", "doc2"], pdf=True)

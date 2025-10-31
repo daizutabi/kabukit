@@ -11,6 +11,8 @@ import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
 
+from kabukit.utils.cache import _get_cache_filepath, clean, glob, read, write
+
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -27,8 +29,6 @@ def mock_cache_dir(tmp_path: Path, mocker: MockerFixture) -> Path:
 
 
 def test_glob_by_source_and_group(mock_cache_dir: Path) -> None:
-    from kabukit.utils.cache import glob
-
     test_dir = mock_cache_dir / "jquants" / "test"
     test_dir.mkdir(parents=True)
 
@@ -50,8 +50,6 @@ def test_glob_by_source_and_group(mock_cache_dir: Path) -> None:
 
 
 def test_glob_all_recursively(mock_cache_dir: Path) -> None:
-    from kabukit.utils.cache import glob
-
     dir1 = mock_cache_dir / "jquants" / "dir1"
     dir2 = mock_cache_dir / "edinet" / "dir2"
     dir1.mkdir(parents=True)
@@ -71,8 +69,6 @@ def test_glob_all_recursively(mock_cache_dir: Path) -> None:
 
 
 def test_glob_by_group_across_sources(mock_cache_dir: Path) -> None:
-    from kabukit.utils.cache import glob
-
     group1 = mock_cache_dir / "jquants" / "group1"
     group2 = mock_cache_dir / "edinet" / "group1"
     group1.mkdir(parents=True)
@@ -92,8 +88,6 @@ def test_glob_by_group_across_sources(mock_cache_dir: Path) -> None:
 
 
 def test_glob_by_source_recursively(mock_cache_dir: Path) -> None:
-    from kabukit.utils.cache import glob
-
     group1 = mock_cache_dir / "jquants" / "group1"
     group2 = mock_cache_dir / "jquants" / "group2"
     group1.mkdir(parents=True)
@@ -113,8 +107,6 @@ def test_glob_by_source_recursively(mock_cache_dir: Path) -> None:
 
 
 def test_glob_returns_empty_if_no_data(mock_cache_dir: Path) -> None:
-    from kabukit.utils.cache import glob
-
     test_dir = mock_cache_dir / "jquants" / "test"
     test_dir.mkdir(parents=True)
 
@@ -123,8 +115,6 @@ def test_glob_returns_empty_if_no_data(mock_cache_dir: Path) -> None:
 
 
 def test_get_cache_filepath_with_nonexistent_name(mock_cache_dir: Path) -> None:
-    from kabukit.utils.cache import _get_cache_filepath
-
     test_dir = mock_cache_dir / "jquants" / "test"
     test_dir.mkdir(parents=True)
 
@@ -133,8 +123,6 @@ def test_get_cache_filepath_with_nonexistent_name(mock_cache_dir: Path) -> None:
 
 
 def test_get_cache_filepath_with_name(mock_cache_dir: Path) -> None:
-    from kabukit.utils.cache import _get_cache_filepath
-
     test_dir = mock_cache_dir / "jquants" / "test"
     test_dir.mkdir(parents=True)
 
@@ -146,8 +134,6 @@ def test_get_cache_filepath_with_name(mock_cache_dir: Path) -> None:
 
 
 def test_get_cache_filepath_no_name_latest_file(mock_cache_dir: Path) -> None:
-    from kabukit.utils.cache import _get_cache_filepath
-
     test_dir = mock_cache_dir / "jquants" / "test"
     test_dir.mkdir(parents=True)
 
@@ -169,8 +155,6 @@ def test_get_cache_filepath_no_name_latest_file(mock_cache_dir: Path) -> None:
 
 
 def test_get_cache_filepath_no_data_found(mock_cache_dir: Path) -> None:
-    from kabukit.utils.cache import _get_cache_filepath
-
     test_dir = mock_cache_dir / "jquants" / "test"
     test_dir.mkdir(parents=True)
 
@@ -179,8 +163,6 @@ def test_get_cache_filepath_no_data_found(mock_cache_dir: Path) -> None:
 
 
 def test_read(mock_cache_dir: Path) -> None:
-    from kabukit.utils.cache import read
-
     cache_dir = mock_cache_dir / "jquants" / "test"
     cache_dir.mkdir(parents=True)
 
@@ -192,8 +174,6 @@ def test_read(mock_cache_dir: Path) -> None:
 
 
 def test_write_no_name(mock_cache_dir: Path) -> None:
-    from kabukit.utils.cache import write
-
     data = pl.DataFrame({"A": [1, 2], "B": ["x", "y"]})
     path = write("jquants", "test", data)
 
@@ -204,8 +184,6 @@ def test_write_no_name(mock_cache_dir: Path) -> None:
 
 
 def test_write_with_name(mock_cache_dir: Path) -> None:
-    from kabukit.utils.cache import write
-
     data = pl.DataFrame({"A": [1, 2], "B": ["x", "y"]})
     path = write("jquants", "test", data, name="my_file")
 
@@ -215,8 +193,6 @@ def test_write_with_name(mock_cache_dir: Path) -> None:
 
 
 def test_clean_all_cache(mock_cache_dir: Path) -> None:
-    from kabukit.utils.cache import clean
-
     (mock_cache_dir / "jquants" / "group1").mkdir(parents=True)
     (mock_cache_dir / "jquants" / "group1" / "file1.parquet").touch()
     (mock_cache_dir / "edinet" / "group2").mkdir(parents=True)
@@ -231,8 +207,6 @@ def test_clean_all_cache(mock_cache_dir: Path) -> None:
 
 
 def test_clean_by_source_and_group(mock_cache_dir: Path) -> None:
-    from kabukit.utils.cache import clean
-
     (mock_cache_dir / "jquants" / "group_to_remove").mkdir(parents=True)
     (mock_cache_dir / "jquants" / "group_to_remove" / "file.parquet").touch()
     (mock_cache_dir / "jquants" / "another_group").mkdir(parents=True)
@@ -248,8 +222,6 @@ def test_clean_by_source_and_group(mock_cache_dir: Path) -> None:
 
 
 def test_clean_only_source(mock_cache_dir: Path) -> None:
-    from kabukit.utils.cache import clean
-
     (mock_cache_dir / "jquants" / "some_group").mkdir(parents=True)
     assert (mock_cache_dir / "jquants").exists()
 
@@ -259,8 +231,6 @@ def test_clean_only_source(mock_cache_dir: Path) -> None:
 
 
 def test_clean_only_group_not_supported(mocker: MockerFixture) -> None:
-    from kabukit.utils.cache import clean
-
     mock_get_cache_dir = mocker.patch("kabukit.utils.cache.get_cache_dir")
 
     clean(group="group")
@@ -269,8 +239,6 @@ def test_clean_only_group_not_supported(mocker: MockerFixture) -> None:
 
 
 def test_clean_no_dir(mocker: MockerFixture, tmp_path: Path) -> None:
-    from kabukit.utils.cache import clean
-
     mock_get_cache_dir = mocker.patch("kabukit.utils.cache.get_cache_dir")
     mock_get_cache_dir.return_value = tmp_path
 

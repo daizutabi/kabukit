@@ -8,6 +8,7 @@ from polars.testing import assert_frame_equal
 from typer.testing import CliRunner
 
 from kabukit.cli.app import app
+from kabukit.utils.datetime import today
 
 from .conftest import MOCK_CODE, MOCK_DATE, MOCK_DATE_OBJ, MOCK_DF
 
@@ -39,8 +40,6 @@ def test_get_prices(
     mock_get_prices: AsyncMock,
     mock_cache_dir: Path,
 ) -> None:
-    from kabukit.utils.datetime import today
-
     result = runner.invoke(app, ["get", "prices"])
 
     assert result.exit_code == 0

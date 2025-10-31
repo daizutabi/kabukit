@@ -8,6 +8,7 @@ from typer.testing import CliRunner
 
 from kabukit.cli.app import app
 from kabukit.cli.get import CustomTqdm
+from kabukit.utils.datetime import today
 
 from .conftest import MOCK_DATE, MOCK_DATE_OBJ, MOCK_DF, MOCK_PATH
 
@@ -31,8 +32,6 @@ def mock_get_edinet(mocker: MockerFixture) -> AsyncMock:
 
 
 def test_get_edinet(mock_get_edinet: AsyncMock, mock_cache_write: MagicMock) -> None:
-    from kabukit.utils.datetime import today
-
     result = runner.invoke(app, ["get", "edinet"])
 
     assert result.exit_code == 0

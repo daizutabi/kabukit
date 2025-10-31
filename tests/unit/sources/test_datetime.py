@@ -8,6 +8,8 @@ import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
 
+from kabukit.sources.datetime import _CalendarCacheManager, _with_date, with_date
+
 if TYPE_CHECKING:
     from typing import Any
     from unittest.mock import AsyncMock, MagicMock
@@ -18,8 +20,6 @@ pytestmark = pytest.mark.unit
 
 
 def test_with_date_disclosed() -> None:
-    from kabukit.sources.datetime import _with_date
-
     df = pl.DataFrame(
         {
             "DisclosedDate": [
@@ -60,8 +60,6 @@ def test_with_date_disclosed() -> None:
 
 
 def test_with_date_submit() -> None:
-    from kabukit.sources.datetime import _with_date
-
     df = pl.DataFrame(
         {
             "SubmittedDate": [
@@ -102,8 +100,6 @@ def test_with_date_submit() -> None:
 
 
 def test_with_date_error() -> None:
-    from kabukit.sources.datetime import _with_date
-
     with pytest.raises(ValueError, match="DataFrame must contain either "):
         _with_date(pl.DataFrame(), [])
 
@@ -111,7 +107,6 @@ def test_with_date_error() -> None:
 @pytest.fixture(autouse=True)
 def reset_cache(mocker: MockerFixture):
     """各テストの実行前にカレンダーキャッシュをリセットする"""
-    from kabukit.sources.datetime import _CalendarCacheManager
 
     mocker.patch(
         "kabukit.sources.datetime._calendar_cache_manager",
@@ -141,6 +136,7 @@ async def test_calendar_cache_manager_fetch_and_cache(
     MockJQuantsClient: MagicMock,  # noqa: N803
 ) -> None:
     """キャッシュマネージャーが初回はデータを取得し、2回目はキャッシュを返すことをテストする"""
+    # ここでインポートする理由はfixtureの影響を受けるため
     from kabukit.sources.datetime import _calendar_cache_manager
 
     mock_jquants_client.get_calendar.return_value = pl.DataFrame(
@@ -165,6 +161,7 @@ async def test_calendar_cache_manager_concurrency(
     MockJQuantsClient: MagicMock,  # noqa: N803
 ) -> None:
     """複数のコルーチンから同時に呼び出されても、データ取得は一度しか実行されないことをテストする"""
+    # ここでインポートする理由はfixtureの影響を受けるため
     from kabukit.sources.datetime import _calendar_cache_manager
 
     async def slow_get_calendar(*_args: Any, **_kwargs: Any):
@@ -191,7 +188,6 @@ async def test_calendar_cache_manager_concurrency(
 
 async def test_async_with_date(mocker: MockerFixture) -> None:
     """非同期関数 with_date が、依存する関数を正しく呼び出すことをテストする"""
-    from kabukit.sources.datetime import with_date
 
     # 依存する関数をモック化
     mock_get_holidays = mocker.patch(

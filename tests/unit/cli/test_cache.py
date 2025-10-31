@@ -8,6 +8,7 @@ import pytest
 from typer.testing import CliRunner
 
 from kabukit.cli.app import app
+from kabukit.cli.cache import format_size
 
 if TYPE_CHECKING:
     from unittest.mock import MagicMock
@@ -127,6 +128,4 @@ def test_cache_clean_without_args(mocker: MockerFixture) -> None:
     ],
 )
 def test_format_size(size: int, expected: str) -> None:
-    from kabukit.cli.cache import format_size
-
     assert format_size(size) == expected

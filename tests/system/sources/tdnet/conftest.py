@@ -6,6 +6,7 @@ import pytest
 import pytest_asyncio
 
 from kabukit.sources.tdnet.client import TdnetClient
+from kabukit.sources.tdnet.parser import get_table
 
 if TYPE_CHECKING:
     import datetime
@@ -42,8 +43,6 @@ async def page(date: datetime.date):
 
 @pytest.fixture(scope="module")
 def table(page: str) -> Tag:
-    from kabukit.sources.tdnet.parser import get_table
-
     table = get_table(page)
     assert table is not None
     return table

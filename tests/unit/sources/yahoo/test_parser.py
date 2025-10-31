@@ -7,6 +7,18 @@ import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
 
+from kabukit.sources.yahoo.parser import (
+    _parse_datetime,
+    get_preloaded_state,
+    iter_index,
+    iter_performance,
+    iter_press_release,
+    iter_previous_price,
+    iter_price,
+    parse_quote,
+)
+from kabukit.utils.datetime import today
+
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
@@ -14,8 +26,6 @@ pytestmark = pytest.mark.unit
 
 
 def test_get_preloaded_state() -> None:
-    from kabukit.sources.yahoo.parser import get_preloaded_state
-
     text = """\
         <script>
             window.__PRELOADED_STATE__ = {"key": "value"};
@@ -26,8 +36,6 @@ def test_get_preloaded_state() -> None:
 
 
 def test_get_preloaded_state_no_tag() -> None:
-    from kabukit.sources.yahoo.parser import get_preloaded_state
-
     text = """\
         <a>
             window.__PRELOADED_STATE__ = {"key": "value"};
@@ -51,8 +59,6 @@ def test_parse_datetime(
     date: datetime.date,
     time: datetime.time,
 ) -> None:
-    from kabukit.sources.yahoo.parser import _parse_datetime
-
     today = datetime.date(2024, 6, 14)
     mocker.patch("kabukit.utils.datetime.today", return_value=today)
     mocker.patch("kabukit.sources.yahoo.parser.today", return_value=today)
@@ -61,8 +67,6 @@ def test_parse_datetime(
 
 
 def test_parse_quote() -> None:
-    from kabukit.sources.yahoo.parser import parse_quote
-
     text = """\
         <script>
             window.__PRELOADED_STATE__ = {"key": "value"};
@@ -74,16 +78,11 @@ def test_parse_quote() -> None:
 
 
 def test_parse_quote_empty() -> None:
-    from kabukit.sources.yahoo.parser import parse_quote
-
     df = parse_quote("")
     assert_frame_equal(df, pl.DataFrame())
 
 
 def test_iter_price() -> None:
-    from kabukit.sources.yahoo.parser import iter_price
-    from kabukit.utils.datetime import today
-
     state = {
         "mainStocksPriceBoard": {
             "priceBoard": {
@@ -102,9 +101,6 @@ def test_iter_price() -> None:
 
 
 def test_iter_previous_price() -> None:
-    from kabukit.sources.yahoo.parser import iter_previous_price
-    from kabukit.utils.datetime import today
-
     state = {
         "mainStocksDetail": {
             "detail": {
@@ -123,9 +119,6 @@ def test_iter_previous_price() -> None:
 
 
 def test_iter_index() -> None:
-    from kabukit.sources.yahoo.parser import iter_index
-    from kabukit.utils.datetime import today
-
     state = {
         "mainStocksDetail": {
             "referenceIndex": {
@@ -155,8 +148,6 @@ def test_iter_index() -> None:
 
 
 def test_iter_press_release() -> None:
-    from kabukit.sources.yahoo.parser import iter_press_release
-
     state = {
         "mainStocksPressReleaseSummary": {
             "summary": "abc",
@@ -173,8 +164,6 @@ def test_iter_press_release() -> None:
 
 
 def test_iter_performance() -> None:
-    from kabukit.sources.yahoo.parser import iter_performance
-
     state = {
         "stockPerformance": {
             "summaryInfo": {
