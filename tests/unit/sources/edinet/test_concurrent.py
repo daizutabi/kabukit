@@ -29,7 +29,7 @@ def dummy_callback(df: pl.DataFrame) -> pl.DataFrame:
 
 @pytest.fixture
 def mock_get(mocker: MockerFixture) -> AsyncMock:
-    return mocker.patch("kabukit.utils.concurrent.get", new_callable=mocker.AsyncMock)
+    return mocker.patch("kabukit.utils.gather.get", new_callable=mocker.AsyncMock)
 
 
 @pytest.fixture

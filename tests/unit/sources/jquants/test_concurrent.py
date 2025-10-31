@@ -98,7 +98,7 @@ async def test_get_target_codes(mock_get_info: AsyncMock) -> None:
 
 @pytest.fixture
 def mock_get(mocker: MockerFixture) -> AsyncMock:
-    return mocker.patch("kabukit.utils.concurrent.get", new_callable=mocker.AsyncMock)
+    return mocker.patch("kabukit.utils.gather.get", new_callable=mocker.AsyncMock)
 
 
 @pytest.fixture

@@ -37,7 +37,7 @@ async def test_get_list_multiple_dates(mocker: MockerFixture) -> None:
     )
     mock_concurrent_get = mocker.AsyncMock(return_value=mock_df_concat)
     mocker.patch(
-        "kabukit.sources.tdnet.concurrent.concurrent.get",
+        "kabukit.sources.tdnet.concurrent.gather.get",
         new=mock_concurrent_get,
     )
 
@@ -68,7 +68,7 @@ async def test_get_list_no_dates_specified(mocker: MockerFixture) -> None:
     )
     mock_concurrent_get = mocker.AsyncMock(return_value=mock_df_concat)
     mocker.patch(
-        "kabukit.sources.tdnet.concurrent.concurrent.get",
+        "kabukit.sources.tdnet.concurrent.gather.get",
         new=mock_concurrent_get,
     )
 
@@ -90,7 +90,7 @@ async def test_get_list_no_dates_specified(mocker: MockerFixture) -> None:
 async def test_get_list_returns_empty_dataframe(mocker: MockerFixture) -> None:
     mock_concurrent_get = mocker.AsyncMock(return_value=pl.DataFrame())
     mocker.patch(
-        "kabukit.sources.tdnet.concurrent.concurrent.get",
+        "kabukit.sources.tdnet.concurrent.gather.get",
         new=mock_concurrent_get,
     )
 

@@ -30,7 +30,7 @@ async def test_get_quote_multiple_codes(mocker: MockerFixture) -> None:
     mock_df = pl.DataFrame({"Code": [3, 2, 1]})
     mock_concurrent_get = mocker.AsyncMock(return_value=mock_df)
     mocker.patch(
-        "kabukit.sources.yahoo.concurrent.concurrent.get",
+        "kabukit.sources.yahoo.concurrent.gather.get",
         new=mock_concurrent_get,
     )
 
@@ -60,7 +60,7 @@ async def test_get_quote_no_codes_specified(mocker: MockerFixture) -> None:
     mock_df = pl.DataFrame({"Code": [3, 2, 1]})
     mock_concurrent_get = mocker.AsyncMock(return_value=mock_df)
     mocker.patch(
-        "kabukit.sources.yahoo.concurrent.concurrent.get",
+        "kabukit.sources.yahoo.concurrent.gather.get",
         new=mock_concurrent_get,
     )
 

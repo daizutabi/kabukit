@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from kabukit.sources.jquants.concurrent import get_target_codes
-from kabukit.utils import concurrent
+from kabukit.utils import gather
 
 from .client import YahooClient
 
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
     import polars as pl
 
-    from kabukit.utils.concurrent import Callback, Progress
+    from kabukit.utils.gather import Callback, Progress
 
 
 async def get_quote(
@@ -51,7 +51,7 @@ async def get_quote(
     if codes is None:
         codes = await get_target_codes()
 
-    data = await concurrent.get(
+    data = await gather.get(
         YahooClient,
         "quote",
         codes,
