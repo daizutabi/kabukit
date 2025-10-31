@@ -164,7 +164,7 @@ def get_preloaded_store(text: str) -> dict[str, Any]:
         抽出した状態辞書。見つからなかった場合は空の辞書。
     """
     if match := _get(text, PRELOADED_STORE_PATTERN):
-        if store := _extract_json(match.group(1)):
+        if store := _extract_content(match.group(1)):
             store = store.replace('\\"', '"')
             return json.loads(store)
 
@@ -185,7 +185,7 @@ def _parse_datetime(date_str: str) -> tuple[datetime.date, datetime.time]:
     return today(), parse_time(date_str)
 
 
-def _extract_json(text: str) -> str:
+def _extract_content(text: str) -> str:
     start_index = text.find("{")
     if start_index == -1:
         return ""

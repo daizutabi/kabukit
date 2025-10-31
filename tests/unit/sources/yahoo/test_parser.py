@@ -8,8 +8,10 @@ import pytest
 from polars.testing import assert_frame_equal
 
 from kabukit.sources.yahoo.parser import (
+    _extract_content,
     _parse_datetime,
     get_preloaded_state,
+    get_preloaded_store,
     iter_index,
     iter_performance,
     iter_press_release,
@@ -42,28 +44,6 @@ def test_get_preloaded_state_no_tag() -> None:
         </a>
     """
     assert get_preloaded_state(text) == {}
-
-
-@pytest.mark.parametrize(
-    ("date_str", "date", "time"),
-    [
-        ("6/14", datetime.date(2024, 6, 14), datetime.time(15, 30)),
-        ("6/15", datetime.date(2023, 6, 15), datetime.time(15, 30)),
-        ("12:30", datetime.date(2024, 6, 14), datetime.time(12, 30)),
-        ("2025/10", datetime.date(2025, 10, 31), datetime.time(0, 0)),
-    ],
-)
-def test_parse_datetime(
-    mocker: MockerFixture,
-    date_str: str,
-    date: datetime.date,
-    time: datetime.time,
-) -> None:
-    today = datetime.date(2024, 6, 14)
-    mocker.patch("kabukit.utils.datetime.today", return_value=today)
-    mocker.patch("kabukit.sources.yahoo.parser.today", return_value=today)
-
-    assert _parse_datetime(date_str) == (date, time)
 
 
 def test_parse_quote() -> None:
@@ -185,3 +165,48 @@ def test_iter_performance() -> None:
         ("PerformanceDate", datetime.date(2024, 6, 14)),
         ("PerformanceTime", datetime.time(10, 0)),
     ]
+
+
+def test_get_preloaded_store() -> None:
+    text = r"""<script>\"preloadedStore\":{\"key\":\"value\"}</script>"""
+    result = get_preloaded_store(text)
+    assert result == {"key": "value"}
+
+
+def test_get_preloaded_store_empty() -> None:
+    assert get_preloaded_store("<script></script>") == {}
+
+
+@pytest.mark.parametrize(
+    ("date_str", "date", "time"),
+    [
+        ("6/14", datetime.date(2024, 6, 14), datetime.time(15, 30)),
+        ("6/15", datetime.date(2023, 6, 15), datetime.time(15, 30)),
+        ("12:30", datetime.date(2024, 6, 14), datetime.time(12, 30)),
+        ("2025/10", datetime.date(2025, 10, 31), datetime.time(0, 0)),
+    ],
+)
+def test_parse_datetime(
+    mocker: MockerFixture,
+    date_str: str,
+    date: datetime.date,
+    time: datetime.time,
+) -> None:
+    today = datetime.date(2024, 6, 14)
+    mocker.patch("kabukit.utils.datetime.today", return_value=today)
+    mocker.patch("kabukit.sources.yahoo.parser.today", return_value=today)
+
+    assert _parse_datetime(date_str) == (date, time)
+
+
+@pytest.mark.parametrize(
+    ("content", "expected"),
+    [
+        ("", ""),
+        ("{", ""),
+        ("{a}", "{a}"),
+        ("{a{b}}", "{a{b}}"),
+    ],
+)
+def test_extract_content(content: str, expected: str) -> None:
+    assert _extract_content(content) == expected
