@@ -87,7 +87,7 @@ docs = [
   "ipykernel>=7.0.0",
   "mkapi>=4.5.0",
   "mkdocs-material>=9.6.21",
-  "mkdocs-nbsync>=0.2.1",
+  "mkdocs-nbsync>=0.2.2",
   "nbconvert>=7.16.6",
   "pymdownx-cjk-autojoin>=0.2.1",
 ]
