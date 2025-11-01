@@ -2,27 +2,9 @@ from __future__ import annotations
 
 import polars as pl
 import typer
+from rich import box
 from rich.console import Console
 from rich.table import Table
-
-
-def display_single_row_dataframe(df: pl.DataFrame) -> None:
-    """DataFrameが単一行の場合、rich Tableで整形して表示します。"""
-
-    table = Table(
-        show_header=True,
-        header_style="bold magenta",
-    )
-    table.add_column("Column Name", style="cyan", no_wrap=True)
-    table.add_column("Data Type", style="yellow")
-    table.add_column("Value", style="green")
-
-    for col_name, dtype in df.schema.items():
-        value = df[0, col_name]
-        table.add_row(col_name, str(dtype), str(value))
-
-    console = Console()
-    console.print(table)
 
 
 def display_dataframe(df: pl.DataFrame) -> None:
@@ -37,3 +19,21 @@ def display_dataframe(df: pl.DataFrame) -> None:
         display_single_row_dataframe(df)
     else:
         typer.echo(df)
+
+
+def display_single_row_dataframe(df: pl.DataFrame) -> None:
+    """DataFrameが単一行の場合、rich Tableで整形して表示します。"""
+    typer.echo(f"width: {df.width}")
+
+    table = Table(show_header=True, header_style=None, box=box.SQUARE_DOUBLE_HEAD)
+
+    table.add_column("Column Name", no_wrap=True)
+    table.add_column("Data Type")
+    table.add_column("Value")
+
+    for col_name, dtype in df.schema.items():
+        value = df[0, col_name]
+        table.add_row(col_name, str(dtype), str(value))
+
+    console = Console()
+    console.print(table)
