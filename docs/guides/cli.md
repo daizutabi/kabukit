@@ -135,20 +135,20 @@ J-Quants API から上場銘柄一覧を取得します。
 
 銘柄コード (4桁) を指定すると、指定した銘柄の最新情報を取得できます。
 
-```console exec="on" source="console"
+```console exec="1" source="1" result="text"
 $ kabu get info 7203
 ```
 
 日付 (YYYYMMDD) を指定すると、指定した日付または
 翌営業日における全銘柄の情報を取得できます。
 
-```console exec="on" source="console"
+```console exec="1" source="1" result="text"
 $ kabu get info 20230101
 ```
 
 銘柄コードを省略すると、当日または翌営業日における全銘柄の最新情報を取得できます。
 
-```console exec="on" source="console"
+```console exec="1" source="1" result="text"
 $ kabu get info
 ```
 
@@ -173,21 +173,21 @@ J-Quants API から財務情報を取得します。
 
 銘柄コードを指定すると、指定した銘柄の全期間分の財務情報を取得できます。
 
-```console exec="on" source="console"
+```console exec="1" source="1" result="text"
 $ kabu get statements 7203
 ```
 
 日付を指定すると、指定した日付に
 開示された全銘柄の財務情報を取得できます。
 
-```console exec="on" source="console"
+```console exec="1" source="1" result="text"
 $ kabu get statements 20251023
 ```
 
 引数を省略すると、当日に
 開示された全銘柄の財務情報を取得できます。
 
-```console exec="on" source="console"
+```console exec="1" source="1" result="text"
 $ kabu get statements
 ```
 
@@ -226,21 +226,21 @@ J-Quants API から株価情報を取得します。
 
 銘柄コードを指定すると、指定した銘柄の全期間分の株価情報を取得できます。
 
-```console exec="on" source="console"
+```console exec="1" source="1" result="text"
 $ kabu get prices 7203
 ```
 
 日付を指定すると、指定した日付の
 全銘柄の株価情報を取得できます。
 
-```console exec="on" source="console"
+```console exec="1" source="1" result="text"
 $ kabu get prices 20251023
 ```
 
 引数を省略すると、当日の
 全銘柄の株価情報を取得できます。
 
-```console exec="on" source="console"
+```console exec="1" source="1" result="text"
 $ kabu get prices
 ```
 
@@ -297,14 +297,14 @@ EDINET API から提出書類一覧を取得します。
 日付を指定すると、指定した日付に
 提出された書類一覧を取得できます。
 
-```console exec="on" source="console"
+```console exec="1" source="1" result="text"
 $ kabu get edinet 20251010
 ```
 
 日付を指定しないと、当日に
 提出された書類一覧を取得できます。
 
-```console exec="on" source="console"
+```console exec="1" source="1" result="text"
 $ kabu get edinet
 ```
 
@@ -339,14 +339,14 @@ TDnet から開示書類一覧を取得します。
 日付を指定すると、指定した日付に
 開示された書類一覧を取得できます。
 
-```console exec="on" source="console"
+```console exec="1" source="1" result="text"
 $ kabu get tdnet 20251010
 ```
 
 日付を指定しないと、当日に
 開示された書類一覧を取得できます。
 
-```console exec="on" source="console"
+```console exec="1" source="1" result="text"
 $ kabu get tdnet
 ```
 
