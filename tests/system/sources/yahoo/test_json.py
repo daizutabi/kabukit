@@ -6,7 +6,7 @@ from typing import Any
 
 def test_state_price(state: dict[str, Any]) -> None:
     x = state["mainStocksPriceBoard"]["priceBoard"]
-    assert len(x) == 27
+    assert len(x) in [26, 27]
     assert "price" in x
     assert "priceDateTime" in x
     assert re.match(r"^\d+[/:]\d+$", x["priceDateTime"])
@@ -40,13 +40,15 @@ def test_state_press_release(state: dict[str, Any]) -> None:
 
 
 def test_state_performance(state: dict[str, Any]) -> None:
-    x = state["stockPerformance"]["summaryInfo"]
-    assert len(x) == 5
-    assert "potential" in x
-    assert "profitability" in x
-    assert "stability" in x
-    assert "summary" in x
-    assert "updateTime" in x
+    x = state["stockPerformance"]
+    if "summaryInfo" in x:
+        x = x["summaryInfo"]
+        assert len(x) == 5
+        assert "potential" in x
+        assert "profitability" in x
+        assert "stability" in x
+        assert "summary" in x
+        assert "updateTime" in x
 
 
 def test_store_preformance(store: dict[str, Any]) -> None:
@@ -63,4 +65,4 @@ def test_store_forcast(store: dict[str, Any]) -> None:
     x = store["performance"]["forecast"]
 
     assert isinstance(x, dict)
-    assert len(x) == 7  # pyright: ignore[reportUnknownArgumentType]
+    assert len(x) in [5, 7]  # pyright: ignore[reportUnknownArgumentType]

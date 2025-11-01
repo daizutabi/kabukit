@@ -37,9 +37,11 @@ def test_state_iter_index(state: dict[str, Any]) -> None:
     assert isinstance(x["IssuedSharesDate"], datetime.date)
     assert isinstance(x["BookValuePerShare"], float)
     assert isinstance(x["BookValuePerShareDate"], datetime.date)
-    assert isinstance(x["EarningsPerShare"], float)
+    if x["EarningsPerShare"] is not None:
+        assert isinstance(x["EarningsPerShare"], float)
     assert isinstance(x["EarningsPerShareDate"], datetime.date)
-    assert isinstance(x["DividendPerShare"], float)
+    if x["DividendPerShare"] is not None:
+        assert isinstance(x["DividendPerShare"], float)
     assert isinstance(x["DividendPerShareDate"], datetime.date)
 
 
@@ -54,12 +56,13 @@ def test_state_iter_press_release(state: dict[str, Any]) -> None:
 def test_state_iter_performance(state: dict[str, Any]) -> None:
     x = dict(iter_performance(state))
     assert len(x) == 6
-    assert isinstance(x["PerformanceSummary"], str)
-    assert isinstance(x["PerformancePotential"], str)
-    assert isinstance(x["PerformanceStability"], str)
-    assert isinstance(x["PerformanceProfitability"], str)
-    assert isinstance(x["PerformanceDate"], datetime.date)
-    assert isinstance(x["PerformanceTime"], datetime.time)
+    if x["PerformanceSummary"] is not None:
+        assert isinstance(x["PerformanceSummary"], str)
+        assert isinstance(x["PerformancePotential"], str)
+        assert isinstance(x["PerformanceStability"], str)
+        assert isinstance(x["PerformanceProfitability"], str)
+        assert isinstance(x["PerformanceDate"], datetime.date)
+        assert isinstance(x["PerformanceTime"], datetime.time)
 
 
 def test_parse_quote(quote: str) -> None:

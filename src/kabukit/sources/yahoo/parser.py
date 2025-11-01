@@ -71,7 +71,7 @@ def iter_price(state: dict[str, Any], /) -> Iterator[tuple[str, Any]]:
     """
     detail: dict[str, Any] = state["mainStocksPriceBoard"]["priceBoard"]
 
-    yield "Price", float(detail["price"].replace(",", ""))
+    yield "Price", _float_or_none(detail["price"])
 
     date_str = detail["priceDateTime"]
     date, time = _parse_datetime(date_str)
@@ -91,7 +91,7 @@ def iter_previous_price(state: dict[str, Any], /) -> Iterator[tuple[str, Any]]:
     """
     detail: dict[str, Any] = state["mainStocksDetail"]["detail"]
 
-    yield "PreviousPrice", float(detail["previousPrice"].replace(",", ""))
+    yield "PreviousPrice", _float_or_none(detail["previousPrice"])
 
     date_str = detail["previousPriceDate"]
     date, time = _parse_datetime(date_str)
@@ -117,7 +117,7 @@ def iter_index(state: dict[str, Any], /) -> Iterator[tuple[str, Any]]:
     yield "IssuedSharesDate", date
 
     for p, name in [("b", "BookValue"), ("e", "Earnings"), ("d", "Dividend")]:
-        yield f"{name}PerShare", float(index[f"{p}ps"].replace(",", ""))
+        yield f"{name}PerShare", _float_or_none(index[f"{p}ps"])
         date, _ = _parse_datetime(index[f"{p}psDate"])
         yield f"{name}PerShareDate", date
 
@@ -148,15 +148,28 @@ def iter_performance(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
     Yields:
         tuple[str, Any]: stockPerformance セクション内の主な値。
     """
-    info: dict[str, Any] = state["stockPerformance"]["summaryInfo"]
+    info: dict[str, Any] | None = state["stockPerformance"].get("summaryInfo", None)
 
-    yield "PerformanceSummary", info["summary"]
-    yield "PerformancePotential", info["potential"]
-    yield "PerformanceStability", info["stability"]
-    yield "PerformanceProfitability", info["profitability"]
+    columns = [
+        "PerformanceSummary",
+        "PerformancePotential",
+        "PerformanceStability",
+        "PerformanceProfitability",
+        "PerformanceDate",
+        "PerformanceTime",
+    ]
+
+    if info is None:
+        for column in columns:
+            yield column, None
+        return
+
+    for k, key in enumerate(["summary", "potential", "stability", "profitability"]):
+        yield columns[k], info[key]
+
     update_datetime = datetime.datetime.fromisoformat(info["updateTime"])
-    yield "PerformanceDate", update_datetime.date()
-    yield "PerformanceTime", update_datetime.time()
+    yield columns[4], update_datetime.date()
+    yield columns[5], update_datetime.time()
 
 
 PRELOADED_STORE_PATTERN = re.compile(r'\\"preloadedStore\\":(.*)')
@@ -188,6 +201,14 @@ def parse_performance(text: str) -> pl.DataFrame:
     performance = store["performance"]["performance"]
 
     return pl.DataFrame(performance)
+
+
+def _float_or_none(value: str) -> float | None:
+    """文字列を浮動小数点数に変換する。変換できない場合は None を返す。"""
+    if value == "---":
+        return None
+
+    return float(value.replace(",", ""))
 
 
 def _parse_datetime(date_str: str) -> tuple[datetime.date, datetime.time]:

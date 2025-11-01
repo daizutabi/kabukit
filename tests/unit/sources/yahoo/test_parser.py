@@ -9,6 +9,7 @@ from polars.testing import assert_frame_equal
 
 from kabukit.sources.yahoo.parser import (
     _extract_content,
+    _float_or_none,
     _parse_datetime,
     get_preloaded_state,
     get_preloaded_store,
@@ -183,6 +184,20 @@ def test_iter_performance() -> None:
     ]
 
 
+def test_iter_performance_none() -> None:
+    state = {"stockPerformance": {"a": 1}}
+
+    results = list(iter_performance(state))
+    assert results == [
+        ("PerformanceSummary", None),
+        ("PerformancePotential", None),
+        ("PerformanceStability", None),
+        ("PerformanceProfitability", None),
+        ("PerformanceDate", None),
+        ("PerformanceTime", None),
+    ]
+
+
 def test_get_preloaded_store() -> None:
     text = r"""<script>\"preloadedStore\":{\"key\":\"value\"}</script>"""
     result = get_preloaded_store(text)
@@ -215,6 +230,14 @@ def test_parse_performance_empty(mocker: MockerFixture) -> None:
 
     assert_frame_equal(df, pl.DataFrame())
     mock_get_preloaded_store.assert_called_once_with("abc")
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [("1", 1.0), ("1,234.5", 1234.5), ("---", None)],
+)
+def test_float_or_none(value: str, expected: float | None) -> None:
+    assert _float_or_none(value) == expected
 
 
 @pytest.mark.parametrize(
