@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from typing import Any
+
 import polars as pl
 import pytest
 
-from kabukit.cli.utils import display_dataframe
+from kabukit.cli.utils import display_dataframe, display_value
 
 pytestmark = pytest.mark.unit
 
@@ -66,3 +68,11 @@ def test_display_dataframe_last(
     out = capsys.readouterr().out
     assert "width: 2" in out
     assert "def" in out
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [("a", "a"), (123, "123"), (12.34, "12.34"), (1e10, "10,000,000,000.0")],
+)
+def test_display_value(value: Any, expected: str) -> None:
+    assert display_value(value) == expected
