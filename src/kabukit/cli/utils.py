@@ -12,8 +12,12 @@ def display_dataframe(
     *,
     first: bool = False,
     last: bool = False,
+    quiet: bool = False,
 ) -> None:
     """データフレームを表示します。"""
+    if quiet:
+        return
+
     pl.Config.set_tbl_rows(5)
     pl.Config.set_tbl_cols(6)
     pl.Config.set_tbl_hide_dtype_separator()

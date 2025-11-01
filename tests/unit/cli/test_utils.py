@@ -28,6 +28,15 @@ def test_display_dataframe(
     assert "shape: (2, 2)" in capsys.readouterr().out
 
 
+def test_display_dataframe_quiet(
+    df: pl.DataFrame,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    display_dataframe(df, quiet=True)
+
+    assert capsys.readouterr().out == ""
+
+
 def test_display_single_row_dataframe(
     df: pl.DataFrame,
     capsys: pytest.CaptureFixture[str],
