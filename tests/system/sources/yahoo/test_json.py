@@ -4,24 +4,24 @@ import re
 from typing import Any
 
 
-def test_quote_price(quote: dict[str, Any]) -> None:
-    x = quote["mainStocksPriceBoard"]["priceBoard"]
+def test_state_price(state: dict[str, Any]) -> None:
+    x = state["mainStocksPriceBoard"]["priceBoard"]
     assert len(x) == 27
     assert "price" in x
     assert "priceDateTime" in x
     assert re.match(r"^\d+[/:]\d+$", x["priceDateTime"])
 
 
-def test_quote_previous_price(quote: dict[str, Any]) -> None:
-    x = quote["mainStocksDetail"]["detail"]
+def test_state_previous_price(state: dict[str, Any]) -> None:
+    x = state["mainStocksDetail"]["detail"]
     assert len(x) == 24
     assert "previousPrice" in x
     assert "previousPriceDate" in x
     assert re.match(r"^\d+/\d+$", x["previousPriceDate"])
 
 
-def test_quote_index(quote: dict[str, Any]) -> None:
-    x = quote["mainStocksDetail"]["referenceIndex"]
+def test_state_index(state: dict[str, Any]) -> None:
+    x = state["mainStocksDetail"]["referenceIndex"]
     assert len(x) == 38
     assert "sharesIssued" in x
     assert "sharesIssuedDate" in x
@@ -32,15 +32,15 @@ def test_quote_index(quote: dict[str, Any]) -> None:
         assert re.match(r"^\d{4}/\d{2}$", x[f"{p}psDate"])
 
 
-def test_quote_press_release(quote: dict[str, Any]) -> None:
-    x = quote["mainStocksPressReleaseSummary"]
+def test_state_press_release(state: dict[str, Any]) -> None:
+    x = state["mainStocksPressReleaseSummary"]
     assert len(x) == 2
     assert "disclosedTime" in x
     assert "summary" in x
 
 
-def test_quote_performance(quote: dict[str, Any]) -> None:
-    x = quote["stockPerformance"]["summaryInfo"]
+def test_state_performance(state: dict[str, Any]) -> None:
+    x = state["stockPerformance"]["summaryInfo"]
     assert len(x) == 5
     assert "potential" in x
     assert "profitability" in x
@@ -49,11 +49,18 @@ def test_quote_performance(quote: dict[str, Any]) -> None:
     assert "updateTime" in x
 
 
-def test_performance(performance: dict[str, Any]) -> None:
-    assert "performance" in performance
-    # for k in performance["performance"]["performance"]:
-    #     print(k)
-    # for k in performance["performance"]["forecast"]:
-    #     print(k)
+def test_store_preformance(store: dict[str, Any]) -> None:
+    x = store["performance"]["performance"]
 
-    # assert 0
+    assert isinstance(x, list)
+
+    for record in x:  # pyright: ignore[reportUnknownVariableType]
+        assert isinstance(record, dict)
+        assert len(record) == 29  # pyright: ignore[reportUnknownArgumentType]
+
+
+def test_store_forcast(store: dict[str, Any]) -> None:
+    x = store["performance"]["forecast"]
+
+    assert isinstance(x, dict)
+    assert len(x) == 7  # pyright: ignore[reportUnknownArgumentType]

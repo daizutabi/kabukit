@@ -15,9 +15,6 @@ if TYPE_CHECKING:
     from typing import Any
 
 
-PRELOADED_STATE_PATTERN = re.compile(r"window\.__PRELOADED_STATE__\s*=\s*(\{.*\})")
-
-
 def _get(text: str, pattern: re.Pattern[str]) -> re.Match[str] | None:
     soup = BeautifulSoup(text, "lxml")
     script = soup.find("script", string=pattern)  # pyright: ignore[reportCallIssue, reportArgumentType, reportUnknownVariableType], # ty: ignore[no-matching-overload]
@@ -28,7 +25,10 @@ def _get(text: str, pattern: re.Pattern[str]) -> re.Match[str] | None:
     return pattern.search(script.text)
 
 
-def get_preloaded_state(text: str) -> dict[str, Any]:
+PRELOADED_STATE_PATTERN = re.compile(r"window\.__PRELOADED_STATE__\s*=\s*(\{.*\})")
+
+
+def get_preloaded_state(text: str, /) -> dict[str, Any]:
     """HTMLテキストから `__PRELOADED_STATE__` を抽出して辞書として返す。
 
     Args:
@@ -49,7 +49,15 @@ def parse_quote(text: str) -> pl.DataFrame:
     if not state:
         return pl.DataFrame()
 
-    return pl.DataFrame({"text": [text]})
+    return pl.DataFrame(dict(iter_quote(state)))
+
+
+def iter_quote(state: dict[str, Any], /) -> Iterator[tuple[str, Any]]:
+    yield from iter_price(state)
+    yield from iter_previous_price(state)
+    yield from iter_index(state)
+    yield from iter_press_release(state)
+    yield from iter_performance(state)
 
 
 def iter_price(state: dict[str, Any], /) -> Iterator[tuple[str, Any]]:
@@ -154,7 +162,7 @@ def iter_performance(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
 PRELOADED_STORE_PATTERN = re.compile(r'\\"preloadedStore\\":(.*)')
 
 
-def get_preloaded_store(text: str) -> dict[str, Any]:
+def get_preloaded_store(text: str, /) -> dict[str, Any]:
     """HTMLテキストから `preloadedStore` を抽出して辞書として返す。
 
     Args:
@@ -169,6 +177,17 @@ def get_preloaded_store(text: str) -> dict[str, Any]:
             return json.loads(store)
 
     return {}
+
+
+def parse_performance(text: str) -> pl.DataFrame:
+    store = get_preloaded_store(text)
+
+    if not store:
+        return pl.DataFrame()
+
+    performance = store["performance"]["performance"]
+
+    return pl.DataFrame(performance)
 
 
 def _parse_datetime(date_str: str) -> tuple[datetime.date, datetime.time]:
@@ -186,6 +205,7 @@ def _parse_datetime(date_str: str) -> tuple[datetime.date, datetime.time]:
 
 
 def _extract_content(text: str) -> str:
+    """波括弧で囲まれたJSONコンテンツを抽出する。"""
     start_index = text.find("{")
     if start_index == -1:
         return ""
