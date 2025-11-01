@@ -4,10 +4,18 @@ from typing import Any
 
 import polars as pl
 import pytest
+import typer
 
-from kabukit.cli.utils import display_dataframe, display_value
+from kabukit.cli.utils import display_dataframe, display_value, get_code_date
 
 pytestmark = pytest.mark.unit
+
+
+def test_get_code_date_invalid(capsys: pytest.CaptureFixture[str]) -> None:
+    with pytest.raises(typer.Exit):
+        get_code_date("invalid")
+
+    assert "無効な銘柄コード・日付の形式です。" in capsys.readouterr().err
 
 
 @pytest.fixture(scope="module")
