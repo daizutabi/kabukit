@@ -7,7 +7,7 @@ import polars as pl
 import pytest
 
 from kabukit.sources.client import Client
-from kabukit.utils.gather import collect, collect_fn, concat, concat_fn, get, get_stream
+from kabukit.utils.gather import collect, collect_fn, get, get_stream
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterable, AsyncIterator
@@ -47,17 +47,6 @@ async def test_collect_fn() -> None:
 async def sleep_df(second: float) -> pl.DataFrame:
     await asyncio.sleep(second)
     return pl.DataFrame({"a": [second]})
-
-
-async def test_concat() -> None:
-    x = (sleep_df(s) for s in [0.03, 0.02, 0.01])
-    df = await concat(x, max_concurrency=2)
-    assert df.sort("a").to_series().to_list() == [0.01, 0.02, 0.03]
-
-
-async def test_concat_fn() -> None:
-    df = await concat_fn(sleep_df, [0.03, 0.02, 0.01], max_concurrency=2)
-    assert df.sort("a").to_series().to_list() == [0.01, 0.02, 0.03]
 
 
 class MockClient(Client):
