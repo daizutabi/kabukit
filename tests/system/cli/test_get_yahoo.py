@@ -34,7 +34,7 @@ def test_get_yahoo_code(mock_sub_dir: Path, code: str) -> None:
     result = runner.invoke(app, ["get", "yahoo", code])
 
     assert result.exit_code == 0
-    assert "shape:" in result.stdout
+    assert "width:" in result.stdout
     assert "72030" in result.stdout
     assert not mock_sub_dir.exists()
 

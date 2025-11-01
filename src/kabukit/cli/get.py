@@ -17,17 +17,6 @@ class CustomTqdm(tqdm.asyncio.tqdm):
         super().__init__(*args, **kwargs)
 
 
-def set_table() -> None:
-    import polars as pl
-
-    pl.Config.set_tbl_rows(5)
-    pl.Config.set_tbl_cols(6)
-    pl.Config.set_tbl_hide_dtype_separator()
-
-
-set_table()
-
-
 app = AsyncTyper(
     add_completion=False,
     help="J-QuantsまたはEDINETからデータを取得します。",
@@ -56,11 +45,13 @@ async def calendar(*, quiet: Quiet = False) -> None:
     from kabukit.sources.jquants.batch import get_calendar
     from kabukit.utils.cache import write
 
+    from .utils import display_dataframe
+
     df = await get_calendar()
     path = write("jquants", "calendar", df)
 
     if not quiet:
-        typer.echo(df)
+        display_dataframe(df)
         typer.echo(f"営業日カレンダーを '{path}' に保存しました。")
 
 
@@ -71,10 +62,12 @@ async def info(arg: Arg = None, *, quiet: Quiet = False) -> None:
     from kabukit.utils.cache import write
     from kabukit.utils.params import get_code_date
 
+    from .utils import display_dataframe
+
     df = await get_info(*get_code_date(arg))
 
     if not quiet:
-        typer.echo(df)
+        display_dataframe(df)
 
     if arg is None:
         path = write("jquants", "info", df)
@@ -96,6 +89,8 @@ async def statements(
     from kabukit.utils.datetime import today
     from kabukit.utils.params import get_code_date
 
+    from .utils import display_dataframe
+
     if arg is None and not all_:
         arg = today(as_str=True)
 
@@ -106,7 +101,7 @@ async def statements(
     )
 
     if not quiet:
-        typer.echo(df)
+        display_dataframe(df)
 
     if arg is None and max_items is None:
         path = write("jquants", "statements", df)
@@ -128,6 +123,8 @@ async def prices(
     from kabukit.utils.datetime import today
     from kabukit.utils.params import get_code_date
 
+    from .utils import display_dataframe
+
     if arg is None and not all_:
         arg = today(as_str=True)
 
@@ -138,7 +135,7 @@ async def prices(
     )
 
     if not quiet:
-        typer.echo(df)
+        display_dataframe(df)
 
     if arg is None and max_items is None:
         path = write("jquants", "prices", df)
@@ -155,15 +152,13 @@ async def jquants(
     quiet: Quiet = False,
 ) -> None:
     """J-Quants APIから全情報を取得します。"""
-    typer.echo("上場銘柄一覧を取得します。")
+    typer.echo("- 上場銘柄一覧を取得します。")
     await info(arg, quiet=quiet)
 
-    typer.echo("---")
-    typer.echo("財務情報を取得します。")
+    typer.echo("- 財務情報を取得します。")
     await statements(arg, all_=all_, max_items=max_items, quiet=quiet)
 
-    typer.echo("---")
-    typer.echo("株価情報を取得します。")
+    typer.echo("- 株価情報を取得します。")
     await prices(arg, all_=all_, max_items=max_items, quiet=quiet)
 
 
@@ -181,6 +176,8 @@ async def edinet(
     from kabukit.utils.datetime import today
     from kabukit.utils.params import get_code_date
 
+    from .utils import display_dataframe
+
     if date is None and not all_:
         date = today(as_str=True)
 
@@ -192,7 +189,7 @@ async def edinet(
     )
 
     if not quiet:
-        typer.echo(df)
+        display_dataframe(df)
 
     if date is None and max_items is None:
         path = write("edinet", "list", df)
@@ -214,6 +211,8 @@ async def tdnet(
     from kabukit.utils.datetime import today
     from kabukit.utils.params import get_code_date
 
+    from .utils import display_dataframe
+
     if date is None and not all_:
         date = today(as_str=True)
 
@@ -224,7 +223,7 @@ async def tdnet(
     )
 
     if not quiet:
-        typer.echo(df)
+        display_dataframe(df)
 
     if date is None and max_items is None:
         path = write("tdnet", "list", df)
@@ -244,6 +243,8 @@ async def yahoo(
     from kabukit.sources.yahoo.batch import get_quote
     from kabukit.utils.cache import write
 
+    from .utils import display_dataframe
+
     if code is None and not all_:
         typer.echo("銘柄コードか --all オプションを指定してください。")
         raise typer.Exit(1)
@@ -255,7 +256,7 @@ async def yahoo(
     )
 
     if not quiet:
-        typer.echo(df)
+        display_dataframe(df)
 
     if code is None and max_items is None:
         path = write("yahoo", "quote", df)

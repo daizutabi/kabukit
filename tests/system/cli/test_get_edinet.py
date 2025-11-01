@@ -25,7 +25,7 @@ def test_get_edinet(mock_sub_dir: Path) -> None:
     result = runner.invoke(app, ["get", "edinet"])
 
     assert result.exit_code == 0
-    assert "shape:" in result.stdout
+    assert "shape:" in result.stdout or "取得したデータはありません。" in result.stdout
     assert not mock_sub_dir.exists()
 
 

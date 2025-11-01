@@ -25,7 +25,7 @@ def test_get_statements(mock_sub_dir: Path) -> None:
     result = runner.invoke(app, ["get", "statements"])
 
     assert result.exit_code == 0
-    assert "shape:" in result.stdout
+    assert "shape:" in result.stdout or "取得したデータはありません。" in result.stdout
     assert not mock_sub_dir.exists()
 
 
@@ -44,6 +44,15 @@ def test_get_statements_with_date(mock_sub_dir: Path) -> None:
     assert result.exit_code == 0
     assert "shape:" in result.stdout
     assert "2023-01-04" in result.stdout
+    assert not mock_sub_dir.exists()
+
+
+def test_get_statements_empty(mock_sub_dir: Path) -> None:
+    result = runner.invoke(app, ["get", "statements", "20250101"])
+
+    assert result.exit_code == 0
+    assert "shape:" not in result.stdout
+    assert "取得したデータはありません。" in result.stdout
     assert not mock_sub_dir.exists()
 
 
