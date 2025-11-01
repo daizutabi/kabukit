@@ -26,6 +26,8 @@ Arg = Annotated[str | None, Argument(help="銘柄コード (4桁) または日�
 Code = Annotated[str | None, Argument(help="銘柄コード (4桁)。")]
 Date = Annotated[str | None, Argument(help="取得する日付 (YYYYMMDD)。")]
 All = Annotated[bool, Option("--all", help="全銘柄を取得します。")]
+First = Annotated[bool, Option("--first", help="最初の行のみ表示します。")]
+Last = Annotated[bool, Option("--last", help="最後の行のみ表示します。")]
 MaxItems = Annotated[
     int | None,
     Option(
@@ -40,7 +42,12 @@ Quiet = Annotated[
 
 
 @app.async_command()
-async def calendar(*, quiet: Quiet = False) -> None:
+async def calendar(
+    *,
+    first: bool = False,
+    last: bool = False,
+    quiet: Quiet = False,
+) -> None:
     """営業日カレンダーを取得します。"""
     from kabukit.sources.jquants.batch import get_calendar
     from kabukit.utils.cache import write
@@ -51,7 +58,7 @@ async def calendar(*, quiet: Quiet = False) -> None:
     path = write("jquants", "calendar", df)
 
     if not quiet:
-        display_dataframe(df)
+        display_dataframe(df, first=first, last=last)
         typer.echo(f"営業日カレンダーを '{path}' に保存しました。")
 
 
