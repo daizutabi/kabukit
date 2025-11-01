@@ -6,7 +6,7 @@ import polars as pl
 
 from kabukit.sources.client import Client
 
-from .parser import parse_quote
+from .parser import parse_performance, parse_quote
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -30,9 +30,10 @@ class YahooClient(Client):
     async def _get(
         self,
         code: str,
+        url: str,
         parse: Callable[[str], pl.DataFrame],
     ) -> pl.DataFrame:
-        response = await self.get(f"{code[:4]}.T")
+        response = await self.get(f"{code[:4]}.T{url}")
 
         df = parse(response.text)
 
@@ -56,4 +57,15 @@ class YahooClient(Client):
         Returns:
             polars.DataFrame: 銘柄の市場情報を含むDataFrame。
         """
-        return await self._get(code, parse_quote)
+        return await self._get(code, "", parse_quote)
+
+    async def get_performance(self, code: str) -> pl.DataFrame:
+        """銘柄の財務情報をYahooファイナンスから取得する。
+
+        Args:
+            code: 情報を取得する銘柄コード。
+
+        Returns:
+            polars.DataFrame: 銘柄の市場情報を含むDataFrame。
+        """
+        return await self._get(code, "/performance", parse_performance)

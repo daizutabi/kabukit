@@ -9,6 +9,8 @@ from kabukit.sources.yahoo.parser import (
     iter_press_release,
     iter_previous_price,
     iter_price,
+    parse_performance,
+    parse_quote,
 )
 
 
@@ -58,3 +60,13 @@ def test_state_iter_performance(state: dict[str, Any]) -> None:
     assert isinstance(x["PerformanceProfitability"], str)
     assert isinstance(x["PerformanceDate"], datetime.date)
     assert isinstance(x["PerformanceTime"], datetime.time)
+
+
+def test_parse_quote(quote: str) -> None:
+    df = parse_quote(quote)
+    assert df.shape == (1, 23)
+
+
+def test_parse_performance(performance: str) -> None:
+    df = parse_performance(performance)
+    assert df.width == 29

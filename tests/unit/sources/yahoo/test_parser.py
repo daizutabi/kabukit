@@ -46,15 +46,19 @@ def test_get_preloaded_state_no_tag() -> None:
     assert get_preloaded_state(text) == {}
 
 
-def test_parse_quote() -> None:
+def test_parse_quote(mocker: MockerFixture) -> None:
+    mock_iter_quote = mocker.patch(
+        "kabukit.sources.yahoo.parser.iter_quote",
+        return_value=iter([("a", 1), ("b", 2)]),
+    )
     text = """\
         <script>
             window.__PRELOADED_STATE__ = {"key": "value"};
         </script>
     """
     df = parse_quote(text)
-    # assert df["Code"].unique().to_list() == ["12340"]
-    assert not df.is_empty()
+    assert_frame_equal(df, pl.DataFrame({"a": 1, "b": 2}))
+    mock_iter_quote.assert_called_once_with({"key": "value"})
 
 
 def test_parse_quote_empty() -> None:

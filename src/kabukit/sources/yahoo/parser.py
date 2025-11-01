@@ -28,7 +28,7 @@ def _get(text: str, pattern: re.Pattern[str]) -> re.Match[str] | None:
 PRELOADED_STATE_PATTERN = re.compile(r"window\.__PRELOADED_STATE__\s*=\s*(\{.*\})")
 
 
-def get_preloaded_state(text: str) -> dict[str, Any]:
+def get_preloaded_state(text: str, /) -> dict[str, Any]:
     """HTMLテキストから `__PRELOADED_STATE__` を抽出して辞書として返す。
 
     Args:
@@ -43,33 +43,21 @@ def get_preloaded_state(text: str) -> dict[str, Any]:
     return {}
 
 
-PRELOADED_STORE_PATTERN = re.compile(r'\\"preloadedStore\\":(.*)')
-
-
-def get_preloaded_store(text: str) -> dict[str, Any]:
-    """HTMLテキストから `preloadedStore` を抽出して辞書として返す。
-
-    Args:
-        text: HTMLテキスト。
-
-    Returns:
-        抽出した状態辞書。見つからなかった場合は空の辞書。
-    """
-    if match := _get(text, PRELOADED_STORE_PATTERN):
-        if store := _extract_content(match.group(1)):
-            store = store.replace('\\"', '"')
-            return json.loads(store)
-
-    return {}
-
-
 def parse_quote(text: str) -> pl.DataFrame:
     state = get_preloaded_state(text)
 
     if not state:
         return pl.DataFrame()
 
-    return pl.DataFrame({"text": [text]})
+    return pl.DataFrame(dict(iter_quote(state)))
+
+
+def iter_quote(state: dict[str, Any], /) -> Iterator[tuple[str, Any]]:
+    yield from iter_price(state)
+    yield from iter_previous_price(state)
+    yield from iter_index(state)
+    yield from iter_press_release(state)
+    yield from iter_performance(state)
 
 
 def iter_price(state: dict[str, Any], /) -> Iterator[tuple[str, Any]]:
@@ -169,6 +157,37 @@ def iter_performance(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
     update_datetime = datetime.datetime.fromisoformat(info["updateTime"])
     yield "PerformanceDate", update_datetime.date()
     yield "PerformanceTime", update_datetime.time()
+
+
+PRELOADED_STORE_PATTERN = re.compile(r'\\"preloadedStore\\":(.*)')
+
+
+def get_preloaded_store(text: str, /) -> dict[str, Any]:
+    """HTMLテキストから `preloadedStore` を抽出して辞書として返す。
+
+    Args:
+        text: HTMLテキスト。
+
+    Returns:
+        抽出した状態辞書。見つからなかった場合は空の辞書。
+    """
+    if match := _get(text, PRELOADED_STORE_PATTERN):
+        if store := _extract_content(match.group(1)):
+            store = store.replace('\\"', '"')
+            return json.loads(store)
+
+    return {}
+
+
+def parse_performance(text: str) -> pl.DataFrame:
+    store = get_preloaded_store(text)
+
+    if not store:
+        return pl.DataFrame()
+
+    performance = store["performance"]["performance"]
+
+    return pl.DataFrame(performance)
 
 
 def _parse_datetime(date_str: str) -> tuple[datetime.date, datetime.time]:
