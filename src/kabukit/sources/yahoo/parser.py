@@ -15,9 +15,6 @@ if TYPE_CHECKING:
     from typing import Any
 
 
-PRELOADED_STATE_PATTERN = re.compile(r"window\.__PRELOADED_STATE__\s*=\s*(\{.*\})")
-
-
 def _get(text: str, pattern: re.Pattern[str]) -> re.Match[str] | None:
     soup = BeautifulSoup(text, "lxml")
     script = soup.find("script", string=pattern)  # pyright: ignore[reportCallIssue, reportArgumentType, reportUnknownVariableType], # ty: ignore[no-matching-overload]
@@ -26,6 +23,9 @@ def _get(text: str, pattern: re.Pattern[str]) -> re.Match[str] | None:
         return None
 
     return pattern.search(script.text)
+
+
+PRELOADED_STATE_PATTERN = re.compile(r"window\.__PRELOADED_STATE__\s*=\s*(\{.*\})")
 
 
 def get_preloaded_state(text: str) -> dict[str, Any]:
@@ -39,6 +39,26 @@ def get_preloaded_state(text: str) -> dict[str, Any]:
     """
     if match := _get(text, PRELOADED_STATE_PATTERN):
         return json.loads(match.group(1))
+
+    return {}
+
+
+PRELOADED_STORE_PATTERN = re.compile(r'\\"preloadedStore\\":(.*)')
+
+
+def get_preloaded_store(text: str) -> dict[str, Any]:
+    """HTMLテキストから `preloadedStore` を抽出して辞書として返す。
+
+    Args:
+        text: HTMLテキスト。
+
+    Returns:
+        抽出した状態辞書。見つからなかった場合は空の辞書。
+    """
+    if match := _get(text, PRELOADED_STORE_PATTERN):
+        if store := _extract_content(match.group(1)):
+            store = store.replace('\\"', '"')
+            return json.loads(store)
 
     return {}
 
@@ -151,26 +171,6 @@ def iter_performance(state: dict[str, Any]) -> Iterator[tuple[str, Any]]:
     yield "PerformanceTime", update_datetime.time()
 
 
-PRELOADED_STORE_PATTERN = re.compile(r'\\"preloadedStore\\":(.*)')
-
-
-def get_preloaded_store(text: str) -> dict[str, Any]:
-    """HTMLテキストから `preloadedStore` を抽出して辞書として返す。
-
-    Args:
-        text: HTMLテキスト。
-
-    Returns:
-        抽出した状態辞書。見つからなかった場合は空の辞書。
-    """
-    if match := _get(text, PRELOADED_STORE_PATTERN):
-        if store := _extract_content(match.group(1)):
-            store = store.replace('\\"', '"')
-            return json.loads(store)
-
-    return {}
-
-
 def _parse_datetime(date_str: str) -> tuple[datetime.date, datetime.time]:
     """月日/日付/時刻文字列を解釈する。"""
     if re.match(r"^\d{4}/\d{2}$", date_str):
@@ -186,6 +186,7 @@ def _parse_datetime(date_str: str) -> tuple[datetime.date, datetime.time]:
 
 
 def _extract_content(text: str) -> str:
+    """波括弧で囲まれたJSONコンテンツを抽出する。"""
     start_index = text.find("{")
     if start_index == -1:
         return ""
