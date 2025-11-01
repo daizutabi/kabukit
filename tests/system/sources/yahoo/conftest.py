@@ -24,10 +24,10 @@ def code(request: pytest.FixtureRequest) -> str:
 
 
 @pytest_asyncio.fixture(scope="module")
-async def quote(code: str):
+async def state(code: str):
     return await get(f"{code}.T", get_preloaded_state)
 
 
 @pytest_asyncio.fixture(scope="module")
-async def performance(code: str):
+async def store(code: str):
     return await get(f"{code}.T/performance", get_preloaded_store)
