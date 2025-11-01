@@ -74,27 +74,6 @@ async def collect_fn[T, R](
         yield item
 
 
-async def concat(
-    awaitables: Iterable[Awaitable[pl.DataFrame]],
-    /,
-    max_concurrency: int | None = None,
-) -> pl.DataFrame:
-    dfs = collect(awaitables, max_concurrency=max_concurrency)
-    dfs = [df async for df in dfs]
-    return pl.concat(df for df in dfs if not df.is_empty())
-
-
-async def concat_fn[T](
-    function: Callable[[T], Awaitable[pl.DataFrame]],
-    args: Iterable[T],
-    /,
-    max_concurrency: int | None = None,
-) -> pl.DataFrame:
-    dfs = collect_fn(function, args, max_concurrency=max_concurrency)
-    dfs = [df async for df in dfs]
-    return pl.concat(df for df in dfs if not df.is_empty())
-
-
 type Callback = Callable[[pl.DataFrame], pl.DataFrame | None]
 type Progress = type[progress_bar[Any] | tqdm[Any]] | _Progress
 
