@@ -15,7 +15,7 @@ async def get(url: str) -> str:
         return response.text
 
 
-@pytest.fixture(scope="module", params=["7203"])
+@pytest.fixture(scope="module", params=["1375", "6857", "7203"])
 def code(request: pytest.FixtureRequest) -> str:
     return request.param
 

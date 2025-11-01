@@ -154,4 +154,4 @@ async def get(
             stream = (x if (r := callback(x)) is None else r async for x in stream)
 
         dfs = [df async for df in stream if not df.is_empty()]  # ty: ignore[not-iterable]
-        return pl.concat(dfs) if dfs else pl.DataFrame()
+        return pl.concat(dfs, how="vertical_relaxed") if dfs else pl.DataFrame()
