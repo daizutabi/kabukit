@@ -1,14 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated, Any
+from typing import Annotated, Any
 
 import tqdm.asyncio
 import typer
 from async_typer import AsyncTyper
 from typer import Argument, Option
-
-if TYPE_CHECKING:
-    import polars as pl
 
 # pyright: reportMissingTypeStubs=false
 # pyright: reportUnknownMemberType=false
@@ -18,17 +15,6 @@ class CustomTqdm(tqdm.asyncio.tqdm):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs.setdefault("ncols", 80)
         super().__init__(*args, **kwargs)
-
-
-def set_table() -> None:
-    import polars as pl
-
-    pl.Config.set_tbl_rows(5)
-    pl.Config.set_tbl_cols(6)
-    pl.Config.set_tbl_hide_dtype_separator()
-
-
-set_table()
 
 
 app = AsyncTyper(
@@ -59,11 +45,13 @@ async def calendar(*, quiet: Quiet = False) -> None:
     from kabukit.sources.jquants.batch import get_calendar
     from kabukit.utils.cache import write
 
+    from .utils import display_dataframe
+
     df = await get_calendar()
     path = write("jquants", "calendar", df)
 
     if not quiet:
-        echo_dataframe(df)
+        display_dataframe(df)
         typer.echo(f"営業日カレンダーを '{path}' に保存しました。")
 
 
@@ -74,10 +62,12 @@ async def info(arg: Arg = None, *, quiet: Quiet = False) -> None:
     from kabukit.utils.cache import write
     from kabukit.utils.params import get_code_date
 
+    from .utils import display_dataframe
+
     df = await get_info(*get_code_date(arg))
 
     if not quiet:
-        echo_dataframe(df)
+        display_dataframe(df)
 
     if arg is None:
         path = write("jquants", "info", df)
@@ -99,6 +89,8 @@ async def statements(
     from kabukit.utils.datetime import today
     from kabukit.utils.params import get_code_date
 
+    from .utils import display_dataframe
+
     if arg is None and not all_:
         arg = today(as_str=True)
 
@@ -109,7 +101,7 @@ async def statements(
     )
 
     if not quiet:
-        echo_dataframe(df)
+        display_dataframe(df)
 
     if arg is None and max_items is None:
         path = write("jquants", "statements", df)
@@ -131,6 +123,8 @@ async def prices(
     from kabukit.utils.datetime import today
     from kabukit.utils.params import get_code_date
 
+    from .utils import display_dataframe
+
     if arg is None and not all_:
         arg = today(as_str=True)
 
@@ -141,7 +135,7 @@ async def prices(
     )
 
     if not quiet:
-        echo_dataframe(df)
+        display_dataframe(df)
 
     if arg is None and max_items is None:
         path = write("jquants", "prices", df)
@@ -182,6 +176,8 @@ async def edinet(
     from kabukit.utils.datetime import today
     from kabukit.utils.params import get_code_date
 
+    from .utils import display_dataframe
+
     if date is None and not all_:
         date = today(as_str=True)
 
@@ -193,7 +189,7 @@ async def edinet(
     )
 
     if not quiet:
-        echo_dataframe(df)
+        display_dataframe(df)
 
     if date is None and max_items is None:
         path = write("edinet", "list", df)
@@ -215,6 +211,8 @@ async def tdnet(
     from kabukit.utils.datetime import today
     from kabukit.utils.params import get_code_date
 
+    from .utils import display_dataframe
+
     if date is None and not all_:
         date = today(as_str=True)
 
@@ -225,7 +223,7 @@ async def tdnet(
     )
 
     if not quiet:
-        echo_dataframe(df)
+        display_dataframe(df)
 
     if date is None and max_items is None:
         path = write("tdnet", "list", df)
@@ -245,6 +243,8 @@ async def yahoo(
     from kabukit.sources.yahoo.batch import get_quote
     from kabukit.utils.cache import write
 
+    from .utils import display_dataframe
+
     if code is None and not all_:
         typer.echo("銘柄コードか --all オプションを指定してください。")
         raise typer.Exit(1)
@@ -256,17 +256,9 @@ async def yahoo(
     )
 
     if not quiet:
-        echo_dataframe(df)
+        display_dataframe(df)
 
     if code is None and max_items is None:
         path = write("yahoo", "quote", df)
         if not quiet:
             typer.echo(f"銘柄情報を '{path}' に保存しました。")
-
-
-def echo_dataframe(df: pl.DataFrame) -> None:
-    """データフレームを表示します。"""
-    if df.is_empty():
-        typer.echo("取得したデータはありません。")
-    else:
-        typer.echo(df)
