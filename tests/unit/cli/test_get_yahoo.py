@@ -34,7 +34,7 @@ def test_get_yahoo(mock_get_yahoo: AsyncMock, mock_cache_write: MagicMock) -> No
     result = runner.invoke(app, ["get", "yahoo"])
 
     assert result.exit_code == 1
-    assert "--all オプションを指定してください" in result.stdout
+    assert "--all オプションを指定してください" in result.stderr
 
     mock_get_yahoo.assert_not_awaited()
     mock_cache_write.assert_not_called()

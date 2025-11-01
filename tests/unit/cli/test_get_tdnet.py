@@ -68,6 +68,16 @@ def test_get_tdnet_all(mock_get_tdnet: AsyncMock, mock_cache_write: MagicMock) -
     mock_cache_write.assert_called_once_with("tdnet", "list", MOCK_DF)
 
 
+def test_get_tdnet_code(mock_get_tdnet: AsyncMock, mock_cache_write: MagicMock) -> None:
+    result = runner.invoke(app, ["get", "tdnet", "1000"])
+
+    assert result.exit_code == 1
+    assert "銘柄コードではなく日付を指定してください。" in result.stderr
+
+    mock_get_tdnet.assert_not_awaited()
+    mock_cache_write.assert_not_called()
+
+
 def test_get_tdnet_interrupt(mock_get_tdnet: AsyncMock) -> None:
     mock_get_tdnet.side_effect = KeyboardInterrupt
 

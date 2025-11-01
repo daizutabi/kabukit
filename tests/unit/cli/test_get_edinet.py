@@ -82,6 +82,19 @@ def test_get_edinet_all(
     mock_cache_write.assert_called_once_with("edinet", "list", MOCK_DF)
 
 
+def test_get_edinet_code(
+    mock_get_edinet: AsyncMock,
+    mock_cache_write: MagicMock,
+) -> None:
+    result = runner.invoke(app, ["get", "edinet", "1000"])
+
+    assert result.exit_code == 1
+    assert "銘柄コードではなく日付を指定してください。" in result.stderr
+
+    mock_get_edinet.assert_not_awaited()
+    mock_cache_write.assert_not_called()
+
+
 def test_get_edinet_interrupt(mock_get_edinet: AsyncMock) -> None:
     mock_get_edinet.side_effect = KeyboardInterrupt
 

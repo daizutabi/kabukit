@@ -36,7 +36,7 @@ def mock_cli_prices(mocker: MockerFixture) -> AsyncMock:
 @pytest.mark.parametrize("all_", [[], ["--all"]])
 @pytest.mark.parametrize("quiet", [[], ["-q"], ["--quiet"]])
 @pytest.mark.parametrize(("codes", "arg"), [([MOCK_CODE], MOCK_CODE), ([], None)])
-def test_get_jquants_with_code(
+def test_get_jquants(
     mock_cli_info: AsyncMock,
     mock_cli_statements: AsyncMock,
     mock_cli_prices: AsyncMock,
@@ -52,6 +52,20 @@ def test_get_jquants_with_code(
     a = bool(all_)
     q = bool(quiet)
 
-    mock_cli_info.assert_awaited_once_with(arg, quiet=q)
-    mock_cli_statements.assert_awaited_once_with(arg, all_=a, max_items=None, quiet=q)
-    mock_cli_prices.assert_awaited_once_with(arg, all_=a, max_items=None, quiet=q)
+    mock_cli_info.assert_awaited_once_with(arg, first=False, last=False, quiet=q)
+    mock_cli_statements.assert_awaited_once_with(
+        arg,
+        all_=a,
+        first=False,
+        last=False,
+        max_items=None,
+        quiet=q,
+    )
+    mock_cli_prices.assert_awaited_once_with(
+        arg,
+        all_=a,
+        first=False,
+        last=False,
+        max_items=None,
+        quiet=q,
+    )

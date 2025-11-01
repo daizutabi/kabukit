@@ -45,7 +45,7 @@ def test_get_info(mock_cache_dir: Path) -> None:
     result = runner.invoke(app, ["get", "info"])
 
     assert result.exit_code == 0
-    assert "全銘柄の情報を" in result.stdout
+    assert "全銘柄の銘柄情報を" in result.stdout
     assert "Code" in result.stdout
     assert "Company" in result.stdout
 

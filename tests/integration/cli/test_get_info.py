@@ -66,7 +66,7 @@ def test_get_info(mock_get_info: AsyncMock, mock_cache_dir: Path) -> None:
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
-    assert "全銘柄の情報を" in result.stdout
+    assert "全銘柄の銘柄情報を" in result.stdout
 
     mock_get_info.assert_awaited_once_with(None, None, only_common_stocks=True)
 

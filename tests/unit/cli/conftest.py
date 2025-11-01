@@ -26,6 +26,6 @@ def mock_jquants_client(mocker: MockerFixture) -> MagicMock:
 
 @pytest.fixture
 def mock_cache_write(mocker: MockerFixture) -> MagicMock:
-    mock_cache_write = mocker.patch("kabukit.utils.cache.write")
+    mock_cache_write = mocker.patch("kabukit.cli.utils.write")
     mock_cache_write.return_value = MOCK_PATH
     return mock_cache_write
