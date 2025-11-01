@@ -40,7 +40,7 @@ def test_get_yahoo(mock_get_yahoo: AsyncMock, mock_cache_dir: Path) -> None:
     result = runner.invoke(app, ["get", "yahoo"])
 
     assert result.exit_code == 1
-    assert "--all オプションを指定してください" in result.stdout
+    assert "--all オプションを指定してください" in result.stderr
 
     mock_get_yahoo.assert_not_called()
     assert not get_cache_files(mock_cache_dir)

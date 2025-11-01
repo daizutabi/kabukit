@@ -20,7 +20,7 @@ def test_get_jquants_all(mock_cache_dir: Path) -> None:
     result = runner.invoke(app, ["get", "jquants", "--all", "--max-items", "3"])
 
     assert result.exit_code == 0
-    assert "上場銘柄一覧を取得します。" in result.stdout
+    assert "銘柄情報を取得します。" in result.stdout
     assert "財務情報を取得します。" in result.stdout
     assert "株価情報を取得します。" in result.stdout
 

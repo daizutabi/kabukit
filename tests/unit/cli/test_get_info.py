@@ -54,7 +54,7 @@ def test_get_info(
 
     assert result.exit_code == 0
     assert str(MOCK_DF) in result.stdout
-    assert f"全銘柄の情報を '{MOCK_PATH}' に保存しました。" in result.stdout
+    assert f"全銘柄の銘柄情報を '{MOCK_PATH}' に保存しました。" in result.stdout
 
     mock_get_info.assert_awaited_once_with(None, None)
     mock_cache_write.assert_called_once_with("jquants", "info", MOCK_DF)

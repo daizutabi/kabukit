@@ -25,7 +25,7 @@ def test_get_yahoo(mock_sub_dir: Path) -> None:
     result = runner.invoke(app, ["get", "yahoo"])
 
     assert result.exit_code == 1
-    assert "--all" in result.stdout
+    assert "--all" in result.stderr
     assert not mock_sub_dir.exists()
 
 
