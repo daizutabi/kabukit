@@ -1,7 +1,7 @@
 # Python API の使い方
 
 kabukit は、複数のソースからデータを取得するための、
-Python API 提供します。
+Python API を提供します。
 
 現在サポートしているソースは以下の通りです。
 

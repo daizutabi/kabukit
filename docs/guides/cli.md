@@ -7,7 +7,7 @@ kabukit は、複数のソースからデータを取得するための、
 
 - [J-Quants API](https://jpx-jquants.com/)
 - [EDINET API](https://disclosure2dl.edinet-fsa.go.jp/guide/static/disclosure/WZEK0110.html)
-- [TDnet](https://www.release.tdnet.info/inbs/I_main_00.html)
+<!-- - [TDnet](https://www.release.tdnet.info/inbs/I_main_00.html) -->
 
 コマンド名は `kabu` です。このコマンドの役割は大きく分けて 3 つあります。
 
@@ -194,7 +194,7 @@ $ kabu get statements
 引数を省略して、`--all` オプションを付けると、
 全銘柄の全期間分の財務情報を一度に取得できます。
 
-```bash
+```text
 $ kabu get statements --all
 100%|█████████████████████████████████████| 3787/3787 [01:28<00:00, 42.61it/s]
 shape: (165_891, 105)
@@ -247,7 +247,7 @@ $ kabu get prices
 引数を省略して、`--all` オプションを付けると、
 全銘柄の全期間分の株価情報を一度に取得できます。
 
-```bash
+```text
 $ kabu get prices --all
 100%|█████████████████████████████████████| 3787/3787 [12:33<00:00,  5.02it/s]
 shape: (8_128_217, 16)
@@ -311,7 +311,7 @@ $ kabu get edinet
 日付を指定せずに、`--all` オプションを付けると、
 過去 10 年分の書類一覧を一度に取得できます。
 
-```bash
+```text
 $ kabu get edinet --all
 100%|█████████████████████████████████████| 3653/3653 [00:42<00:00, 86.47it/s]
 shape: (896_632, 30)
@@ -331,6 +331,7 @@ shape: (896_632, 30)
 - `--quiet` または `-q` オプションを付けると、プログレスバーおよび
   取得したデータフレームの表示を抑制できます。
 
+<!--
 ### TDnet 書類一覧 (`tdnet`)
 
 `kabu get tdnet` コマンドを使うと、
@@ -353,7 +354,7 @@ $ kabu get tdnet
 日付を指定せずに、`--all` オプションを付けると、
 過去 1 か月分の書類一覧を一度に取得できます。
 
-```bash
+```text
 $ kabu get tdnet --all
 100%|█████████████████████████████████████| 31/31 [00:01<00:00, 19.69it/s]
 shape: (5_135, 9)
@@ -372,6 +373,7 @@ shape: (5_135, 9)
 - `--max-items` オプションを付けると、取得日数の上限を指定できます。
 - `--quiet` または `-q` オプションを付けると、プログレスバーおよび
   取得したデータフレームの表示を抑制できます。
+-->
 
 ## キャッシュ (`cache`)
 

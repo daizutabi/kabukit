@@ -18,10 +18,12 @@ J-Quants API で取得する株価情報には、Date が含まれます。
 - この時刻より後に開示された情報は、翌営業日の株価に影響を与えます。
   Date は DisclosedDate の翌営業日に設定されます。
 
+<!--
 ## TDnet
 
 TDnet でも、リクエストする URL と取得した HTML から
 DisclosedDate と DisclosedTime を簡単に決定できます。
+-->
 
 ## EDINET API
 

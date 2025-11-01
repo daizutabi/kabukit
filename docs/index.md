@@ -24,7 +24,7 @@ hide:
 日本の株式分析を、もっと手軽に、もっと速く
 </p>
 
-**kabukit** は、J-Quants と EDINET のデータを、
+kabukit は、J-Quants と EDINET のデータを、
 コマンドラインや Python コードから快適に扱うための
 モダンなツールキットです。
 
@@ -97,7 +97,8 @@ kabu get info
 kabu get statements 7203
 ```
 
-つぎに、Python コードから使ってみましょう。
+つぎに、[Jupyter](https://jupyter.org/) や [marimo](https://marimo.io/)
+などのノートブックで使ってみましょう。
 
 ```python
 from kabukit import get_info, get_prices
@@ -108,10 +109,6 @@ df_info = await get_info()
 # トヨタ自動車の株価を取得
 df_prices = await get_prices("7203")
 ```
-
-!!! note
-    [Jupyter](https://jupyter.org/) や [marimo](https://marimo.io/)
-    などのノートブック環境では、`await` 式を直接記述できます。
 
 ## 主な機能
 

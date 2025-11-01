@@ -22,7 +22,7 @@ EDINET API を利用するには、事前にコマンドラインで EDINET API 
 from kabukit import get_edinet_list
 
 df = await get_edinet_list("2025-10-10")
-df.select("Date", "Code", "DocumentId", "Company", "PdfFlag", "CsvFlag").tail()
+df.select("FileDate", "Code", "DocumentId", "Company", "PdfFlag", "CsvFlag")
 ```
 
 複数の提出日の書類一覧を一度に取得することもできます。
@@ -30,7 +30,7 @@ df.select("Date", "Code", "DocumentId", "Company", "PdfFlag", "CsvFlag").tail()
 
 ```python exec="1" source="material-block"
 df = await get_edinet_list(["2025-10-10", "2025-10-14", "2025-10-15"])
-df.select("Date", "Code", "DocumentId", "Company", "PdfFlag", "CsvFlag").tail()
+df.select("FileDate", "Code", "DocumentId", "Company", "PdfFlag", "CsvFlag")
 ```
 
 戻り値のデータフレームは、銘柄コード (`Code`)、日付 (`Date`) の順でソートされます。
@@ -39,12 +39,12 @@ df.select("Date", "Code", "DocumentId", "Company", "PdfFlag", "CsvFlag").tail()
 
 ```python exec="1" source="material-block"
 df = await get_edinet_list(days=10)
-df.select("Date", "Code", "DocumentId", "Company", "PdfFlag", "CsvFlag").head()
+df.select("FileDate", "Code", "DocumentId", "Company", "PdfFlag", "CsvFlag")
 ```
 
 ```python exec="1" source="material-block"
 df_years = await get_edinet_list(years=1)
-df_years.select("Date", "Code", "DocumentId", "Company", "PdfFlag", "CsvFlag").head()
+df_years.select("FileDate", "Code", "DocumentId", "Company", "PdfFlag", "CsvFlag")
 ```
 
 ### 書類本文 (`get_edinet_documents`)
@@ -56,7 +56,7 @@ df_years.select("Date", "Code", "DocumentId", "Company", "PdfFlag", "CsvFlag").h
 from kabukit import get_edinet_documents
 
 df = await get_edinet_documents("S100WUKL")
-df.select("DocumentId", "要素ID", "項目名", "値").head()
+df.select("DocumentId", "要素ID", "項目名", "値")
 ```
 
 複数の書類 ID を与えて、非同期に並列取得することもできます。
@@ -66,7 +66,7 @@ from polars import col as c
 
 doc_ids = df_years.filter(c.CsvFlag)["DocumentId"]  # CSV形式を提供する書類を選択
 df = await get_edinet_documents(doc_ids, max_items=3)
-df.select("DocumentId", "要素ID", "項目名", "値").head()
+df.select("DocumentId", "要素ID", "項目名", "値")
 ```
 
 !!! info
@@ -86,7 +86,7 @@ pl.Config(fmt_str_lengths=15)
 ```python exec="1" source="material-block"
 doc_ids = df_years.filter(c.PdfFlag)["DocumentId"]  # PDF形式を提供する書類を選択
 df = await get_edinet_documents(doc_ids, max_items=3, pdf=True)
-df.select("DocumentId", "PdfContent").tail()
+df.select("DocumentId", "PdfContent")
 ```
 
 ```python .md#_
@@ -118,7 +118,7 @@ client = EdinetClient()
 
 ```python exec="1" source="material-block"
 df = await client.get_list("2025-10-10")
-df.select("FileDate", "Code", "DocumentId", "Company", "PdfFlag", "CsvFlag").tail()
+df.select("FileDate", "Code", "DocumentId", "Company", "PdfFlag", "CsvFlag")
 ```
 
 ### 書類本文 (`get_document`)
@@ -128,7 +128,7 @@ df.select("FileDate", "Code", "DocumentId", "Company", "PdfFlag", "CsvFlag").tai
 
 ```python exec="1" source="material-block"
 df = await client.get_document("S100WUKL")
-df.select("DocumentId", "要素ID", "項目名", "値").head()
+df.select("DocumentId", "要素ID", "項目名", "値")
 ```
 
 `pdf` キーワード引数を `True` に指定すると、書類本文を PDF 形式で
@@ -140,7 +140,7 @@ pl.Config(fmt_str_lengths=15)
 
 ```python exec="1" source="material-block"
 df = await client.get_document("S100WUKL", pdf=True)
-df.select("DocumentId", "PdfContent").tail()
+df.select("DocumentId", "PdfContent")
 ```
 
 ```python .md#_

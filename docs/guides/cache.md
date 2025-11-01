@@ -92,13 +92,12 @@ $ kabu cache tree
 また、最新のキャッシュを使うことが多いので、
 ほとんどの場合、`name` 引数は省略されます。
 
-以下では、上場銘柄一覧 ("info") の最新データを読み込み、
-最後の 3 行を表示します。
+以下では、上場銘柄一覧 ("info") の最新データを読み込みます。
 
 ```python exec="1" source="material-block"
 from kabukit import cache
 
-cache.read("jquants", "info").tail(3)
+cache.read("jquants", "info")
 ```
 
 ### 書き込み (`write`)
