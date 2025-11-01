@@ -3,7 +3,13 @@ from __future__ import annotations
 import polars as pl
 
 
-def transform(df: pl.DataFrame) -> pl.DataFrame:
+def transform(df: pl.DataFrame, *, only_common_stocks: bool = True) -> pl.DataFrame:
+    if only_common_stocks:
+        df = filter_common_stocks(df)
+
+    if df.is_empty():
+        return pl.DataFrame()
+
     return (
         df.with_columns(
             pl.col("Date").str.to_date("%Y-%m-%d"),

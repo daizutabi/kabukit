@@ -1,9 +1,15 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import polars as pl
 import pytest
+from polars.testing import assert_frame_equal
 
 from kabukit.sources.jquants.transform.info import filter_common_stocks, transform
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 pytestmark = pytest.mark.unit
 
@@ -31,6 +37,16 @@ def test_transform() -> None:
     assert df["ScaleCategory"].dtype == pl.Categorical
     assert df["Market"].dtype == pl.Categorical
     assert df["Margin"].dtype == pl.Categorical
+
+
+def test_transform_empty(mocker: MockerFixture) -> None:
+    mock_filter = mocker.patch(
+        "kabukit.sources.jquants.transform.info.filter_common_stocks",
+        return_value=pl.DataFrame({"a": []}),
+    )
+    df = transform(pl.DataFrame())
+    assert_frame_equal(df, pl.DataFrame())
+    mock_filter.assert_called_once()
 
 
 def test_filter_common_stocks() -> None:
