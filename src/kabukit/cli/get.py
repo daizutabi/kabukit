@@ -1,11 +1,14 @@
 from __future__ import annotations
 
-from typing import Annotated, Any
+from typing import TYPE_CHECKING, Annotated, Any
 
 import tqdm.asyncio
 import typer
 from async_typer import AsyncTyper
 from typer import Argument, Option
+
+if TYPE_CHECKING:
+    import polars as pl
 
 # pyright: reportMissingTypeStubs=false
 # pyright: reportUnknownMemberType=false
@@ -60,7 +63,7 @@ async def calendar(*, quiet: Quiet = False) -> None:
     path = write("jquants", "calendar", df)
 
     if not quiet:
-        typer.echo(df)
+        echo_dataframe(df)
         typer.echo(f"営業日カレンダーを '{path}' に保存しました。")
 
 
@@ -74,7 +77,7 @@ async def info(arg: Arg = None, *, quiet: Quiet = False) -> None:
     df = await get_info(*get_code_date(arg))
 
     if not quiet:
-        typer.echo(df)
+        echo_dataframe(df)
 
     if arg is None:
         path = write("jquants", "info", df)
@@ -106,7 +109,7 @@ async def statements(
     )
 
     if not quiet:
-        typer.echo(df)
+        echo_dataframe(df)
 
     if arg is None and max_items is None:
         path = write("jquants", "statements", df)
@@ -138,7 +141,7 @@ async def prices(
     )
 
     if not quiet:
-        typer.echo(df)
+        echo_dataframe(df)
 
     if arg is None and max_items is None:
         path = write("jquants", "prices", df)
@@ -155,15 +158,13 @@ async def jquants(
     quiet: Quiet = False,
 ) -> None:
     """J-Quants APIから全情報を取得します。"""
-    typer.echo("上場銘柄一覧を取得します。")
+    typer.echo("- 上場銘柄一覧を取得します。")
     await info(arg, quiet=quiet)
 
-    typer.echo("---")
-    typer.echo("財務情報を取得します。")
+    typer.echo("- 財務情報を取得します。")
     await statements(arg, all_=all_, max_items=max_items, quiet=quiet)
 
-    typer.echo("---")
-    typer.echo("株価情報を取得します。")
+    typer.echo("- 株価情報を取得します。")
     await prices(arg, all_=all_, max_items=max_items, quiet=quiet)
 
 
@@ -192,7 +193,7 @@ async def edinet(
     )
 
     if not quiet:
-        typer.echo(df)
+        echo_dataframe(df)
 
     if date is None and max_items is None:
         path = write("edinet", "list", df)
@@ -224,7 +225,7 @@ async def tdnet(
     )
 
     if not quiet:
-        typer.echo(df)
+        echo_dataframe(df)
 
     if date is None and max_items is None:
         path = write("tdnet", "list", df)
@@ -255,9 +256,17 @@ async def yahoo(
     )
 
     if not quiet:
-        typer.echo(df)
+        echo_dataframe(df)
 
     if code is None and max_items is None:
         path = write("yahoo", "quote", df)
         if not quiet:
             typer.echo(f"銘柄情報を '{path}' に保存しました。")
+
+
+def echo_dataframe(df: pl.DataFrame) -> None:
+    """データフレームを表示します。"""
+    if df.is_empty():
+        typer.echo("取得したデータはありません。")
+    else:
+        typer.echo(df)
