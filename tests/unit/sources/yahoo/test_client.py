@@ -38,3 +38,19 @@ async def test_get_quote_empty(mocker: MockerFixture) -> None:
 
     assert_frame_equal(df, pl.DataFrame())
     mock_get.assert_awaited_once_with("2703.T")
+
+
+async def test_get_performance(mocker: MockerFixture) -> None:
+    mock_get = mocker.patch.object(YahooClient, "get")
+    mock_get.return_value = Response(200, text="abc")
+    mock_parse_performance = mocker.patch(
+        "kabukit.sources.yahoo.client.parse_performance",
+    )
+    mock_parse_performance.return_value = pl.DataFrame({"a": 1})
+
+    client = YahooClient()
+    df = await client.get_performance("2703")
+
+    assert_frame_equal(df, pl.DataFrame({"Code": "27030", "a": 1}))
+    mock_get.assert_awaited_once_with("2703.T/performance")
+    mock_parse_performance.assert_called_once_with("abc")

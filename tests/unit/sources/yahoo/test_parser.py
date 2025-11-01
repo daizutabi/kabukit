@@ -17,6 +17,8 @@ from kabukit.sources.yahoo.parser import (
     iter_press_release,
     iter_previous_price,
     iter_price,
+    iter_quote,
+    parse_performance,
     parse_quote,
 )
 from kabukit.utils.datetime import today
@@ -64,6 +66,16 @@ def test_parse_quote(mocker: MockerFixture) -> None:
 def test_parse_quote_empty() -> None:
     df = parse_quote("")
     assert_frame_equal(df, pl.DataFrame())
+
+
+def test_iter_quote(mocker: MockerFixture) -> None:
+    iters = [
+        mocker.patch(f"kabukit.sources.yahoo.parser.iter_{name}")
+        for name in ["price", "previous_price", "index", "press_release", "performance"]
+    ]
+    list(iter_quote({"key": "value"}))
+    for iter_func in iters:
+        iter_func.assert_called_once_with({"key": "value"})
 
 
 def test_iter_price() -> None:
@@ -179,6 +191,30 @@ def test_get_preloaded_store() -> None:
 
 def test_get_preloaded_store_empty() -> None:
     assert get_preloaded_store("<script></script>") == {}
+
+
+def test_parse_performance(mocker: MockerFixture) -> None:
+    mock_get_preloaded_store = mocker.patch(
+        "kabukit.sources.yahoo.parser.get_preloaded_store",
+        return_value={"performance": {"performance": {"a": 1, "b": 2}}},
+    )
+
+    df = parse_performance("abc")
+
+    assert_frame_equal(df, pl.DataFrame({"a": 1, "b": 2}))
+    mock_get_preloaded_store.assert_called_once_with("abc")
+
+
+def test_parse_performance_empty(mocker: MockerFixture) -> None:
+    mock_get_preloaded_store = mocker.patch(
+        "kabukit.sources.yahoo.parser.get_preloaded_store",
+        return_value={},
+    )
+
+    df = parse_performance("abc")
+
+    assert_frame_equal(df, pl.DataFrame())
+    mock_get_preloaded_store.assert_called_once_with("abc")
 
 
 @pytest.mark.parametrize(
