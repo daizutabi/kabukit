@@ -32,7 +32,7 @@ CLI の `kabu get` コマンドで取得された各種情報は、
 `kabu cache tree` コマンドを使うと、
 キャッシュディレクトリの構造をツリー形式で表示できます。
 
-```console exec="on" source="console" result="ansi"
+```console exec="1" source="1" result="text"
 $ kabu cache tree
 ```
 
@@ -83,7 +83,7 @@ Pythonからキャッシュを操作するための関数を提供します。
 
 まず、現在のキャッシュの状態を確認しておきます。
 
-```console exec="on" source="console" result="ansi"
+```console exec="1" source="1" result="text"
 $ kabu cache tree
 ```
 
