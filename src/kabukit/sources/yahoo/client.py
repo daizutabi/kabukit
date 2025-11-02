@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import httpx
 import polars as pl
 
 from kabukit.sources.client import Client
@@ -33,7 +34,12 @@ class YahooClient(Client):
         url: str,
         parse: Callable[[str], pl.DataFrame],
     ) -> pl.DataFrame:
-        response = await self.get(f"{code[:4]}.T{url}")
+        try:
+            response = await self.get(f"{code[:4]}.T{url}")
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 404:
+                return pl.DataFrame()
+            raise
 
         df = parse(response.text)
 
