@@ -250,6 +250,8 @@ async def yahoo(
     quiet: Quiet = False,
 ) -> None:
     """Yahooファイナンスから情報を取得します。"""
+    import httpx
+
     from kabukit.sources.yahoo.batch import get_quote
 
     from .utils import CustomTqdm, display_dataframe, write_cache
@@ -258,11 +260,16 @@ async def yahoo(
         typer.echo("銘柄コードか --all オプションを指定してください。", err=True)
         raise typer.Exit(1)
 
-    df = await get_quote(
-        code,
-        max_items=max_items,
-        progress=None if code or quiet else CustomTqdm,
-    )
+    try:
+        df = await get_quote(
+            code,
+            max_items=max_items,
+            progress=None if code or quiet else CustomTqdm,
+        )
+    except httpx.HTTPStatusError as e:
+        typer.echo(f"データ取得に失敗しました: {e}", err=True)
+        raise typer.Exit(1) from None
+
     display_dataframe(df, first=first, last=last, quiet=quiet)
 
     if not any([code, max_items, first, last]):

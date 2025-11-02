@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock
 
+import httpx
 import pytest
 from typer.testing import CliRunner
 
@@ -60,7 +61,7 @@ def test_get_yahoo_all(mock_get_yahoo: AsyncMock, mock_cache_write: MagicMock) -
     mock_cache_write.assert_called_once_with("yahoo", "quote", MOCK_DF)
 
 
-def test_get_yaho_interrupt(mock_get_yahoo: AsyncMock) -> None:
+def test_get_yahoo_interrupt(mock_get_yahoo: AsyncMock) -> None:
     mock_get_yahoo.side_effect = KeyboardInterrupt
 
     result = runner.invoke(app, ["get", "yahoo", "--all"])
@@ -68,3 +69,16 @@ def test_get_yaho_interrupt(mock_get_yahoo: AsyncMock) -> None:
     assert result.exit_code == 130
 
     mock_get_yahoo.assert_awaited_once_with(None, max_items=None, progress=CustomTqdm)
+
+
+def test_get_yahoo_error(mock_get_yahoo: AsyncMock) -> None:
+    mock_get_yahoo.side_effect = httpx.HTTPStatusError(
+        "500 Internal Server Error",
+        request=httpx.Request("GET", "http://test.com"),
+        response=httpx.Response(500, request=httpx.Request("GET", "http://test.com")),
+    )
+
+    result = runner.invoke(app, ["get", "yahoo", "7203"])
+
+    assert result.exit_code == 1
+    assert "失敗しました" in result.stderr

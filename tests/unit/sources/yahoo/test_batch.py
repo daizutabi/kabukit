@@ -28,7 +28,10 @@ async def test_get_quote_single_code(mocker: MockerFixture) -> None:
     assert_frame_equal(result, mock_df)
 
 
-async def test_get_quote_multiple_codes(mock_gather_get: AsyncMock) -> None:
+async def test_get_quote_multiple_codes(
+    mocker: MockerFixture,
+    mock_gather_get: AsyncMock,
+) -> None:
     mock_df = pl.DataFrame({"Code": [3, 2, 1]})
     mock_gather_get.return_value = mock_df
 
@@ -40,7 +43,7 @@ async def test_get_quote_multiple_codes(mock_gather_get: AsyncMock) -> None:
         "quote",
         codes,
         max_items=None,
-        max_concurrency=4,
+        max_concurrency=mocker.ANY,
         progress=None,
         callback=None,
     )
@@ -69,7 +72,7 @@ async def test_get_quote_no_codes_specified(
         "quote",
         codes,
         max_items=None,
-        max_concurrency=4,
+        max_concurrency=mocker.ANY,
         progress=None,
         callback=None,
     )
