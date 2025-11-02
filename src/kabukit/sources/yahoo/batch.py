@@ -19,11 +19,13 @@ async def get_quote(
     codes: Iterable[str] | str | None = None,
     /,
     max_items: int | None = None,
-    max_concurrency: int = 2,
+    max_concurrency: int = 8,
     progress: Progress | None = None,
     callback: Callback | None = None,
 ) -> pl.DataFrame:
     """Yahooファイナンスから情報を取得する。
+
+    一度に取得できる銘柄数は3,200件まで。
 
     Args:
         codes (Iterable[str] | str, optional): 財務情報を取得する銘柄のコード。
@@ -31,7 +33,7 @@ async def get_quote(
         max_items (int | None, optional): 取得する銘柄数の上限。
             指定しないときはすべての銘柄が対象となる。
         max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
-            デフォルトは3。
+            デフォルトは8。
         progress (Progress | None, optional): 進捗表示のための関数。
             tqdm, marimoなどのライブラリを使用できる。
             指定しないときは進捗表示は行われない。
