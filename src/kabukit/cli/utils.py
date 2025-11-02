@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 import polars as pl
+import tqdm.asyncio
 import typer
 from rich import box
 from rich.console import Console
@@ -13,6 +14,14 @@ from kabukit.utils.params import get_code_date as _get_code_date
 
 if TYPE_CHECKING:
     import datetime
+
+# pyright: reportUnknownMemberType=false
+
+
+class CustomTqdm(tqdm.asyncio.tqdm):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        kwargs.setdefault("ncols", 80)
+        super().__init__(*args, **kwargs)
 
 
 def get_code_date(

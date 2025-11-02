@@ -164,9 +164,9 @@ class JQuantsClient(Client):
             date (str | datetime.date, optional): 銘柄情報を取得する日付
                 (例: "2025-10-01")。
             transform (bool, optional): 取得したデータを整形するかどうか。
-                デフォルト値はTrue。
+                デフォルトはTrue。
             only_common_stocks (bool, optional): 投資信託や優先株式を除く、
-                普通株式のみを対象とするか。デフォルト値はTrue。
+                普通株式のみを対象とするか。デフォルトはTrue。
 
         Returns:
             pl.DataFrame: 銘柄情報を含むDataFrame。
@@ -203,7 +203,7 @@ class JQuantsClient(Client):
             date (str | datetime.date, optional): 財務情報を取得する日付
                 (例: "2025-10-01")。
             transform (bool, optional): 取得したデータを整形するかどうか。
-                デフォルト値はTrue。
+                デフォルトはTrue。
 
         Returns:
             pl.DataFrame: 財務情報を含むDataFrame。
@@ -252,7 +252,7 @@ class JQuantsClient(Client):
             to (str | datetime.date, optional): 取得期間の終了日。
                 `date`とは併用不可。
             transform (bool, optional): 取得したデータを整形するかどうか。
-                デフォルト値はTrue。
+                デフォルトはTrue。
 
         Returns:
             pl.DataFrame: 日々の株価四本値を含むDataFrame。

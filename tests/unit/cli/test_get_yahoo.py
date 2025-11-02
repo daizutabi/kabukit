@@ -7,7 +7,7 @@ import pytest
 from typer.testing import CliRunner
 
 from kabukit.cli.app import app
-from kabukit.cli.get import CustomTqdm
+from kabukit.cli.utils import CustomTqdm
 
 from .conftest import MOCK_CODE, MOCK_DF, MOCK_PATH
 

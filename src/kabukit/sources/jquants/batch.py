@@ -42,7 +42,7 @@ async def get_info(
         date (str | datetime.date, optional): 銘柄情報を取得する日付
             (例: "2025-10-01")。
         only_common_stocks (bool, optional): 投資信託や優先株式を除く、
-            普通株式のみを対象とするか。デフォルト値はTrue。
+            普通株式のみを対象とするか。デフォルトはTrue。
 
     Returns:
         pl.DataFrame: 銘柄情報を含むDataFrame。
@@ -83,7 +83,7 @@ async def get_statements(
         max_items (int | None, optional): 取得する銘柄数の上限。
             指定しないときはすべての銘柄が対象となる。
         max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
-            デフォルト値12。
+            デフォルトは12。
         progress (Progress | None, optional): 進捗表示のための関数。
             tqdm, marimoなどのライブラリを使用できる。
             指定しないときは進捗表示は行われない。
@@ -136,7 +136,7 @@ async def get_prices(
         max_items (int | None, optional): 取得する銘柄数の上限。
             指定しないときはすべての銘柄が対象となる。
         max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
-            デフォルト値8。
+            デフォルトは8。
         progress (Progress | None, optional): 進捗表示のための関数。
             tqdm, marimoなどのライブラリを使用できる。
             指定しないときは進捗表示は行われない。
