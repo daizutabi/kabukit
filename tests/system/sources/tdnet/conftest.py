@@ -28,9 +28,11 @@ async def dates():
 
 @pytest_asyncio.fixture(scope="module")
 async def date(dates: list[datetime.date]) -> datetime.date:
-    for date in dates:
-        if date.weekday() == 0:
-            return date
+    async with TdnetClient() as client:
+        for date in dates:
+            page = await client.get_page(date, 1)
+            if 'id="pager-box-top"' in page:
+                return date
 
     raise NotImplementedError
 
