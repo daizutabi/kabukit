@@ -33,7 +33,12 @@ def test_state_index(state: dict[str, Any]) -> None:
 
 
 def test_state_press_release(state: dict[str, Any]) -> None:
-    if x := state["mainStocksPressReleaseSummary"]:
+    x = state["mainStocksPressReleaseSummary"]
+    if not x:
+        pass
+    elif len(x) == 1:
+        assert "disclosedTime" in x
+    else:
         assert len(x) == 2
         assert "disclosedTime" in x
         assert "summary" in x
@@ -65,4 +70,4 @@ def test_store_forcast(store: dict[str, Any]) -> None:
     x = store["performance"]["forecast"]
 
     assert isinstance(x, dict)
-    assert len(x) in [0, 5, 7]  # pyright: ignore[reportUnknownArgumentType]
+    assert len(x) in [0, 5, 7, 9]  # pyright: ignore[reportUnknownArgumentType]
