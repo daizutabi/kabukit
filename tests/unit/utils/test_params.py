@@ -24,6 +24,15 @@ def test_get_params() -> None:
     assert params["from"] == "2023-01-01"
 
 
+@pytest.mark.parametrize(
+    ("date", "expected"),
+    [("2023-01-01", "2023-01-01"), ("20230101", "2023-01-01")],
+)
+def test_get_params_date(date: str, expected: str) -> None:
+    params = get_params(date=date)
+    assert params["date"] == expected
+
+
 @pytest.mark.parametrize("d", ["2023-01-01", date(2023, 1, 1)])
 def test_date_to_str(d: str | date) -> None:
     assert date_to_str(d) == "2023-01-01"
