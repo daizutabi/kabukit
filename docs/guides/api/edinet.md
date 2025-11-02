@@ -16,12 +16,12 @@ EDINET API を利用するには、事前にコマンドラインで EDINET API 
 
 [`kabukit.get_edinet_list`][] 関数は、提出書類一覧を取得します。
 
-日付 (YYYY-MM-DD) を指定すると、指定した日付に提出された書類一覧を取得できます。
+日付 (YYYYMMDD または YYYY-MM-DD) を指定すると、指定した日付に提出された書類一覧を取得できます。
 
 ```python exec="1" source="material-block"
 from kabukit import get_edinet_list
 
-df = await get_edinet_list("2025-10-10")
+df = await get_edinet_list("20251010")
 df.select("FileDate", "Code", "DocumentId", "Company", "PdfFlag", "CsvFlag")
 ```
 
