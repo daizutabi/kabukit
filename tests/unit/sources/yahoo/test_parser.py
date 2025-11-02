@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import polars as pl
 import pytest
@@ -157,6 +157,17 @@ def test_iter_press_release() -> None:
         ("PressReleaseSummary", "abc"),
         ("PressReleaseDate", datetime.date(2025, 8, 7)),
         ("PressReleaseTime", datetime.time(14, 0)),
+    ]
+
+
+def test_iter_press_release_none() -> None:
+    state: dict[str, dict[str, Any]] = {"mainStocksPressReleaseSummary": {}}
+
+    results = list(iter_press_release(state))
+    assert results == [
+        ("PressReleaseSummary", None),
+        ("PressReleaseDate", None),
+        ("PressReleaseTime", None),
     ]
 
 
