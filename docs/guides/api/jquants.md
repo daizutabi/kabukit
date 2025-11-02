@@ -12,7 +12,7 @@ J-Quants API を利用するには、事前にコマンドラインで J-Quants 
 
 ## モジュールレベル関数
 
-### 上場銘柄一覧 (`get_info`)
+### 銘柄情報 (`get_info`)
 
 [`kabukit.get_info`][] 関数は、上場銘柄の情報を取得します。
 
@@ -29,7 +29,7 @@ df.select("Date", "Code", "Company", "Market")
 ただし、デフォルトでは、投資信託や優先株式を除きます。
 
 ```python exec="1" source="material-block"
-df = await get_info()  # 全上場銘柄一覧を取得 (投資信託や優先株式を除く)
+df = await get_info()  # 全銘柄情報を取得 (投資信託や優先株式を除く)
 df.select("Date", "Code", "Company", "Market")
 ```
 
@@ -39,7 +39,7 @@ J-Quants API から取得できる全銘柄が含まれます。
 ```python exec="1" source="material-block"
 from polars import col as c
 
-df = await get_info(only_common_stocks=False)  # 全上場銘柄一覧を取得
+df = await get_info(only_common_stocks=False)  # 全銘柄情報を取得
 df = df.filter(c.Sector17 == "その他")  # 業種区分が「その他」の銘柄を選択
 df.select("Date", "Code", "Company")
 ```
@@ -148,7 +148,7 @@ from kabukit import JQuantsClient
 client = JQuantsClient()
 ```
 
-### 上場銘柄一覧 (`get_info`)
+### 銘柄情報 (`get_info`)
 
 [`JQuantsClient.get_info`][kabukit.JQuantsClient.get_info]
 メソッドは、上場銘柄の情報を取得します。

@@ -68,7 +68,7 @@ uv add kabukit
 # J-Quants API の認証（対話形式）
 kabu auth jquants
 
-# 上場銘柄一覧を取得
+# 全銘柄情報を取得
 kabu get info
 
 # トヨタ自動車の財務情報を取得
@@ -82,7 +82,7 @@ kabu get statements 7203
 ```python
 from kabukit import get_info, get_prices
 
-# 上場銘柄一覧を取得
+# 全銘柄情報を取得
 df_info = await get_info()
 
 # トヨタ自動車の株価を取得
