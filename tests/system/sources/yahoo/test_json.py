@@ -29,14 +29,14 @@ def test_state_index(state: dict[str, Any]) -> None:
     for p in ["b", "e", "d"]:
         assert f"{p}ps" in x
         assert f"{p}psDate" in x
-        assert re.match(r"^\d{4}/\d{2}$", x[f"{p}psDate"])
+        assert re.match(r"^[\d-]{4}/[\d-]{2}$", x[f"{p}psDate"])
 
 
 def test_state_press_release(state: dict[str, Any]) -> None:
-    x = state["mainStocksPressReleaseSummary"]
-    assert len(x) == 2
-    assert "disclosedTime" in x
-    assert "summary" in x
+    if x := state["mainStocksPressReleaseSummary"]:
+        assert len(x) == 2
+        assert "disclosedTime" in x
+        assert "summary" in x
 
 
 def test_state_performance(state: dict[str, Any]) -> None:
@@ -65,4 +65,4 @@ def test_store_forcast(store: dict[str, Any]) -> None:
     x = store["performance"]["forecast"]
 
     assert isinstance(x, dict)
-    assert len(x) in [5, 7]  # pyright: ignore[reportUnknownArgumentType]
+    assert len(x) in [0, 5, 7]  # pyright: ignore[reportUnknownArgumentType]

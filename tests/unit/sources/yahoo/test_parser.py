@@ -262,6 +262,10 @@ def test_parse_datetime(
     assert _parse_datetime(date_str) == (date, time)
 
 
+def test_parse_datetime_none() -> None:
+    assert _parse_datetime("----/--") == (None, None)
+
+
 @pytest.mark.parametrize(
     ("content", "expected"),
     [

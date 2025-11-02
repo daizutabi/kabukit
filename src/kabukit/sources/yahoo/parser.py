@@ -133,6 +133,12 @@ def iter_press_release(state: dict[str, Any], /) -> Iterator[tuple[str, Any]]:
     """
     pr: dict[str, Any] = state["mainStocksPressReleaseSummary"]
 
+    if not pr:
+        yield "PressReleaseSummary", None
+        yield "PressReleaseDate", None
+        yield "PressReleaseTime", None
+        return
+
     yield "PressReleaseSummary", pr["summary"]
     disclosed_datetime = datetime.datetime.fromisoformat(pr["disclosedTime"])
     yield "PressReleaseDate", disclosed_datetime.date()
@@ -211,8 +217,13 @@ def _float_or_none(value: str) -> float | None:
     return float(value.replace(",", ""))
 
 
-def _parse_datetime(date_str: str) -> tuple[datetime.date, datetime.time]:
+def _parse_datetime(
+    date_str: str,
+) -> tuple[datetime.date, datetime.time] | tuple[None, None]:
     """月日/日付/時刻文字列を解釈する。"""
+    if "-" in date_str:
+        return None, None
+
     if re.match(r"^\d{4}/\d{2}$", date_str):
         # "2023/10" のような年月形式の場合
         return parse_year_month(date_str), datetime.time(0, 0)
