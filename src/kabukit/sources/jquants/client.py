@@ -181,10 +181,13 @@ class JQuantsClient(Client):
 
         df = pl.DataFrame(data["info"])
 
-        if only_common_stocks:
-            df = info.filter_common_stocks(df)
+        if not transform:
+            return df
 
-        return info.transform(df) if transform else df
+        if df.is_empty():
+            return pl.DataFrame()
+
+        return info.transform(df, only_common_stocks=only_common_stocks)
 
     async def get_statements(
         self,

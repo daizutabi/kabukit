@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import polars as pl
 import typer
@@ -9,6 +9,20 @@ from rich.console import Console
 from rich.table import Table
 
 from kabukit.utils.cache import write
+from kabukit.utils.params import get_code_date as _get_code_date
+
+if TYPE_CHECKING:
+    import datetime
+
+
+def get_code_date(
+    arg: str | None,
+) -> tuple[None, None] | tuple[str, None] | tuple[None, datetime.date]:
+    try:
+        return _get_code_date(arg)
+    except ValueError:
+        typer.echo("無効な銘柄コード・日付の形式です。", err=True)
+        raise typer.Exit(1) from None
 
 
 def write_cache(
