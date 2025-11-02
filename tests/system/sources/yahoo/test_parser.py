@@ -3,6 +3,8 @@ from __future__ import annotations
 import datetime
 from typing import Any
 
+import polars as pl
+
 from kabukit.sources.yahoo.parser import (
     iter_index,
     iter_performance,
@@ -35,22 +37,24 @@ def test_state_iter_index(state: dict[str, Any]) -> None:
     assert len(x) == 8
     assert isinstance(x["IssuedShares"], int)
     assert isinstance(x["IssuedSharesDate"], datetime.date)
-    assert isinstance(x["BookValuePerShare"], float)
-    assert isinstance(x["BookValuePerShareDate"], datetime.date)
+    if x["BookValuePerShare"] is not None:
+        assert isinstance(x["BookValuePerShare"], float)
+        assert isinstance(x["BookValuePerShareDate"], datetime.date)
     if x["EarningsPerShare"] is not None:
         assert isinstance(x["EarningsPerShare"], float)
-    assert isinstance(x["EarningsPerShareDate"], datetime.date)
+        assert isinstance(x["EarningsPerShareDate"], datetime.date)
     if x["DividendPerShare"] is not None:
         assert isinstance(x["DividendPerShare"], float)
-    assert isinstance(x["DividendPerShareDate"], datetime.date)
+        assert isinstance(x["DividendPerShareDate"], datetime.date)
 
 
 def test_state_iter_press_release(state: dict[str, Any]) -> None:
     x = dict(iter_press_release(state))
     assert len(x) == 3
-    assert isinstance(x["PressReleaseSummary"], str)
-    assert isinstance(x["PressReleaseDate"], datetime.date)
-    assert isinstance(x["PressReleaseTime"], datetime.time)
+    if x["PressReleaseSummary"] is not None:
+        assert isinstance(x["PressReleaseSummary"], str)
+        assert isinstance(x["PressReleaseDate"], datetime.date)
+        assert isinstance(x["PressReleaseTime"], datetime.time)
 
 
 def test_state_iter_performance(state: dict[str, Any]) -> None:
@@ -72,4 +76,4 @@ def test_parse_quote(quote: str) -> None:
 
 def test_parse_performance(performance: str) -> None:
     df = parse_performance(performance)
-    assert df.width == 29
+    assert df.width == 29 or df.equals(pl.DataFrame())

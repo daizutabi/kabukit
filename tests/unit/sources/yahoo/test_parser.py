@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import polars as pl
 import pytest
@@ -160,6 +160,17 @@ def test_iter_press_release() -> None:
     ]
 
 
+def test_iter_press_release_none() -> None:
+    state: dict[str, dict[str, Any]] = {"mainStocksPressReleaseSummary": {}}
+
+    results = list(iter_press_release(state))
+    assert results == [
+        ("PressReleaseSummary", None),
+        ("PressReleaseDate", None),
+        ("PressReleaseTime", None),
+    ]
+
+
 def test_iter_performance() -> None:
     state = {
         "stockPerformance": {
@@ -260,6 +271,10 @@ def test_parse_datetime(
     mocker.patch("kabukit.sources.yahoo.parser.today", return_value=today)
 
     assert _parse_datetime(date_str) == (date, time)
+
+
+def test_parse_datetime_none() -> None:
+    assert _parse_datetime("----/--") == (None, None)
 
 
 @pytest.mark.parametrize(
