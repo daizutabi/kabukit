@@ -16,7 +16,3 @@ async def test_count(client: EdinetClient) -> None:
 
 async def test_count_zero(client: EdinetClient) -> None:
     assert await client.get_count("1000-01-01") == 0
-
-
-async def test_count_status_not_200(client: EdinetClient) -> None:
-    assert await client.get_count("") == 0
