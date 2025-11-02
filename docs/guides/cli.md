@@ -139,7 +139,7 @@ J-Quants API から上場銘柄一覧を取得します。
 $ kabu get info 7203
 ```
 
-日付 (YYYYMMDD) を指定すると、指定した日付または
+日付 (YYYYMMDD または YYYY-MM-DD) を指定すると、指定した日付または
 翌営業日における全銘柄の情報を取得できます。
 
 ```console exec="1" source="1" result="text"

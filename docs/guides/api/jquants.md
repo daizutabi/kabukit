@@ -166,7 +166,7 @@ df.select("Date", "Code", "Company", "Sector17")
 `date` 引数に日付を指定して、指定した日付の全銘柄情報を取得します。
 
 ```python exec="1" source="material-block"
-df = await client.get_info(date="2020-10-01")
+df = await client.get_info(date="20201001")
 df.select("Date", "Code", "Company", "Sector17")
 ```
 

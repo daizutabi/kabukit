@@ -24,7 +24,7 @@ def get_params(**kwargs: Any) -> dict[str, Any]:
     params: dict[str, Any] = {}
 
     for key, value in iter_items(kwargs):
-        if isinstance(value, datetime.date):
+        if isinstance(value, datetime.date) or key == "date":
             params[key] = date_to_str(value)
         elif isinstance(value, str | int | float | bool):
             params[key] = value
@@ -43,10 +43,10 @@ def date_to_str(date: str | datetime.date) -> str:
     Returns:
         The date as a YYYY-MM-DD string.
     """
-    if isinstance(date, datetime.date):
-        return date.strftime("%Y-%m-%d")
+    if isinstance(date, str):
+        date = parse_date(date)
 
-    return date
+    return date.strftime("%Y-%m-%d")
 
 
 def get_code_date(

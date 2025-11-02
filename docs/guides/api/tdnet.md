@@ -9,12 +9,12 @@
 
 [`kabukit.get_tdnet_list`][] 関数は、適時開示情報の書類一覧を取得します。
 
-日付（YYYY-MM-DD）を指定すると、指定した日に開示された書類一覧を取得できます。
+日付（YYYYMMDD または YYYY-MM-DD）を指定すると、指定した日に開示された書類一覧を取得できます。
 
 ```python exec="1" source="material-block"
 from kabukit import get_tdnet_list
 
-df = await get_tdnet_list("2025-10-10")
+df = await get_tdnet_list("20251010")
 df.select("Date", "Code", "Company", "Title").tail()
 ```
 
