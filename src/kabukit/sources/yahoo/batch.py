@@ -19,7 +19,7 @@ async def get_quote(
     codes: Iterable[str] | str | None = None,
     /,
     max_items: int | None = None,
-    max_concurrency: int = 3,
+    max_concurrency: int = 2,
     progress: Progress | None = None,
     callback: Callback | None = None,
 ) -> pl.DataFrame:
