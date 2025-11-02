@@ -56,7 +56,7 @@ def format_info(path: Path) -> str:
     timestamp = path.stat().st_mtime
     formatted_timestamp = format_timestamp(timestamp)
 
-    return f"{formatted_timestamp}, {formatted_size}"
+    return f"{formatted_timestamp} {formatted_size}"
 
 
 def format_timestamp(timestamp: float) -> str:
@@ -66,12 +66,12 @@ def format_timestamp(timestamp: float) -> str:
 
 def format_size(size: int) -> str:
     if size < 1024:
-        return f"{size} B"
+        return f"{size}B"
 
     if size < 1024 * 1024:
-        return f"{size / 1024:.1f} KB"
+        return f"{size / 1024:.1f}KiB"
 
-    return f"{size / (1024 * 1024):.1f} MB"
+    return f"{size / (1024 * 1024):.1f}MiB"
 
 
 SubDir = Annotated[str | None, Argument(help="サブディレクトリ。")]
