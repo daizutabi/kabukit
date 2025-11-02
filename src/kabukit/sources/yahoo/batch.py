@@ -19,7 +19,7 @@ async def get_quote(
     codes: Iterable[str] | str | None = None,
     /,
     max_items: int | None = None,
-    max_concurrency: int = 4,
+    max_concurrency: int = 3,
     progress: Progress | None = None,
     callback: Callback | None = None,
 ) -> pl.DataFrame:
@@ -31,7 +31,7 @@ async def get_quote(
         max_items (int | None, optional): 取得する銘柄数の上限。
             指定しないときはすべての銘柄が対象となる。
         max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
-            デフォルトは4。
+            デフォルトは3。
         progress (Progress | None, optional): 進捗表示のための関数。
             tqdm, marimoなどのライブラリを使用できる。
             指定しないときは進捗表示は行われない。
