@@ -120,11 +120,11 @@ def test_cache_clean_without_args(mocker: MockerFixture) -> None:
 @pytest.mark.parametrize(
     ("size", "expected"),
     [
-        (100, "100 B"),
-        (2048, "2.0 KB"),
-        (5000, "4.9 KB"),
-        (5 * 1024**2, "5.0 MB"),
-        (312 * 1024**2, "312.0 MB"),
+        (100, "100B"),
+        (2048, "2.0KiB"),
+        (5000, "4.9KiB"),
+        (5 * 1024**2, "5.0MiB"),
+        (312 * 1024**2, "312.0MiB"),
     ],
 )
 def test_format_size(size: int, expected: str) -> None:
