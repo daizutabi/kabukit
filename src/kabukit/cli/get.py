@@ -1,20 +1,13 @@
 from __future__ import annotations
 
-from typing import Annotated, Any
+from typing import Annotated
 
-import tqdm.asyncio
 import typer
 from async_typer import AsyncTyper
 from typer import Argument, Option
 
 # pyright: reportMissingTypeStubs=false
 # pyright: reportUnknownMemberType=false
-
-
-class CustomTqdm(tqdm.asyncio.tqdm):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        kwargs.setdefault("ncols", 80)
-        super().__init__(*args, **kwargs)
 
 
 app = AsyncTyper(
@@ -94,7 +87,7 @@ async def statements(
     from kabukit.sources.jquants.batch import get_statements
     from kabukit.utils.datetime import today
 
-    from .utils import display_dataframe, get_code_date, write_cache
+    from .utils import CustomTqdm, display_dataframe, get_code_date, write_cache
 
     if arg is None and not all_:
         arg = today(as_str=True)
@@ -124,7 +117,7 @@ async def prices(
     from kabukit.sources.jquants.batch import get_prices
     from kabukit.utils.datetime import today
 
-    from .utils import display_dataframe, get_code_date, write_cache
+    from .utils import CustomTqdm, display_dataframe, get_code_date, write_cache
 
     if arg is None and not all_:
         arg = today(as_str=True)
@@ -189,7 +182,7 @@ async def edinet(
     from kabukit.sources.edinet.batch import get_list
     from kabukit.utils.datetime import today
 
-    from .utils import display_dataframe, get_code_date, write_cache
+    from .utils import CustomTqdm, display_dataframe, get_code_date, write_cache
 
     if date is None and not all_:
         date = today(as_str=True)
@@ -225,7 +218,7 @@ async def tdnet(
     from kabukit.sources.tdnet.batch import get_list
     from kabukit.utils.datetime import today
 
-    from .utils import display_dataframe, get_code_date, write_cache
+    from .utils import CustomTqdm, display_dataframe, get_code_date, write_cache
 
     if date is None and not all_:
         date = today(as_str=True)
@@ -259,7 +252,7 @@ async def yahoo(
     """Yahooファイナンスから情報を取得します。"""
     from kabukit.sources.yahoo.batch import get_quote
 
-    from .utils import display_dataframe, write_cache
+    from .utils import CustomTqdm, display_dataframe, write_cache
 
     if code is None and not all_:
         typer.echo("銘柄コードか --all オプションを指定してください。", err=True)

@@ -133,7 +133,7 @@ def iter_press_release(state: dict[str, Any], /) -> Iterator[tuple[str, Any]]:
     """
     pr: dict[str, Any] = state["mainStocksPressReleaseSummary"]
 
-    if not pr:
+    if "summary" not in pr:
         yield "PressReleaseSummary", None
         yield "PressReleaseDate", None
         yield "PressReleaseTime", None

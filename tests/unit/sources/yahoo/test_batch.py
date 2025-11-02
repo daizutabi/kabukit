@@ -40,7 +40,7 @@ async def test_get_quote_multiple_codes(mock_gather_get: AsyncMock) -> None:
         "quote",
         codes,
         max_items=None,
-        max_concurrency=12,
+        max_concurrency=4,
         progress=None,
         callback=None,
     )
@@ -69,7 +69,7 @@ async def test_get_quote_no_codes_specified(
         "quote",
         codes,
         max_items=None,
-        max_concurrency=12,
+        max_concurrency=4,
         progress=None,
         callback=None,
     )

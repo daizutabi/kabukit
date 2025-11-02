@@ -6,9 +6,20 @@ import polars as pl
 import pytest
 import typer
 
-from kabukit.cli.utils import display_dataframe, display_value, get_code_date
+from kabukit.cli.utils import (
+    CustomTqdm,
+    display_dataframe,
+    display_value,
+    get_code_date,
+)
 
 pytestmark = pytest.mark.unit
+
+
+def test_custom_tqdm() -> None:
+    tqdm = CustomTqdm(total=10)
+    assert tqdm.ncols == 80
+    tqdm.close()
 
 
 def test_get_code_date_invalid(capsys: pytest.CaptureFixture[str]) -> None:
