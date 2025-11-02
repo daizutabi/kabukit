@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import re
-from functools import cache
 from typing import TYPE_CHECKING
 
 import polars as pl
-from bs4 import BeautifulSoup
 
+from kabukit.sources.utils import get_soup
 from kabukit.utils.datetime import parse_date, parse_time
 
 if TYPE_CHECKING:
@@ -14,11 +13,6 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from bs4.element import Tag
-
-
-@cache
-def get_soup(text: str) -> BeautifulSoup:
-    return BeautifulSoup(text, "lxml")
 
 
 DATE_PATTERN = re.compile(r"I_list_001_(\d{8})\.html")

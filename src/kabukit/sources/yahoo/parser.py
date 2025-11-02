@@ -6,8 +6,9 @@ import re
 from typing import TYPE_CHECKING
 
 import polars as pl
-from bs4 import BeautifulSoup, Tag
+from bs4 import Tag
 
+from kabukit.sources.utils import get_soup
 from kabukit.utils.datetime import parse_month_day, parse_time, parse_year_month, today
 
 if TYPE_CHECKING:
@@ -16,7 +17,7 @@ if TYPE_CHECKING:
 
 
 def _get(text: str, pattern: re.Pattern[str]) -> re.Match[str] | None:
-    soup = BeautifulSoup(text, "lxml")
+    soup = get_soup(text)
     script = soup.find("script", string=pattern)  # pyright: ignore[reportCallIssue, reportArgumentType, reportUnknownVariableType], # ty: ignore[no-matching-overload]
 
     if not isinstance(script, Tag):
