@@ -36,3 +36,8 @@ async def test_csv(client: EdinetClient) -> None:
     assert df.columns[0] == "DocumentId"
     assert df.shape == (47, 10)
     assert "値" in df.columns
+
+
+async def test_xbrl(client: EdinetClient) -> None:
+    xbrl = await client.get_xbrl("S100WXPV")
+    assert xbrl.startswith('<?xml version="1.0" encoding="UTF-8"?>\n<xbrli:xbrl')

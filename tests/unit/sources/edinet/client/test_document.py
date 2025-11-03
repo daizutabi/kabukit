@@ -81,6 +81,47 @@ async def test_get_zip_fail(mock_get: AsyncMock, mocker: MockerFixture) -> None:
         await client.get_zip("S100TEST", doc_type=5)
 
 
+async def test_get_xbrl_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+    zip_buffer = io.BytesIO()
+    data = "xbrl_コンテンツ".encode()
+    with zipfile.ZipFile(zip_buffer, "w") as zf:
+        zf.writestr("XBRL/PublicDoc/test.xbrl", data)
+    zip_content = zip_buffer.getvalue()
+
+    mock_get.return_value = Response(
+        200,
+        content=zip_content,
+        headers={"content-type": "application/octet-stream"},
+    )
+    mock_get.return_value.raise_for_status = mocker.MagicMock()
+
+    client = EdinetClient("test_key")
+    xbrl = await client.get_xbrl("S100TEST")
+
+    assert xbrl == "xbrl_コンテンツ"
+    mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 1})
+
+
+async def test_get_xbrl_fail(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w") as zf:
+        zf.writestr("XBRL/PublicDoc/test.txt", "abc")
+    zip_content = zip_buffer.getvalue()
+
+    mock_get.return_value = Response(
+        200,
+        content=zip_content,
+        headers={"content-type": "application/octet-stream"},
+    )
+    mock_get.return_value.raise_for_status = mocker.MagicMock()
+
+    client = EdinetClient("test_key")
+
+    msg = "XBRL is not available."
+    with pytest.raises(ValueError, match=msg):
+        await client.get_xbrl("S100TEST")
+
+
 async def test_get_csv_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     csv_content = "header1\theader2\nvalue1\tvalue2"
     zip_buffer = io.BytesIO()
