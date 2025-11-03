@@ -1,3 +1,9 @@
+"""JPXから上場株式数データを解析するためのモジュール。
+
+このモジュールは、JPXのウェブサイトから上場株式数に関するHTMLリンクを抽出し、
+PDFファイルの内容を解析して、株式数データをPolars DataFrameとして提供します。
+"""
+
 from __future__ import annotations
 
 import calendar
@@ -17,6 +23,14 @@ if TYPE_CHECKING:
 
 
 def iter_shares_urls(html: str, /) -> Iterator[str]:
+    """HTMLコンテンツから上場株式数データのバックナンバーURLを抽出する。
+
+    Args:
+        html (str): 解析対象のHTML文字列。
+
+    Yields:
+        str: 上場株式数データのバックナンバーURL。
+    """
     soup = get_soup(html)
     select = soup.find("select", class_="backnumber")
 
@@ -30,6 +44,14 @@ def iter_shares_urls(html: str, /) -> Iterator[str]:
 
 
 def iter_shares_links(html: str, /) -> Iterator[str]:
+    """HTMLコンテンツから特定のパターンに一致するPDFリンクを抽出する。
+
+    Args:
+        html (str): 解析対象のHTML文字列。
+
+    Yields:
+        str: 上場株式数PDFファイルへのリンク。
+    """
     soup = get_soup(html)
 
     pattern = re.compile(r"HP-\d{4}\.\d{1,2}\.pdf")
@@ -42,25 +64,48 @@ def iter_shares_links(html: str, /) -> Iterator[str]:
 
 @dataclass
 class Shares:
-    name: str
+    """上場株式数データを保持するデータクラス。"""
+
+    company: str
+    """会社名"""
     code: str
+    """銘柄コード"""
     number: int
+    """上場株式数"""
     year: int
+    """データが所属する年"""
     month: int
+    """データが所属する月"""
 
     def to_dict(self) -> dict[str, str | int | datetime.date]:
+        """Sharesオブジェクトを辞書形式に変換する。
+
+        Returns:
+            dict[str, str | int | datetime.date]: Polars DataFrameの行として
+                適した辞書。
+        """
         day = calendar.monthrange(self.year, self.month)[1]
         date = datetime.date(self.year, self.month, day)
 
         return {
             "Date": date,
             "Code": self.code,
-            "Company": self.name,
+            "Company": self.company,
             "IssuedShares": self.number,
         }
 
 
 def iter_shares_pages(content: bytes, /) -> Iterator[str]:
+    """PDFコンテンツから上場株式数データを含むページテキストを抽出する。
+
+    PDF内の特定のヘッダーを検出し、そのページ以降のテキストを抽出する。
+
+    Args:
+        content (bytes): PDFファイルのバイトコンテンツ。
+
+    Yields:
+        str: 上場株式数データを含むページのテキスト。
+    """
     reader = PdfReader(io.BytesIO(content))
 
     header = r"^\s*\d{4}年\d{1,2}月分.+会社別\n会社名\s+（コード）\s+月末現在上場株式数"
@@ -77,23 +122,39 @@ def iter_shares_pages(content: bytes, /) -> Iterator[str]:
 
 
 def iter_shares(page: str, /) -> Iterator[Shares]:
+    """単一のページテキストから上場株式数データを抽出する。
+
+    Args:
+        page (str): 上場株式数データを含むページのテキスト。
+
+    Yields:
+        Shares: 解析された`Shares`オブジェクト。
+    """
     m = re.match(r"^\s*(\d{4})年(\d{1,2})月分\n", page)
     if not m:
         return
 
     year, month = map(int, m.groups())
 
-    pattern = re.compile(r"^(.+)\s+\(([0-9A-Z]{4})\)\s([\d,]+)\s+")
+    pattern = re.compile(r"^(.+?)\s+\(([0-9A-Z]{4})\)\s+([\d,]+)\s*")
 
     for line in page.splitlines():
         m = pattern.match(line)
         if m:
-            name, code, number = m.groups()
+            company, code, number = m.groups()
             number = int(number.replace(",", ""))
-            yield Shares(name, code, number, year, month)
+            yield Shares(company, code, number, year, month)
 
 
 def parse_shares(content: bytes, /) -> pl.DataFrame:
+    """PDFコンテンツを解析し、上場株式数データのPolars DataFrameを生成する。
+
+    Args:
+        content (bytes): PDFファイルのバイトコンテンツ。
+
+    Returns:
+        pl.DataFrame: 上場株式数データを含むPolars DataFrame。
+    """
     pages = iter_shares_pages(content)
     shares = (share.to_dict() for page in pages for share in iter_shares(page))
     return pl.DataFrame(shares)
