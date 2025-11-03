@@ -19,7 +19,7 @@ async def get_list(
     dates: Iterable[datetime.date | str] | datetime.date | str | None = None,
     /,
     max_items: int | None = None,
-    max_concurrency: int | None = None,
+    max_concurrency: int = 12,
     progress: Progress | None = None,
     callback: Callback | None = None,
 ) -> pl.DataFrame:
@@ -29,8 +29,8 @@ async def get_list(
         dates (Iterable[datetime.date | str] | datetime.date | str | None):
             取得対象の日付のリスト。None の場合は現在取得可能な日付リストから生成する。
         max_items (int | None, optional): 取得数の上限。
-        max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
-            指定しないときはデフォルト値が使用される。
+        max_concurrency (int, optional): 同時に実行するリクエストの最大数。
+            デフォルトは12。
         progress (Progress | None, optional): 進捗表示のための関数。
             tqdm, marimoなどのライブラリを使用できる。
             指定しないときは進捗表示は行われない。

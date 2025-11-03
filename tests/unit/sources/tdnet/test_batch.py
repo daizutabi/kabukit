@@ -29,7 +29,10 @@ async def test_get_list_single_date(mocker: MockerFixture) -> None:
     assert_frame_equal(result, mock_df)
 
 
-async def test_get_list_multiple_dates(mock_gather_get: AsyncMock) -> None:
+async def test_get_list_multiple_dates(
+    mock_gather_get: AsyncMock,
+    mocker: MockerFixture,
+) -> None:
     dates = [datetime.date(2023, 1, 1), datetime.date(2023, 1, 2)]
 
     mock_df = pl.DataFrame({"Code": [1, 2], "Date": dates})
@@ -42,7 +45,7 @@ async def test_get_list_multiple_dates(mock_gather_get: AsyncMock) -> None:
         "list",
         dates,
         max_items=None,
-        max_concurrency=None,
+        max_concurrency=mocker.ANY,
         progress=None,
         callback=None,
     )
@@ -68,7 +71,7 @@ async def test_get_list_no_dates_specified(
         "list",
         dates,
         max_items=None,
-        max_concurrency=None,
+        max_concurrency=mocker.ANY,
         progress=None,
         callback=None,
     )

@@ -100,6 +100,7 @@ async def test_get_list_days(
 async def test_get_list_years(
     mock_get_past_dates: MagicMock,
     mock_gather_get: AsyncMock,
+    mocker: MockerFixture,
 ) -> None:
     mock_get_past_dates.return_value = [
         datetime.date(2023, 1, 1),
@@ -118,7 +119,7 @@ async def test_get_list_years(
             datetime.date(2022, 1, 1),
         ],
         max_items=None,
-        max_concurrency=None,
+        max_concurrency=mocker.ANY,
         progress=None,
         callback=None,
     )
@@ -155,7 +156,10 @@ async def test_get_documents_csv(mock_gather_get: AsyncMock) -> None:
     )
 
 
-async def test_get_documents_pdf(mock_gather_get: AsyncMock) -> None:
+async def test_get_documents_pdf(
+    mock_gather_get: AsyncMock,
+    mocker: MockerFixture,
+) -> None:
     mock_gather_get.return_value = pl.DataFrame({"DocumentId": [1]})
 
     await get_documents(["doc1", "doc2"], pdf=True)
@@ -165,7 +169,7 @@ async def test_get_documents_pdf(mock_gather_get: AsyncMock) -> None:
         "pdf",
         ["doc1", "doc2"],
         max_items=None,
-        max_concurrency=None,
+        max_concurrency=mocker.ANY,
         progress=None,
         callback=None,
     )
