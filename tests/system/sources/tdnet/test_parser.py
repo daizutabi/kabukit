@@ -54,6 +54,5 @@ def test_table_format(page: str) -> None:  # noqa: C901
                 assert td.get_text(strip=True) or True
 
 
-# def test_xbrl_urls(xbrl_urls: list[str]) -> None:
-#     print(xbrl_urls)
-#     assert 0
+def test_xbrl_content(xbrl_content: bytes) -> None:
+    assert xbrl_content.startswith(b"PK\x03\x04\x14\x00\x08\x08\x08\x00")
