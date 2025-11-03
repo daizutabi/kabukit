@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING, ClassVar
 
 import pytest
@@ -8,6 +9,8 @@ from httpx import ConnectTimeout, HTTPStatusError, Response
 from kabukit.sources.client import Client
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+    from typing import Any
     from unittest.mock import AsyncMock
 
     from pytest_mock import MockerFixture
@@ -112,9 +115,15 @@ async def test_run_in_executor_without_executor(mocker: MockerFixture) -> None:
     mock_loop.run_in_executor.assert_not_called()
 
 
+def side_effect[T](_executor: Any, func_to_run: Callable[[], T]):  # pyright: ignore[reportUnknownParameterType]
+    future = asyncio.Future()  # pyright: ignore[reportUnknownVariableType]
+    future.set_result(func_to_run())  # pyright: ignore[reportUnknownMemberType]
+    return future  # pyright: ignore[reportUnknownVariableType]
+
+
 async def test_run_in_executor_with_executor(mocker: MockerFixture) -> None:
     mock_loop = mocker.MagicMock()
-    mock_loop.run_in_executor = mocker.AsyncMock()
+    mock_loop.run_in_executor.side_effect = side_effect
     mocker.patch(
         "kabukit.sources.client.asyncio.get_running_loop",
         return_value=mock_loop,
@@ -123,6 +132,27 @@ async def test_run_in_executor_with_executor(mocker: MockerFixture) -> None:
     mock_executor = mocker.MagicMock()
     client = MockClient(executor=mock_executor)
 
-    await client.run_in_executor(sum, [1, 2, 3])
+    result = await client.run_in_executor(sum, [1, 2, 3])
 
-    mock_loop.run_in_executor.assert_awaited_once_with(mock_executor, mocker.ANY)
+    assert result == 6  # 戻り値を検証
+    mock_loop.run_in_executor.assert_called_once_with(mock_executor, mocker.ANY)
+
+
+async def test_run_in_executor_with_executor_and_kwargs(mocker: MockerFixture) -> None:
+    mock_loop = mocker.MagicMock()
+    mock_loop.run_in_executor.side_effect = side_effect
+    mocker.patch(
+        "kabukit.sources.client.asyncio.get_running_loop",
+        return_value=mock_loop,
+    )
+
+    mock_executor = mocker.MagicMock()
+    client = MockClient(executor=mock_executor)
+
+    def dummy_func(a: int, b: int = 0, c: int = 0) -> int:
+        return a + b + c
+
+    result = await client.run_in_executor(dummy_func, 1, b=2, c=3)
+
+    assert result == 6  # キーワード引数を含めた結果を検証
+    mock_loop.run_in_executor.assert_called_once_with(mock_executor, mocker.ANY)
