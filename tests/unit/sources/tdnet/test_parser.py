@@ -123,8 +123,8 @@ def test_parse_list() -> None:
             "DisclosedTime": [datetime.time(10, 0), datetime.time(11, 0)],
             "Company": ["極洋", "日清製粉"],
             "Title": ["自己株式の取得結果", "役員人事"],
-            "PdfLink": ["some/path.pdf", "other/path.pdf"],
-            "XbrlLink": ["some/xbrl.zip", None],
+            "PdfUrl": ["some/path.pdf", "other/path.pdf"],
+            "XbrlUrl": ["some/xbrl.zip", None],
             "UpdateStatus": [None, "更新"],
         },
     )
@@ -146,8 +146,8 @@ def test_iter_cells() -> None:
         "DisclosedTime": datetime.time(10, 0),
         "Company": "極洋",
         "Title": "自己株式の取得結果",
-        "PdfLink": "some/path.pdf",
-        "XbrlLink": "some/xbrl.zip",
+        "PdfUrl": "some/path.pdf",
+        "XbrlUrl": "some/xbrl.zip",
         "UpdateStatus": None,
     }
     assert result == expected

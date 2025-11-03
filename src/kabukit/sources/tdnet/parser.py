@@ -73,8 +73,8 @@ def iter_cells(tag: Tag, /) -> Iterator[tuple[str, datetime.time | str | None]]:
     yield "DisclosedTime", parse_time(tds[0].get_text(strip=True))
     yield "Company", tds[2].get_text(strip=True)
     yield "Title", tds[3].get_text(strip=True)
-    yield "PdfLink", get_link(tds[3])
-    yield "XbrlLink", get_link(tds[4])
+    yield "PdfUrl", get_link(tds[3])
+    yield "XbrlUrl", get_link(tds[4])
     yield "UpdateStatus", tds[6].get_text(strip=True) or None
 
 
