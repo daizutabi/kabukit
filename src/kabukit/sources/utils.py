@@ -6,5 +6,5 @@ from bs4 import BeautifulSoup
 
 
 @cache
-def get_soup(text: str) -> BeautifulSoup:
-    return BeautifulSoup(text, "lxml")
+def get_soup(html: str) -> BeautifulSoup:
+    return BeautifulSoup(html, "lxml")

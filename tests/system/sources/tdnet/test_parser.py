@@ -6,6 +6,7 @@ import pytest
 from bs4.element import Tag
 
 from kabukit.sources.tdnet.parser import iter_page_numbers
+from kabukit.sources.utils import get_soup
 
 pytestmark = pytest.mark.system
 
@@ -20,7 +21,12 @@ def test_iter_page_numbers(page: str) -> None:
     assert sorted(set(pages)) == pages
 
 
-def test_table_format(table: Tag) -> None:  # noqa: C901
+def test_table_format(page: str) -> None:  # noqa: C901
+    soup = get_soup(page)
+    table = soup.find("table", attrs={"id": "main-list-table"})
+
+    assert table is not None
+
     for row in table.find_all("tr"):
         for k, td in enumerate(row.find_all("td")):
             if k == 0:  # 時刻
@@ -46,3 +52,7 @@ def test_table_format(table: Tag) -> None:  # noqa: C901
                 assert td.get_text(strip=True)
             elif k == 6:  # 更新履歴
                 assert td.get_text(strip=True) or True
+
+
+def test_xbrl_content(xbrl_content: bytes) -> None:
+    assert xbrl_content.startswith(b"PK\x03\x04\x14\x00\x08\x08\x08\x00")

@@ -55,14 +55,14 @@ def test_list_title(data: pl.DataFrame) -> None:
 
 
 def test_list_pdf(data: pl.DataFrame) -> None:
-    x = data["PdfLink"]
+    x = data["PdfUrl"]
     assert x.dtype == pl.String
     assert x.is_not_null().all()
     assert x.str.ends_with(".pdf").all()
 
 
 def test_list_xbrl(data: pl.DataFrame) -> None:
-    x = data["XbrlLink"]
+    x = data["XbrlUrl"]
     assert x.dtype == pl.String
     assert x.drop_nulls().str.ends_with(".zip").all()
 

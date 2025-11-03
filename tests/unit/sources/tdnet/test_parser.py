@@ -8,12 +8,11 @@ from bs4 import BeautifulSoup
 from polars.testing import assert_frame_equal
 
 from kabukit.sources.tdnet.parser import (
-    get_link,
-    get_table,
-    iter_cells,
+    get_url,
     iter_dates,
+    iter_items,
     iter_page_numbers,
-    parse_list,
+    parse_item,
 )
 from kabukit.sources.utils import get_soup
 
@@ -104,64 +103,57 @@ def test_iter_page_numbers_no_pager() -> None:
     assert result == []
 
 
-def test_get_table() -> None:
-    table = get_table(FAKE_HTML_WITH_TABLE)
-    assert table is not None
-    assert table.name == "table"
+def test_iter_items() -> None:
+    items = iter_items(FAKE_HTML_WITH_TABLE)
+    df = pl.DataFrame([item.to_dict() for item in items])
 
-
-def test_get_table_no_table() -> None:
-    table = get_table(FAKE_HTML_WITHOUT_TABLE)
-    assert table is None
-
-
-def test_parse_list() -> None:
-    df = parse_list(FAKE_HTML_WITH_TABLE)
     expected = pl.DataFrame(
         {
             "Code": ["1301", "1302"],
+            "DisclosedDate": [None, None],
             "DisclosedTime": [datetime.time(10, 0), datetime.time(11, 0)],
             "Company": ["極洋", "日清製粉"],
             "Title": ["自己株式の取得結果", "役員人事"],
-            "PdfLink": ["some/path.pdf", "other/path.pdf"],
-            "XbrlLink": ["some/xbrl.zip", None],
+            "PdfUrl": ["some/path.pdf", "other/path.pdf"],
+            "XbrlUrl": ["some/xbrl.zip", None],
             "UpdateStatus": [None, "更新"],
         },
     )
+
     assert_frame_equal(df, expected)
 
 
-def test_parse_list_no_table() -> None:
-    df = parse_list(FAKE_HTML_WITHOUT_TABLE)
-    assert df.is_empty()
+def test_iter_items_no_table() -> None:
+    assert list(iter_items(FAKE_HTML_WITHOUT_TABLE)) == []
 
 
-def test_iter_cells() -> None:
+def test_parse_items() -> None:
     soup = BeautifulSoup(FAKE_HTML_WITH_TABLE, "lxml")
     tr = soup.find("tr")
     assert tr is not None
-    result = dict(iter_cells(tr))
+    result = parse_item(tr).to_dict()
     expected = {
         "Code": "1301",
+        "DisclosedDate": None,
         "DisclosedTime": datetime.time(10, 0),
         "Company": "極洋",
         "Title": "自己株式の取得結果",
-        "PdfLink": "some/path.pdf",
-        "XbrlLink": "some/xbrl.zip",
+        "PdfUrl": "some/path.pdf",
+        "XbrlUrl": "some/xbrl.zip",
         "UpdateStatus": None,
     }
     assert result == expected
 
 
-def test_get_link() -> None:
+def test_get_url() -> None:
     soup = BeautifulSoup('<td><a href="test.pdf">link</a></td>', "lxml")
     td = soup.find("td")
     assert td is not None
-    assert get_link(td) == "test.pdf"
+    assert get_url(td) == "test.pdf"
 
 
-def test_get_link_no_link() -> None:
+def test_get_url_without_link() -> None:
     soup = BeautifulSoup("<td>no link</td>", "lxml")
     td = soup.find("td")
     assert td is not None
-    assert get_link(td) is None
+    assert get_url(td) is None

@@ -10,6 +10,6 @@ class ListColumns(BaseColumns):
     DisclosedTime = "開示時刻"
     Company = "会社名"
     Title = "表題"
-    PdfLink = "PDFリンク"
-    XbrlLink = "XBRLリンク"
+    PdfUrl = "PDF URL"
+    XbrlUrl = "XBRL URL"
     UpdateStatus = "更新履歴"
