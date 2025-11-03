@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import re
 from enum import StrEnum
 from typing import TYPE_CHECKING, ClassVar
 
@@ -8,7 +7,6 @@ import polars as pl
 
 from kabukit.sources.client import Client
 from kabukit.sources.datetime import with_date
-from kabukit.sources.utils import extract_content
 from kabukit.utils.config import get_config_value
 from kabukit.utils.params import get_params
 
@@ -194,12 +192,7 @@ class EdinetClient(Client):
         if content is None:
             return pl.DataFrame()
 
-        pattern = re.compile(r"^.+\.csv$")
-
-        if csv := extract_content(content, pattern):
-            return parse_csv(csv, doc_id)
-
-        return pl.DataFrame()
+        return parse_csv(content, doc_id)
 
     async def get_document(self, doc_id: str, *, pdf: bool = False) -> pl.DataFrame:
         """指定したIDの書類を取得する。

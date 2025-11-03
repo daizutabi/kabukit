@@ -21,10 +21,15 @@ def parse_xbrl(content: bytes) -> str | None:
 
 
 def parse_csv(content: bytes, doc_id: str) -> pl.DataFrame:
-    return read_csv(content).select(
-        pl.lit(doc_id).alias("DocumentId"),
-        pl.all(),
-    )
+    pattern = re.compile(r"^.+\.csv$")
+
+    if csv := extract_content(content, pattern):
+        return read_csv(csv).select(
+            pl.lit(doc_id).alias("DocumentId"),
+            pl.all(),
+        )
+
+    return pl.DataFrame()
 
 
 def read_csv(content: bytes) -> pl.DataFrame:

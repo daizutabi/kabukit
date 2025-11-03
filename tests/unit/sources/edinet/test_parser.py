@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import io
+import zipfile
+
 import pytest
 
 from kabukit.sources.edinet.parser import parse_csv, parse_pdf, read_csv
@@ -23,7 +26,12 @@ def test_parse_pdf() -> None:
 
 
 def test_parse_csv() -> None:
-    data = "col1\tカラム2\n1\t2\n3\t4".encode("utf-16-le")
-    df = parse_csv(data, "abc")
-    assert df.columns == ["DocumentId", "col1", "カラム2"]
+    csv_content = "header1\theader2\nvalue1\tvalue2\nvalue3\tvalue4"
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w") as zf:
+        zf.writestr("a/b/test.csv", csv_content.encode("utf-16-le"))
+    content = zip_buffer.getvalue()
+
+    df = parse_csv(content, "abc")
+    assert df.columns == ["DocumentId", "header1", "header2"]
     assert df["DocumentId"].to_list() == ["abc", "abc"]
