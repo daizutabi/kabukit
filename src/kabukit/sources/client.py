@@ -7,6 +7,7 @@ import tenacity
 from httpx import AsyncClient
 
 if TYPE_CHECKING:
+    from concurrent.futures import Executor
     from typing import Self
 
     from httpx import Response
@@ -21,9 +22,11 @@ def is_retryable(e: BaseException) -> bool:
 class Client:
     client: AsyncClient
     base_url: ClassVar[str]
+    executor: Executor | None = None
 
-    def __init__(self) -> None:
+    def __init__(self, executor: Executor | None = None) -> None:
         self.client = AsyncClient(base_url=self.__class__.base_url, timeout=20)
+        self.executor = executor
 
     async def aclose(self) -> None:
         """HTTPクライアントを閉じる。"""
