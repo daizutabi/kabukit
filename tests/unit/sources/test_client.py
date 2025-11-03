@@ -94,3 +94,35 @@ async def test_get_fails_after_retries(
 
     assert mock_get.call_count == 3
     assert mock_sleep.call_count == 2
+
+
+async def test_run_in_executor_without_executor(mocker: MockerFixture) -> None:
+    mock_loop = mocker.MagicMock()
+    mock_loop.run_in_executor = mocker.AsyncMock()
+    mocker.patch(
+        "kabukit.sources.client.asyncio.get_running_loop",
+        return_value=mock_loop,
+    )
+
+    client = MockClient(executor=None)
+
+    result = await client.run_in_executor(sum, [1, 2, 3])
+    assert result == 6
+
+    mock_loop.run_in_executor.assert_not_called()
+
+
+async def test_run_in_executor_with_executor(mocker: MockerFixture) -> None:
+    mock_loop = mocker.MagicMock()
+    mock_loop.run_in_executor = mocker.AsyncMock()
+    mocker.patch(
+        "kabukit.sources.client.asyncio.get_running_loop",
+        return_value=mock_loop,
+    )
+
+    mock_executor = mocker.MagicMock()
+    client = MockClient(executor=mock_executor)
+
+    await client.run_in_executor(sum, [1, 2, 3])
+
+    mock_loop.run_in_executor.assert_awaited_once_with(mock_executor, mocker.ANY)

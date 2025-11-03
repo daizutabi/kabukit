@@ -93,7 +93,7 @@ async def test_get_shares_blocking(mock_get: AsyncMock, mocker: MockerFixture) -
     mock_loop = mocker.MagicMock()
     mock_loop.run_in_executor = mocker.AsyncMock()
     mocker.patch(
-        "kabukit.sources.jpx.client.asyncio.get_running_loop",
+        "kabukit.sources.client.asyncio.get_running_loop",
         return_value=mock_loop,
     )
 
@@ -122,7 +122,7 @@ async def test_get_shares_with_executor(
     mock_loop = mocker.MagicMock()
     mock_loop.run_in_executor = mocker.AsyncMock()
     mocker.patch(
-        "kabukit.sources.jpx.client.asyncio.get_running_loop",
+        "kabukit.sources.client.asyncio.get_running_loop",
         return_value=mock_loop,
     )
     mock_executor = mocker.MagicMock()
@@ -133,9 +133,5 @@ async def test_get_shares_with_executor(
         await client.get_shares("/a.pdf")
 
     mock_get.assert_awaited_once_with("/a.pdf", params=None)
-    mock_loop.run_in_executor.assert_awaited_once_with(
-        mock_executor,
-        mock_parse_shares,
-        b"pdf_content",
-    )
+    mock_loop.run_in_executor.assert_awaited_once_with(mock_executor, mocker.ANY)
     mock_parse_shares.assert_not_called()
