@@ -95,7 +95,7 @@ class JpxClient(Client):
         Args:
             pdf_url (str): 上場株式数データが記載されたPDFのURL。
             executor (Executor | None, optional): PDFのパース処理を実行するための
-                Executor。 指定しない場合はブロッキングでパース処理を行う。
+                Executor。指定しない場合はブロッキングでパース処理を行う。
 
         Returns:
             pl.DataFrame: 上場株式数データを含むPolars DataFrame。
