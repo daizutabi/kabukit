@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 async def get_shares(
     max_items: int | None = None,
-    max_concurrency: int = 8,
+    max_concurrency: int = 12,
     max_workers: int | None = None,
     progress: Progress | None = None,
     callback: Callback | None = None,

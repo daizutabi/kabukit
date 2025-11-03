@@ -22,7 +22,7 @@ async def get_list(
     days: int | None = None,
     years: int | None = None,
     max_items: int | None = None,
-    max_concurrency: int | None = None,
+    max_concurrency: int = 12,
     progress: Progress | None = None,
     callback: Callback | None = None,
 ) -> pl.DataFrame:
@@ -36,8 +36,8 @@ async def get_list(
         years (int | None): 過去 years 年の日付リストを取得する。
             daysが指定されている場合は無視される。
         max_items (int | None, optional): 取得数の上限。
-        max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
-            指定しないときはデフォルト値が使用される。
+        max_concurrency (int, optional): 同時に実行するリクエストの最大数。
+            デフォルトは12。
         progress (Progress | None, optional): 進捗表示のための関数。
             tqdm, marimoなどのライブラリを使用できる。
             指定しないときは進捗表示は行われない。
@@ -75,7 +75,7 @@ async def get_documents(
     doc_ids: Iterable[str] | str,
     /,
     max_items: int | None = None,
-    max_concurrency: int | None = None,
+    max_concurrency: int = 12,
     progress: Progress | None = None,
     callback: Callback | None = None,
     *,
@@ -86,8 +86,8 @@ async def get_documents(
     Args:
         doc_ids (Iterable[str] | str): 取得対象の文書IDのリスト。
         max_items (int | None, optional): 取得数の上限。
-        max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
-            指定しないときはデフォルト値が使用される。
+        max_concurrency (int, optional): 同時に実行するリクエストの最大数。
+            デフォルトは12。
         progress (Progress | None, optional): 進捗表示のための関数。
             tqdm, marimoなどのライブラリを使用できる。
             指定しないときは進捗表示は行われない。
