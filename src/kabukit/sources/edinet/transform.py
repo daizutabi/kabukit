@@ -78,14 +78,3 @@ def rename_list(df: pl.DataFrame) -> pl.DataFrame:
     }
 
     return df.select(mapping.keys()).rename(mapping)
-
-
-def transform_pdf(content: bytes, doc_id: str) -> pl.DataFrame:
-    return pl.DataFrame({"DocumentId": [doc_id], "PdfContent": [content]})
-
-
-def transform_csv(df: pl.DataFrame, doc_id: str) -> pl.DataFrame:
-    return df.select(
-        pl.lit(doc_id).alias("DocumentId"),
-        pl.all(),
-    )
