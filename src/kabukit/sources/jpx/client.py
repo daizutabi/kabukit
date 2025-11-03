@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 from typing import TYPE_CHECKING, ClassVar
 
 from kabukit.sources.client import Client
@@ -92,13 +91,4 @@ class JpxClient(Client):
             pl.DataFrame: 上場株式数データを含むPolars DataFrame。
         """
         response = await self.get(pdf_url)
-
-        if self.executor:
-            loop = asyncio.get_running_loop()
-            return await loop.run_in_executor(
-                self.executor,
-                parse_shares,
-                response.content,
-            )
-
-        return parse_shares(response.content)
+        return await self.run_in_executor(parse_shares, response.content)

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+import functools
 from typing import TYPE_CHECKING, ClassVar
 
 import httpx
@@ -7,6 +9,7 @@ import tenacity
 from httpx import AsyncClient
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from concurrent.futures import Executor
     from typing import Self
 
@@ -63,3 +66,18 @@ class Client:
         response = await self.client.get(url, params=params)
         response.raise_for_status()
         return response
+
+    async def run_in_executor[**P, R](
+        self,
+        func: Callable[P, R],
+        /,
+        *args: P.args,
+        **kwargs: P.kwargs,
+    ) -> R:
+        """指定された関数をエグゼキューター内で非同期に実行する。"""
+        if self.executor is None:
+            return func(*args, **kwargs)
+
+        loop = asyncio.get_running_loop()
+        pfunc = functools.partial(func, *args, **kwargs)
+        return await loop.run_in_executor(self.executor, pfunc)
