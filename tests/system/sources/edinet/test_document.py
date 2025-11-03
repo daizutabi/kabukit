@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import polars as pl
 import pytest
+from polars.testing import assert_frame_equal
 
 if TYPE_CHECKING:
     from kabukit.sources.edinet.client import EdinetClient
@@ -18,8 +20,8 @@ async def test_pdf(client: EdinetClient) -> None:
 
 
 async def test_pdf_error(client: EdinetClient) -> None:
-    with pytest.raises(ValueError, match="PDF is not available"):
-        await client.get_pdf("S100WMS8")
+    df = await client.get_pdf("S100WMS8")
+    assert_frame_equal(df, pl.DataFrame())
 
 
 async def test_zip(client: EdinetClient) -> None:
@@ -27,8 +29,8 @@ async def test_zip(client: EdinetClient) -> None:
 
 
 async def test_zip_error(client: EdinetClient) -> None:
-    with pytest.raises(ValueError, match="ZIP is not available"):
-        await client.get_zip("S100WM0M", doc_type=5)
+    content = await client.get_zip("S100WM0M", doc_type=5)
+    assert content is None
 
 
 async def test_csv(client: EdinetClient) -> None:
@@ -40,4 +42,5 @@ async def test_csv(client: EdinetClient) -> None:
 
 async def test_xbrl(client: EdinetClient) -> None:
     xbrl = await client.get_xbrl("S100WXPV")
+    assert isinstance(xbrl, str)
     assert xbrl.startswith('<?xml version="1.0" encoding="UTF-8"?>\n<xbrli:xbrl')
