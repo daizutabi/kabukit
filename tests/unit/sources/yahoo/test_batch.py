@@ -6,7 +6,7 @@ import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
 
-from kabukit.sources.yahoo import batch
+from kabukit.sources.yahoo.batch import get_quote
 from kabukit.sources.yahoo.client import YahooClient
 
 if TYPE_CHECKING:
@@ -22,7 +22,7 @@ async def test_get_quote_single_code(mocker: MockerFixture) -> None:
     mock_get_quote_method = mocker.AsyncMock(return_value=mock_df)
     mocker.patch.object(YahooClient, "get_quote", new=mock_get_quote_method)
 
-    result = await batch.get_quote("2703")
+    result = await get_quote("2703")
 
     mock_get_quote_method.assert_awaited_once_with("2703")
     assert_frame_equal(result, mock_df)
@@ -36,7 +36,7 @@ async def test_get_quote_multiple_codes(
     mock_gather_get.return_value = mock_df
 
     codes = ["1", "2", "3"]
-    result = await batch.get_quote(codes)
+    result = await get_quote(codes)
 
     mock_gather_get.assert_awaited_once_with(
         YahooClient,
@@ -64,7 +64,7 @@ async def test_get_quote_no_codes_specified(
     mock_df = pl.DataFrame({"Code": [3, 2, 1]})
     mock_gather_get.return_value = mock_df
 
-    result = await batch.get_quote()
+    result = await get_quote()
 
     mock_get_target_codes.assert_awaited_once_with()
     mock_gather_get.assert_awaited_once_with(
