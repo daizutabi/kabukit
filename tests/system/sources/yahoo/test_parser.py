@@ -4,6 +4,7 @@ import datetime
 from typing import Any
 
 import polars as pl
+import pytest
 
 from kabukit.sources.yahoo.parser import (
     iter_index,
@@ -14,6 +15,8 @@ from kabukit.sources.yahoo.parser import (
     parse_performance,
     parse_quote,
 )
+
+pytestmark = pytest.mark.system
 
 
 def test_state_iter_price(state: dict[str, Any]) -> None:

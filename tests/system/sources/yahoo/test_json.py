@@ -3,6 +3,10 @@ from __future__ import annotations
 import re
 from typing import Any
 
+import pytest
+
+pytestmark = pytest.mark.system
+
 
 def test_state_price(state: dict[str, Any]) -> None:
     x = state["mainStocksPriceBoard"]["priceBoard"]
