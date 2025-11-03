@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from kabukit.sources.client import Client
 
-from .parser import iter_shares_links, iter_shares_urls
+from .parser import iter_shares_html_urls, iter_shares_pdf_urls
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -26,14 +26,14 @@ class JpxClient(Client):
     def __init__(self) -> None:
         super().__init__(BASE_URL)
 
-    async def iter_shares_urls(self) -> AsyncIterator[str]:
+    async def iter_shares_html_urls(self) -> AsyncIterator[str]:
         response = await self.get(SHARES_URL)
 
-        for url in iter_shares_urls(response.text):
+        for url in iter_shares_html_urls(response.text):
             yield url
 
-    async def iter_shares_links(self) -> AsyncIterator[str]:
-        async for url in self.iter_shares_urls():
+    async def iter_shares_pdf_urls(self) -> AsyncIterator[str]:
+        async for url in self.iter_shares_html_urls():
             response = await self.get(url)
-            for link in iter_shares_links(response.text):
+            for link in iter_shares_pdf_urls(response.text):
                 yield link

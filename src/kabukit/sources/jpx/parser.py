@@ -22,14 +22,14 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
 
-def iter_shares_urls(html: str, /) -> Iterator[str]:
-    """HTMLコンテンツから上場株式数データのバックナンバーURLを抽出する。
+def iter_shares_html_urls(html: str, /) -> Iterator[str]:
+    """HTMLコンテンツから、上場株式数のPDFリンクが掲載されたHTMLのURLを抽出する。
 
     Args:
         html (str): 解析対象のHTML文字列。
 
     Yields:
-        str: 上場株式数データのバックナンバーURL。
+        str: 上場株式数のPDFリンクが掲載されたHTMLのURL。
     """
     soup = get_soup(html)
     select = soup.find("select", class_="backnumber")
@@ -43,14 +43,14 @@ def iter_shares_urls(html: str, /) -> Iterator[str]:
             yield value
 
 
-def iter_shares_links(html: str, /) -> Iterator[str]:
-    """HTMLコンテンツから特定のパターンに一致するPDFリンクを抽出する。
+def iter_shares_pdf_urls(html: str, /) -> Iterator[str]:
+    """HTMLコンテンツから、上場株式数のPDFコンテンツのURLを抽出する。
 
     Args:
         html (str): 解析対象のHTML文字列。
 
     Yields:
-        str: 上場株式数PDFファイルへのリンク。
+        str: 上場株式数のPDFコンテンツのURL。
     """
     soup = get_soup(html)
 

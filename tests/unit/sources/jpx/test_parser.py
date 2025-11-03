@@ -10,9 +10,9 @@ from polars.testing import assert_frame_equal
 from kabukit.sources.jpx.parser import (
     Shares,
     iter_shares,
-    iter_shares_links,
+    iter_shares_html_urls,
     iter_shares_pages,
-    iter_shares_urls,
+    iter_shares_pdf_urls,
     parse_shares,
 )
 
@@ -50,26 +50,26 @@ FAKE_HTML_LINKS_NO_MATCH = """
 """
 
 
-def test_iter_shares_urls() -> None:
-    urls = list(iter_shares_urls(FAKE_HTML_URLS))
+def test_iter_shares_html_urls() -> None:
+    urls = list(iter_shares_html_urls(FAKE_HTML_URLS))
     assert urls == ["https://example.com/a.html", "https://example.com/b.html"]
 
 
-def test_iter_shares_urls_no_select() -> None:
-    urls = list(iter_shares_urls(FAKE_HTML_URLS_NO_SELECT))
+def test_iter_shares_html_urls_no_select() -> None:
+    urls = list(iter_shares_html_urls(FAKE_HTML_URLS_NO_SELECT))
     assert not urls
 
 
-def test_iter_shares_links() -> None:
-    links = list(iter_shares_links(FAKE_HTML_LINKS))
+def test_iter_shares_pdf_urls() -> None:
+    links = list(iter_shares_pdf_urls(FAKE_HTML_LINKS))
     assert links == [
         "https://example.com/HP-2023.10.pdf",
         "https://example.com/HP-2023.9.pdf",
     ]
 
 
-def test_iter_shares_links_no_match() -> None:
-    links = list(iter_shares_links(FAKE_HTML_LINKS_NO_MATCH))
+def test_iter_shares_pdf_urls_no_match() -> None:
+    links = list(iter_shares_pdf_urls(FAKE_HTML_LINKS_NO_MATCH))
     assert not links
 
 

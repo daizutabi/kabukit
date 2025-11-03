@@ -17,7 +17,10 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
-async def test_iter_shares_urls(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_iter_shares_html_urls(
+    mock_get: AsyncMock,
+    mocker: MockerFixture,
+) -> None:
     html = """
     <select class="backnumber">
         <option value="/a.html">A</option>
@@ -29,13 +32,13 @@ async def test_iter_shares_urls(mock_get: AsyncMock, mocker: MockerFixture) -> N
     response.raise_for_status = mocker.MagicMock()
 
     async with JpxClient() as client:
-        urls = [url async for url in client.iter_shares_urls()]
+        urls = [url async for url in client.iter_shares_html_urls()]
 
     assert urls == ["/a.html", "/b.html"]
     mock_get.assert_awaited_once_with(SHARES_URL, params=None)
 
 
-async def test_iter_shares_links(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_iter_shares_pdf_urls(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     history_html = """
     <select class="backnumber">
         <option value="/a.html">A</option>
@@ -56,7 +59,7 @@ async def test_iter_shares_links(mock_get: AsyncMock, mocker: MockerFixture) -> 
     mock_get.side_effect = side_effect
 
     async with JpxClient() as client:
-        links = [link async for link in client.iter_shares_links()]
+        links = [link async for link in client.iter_shares_pdf_urls()]
 
     assert links == ["/HP-2023.10.pdf"]
     assert mock_get.call_count == 2
