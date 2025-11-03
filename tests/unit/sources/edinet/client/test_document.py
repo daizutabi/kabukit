@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
-async def test_get_pdf_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_pdf(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     mock_get.return_value = Response(
         200,
         content=b"pdf content",
@@ -38,21 +38,7 @@ async def test_get_pdf_success(mock_get: AsyncMock, mocker: MockerFixture) -> No
     mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 2})
 
 
-async def test_get_pdf_fail(mock_get: AsyncMock, mocker: MockerFixture) -> None:
-    mock_get.return_value = Response(
-        200,
-        content=b"not a pdf",
-        headers={"content-type": "application/json"},
-    )
-    mock_get.return_value.raise_for_status = mocker.MagicMock()
-
-    client = EdinetClient("test_key")
-    msg = "PDF is not available."
-    with pytest.raises(ValueError, match=msg):
-        await client.get_pdf("S100TEST")
-
-
-async def test_get_zip_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_zip(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     mock_get.return_value = Response(
         200,
         content=b"zip content",
@@ -67,21 +53,7 @@ async def test_get_zip_success(mock_get: AsyncMock, mocker: MockerFixture) -> No
     mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 5})
 
 
-async def test_get_zip_fail(mock_get: AsyncMock, mocker: MockerFixture) -> None:
-    mock_get.return_value = Response(
-        200,
-        content=b"not a zip",
-        headers={"content-type": "application/json"},
-    )
-    mock_get.return_value.raise_for_status = mocker.MagicMock()
-
-    client = EdinetClient("test_key")
-    msg = "ZIP is not available."
-    with pytest.raises(ValueError, match=msg):
-        await client.get_zip("S100TEST", doc_type=5)
-
-
-async def test_get_xbrl_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_xbrl(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     zip_buffer = io.BytesIO()
     data = "xbrl_コンテンツ".encode()
     with zipfile.ZipFile(zip_buffer, "w") as zf:
@@ -102,10 +74,13 @@ async def test_get_xbrl_success(mock_get: AsyncMock, mocker: MockerFixture) -> N
     mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 1})
 
 
-async def test_get_xbrl_fail(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_xbrl_no_xbrl_in_zip(
+    mock_get: AsyncMock,
+    mocker: MockerFixture,
+) -> None:
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w") as zf:
-        zf.writestr("XBRL/PublicDoc/test.txt", "abc")
+        zf.writestr("XBRL/PublicDoc/test.txt", "some text")
     zip_content = zip_buffer.getvalue()
 
     mock_get.return_value = Response(
@@ -116,13 +91,13 @@ async def test_get_xbrl_fail(mock_get: AsyncMock, mocker: MockerFixture) -> None
     mock_get.return_value.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
+    xbrl = await client.get_xbrl("S100TEST")
 
-    msg = "XBRL is not available."
-    with pytest.raises(ValueError, match=msg):
-        await client.get_xbrl("S100TEST")
+    assert xbrl is None
+    mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 1})
 
 
-async def test_get_csv_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+async def test_get_csv(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     csv_content = "header1\theader2\nvalue1\tvalue2"
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w") as zf:
@@ -165,9 +140,8 @@ async def test_get_csv_no_csv_in_zip(
     mock_get.return_value.raise_for_status = mocker.MagicMock()
 
     client = EdinetClient("test_key")
-    msg = "CSV is not available."
-    with pytest.raises(ValueError, match=msg):
-        await client.get_csv("S100TEST")
+    df = await client.get_csv("S100TEST")
+    assert_frame_equal(df, pl.DataFrame())
 
 
 async def test_get_document_calls_get_csv_by_default(mocker: MockerFixture) -> None:

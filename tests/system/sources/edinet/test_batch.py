@@ -4,6 +4,7 @@ from datetime import date
 
 import polars as pl
 import pytest
+from polars.testing import assert_frame_equal
 
 from kabukit.sources.edinet.batch import get_documents, get_list
 
@@ -71,6 +72,6 @@ async def test_get_documents_single_doc_id() -> None:
     assert df.item(0, "DocumentId") == doc_id
 
 
-async def test_get_documents_invalid_id_raises_error() -> None:
-    with pytest.raises(ValueError, match="ZIP is not available"):
-        await get_documents("E00000")
+async def test_get_documents_invalid_id() -> None:
+    df = await get_documents("E00000")
+    assert_frame_equal(df, pl.DataFrame())

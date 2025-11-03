@@ -110,9 +110,6 @@ class EdinetClient(Client):
         if not transform:
             return df
 
-        if df.is_empty():
-            return pl.DataFrame()
-
         df = transform_list(df, date)
 
         if df.is_empty():
@@ -128,19 +125,15 @@ class EdinetClient(Client):
 
         Returns:
             pl.DataFrame: 抽出したテキストデータを含むDataFrame。
-
-        Raises:
-            ValueError: レスポンスがPDF形式でない場合。
         """
         response = await self.get(f"/documents/{doc_id}", {"type": 2})
 
         if response.headers["content-type"] == "application/pdf":
             return parse_pdf(response.content, doc_id)
 
-        msg = "PDF is not available."
-        raise ValueError(msg)
+        return pl.DataFrame()
 
-    async def get_zip(self, doc_id: str, doc_type: int) -> bytes:
+    async def get_zip(self, doc_id: str, doc_type: int) -> bytes | None:
         """ZIP形式の書類を取得する。
 
         doc_typeの値:
@@ -156,40 +149,38 @@ class EdinetClient(Client):
             doc_type: 書類タイプ (通常は5:CSV)。
 
         Returns:
-            bytes: ZIPファイルのバイナリデータ。
-
-        Raises:
-            ValueError: レスポンスがZIP形式でない場合。
+            bytes | None: ZIPファイルのバイナリデータ。
+                Noneの場合、ZIPが存在しない。
         """
         response = await self.get(f"/documents/{doc_id}", {"type": doc_type})
 
         if response.headers["content-type"] == "application/octet-stream":
             return response.content
 
-        msg = "ZIP is not available."
-        raise ValueError(msg)
+        return None
 
-    async def get_xbrl(self, doc_id: str) -> str:
+    async def get_xbrl(self, doc_id: str) -> str | None:
         """XBRL形式の書類を取得する。
 
         Args:
             doc_id: EDINETの書類ID。
 
         Returns:
-            bytes: ZIPファイルのバイナリデータ。
-
-        Raises:
-            ValueError: レスポンスがZIP形式でない場合。
+            str | None: XBRL形式のテキストデータ。
+                Noneの場合、XBRLが存在しない。
         """
 
         content = await self.get_zip(doc_id, doc_type=1)
 
+        if content is None:
+            return None
+
         pattern = re.compile(r"^XBRL/PublicDoc/.+\.xbrl$")
+
         if xbrl := extract_content(content, pattern):
             return xbrl.decode("utf-8")
 
-        msg = "XBRL is not available."
-        raise ValueError(msg)
+        return None
 
     async def get_csv(self, doc_id: str) -> pl.DataFrame:
         """CSV形式の書類(XBRL)を取得し、DataFrameに変換する。
@@ -202,18 +193,18 @@ class EdinetClient(Client):
 
         Returns:
             pl.DataFrame: CSVデータを含むDataFrame。
-
-        Raises:
-            ValueError: ZIPファイル内にCSVが見つからない場合。
         """
         content = await self.get_zip(doc_id, doc_type=5)
 
+        if content is None:
+            return pl.DataFrame()
+
         pattern = re.compile(r"^.+\.csv$")
+
         if csv := extract_content(content, pattern):
             return parse_csv(csv, doc_id)
 
-        msg = "CSV is not available."
-        raise ValueError(msg)
+        return pl.DataFrame()
 
     async def get_document(self, doc_id: str, *, pdf: bool = False) -> pl.DataFrame:
         """指定したIDの書類を取得する。

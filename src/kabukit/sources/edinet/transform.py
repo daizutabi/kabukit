@@ -11,6 +11,9 @@ if TYPE_CHECKING:
 
 
 def transform_list(df: pl.DataFrame, date: str | datetime.date) -> pl.DataFrame:
+    if df.is_empty():
+        return pl.DataFrame()
+
     df = df.filter(
         pl.col("secCode").is_not_null(),
         pl.col("fundCode").is_null(),
