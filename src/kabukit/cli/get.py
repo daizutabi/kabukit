@@ -23,10 +23,7 @@ First = Annotated[bool, Option("--first", help="最初の行のみ表示しま�
 Last = Annotated[bool, Option("--last", help="最後の行のみ表示します。")]
 MaxItems = Annotated[
     int | None,
-    Option(
-        "--max-items",
-        help="取得する銘柄数を制限します。全銘柄取得時にのみ有効です。",
-    ),
+    Option("--max-items", help="取得するデータ数を制限します。"),
 ]
 Quiet = Annotated[
     bool,
@@ -237,6 +234,29 @@ async def tdnet(
 
     if not any([date, max_items, first, last]):
         write_cache(df, "tdnet", "list", "TDnet書類一覧", quiet=quiet)
+
+
+@app.async_command()
+async def shares(
+    *,
+    max_items: MaxItems = None,
+    first: First = False,
+    last: Last = False,
+    quiet: Quiet = False,
+) -> None:
+    """JPXから上場株式数を取得します。"""
+    from kabukit.sources.jpx.batch import get_shares
+
+    from .utils import CustomTqdm, display_dataframe, write_cache
+
+    df = await get_shares(
+        max_items=max_items,
+        progress=None if quiet else CustomTqdm,
+    )
+    display_dataframe(df, first=first, last=last, quiet=quiet)
+
+    if not any([max_items, first, last]):
+        write_cache(df, "jpx", "shares", "上場株式数", quiet=quiet)
 
 
 @app.async_command()

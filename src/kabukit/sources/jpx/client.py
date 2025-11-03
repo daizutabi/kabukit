@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING
 
 from kabukit.sources.client import Client
@@ -8,6 +9,7 @@ from .parser import iter_shares_html_urls, iter_shares_pdf_urls, parse_shares
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
+    from concurrent.futures import Executor
 
     import polars as pl
 
@@ -25,8 +27,11 @@ class JpxClient(Client):
         client (httpx.AsyncClient): APIリクエストを行うための非同期HTTPクライアント。
     """
 
-    def __init__(self) -> None:
+    executor: Executor | None = None
+
+    def __init__(self, executor: Executor | None = None) -> None:
         super().__init__(BASE_URL)
+        self.executor = executor
 
     async def iter_shares_html_urls(self) -> AsyncIterator[str]:
         """上場株式数データが掲載されたHTMLページのURLを取得する。
@@ -82,6 +87,9 @@ class JpxClient(Client):
     async def get_shares(self, pdf_url: str) -> pl.DataFrame:
         """指定されたPDFのURLから上場株式数データを取得し、DataFrameとして返す。
 
+        PDFのパース処理はCPUバウンドです。
+        `executor`属性によって非同期実行の方法を指定できます。
+
         Args:
             pdf_url (str): 上場株式数データが記載されたPDFのURL。
 
@@ -89,4 +97,13 @@ class JpxClient(Client):
             pl.DataFrame: 上場株式数データを含むPolars DataFrame。
         """
         response = await self.get(pdf_url)
+
+        if self.executor:
+            loop = asyncio.get_running_loop()
+            return await loop.run_in_executor(
+                self.executor,
+                parse_shares,
+                response.content,
+            )
+
         return parse_shares(response.content)

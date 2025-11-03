@@ -84,10 +84,18 @@ async def test_iter_shares_pdf_urls_with_html_url(
     mock_get.assert_awaited_once_with("/a.html", params=None)
 
 
-async def test_get_shares(mock_get: AsyncMock, mocker: MockerFixture) -> None:
-    response = Response(200, content=b"abc")
+async def test_get_shares_blocking(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+    """get_sharesがexecutorなしで呼ばれた場合に、ブロッキングで実行されることをテストする。"""
+    response = Response(200, content=b"pdf_content")
     mock_get.return_value = response
     response.raise_for_status = mocker.MagicMock()
+
+    mock_loop = mocker.MagicMock()
+    mock_loop.run_in_executor = mocker.AsyncMock()
+    mocker.patch(
+        "kabukit.sources.jpx.client.asyncio.get_running_loop",
+        return_value=mock_loop,
+    )
 
     mock_parse_shares = mocker.patch(
         "kabukit.sources.jpx.client.parse_shares",
@@ -98,4 +106,36 @@ async def test_get_shares(mock_get: AsyncMock, mocker: MockerFixture) -> None:
         await client.get_shares("/a.pdf")
 
     mock_get.assert_awaited_once_with("/a.pdf", params=None)
-    mock_parse_shares.assert_called_once_with(b"abc")
+    mock_parse_shares.assert_called_once_with(b"pdf_content")
+    mock_loop.run_in_executor.assert_not_called()
+
+
+async def test_get_shares_with_executor(
+    mock_get: AsyncMock,
+    mocker: MockerFixture,
+) -> None:
+    """get_sharesがexecutorありで呼ばれた場合に、非同期で実行されることをテストする。"""
+    response = Response(200, content=b"pdf_content")
+    mock_get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    mock_loop = mocker.MagicMock()
+    mock_loop.run_in_executor = mocker.AsyncMock()
+    mocker.patch(
+        "kabukit.sources.jpx.client.asyncio.get_running_loop",
+        return_value=mock_loop,
+    )
+    mock_executor = mocker.MagicMock()
+
+    mock_parse_shares = mocker.patch("kabukit.sources.jpx.client.parse_shares")
+
+    async with JpxClient(executor=mock_executor) as client:
+        await client.get_shares("/a.pdf")
+
+    mock_get.assert_awaited_once_with("/a.pdf", params=None)
+    mock_loop.run_in_executor.assert_awaited_once_with(
+        mock_executor,
+        mock_parse_shares,
+        b"pdf_content",
+    )
+    mock_parse_shares.assert_not_called()

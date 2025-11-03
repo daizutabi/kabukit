@@ -56,6 +56,7 @@ def jpx_client_class_mock(mocker: MockerFixture) -> MagicMock:
 async def test_get_shares(
     jpx_client_class_mock: MagicMock,
     mock_gather_get: AsyncMock,
+    mocker: MockerFixture,
 ) -> None:
     mock_gather_get.return_value = pl.DataFrame({"Code": ["B", "A"], "Date": [2, 1]})
 
@@ -70,7 +71,7 @@ async def test_get_shares(
 
     expected_pdf_urls = ["url1.pdf", "url2.pdf"]
     mock_gather_get.assert_awaited_once_with(
-        jpx_client_class_mock,  # クラスのモックオブジェクトで比較
+        mocker.ANY,
         "shares",
         expected_pdf_urls,
         max_items=10,
