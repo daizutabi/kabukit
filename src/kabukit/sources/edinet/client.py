@@ -12,7 +12,7 @@ from kabukit.sources.utils import extract_content
 from kabukit.utils.config import get_config_value
 from kabukit.utils.params import get_params
 
-from .parser import parse_csv, parse_pdf
+from .parser import parse_csv, parse_pdf, parse_xbrl
 from .transform import transform_list
 
 if TYPE_CHECKING:
@@ -128,10 +128,10 @@ class EdinetClient(Client):
         """
         response = await self.get(f"/documents/{doc_id}", {"type": 2})
 
-        if response.headers["content-type"] == "application/pdf":
-            return parse_pdf(response.content, doc_id)
+        if response.headers["content-type"] != "application/pdf":
+            return pl.DataFrame()
 
-        return pl.DataFrame()
+        return parse_pdf(response.content, doc_id)
 
     async def get_zip(self, doc_id: str, doc_type: int) -> bytes | None:
         """ZIP形式の書類を取得する。
@@ -175,12 +175,7 @@ class EdinetClient(Client):
         if content is None:
             return None
 
-        pattern = re.compile(r"^XBRL/PublicDoc/.+\.xbrl$")
-
-        if xbrl := extract_content(content, pattern):
-            return xbrl.decode("utf-8")
-
-        return None
+        return parse_xbrl(content)
 
     async def get_csv(self, doc_id: str) -> pl.DataFrame:
         """CSV形式の書類(XBRL)を取得し、DataFrameに変換する。
