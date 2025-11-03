@@ -12,8 +12,8 @@ from kabukit.sources.utils import extract_content
 from kabukit.utils.config import get_config_value
 from kabukit.utils.params import get_params
 
-from .document import read_csv
-from .transform import transform_csv, transform_list, transform_pdf
+from .parser import parse_csv, parse_pdf
+from .transform import transform_list
 
 if TYPE_CHECKING:
     import datetime
@@ -128,7 +128,7 @@ class EdinetClient(Client):
         response = await self.get(f"/documents/{doc_id}", {"type": 2})
 
         if response.headers["content-type"] == "application/pdf":
-            return transform_pdf(response.content, doc_id)
+            return parse_pdf(response.content, doc_id)
 
         msg = "PDF is not available."
         raise ValueError(msg)
@@ -203,8 +203,7 @@ class EdinetClient(Client):
 
         pattern = re.compile(r"^.+\.csv$")
         if csv := extract_content(content, pattern):
-            df = read_csv(csv)
-            return transform_csv(df, doc_id)
+            return parse_csv(csv, doc_id)
 
         msg = "CSV is not available."
         raise ValueError(msg)

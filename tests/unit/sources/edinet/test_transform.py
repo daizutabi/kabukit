@@ -6,11 +6,7 @@ import polars as pl
 import pytest
 
 from kabukit.sources.edinet.columns import ListColumns
-from kabukit.sources.edinet.transform import (
-    transform_csv,
-    transform_list,
-    transform_pdf,
-)
+from kabukit.sources.edinet.transform import transform_list
 
 pytestmark = pytest.mark.unit
 
@@ -106,20 +102,6 @@ def test_transform_list_file_date(df: pl.DataFrame) -> None:
 def test_transform_list_empty() -> None:
     df = pl.DataFrame({"secCode": [None, "1"], "fundCode": ["1", "2"]})
     assert transform_list(df, "2025-09-19").is_empty()
-
-
-def test_transform_pdf() -> None:
-    df = transform_pdf(b"abc", "abc")
-    assert df.columns == ["DocumentId", "PdfContent"]
-    assert df["DocumentId"].to_list() == ["abc"]
-    assert df["PdfContent"].to_list() == [b"abc"]
-
-
-def test_transform_csv() -> None:
-    df = pl.DataFrame({"a": [1, 2]})
-    df = transform_csv(df, "abc")
-    assert df.columns == ["DocumentId", "a"]
-    assert df["DocumentId"].to_list() == ["abc", "abc"]
 
 
 def test_rename(df: pl.DataFrame) -> None:
