@@ -38,6 +38,24 @@ async def test_get_pdf(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 2})
 
 
+async def test_get_pdf_invalid_doc_id(
+    mock_get: AsyncMock,
+    mocker: MockerFixture,
+) -> None:
+    mock_get.return_value = Response(
+        200,
+        content="not pdf content",
+        headers={"content-type": "text/plain"},
+    )
+    mock_get.return_value.raise_for_status = mocker.MagicMock()
+
+    client = EdinetClient("test_key")
+    df = await client.get_pdf("S100TEST")
+
+    assert_frame_equal(df, pl.DataFrame())
+    mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 2})
+
+
 async def test_get_zip(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     mock_get.return_value = Response(
         200,
@@ -50,6 +68,24 @@ async def test_get_zip(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     content = await client.get_zip("S100TEST", doc_type=5)
 
     assert content == b"zip content"
+    mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 5})
+
+
+async def test_get_zip_invalid_doc_id(
+    mock_get: AsyncMock,
+    mocker: MockerFixture,
+) -> None:
+    mock_get.return_value = Response(
+        200,
+        content="not zip content",
+        headers={"content-type": "text/plain"},
+    )
+    mock_get.return_value.raise_for_status = mocker.MagicMock()
+
+    client = EdinetClient("test_key")
+    content = await client.get_zip("S100TEST", doc_type=5)
+
+    assert content is None
     mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 5})
 
 
@@ -71,6 +107,24 @@ async def test_get_xbrl(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     xbrl = await client.get_xbrl("S100TEST")
 
     assert xbrl == "xbrl_コンテンツ"
+    mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 1})
+
+
+async def test_get_xbrl_invalid_doc_id(
+    mock_get: AsyncMock,
+    mocker: MockerFixture,
+) -> None:
+    mock_get.return_value = Response(
+        200,
+        content="not zip content",
+        headers={"content-type": "text/plain"},
+    )
+    mock_get.return_value.raise_for_status = mocker.MagicMock()
+
+    client = EdinetClient("test_key")
+    xbrl = await client.get_xbrl("S100TEST")
+
+    assert xbrl is None
     mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 1})
 
 
@@ -121,6 +175,24 @@ async def test_get_csv(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     assert_frame_equal(df, expected_df)
     mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 5})
     mock_transform_csv.assert_called_once()
+
+
+async def test_get_csv_invalid_doc_id(
+    mock_get: AsyncMock,
+    mocker: MockerFixture,
+) -> None:
+    mock_get.return_value = Response(
+        200,
+        content="not zip content",
+        headers={"content-type": "text/plain"},
+    )
+    mock_get.return_value.raise_for_status = mocker.MagicMock()
+
+    client = EdinetClient("test_key")
+    df = await client.get_csv("S100TEST")
+
+    assert_frame_equal(df, pl.DataFrame())
+    mock_get.assert_awaited_once_with("/documents/S100TEST", params={"type": 5})
 
 
 async def test_get_csv_no_csv_in_zip(
