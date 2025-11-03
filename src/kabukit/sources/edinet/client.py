@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import io
-import zipfile
+import re
 from enum import StrEnum
 from typing import TYPE_CHECKING
 
@@ -9,6 +8,7 @@ import polars as pl
 
 from kabukit.sources.client import Client
 from kabukit.sources.datetime import with_date
+from kabukit.sources.utils import extract_content
 from kabukit.utils.config import get_config_value
 from kabukit.utils.params import get_params
 
@@ -136,6 +136,14 @@ class EdinetClient(Client):
     async def get_zip(self, doc_id: str, doc_type: int) -> bytes:
         """ZIP形式の書類を取得する。
 
+        doc_typeの値:
+
+            1 提出本文書及び監査報告書 ZIP 形式
+            2 PDF PDF 形式
+            3 代替書面・添付文書 ZIP 形式
+            4 英文ファイル ZIP 形式
+            5 CSV ZIP 形式
+
         Args:
             doc_id: EDINETの書類ID。
             doc_type: 書類タイプ (通常は5:CSV)。
@@ -154,6 +162,28 @@ class EdinetClient(Client):
         msg = "ZIP is not available."
         raise ValueError(msg)
 
+    async def get_xbrl(self, doc_id: str) -> str:
+        """XBRL形式の書類を取得する。
+
+        Args:
+            doc_id: EDINETの書類ID。
+
+        Returns:
+            bytes: ZIPファイルのバイナリデータ。
+
+        Raises:
+            ValueError: レスポンスがZIP形式でない場合。
+        """
+
+        content = await self.get_zip(doc_id, doc_type=1)
+
+        pattern = re.compile(r"^XBRL/PublicDoc/.+\.xbrl$")
+        if xbrl := extract_content(content, pattern):
+            return xbrl.decode("utf-8")
+
+        msg = "XBRL is not available."
+        raise ValueError(msg)
+
     async def get_csv(self, doc_id: str) -> pl.DataFrame:
         """CSV形式の書類(XBRL)を取得し、DataFrameに変換する。
 
@@ -170,14 +200,11 @@ class EdinetClient(Client):
             ValueError: ZIPファイル内にCSVが見つからない場合。
         """
         content = await self.get_zip(doc_id, doc_type=5)
-        buffer = io.BytesIO(content)
 
-        with zipfile.ZipFile(buffer) as zf:
-            for info in zf.infolist():
-                if info.filename.endswith(".csv"):
-                    with zf.open(info) as f:
-                        df = read_csv(f.read())
-                        return transform_csv(df, doc_id)
+        pattern = re.compile(r"^.+\.csv$")
+        if csv := extract_content(content, pattern):
+            df = read_csv(csv)
+            return transform_csv(df, doc_id)
 
         msg = "CSV is not available."
         raise ValueError(msg)
