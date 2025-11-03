@@ -46,3 +46,8 @@ def test_table_format(table: Tag) -> None:  # noqa: C901
                 assert td.get_text(strip=True)
             elif k == 6:  # 更新履歴
                 assert td.get_text(strip=True) or True
+
+
+# def test_xbrl_urls(xbrl_urls: list[str]) -> None:
+#     print(xbrl_urls)
+#     assert 0

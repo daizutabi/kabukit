@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 from typing import TYPE_CHECKING
 
 import pytest
@@ -54,3 +55,20 @@ def table(page: str) -> Tag:
 async def data(date: datetime.date):
     async with TdnetClient() as client:
         yield await client.get_list(date)
+
+
+@pytest_asyncio.fixture(scope="module")
+async def xbrl_urls(dates: list[datetime.date]) -> list[str]:
+    urls: list[str] = []
+
+    async with TdnetClient() as client:
+        for date in dates:
+            df = await client.get_list(date)
+            if df.is_empty():
+                continue
+
+            urls.extend(df.get_column("XbrlUrl").drop_nulls().to_list())
+            if len(urls) >= 10:
+                return random.sample(urls, 10)
+
+    raise NotImplementedError
