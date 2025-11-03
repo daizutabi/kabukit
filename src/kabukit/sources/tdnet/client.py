@@ -9,12 +9,14 @@ from kabukit.sources.client import Client
 from kabukit.sources.datetime import with_date
 from kabukit.utils.datetime import parse_date
 
-from .parser import iter_dates, iter_page_numbers, parse_list
+from .parser import iter_dates, iter_items, iter_page_numbers
 from .transform import transform_list
 
 if TYPE_CHECKING:
     import datetime
     from collections.abc import AsyncIterator
+
+    from .parser import Item
 
 
 BASE_URL = "https://www.release.tdnet.info/inbs"
@@ -78,6 +80,23 @@ class TdnetClient(Client):
             if index != 1:
                 yield await self.get_page(date, index)
 
+    async def iter_items(self, date: str | datetime.date) -> AsyncIterator[Item]:
+        """指定した日のTDnet開示項目を生成する。
+
+        Args:
+            date (str | datetime.date): 取得する開示日の指定。
+
+        Yields:
+            Item: 各開示情報項目。
+        """
+        if isinstance(date, str):
+            date = parse_date(date)
+
+        async for page in self.iter_pages(date):
+            for item in iter_items(page):
+                item.disclosed_date = date
+                yield item
+
     async def get_list(self, date: str | datetime.date) -> pl.DataFrame:
         """指定した日付の開示書類一覧を取得する。
 
@@ -87,15 +106,10 @@ class TdnetClient(Client):
         Returns:
             pl.DataFrame: 開示書類一覧を含むDataFrame。
         """
-        if isinstance(date, str):
-            date = parse_date(date)
+        data = [item.to_dict() async for item in self.iter_items(date)]
 
-        items = [parse_list(page) async for page in self.iter_pages(date)]
-        items = [item for item in items if not item.is_empty()]
-
-        if not items:
+        if not data:
             return pl.DataFrame()
 
-        df = pl.concat(items)
-        df = transform_list(df, date)
+        df = transform_list(pl.DataFrame(data, infer_schema_length=None))
         return await with_date(df)
