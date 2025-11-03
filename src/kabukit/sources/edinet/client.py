@@ -17,6 +17,7 @@ from .transform import transform_list
 
 if TYPE_CHECKING:
     import datetime
+    from concurrent.futures import Executor
 
 
 API_VERSION = "v2"
@@ -41,8 +42,12 @@ class EdinetClient(Client):
 
     base_url: ClassVar[str] = BASE_URL
 
-    def __init__(self, api_key: str | None = None) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        api_key: str | None = None,
+        executor: Executor | None = None,
+    ) -> None:
+        super().__init__(executor=executor)
         self.set_api_key(api_key)
 
     def set_api_key(self, api_key: str | None = None) -> None:

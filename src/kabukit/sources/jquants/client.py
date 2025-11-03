@@ -15,6 +15,7 @@ from .transform import calendar, info, prices, statements, topix
 if TYPE_CHECKING:
     import datetime
     from collections.abc import AsyncIterator
+    from concurrent.futures import Executor
     from typing import Any
 
     from httpx import HTTPStatusError  # noqa: F401
@@ -44,8 +45,12 @@ class JQuantsClient(Client):
 
     base_url: ClassVar[str] = BASE_URL
 
-    def __init__(self, id_token: str | None = None) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        id_token: str | None = None,
+        executor: Executor | None = None,
+    ) -> None:
+        super().__init__(executor=executor)
         self.set_id_token(id_token)
 
     def set_id_token(self, id_token: str | None = None) -> None:

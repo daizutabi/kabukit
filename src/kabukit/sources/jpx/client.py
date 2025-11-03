@@ -9,7 +9,6 @@ from .parser import iter_shares_html_urls, iter_shares_pdf_urls, parse_shares
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
-    from concurrent.futures import Executor
 
     import polars as pl
 
@@ -28,11 +27,6 @@ class JpxClient(Client):
     """
 
     base_url: ClassVar[str] = BASE_URL
-    executor: Executor | None = None
-
-    def __init__(self, executor: Executor | None = None) -> None:
-        super().__init__()
-        self.executor = executor
 
     async def iter_shares_html_urls(self) -> AsyncIterator[str]:
         """上場株式数データが掲載されたHTMLページのURLを取得する。
