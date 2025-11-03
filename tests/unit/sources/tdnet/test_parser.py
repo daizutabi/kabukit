@@ -7,7 +7,15 @@ import pytest
 from bs4 import BeautifulSoup
 from polars.testing import assert_frame_equal
 
-from kabukit.sources.tdnet import parser
+from kabukit.sources.tdnet.parser import (
+    get_link,
+    get_table,
+    iter_cells,
+    iter_dates,
+    iter_page_numbers,
+    parse_list,
+)
+from kabukit.sources.utils import get_soup
 
 pytestmark = pytest.mark.unit
 
@@ -19,7 +27,7 @@ def test_iter_dates() -> None:
         <option value="I_list_001_20230102.html">2023/01/02</option>
     </select>
     """
-    result = list(parser.iter_dates(html))
+    result = list(iter_dates(html))
     expected = [datetime.date(2023, 1, 1), datetime.date(2023, 1, 2)]
     assert result == expected
 
@@ -31,7 +39,7 @@ def test_iter_dates_no_daylist() -> None:
         <option value="I_list_001_20230102.html">2023/01/02</option>
     </select>
     """
-    assert list(parser.iter_dates(html)) == []
+    assert list(iter_dates(html)) == []
 
 
 FAKE_HTML_WITH_PAGER = """
@@ -80,35 +88,35 @@ FAKE_HTML_WITHOUT_TABLE = "<html><body></body></html>"
 
 def test_get_soup_cache() -> None:
     html = "<html><body><p>hello</p></body></html>"
-    soup1 = parser.get_soup(html)
-    soup2 = parser.get_soup(html)
+    soup1 = get_soup(html)
+    soup2 = get_soup(html)
     assert soup1 is soup2
     assert isinstance(soup1, BeautifulSoup)
 
 
 def test_iter_page_numbers() -> None:
-    result = list(parser.iter_page_numbers(FAKE_HTML_WITH_PAGER))
+    result = list(iter_page_numbers(FAKE_HTML_WITH_PAGER))
     assert result == [1, 2, 3]
 
 
 def test_iter_page_numbers_no_pager() -> None:
-    result = list(parser.iter_page_numbers(FAKE_HTML_WITHOUT_PAGER))
+    result = list(iter_page_numbers(FAKE_HTML_WITHOUT_PAGER))
     assert result == []
 
 
 def test_get_table() -> None:
-    table = parser.get_table(FAKE_HTML_WITH_TABLE)
+    table = get_table(FAKE_HTML_WITH_TABLE)
     assert table is not None
     assert table.name == "table"
 
 
 def test_get_table_no_table() -> None:
-    table = parser.get_table(FAKE_HTML_WITHOUT_TABLE)
+    table = get_table(FAKE_HTML_WITHOUT_TABLE)
     assert table is None
 
 
 def test_parse_list() -> None:
-    df = parser.parse_list(FAKE_HTML_WITH_TABLE)
+    df = parse_list(FAKE_HTML_WITH_TABLE)
     expected = pl.DataFrame(
         {
             "Code": ["1301", "1302"],
@@ -124,7 +132,7 @@ def test_parse_list() -> None:
 
 
 def test_parse_list_no_table() -> None:
-    df = parser.parse_list(FAKE_HTML_WITHOUT_TABLE)
+    df = parse_list(FAKE_HTML_WITHOUT_TABLE)
     assert df.is_empty()
 
 
@@ -132,7 +140,7 @@ def test_iter_cells() -> None:
     soup = BeautifulSoup(FAKE_HTML_WITH_TABLE, "lxml")
     tr = soup.find("tr")
     assert tr is not None
-    result = dict(parser.iter_cells(tr))
+    result = dict(iter_cells(tr))
     expected = {
         "Code": "1301",
         "DisclosedTime": datetime.time(10, 0),
@@ -149,11 +157,11 @@ def test_get_link() -> None:
     soup = BeautifulSoup('<td><a href="test.pdf">link</a></td>', "lxml")
     td = soup.find("td")
     assert td is not None
-    assert parser.get_link(td) == "test.pdf"
+    assert get_link(td) == "test.pdf"
 
 
 def test_get_link_no_link() -> None:
     soup = BeautifulSoup("<td>no link</td>", "lxml")
     td = soup.find("td")
     assert td is not None
-    assert parser.get_link(td) is None
+    assert get_link(td) is None
