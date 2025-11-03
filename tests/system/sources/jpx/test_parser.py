@@ -52,7 +52,7 @@ def test_iter_shares_links(shares_html: str) -> None:
 
 
 @pytest_asyncio.fixture(scope="module")
-async def shares_links() -> list[str]:
+async def shares_pdf_urls() -> list[str]:
     async with JpxClient() as client:
         links = [link async for link in client.iter_shares_pdf_urls()]
         random.shuffle(links)
@@ -60,15 +60,18 @@ async def shares_links() -> list[str]:
 
 
 @pytest_asyncio.fixture(scope="module", params=range(3))
-async def shares_link(shares_links: list[str], request: pytest.FixtureRequest) -> str:
+async def shares_pdf_url(
+    shares_pdf_urls: list[str],
+    request: pytest.FixtureRequest,
+) -> str:
     assert isinstance(request.param, int)
-    return shares_links[request.param]
+    return shares_pdf_urls[request.param]
 
 
 @pytest_asyncio.fixture(scope="module")
-async def shares_content(shares_link: str) -> bytes:
+async def shares_content(shares_pdf_url: str) -> bytes:
     async with JpxClient() as client:
-        response = await client.get(shares_link)
+        response = await client.get(shares_pdf_url)
         return response.content
 
 

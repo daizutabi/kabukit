@@ -32,9 +32,9 @@ async def test_iter_shares_html_urls(
     response.raise_for_status = mocker.MagicMock()
 
     async with JpxClient() as client:
-        urls = [url async for url in client.iter_shares_html_urls()]
+        html_urls = [url async for url in client.iter_shares_html_urls()]
 
-    assert urls == ["/a.html", "/b.html"]
+    assert html_urls == ["/a.html", "/b.html"]
     mock_get.assert_awaited_once_with(SHARES_URL, params=None)
 
 
@@ -59,9 +59,43 @@ async def test_iter_shares_pdf_urls(mock_get: AsyncMock, mocker: MockerFixture) 
     mock_get.side_effect = side_effect
 
     async with JpxClient() as client:
-        links = [link async for link in client.iter_shares_pdf_urls()]
+        pdf_urls = [link async for link in client.iter_shares_pdf_urls()]
 
-    assert links == ["/HP-2023.10.pdf"]
+    assert pdf_urls == ["/HP-2023.10.pdf"]
     assert mock_get.call_count == 2
     mock_get.assert_any_await(SHARES_URL, params=None)
     mock_get.assert_any_await("/a.html", params=None)
+
+
+async def test_iter_shares_pdf_urls_with_html_url(
+    mock_get: AsyncMock,
+    mocker: MockerFixture,
+) -> None:
+    pdf_page_html = '<a href="/HP-2023.10.pdf">PDF</a>'
+    response = Response(200, text=pdf_page_html)
+    mock_get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    async with JpxClient() as client:
+        pdf_urls = [link async for link in client.iter_shares_pdf_urls("/a.html")]
+
+    assert pdf_urls == ["/HP-2023.10.pdf"]
+    assert mock_get.call_count == 1
+    mock_get.assert_awaited_once_with("/a.html", params=None)
+
+
+async def test_get_shares(mock_get: AsyncMock, mocker: MockerFixture) -> None:
+    response = Response(200, content=b"abc")
+    mock_get.return_value = response
+    response.raise_for_status = mocker.MagicMock()
+
+    mock_parse_shares = mocker.patch(
+        "kabukit.sources.jpx.client.parse_shares",
+        return_value=mocker.MagicMock(),
+    )
+
+    async with JpxClient() as client:
+        await client.get_shares("/a.pdf")
+
+    mock_get.assert_awaited_once_with("/a.pdf", params=None)
+    mock_parse_shares.assert_called_once_with(b"abc")
