@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 import httpx
 import polars as pl
@@ -32,8 +32,7 @@ class TdnetClient(Client):
         client (httpx.AsyncClient): APIリクエストを行うための非同期HTTPクライアント。
     """
 
-    def __init__(self) -> None:
-        super().__init__(BASE_URL)
+    base_url: ClassVar[str] = BASE_URL
 
     async def get_dates(self) -> list[datetime.date]:
         """TDnetで利用可能な開示日一覧を取得する。

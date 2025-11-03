@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 import pytest
 from httpx import ConnectTimeout, HTTPStatusError, Response
@@ -15,8 +15,12 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.unit
 
 
+class MockClient(Client):
+    base_url: ClassVar[str] = "http://mock.api"
+
+
 async def test_async_with() -> None:
-    async with Client() as client:
+    async with MockClient() as client:
         assert not client.client.is_closed
 
     assert client.client.is_closed
@@ -27,7 +31,7 @@ async def test_get_success(mock_get: AsyncMock, mocker: MockerFixture) -> None:
     mock_get.return_value = expected_response
     expected_response.raise_for_status = mocker.MagicMock()
 
-    client = Client("test_key")
+    client = MockClient()
     response = await client.get("test/path", params={"a": "b"})
 
     assert response == expected_response
@@ -46,7 +50,7 @@ async def test_get_failure(mock_get: AsyncMock, mocker: MockerFixture) -> None:
         ),
     )
 
-    client = Client("test_key")
+    client = MockClient()
 
     with pytest.raises(HTTPStatusError):
         await client.get("test/path", params={})
@@ -66,7 +70,7 @@ async def test_get_retries_on_failure(
 
     mock_get.side_effect = [error, error, success_response]
 
-    client = Client("test_key")
+    client = MockClient()
     response = await client.get("test/path", params={})
 
     assert response == success_response
@@ -83,7 +87,7 @@ async def test_get_fails_after_retries(
     error = ConnectTimeout("Connection timed out")
     mock_get.side_effect = [error, error, error]
 
-    client = Client("test_key")
+    client = MockClient()
 
     with pytest.raises(ConnectTimeout):
         await client.get("test/path", params={})

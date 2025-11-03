@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 import polars as pl
 import pytest
@@ -50,6 +50,8 @@ async def sleep_df(second: float) -> pl.DataFrame:
 
 
 class MockClient(Client):
+    base_url: ClassVar[str] = "http://mock.api"
+
     async def get_data(self, code: int) -> pl.DataFrame:
         await asyncio.sleep(0.01)
         return pl.DataFrame({"Code": [code]})

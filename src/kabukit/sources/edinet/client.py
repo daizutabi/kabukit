@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from enum import StrEnum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 import polars as pl
 
@@ -39,8 +39,10 @@ class EdinetClient(Client):
         client (httpx.AsyncClient): APIリクエストを行うための非同期HTTPクライアント。
     """
 
+    base_url: ClassVar[str] = BASE_URL
+
     def __init__(self, api_key: str | None = None) -> None:
-        super().__init__(BASE_URL)
+        super().__init__()
         self.set_api_key(api_key)
 
     def set_api_key(self, api_key: str | None = None) -> None:
