@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from kabukit.sources.client import Client
 
@@ -27,10 +27,11 @@ class JpxClient(Client):
         client (httpx.AsyncClient): APIリクエストを行うための非同期HTTPクライアント。
     """
 
+    base_url: ClassVar[str] = BASE_URL
     executor: Executor | None = None
 
     def __init__(self, executor: Executor | None = None) -> None:
-        super().__init__(BASE_URL)
+        super().__init__()
         self.executor = executor
 
     async def iter_shares_html_urls(self) -> AsyncIterator[str]:

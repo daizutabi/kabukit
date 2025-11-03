@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 import httpx
 import tenacity
@@ -20,9 +20,10 @@ def is_retryable(e: BaseException) -> bool:
 
 class Client:
     client: AsyncClient
+    base_url: ClassVar[str]
 
-    def __init__(self, base_url: str = "") -> None:
-        self.client = AsyncClient(base_url=base_url, timeout=20)
+    def __init__(self) -> None:
+        self.client = AsyncClient(base_url=self.__class__.base_url, timeout=20)
 
     async def aclose(self) -> None:
         """HTTPクライアントを閉じる。"""
