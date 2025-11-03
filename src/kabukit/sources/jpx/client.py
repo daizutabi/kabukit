@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING
 
 from kabukit.sources.client import Client
@@ -8,6 +9,7 @@ from .parser import iter_shares_html_urls, iter_shares_pdf_urls, parse_shares
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
+    from concurrent.futures import Executor
 
     import polars as pl
 
@@ -79,14 +81,29 @@ class JpxClient(Client):
                 async for pdf_url in self._iter_shares_pdf_urls(url):
                     yield pdf_url
 
-    async def get_shares(self, pdf_url: str) -> pl.DataFrame:
+    async def get_shares(
+        self,
+        pdf_url: str,
+        *,
+        executor: Executor | None = None,
+    ) -> pl.DataFrame:
         """指定されたPDFのURLから上場株式数データを取得し、DataFrameとして返す。
+
+        PDFのパース処理はCPUバウンドです。
+        `executor`引数によって非同期実行の方法を指定できます。
 
         Args:
             pdf_url (str): 上場株式数データが記載されたPDFのURL。
+            executor (Executor | None, optional): PDFのパース処理を実行するための
+                Executor。 指定しない場合はブロッキングでパース処理を行う。
 
         Returns:
             pl.DataFrame: 上場株式数データを含むPolars DataFrame。
         """
         response = await self.get(pdf_url)
+
+        if executor:
+            loop = asyncio.get_running_loop()
+            return await loop.run_in_executor(executor, parse_shares, response.content)
+
         return parse_shares(response.content)
