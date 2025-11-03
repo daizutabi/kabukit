@@ -129,8 +129,8 @@ async def test_get_shares_with_executor(
 
     mock_parse_shares = mocker.patch("kabukit.sources.jpx.client.parse_shares")
 
-    async with JpxClient() as client:
-        await client.get_shares("/a.pdf", executor=mock_executor)
+    async with JpxClient(executor=mock_executor) as client:
+        await client.get_shares("/a.pdf")
 
     mock_get.assert_awaited_once_with("/a.pdf", params=None)
     mock_loop.run_in_executor.assert_awaited_once_with(

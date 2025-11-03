@@ -27,8 +27,11 @@ class JpxClient(Client):
         client (httpx.AsyncClient): APIリクエストを行うための非同期HTTPクライアント。
     """
 
-    def __init__(self) -> None:
+    executor: Executor | None = None
+
+    def __init__(self, executor: Executor | None = None) -> None:
         super().__init__(BASE_URL)
+        self.executor = executor
 
     async def iter_shares_html_urls(self) -> AsyncIterator[str]:
         """上場株式数データが掲載されたHTMLページのURLを取得する。
@@ -81,29 +84,26 @@ class JpxClient(Client):
                 async for pdf_url in self._iter_shares_pdf_urls(url):
                     yield pdf_url
 
-    async def get_shares(
-        self,
-        pdf_url: str,
-        *,
-        executor: Executor | None = None,
-    ) -> pl.DataFrame:
+    async def get_shares(self, pdf_url: str) -> pl.DataFrame:
         """指定されたPDFのURLから上場株式数データを取得し、DataFrameとして返す。
 
         PDFのパース処理はCPUバウンドです。
-        `executor`引数によって非同期実行の方法を指定できます。
+        `executor`属性によって非同期実行の方法を指定できます。
 
         Args:
             pdf_url (str): 上場株式数データが記載されたPDFのURL。
-            executor (Executor | None, optional): PDFのパース処理を実行するための
-                Executor。指定しない場合はブロッキングでパース処理を行う。
 
         Returns:
             pl.DataFrame: 上場株式数データを含むPolars DataFrame。
         """
         response = await self.get(pdf_url)
 
-        if executor:
+        if self.executor:
             loop = asyncio.get_running_loop()
-            return await loop.run_in_executor(executor, parse_shares, response.content)
+            return await loop.run_in_executor(
+                self.executor,
+                parse_shares,
+                response.content,
+            )
 
         return parse_shares(response.content)

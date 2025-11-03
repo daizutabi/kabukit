@@ -91,7 +91,7 @@ async def get_stream(
 
 
 async def get(
-    cls: type[Client],
+    client_factory: Callable[[], Client],
     resource: str,
     args: Iterable[Any],
     /,
@@ -103,8 +103,9 @@ async def get(
     """各種データを取得し、単一のDataFrameにまとめて返す。
 
     Args:
-        cls (type[Client]): 使用するClientクラス。
-            JQuantsClientやEdinetClientなど、Clientを継承したクラス
+        client_factory (Callable[[], Client]): Clientインスタンスを生成する
+            呼び出し可能オブジェクト。
+            JQuantsClientやEdinetClientなど、Clientを継承したクラスを指定できる。
         resource (str): 取得するデータの種類。Clientのメソッド名から"get_"を
             除いたものを指定する。
         args (Iterable[Any]): 取得対象の引数のリスト。
@@ -123,7 +124,7 @@ async def get(
     """
     args = list(islice(args, max_items))
 
-    async with cls() as client:
+    async with client_factory() as client:
         stream = get_stream(client, resource, args, max_concurrency)
 
         if progress:
