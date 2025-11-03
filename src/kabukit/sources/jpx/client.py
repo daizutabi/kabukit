@@ -26,14 +26,14 @@ class JpxClient(Client):
     def __init__(self) -> None:
         super().__init__(BASE_URL)
 
-    async def _iter_shares_urls(self) -> AsyncIterator[str]:
+    async def iter_shares_urls(self) -> AsyncIterator[str]:
         response = await self.get(SHARES_URL)
 
         for url in iter_shares_urls(response.text):
             yield url
 
-    async def _iter_shares_links(self) -> AsyncIterator[str]:
-        async for url in self._iter_shares_urls():
+    async def iter_shares_links(self) -> AsyncIterator[str]:
+        async for url in self.iter_shares_urls():
             response = await self.get(url)
             for link in iter_shares_links(response.text):
                 yield link

@@ -1,12 +1,21 @@
 from __future__ import annotations
 
+import itertools
 import random
+import re
 
+import polars as pl
 import pytest
 import pytest_asyncio
 
 from kabukit.sources.jpx.client import JpxClient
-from kabukit.sources.jpx.parser import iter_shares_links, iter_shares_urls
+from kabukit.sources.jpx.parser import (
+    iter_shares,
+    iter_shares_links,
+    iter_shares_pages,
+    iter_shares_urls,
+    parse_shares,
+)
 
 pytestmark = pytest.mark.system
 
@@ -32,20 +41,20 @@ def shares_url(request: pytest.FixtureRequest) -> str:
 
 
 @pytest_asyncio.fixture
-async def shares_text(client: JpxClient, shares_url: str) -> str:
+async def shares_html(client: JpxClient, shares_url: str) -> str:
     response = await client.get(shares_url)
     return response.text
 
 
-def test_iter_shares_links(shares_text: str) -> None:
-    links = list(iter_shares_links(shares_text))
+def test_iter_shares_links(shares_html: str) -> None:
+    links = list(iter_shares_links(shares_html))
     assert 1 <= len(links) <= 12
 
 
 @pytest_asyncio.fixture(scope="module")
 async def shares_links() -> list[str]:
     async with JpxClient() as client:
-        links = [link async for link in client._iter_shares_links()]  # noqa: SLF001
+        links = [link async for link in client.iter_shares_links()]
         random.shuffle(links)
         return links
 
@@ -57,11 +66,62 @@ async def shares_link(shares_links: list[str], request: pytest.FixtureRequest) -
 
 
 @pytest_asyncio.fixture(scope="module")
-async def shares_pdf(shares_link: str) -> bytes:
+async def shares_content(shares_link: str) -> bytes:
     async with JpxClient() as client:
         response = await client.get(shares_link)
         return response.content
 
 
-def test_shares_pdf_content(shares_pdf: bytes) -> None:
-    assert shares_pdf.startswith(b"%PDF-1.")
+def test_shares_content_starts_with_pdf(shares_content: bytes) -> None:
+    assert shares_content.startswith(b"%PDF-1.")
+
+
+@pytest_asyncio.fixture(scope="module")
+async def shares_pages(shares_content: bytes) -> list[str]:
+    it = iter_shares_pages(shares_content)
+    return list(itertools.islice(it, 4))
+
+
+@pytest_asyncio.fixture(scope="module", params=range(4))
+async def shares_page(shares_pages: list[str], request: pytest.FixtureRequest) -> str:
+    assert isinstance(request.param, int)
+    return shares_pages[request.param]
+
+
+def test_shares_page_starts_with_year_month(shares_page: str) -> None:
+    assert re.match(r"^\s*(\d{4})年(\d{1,2})月分\n", shares_page)
+
+
+def test_iter_shares(shares_page: str) -> None:
+    share = next(iter_shares(shares_page))
+    assert len(share.code) == 4
+    assert share.year >= 2020
+    assert 1 <= share.month <= 12
+
+
+@pytest.fixture(scope="module")
+def shares(shares_content: bytes) -> pl.DataFrame:
+    return parse_shares(shares_content)
+
+
+def test_parse_shares_shape(shares: pl.DataFrame) -> None:
+    assert shares.width == 4
+    assert shares.height > 3500
+
+
+@pytest.mark.parametrize(
+    ("column", "expected"),
+    [
+        ("Date", pl.Date),
+        ("Code", pl.String),
+        ("Company", pl.String),
+        ("IssuedShares", pl.Int64),
+    ],
+)
+def test_parse_shares_dtype(shares: pl.DataFrame, column: str, expected: type) -> None:
+    assert shares[column].dtype == expected
+
+
+@pytest.mark.parametrize("code", ["1301", "6758", "7203", "9984"])
+def test_parse_shares_code(shares: pl.DataFrame, code: str) -> None:
+    assert code in shares["Code"].to_list()
