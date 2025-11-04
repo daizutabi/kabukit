@@ -1,36 +1,31 @@
 import marimo
 
-__generated_with = "0.16.5"
+__generated_with = "0.17.6"
 app = marimo.App(width="medium")
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        """
+    mo.md("""
     # 財務情報 (`/fins/statements`)
 
     四半期の財務情報が取得できます。
 
     <https://jpx.gitbook.io/j-quants-ja/api-reference/statements>
-    """,
-    )
+    """)
     return
 
 
 @app.cell
 def _():
     import marimo as mo
-    from kabukit import JQuantsClient
     from kabukit import get_statements
-    return JQuantsClient, get_statements, mo
+    return get_statements, mo
 
 
 @app.cell
-async def _(JQuantsClient):
-    async with JQuantsClient() as client:
-        df = await client.get_statements("1301")
-    df
+async def _(get_statements):
+    await get_statements("1301")
     return
 
 
