@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.17.2"
+__generated_with = "0.17.6"
 app = marimo.App(width="medium")
 
 
@@ -8,15 +8,13 @@ app = marimo.App(width="medium")
 def _():
     import marimo as mo
 
-    from kabukit import EdinetClient, get_edinet_list
-    return EdinetClient, get_edinet_list, mo
+    from kabukit import get_edinet_list
+    return get_edinet_list, mo
 
 
 @app.cell
-async def _(EdinetClient):
-    async with EdinetClient() as client:
-        df = await client.get_list("2025-09-22")
-    df
+async def _(get_edinet_list):
+    await get_edinet_list("2025-10-31")
     return
 
 

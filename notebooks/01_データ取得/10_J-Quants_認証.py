@@ -1,18 +1,16 @@
 import marimo
 
-__generated_with = "0.16.0"
+__generated_with = "0.17.6"
 app = marimo.App(width="medium")
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
     # J-QuantsのリフレッシュトークンおよびIDトークンの取得
 
     [J-Quants](https://jpx-jquants.com/) で登録したEメールアドレスとパスワードを使って、リフレッシュトークンおよびIDトークンを取得します。
-    """
-    )
+    """)
     return
 
 

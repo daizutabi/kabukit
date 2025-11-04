@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.17.2"
+__generated_with = "0.17.6"
 app = marimo.App(width="medium", sql_output="polars")
 
 
@@ -34,6 +34,18 @@ async def _(EdinetList, button, get_edinet_documents, mo, pl):
         doc_ids = lst["DocumentId"].unique()
         x = await get_edinet_documents(doc_ids, max_items=100, progress=mo.status.progress_bar)
         mo.output.append(x)
+    return
+
+
+@app.cell
+def _():
+    from kabukit import cache
+    return (cache,)
+
+
+@app.cell
+def _(cache):
+    cache.read("edinet", "list")
     return
 
 
