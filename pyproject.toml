@@ -43,6 +43,7 @@ dependencies = [
   "async-typer>=0.1.0,<1.0",
   "beautifulsoup4>=4.0",
   "httpx>=0.28.0,<1.0",
+  "ixbrlparse>=0.11.1",
   "lxml>=6.0",
   "platformdirs>=4.0",
   "polars>=1.32.3",
