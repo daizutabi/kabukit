@@ -61,7 +61,6 @@ async def collect[T, R](
             await asyncio.gather(*tasks, return_exceptions=True)
 
 
-type Callback = Callable[[pl.DataFrame], pl.DataFrame | None]
 type Progress = type[progress_bar[Any] | tqdm[Any]] | _Progress
 
 

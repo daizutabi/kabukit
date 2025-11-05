@@ -11,11 +11,6 @@ from kabukit.sources.edinet.batch import get_documents, get_list
 pytestmark = pytest.mark.system
 
 
-def callback(df: pl.DataFrame) -> pl.DataFrame:
-    assert isinstance(df, pl.DataFrame)
-    return df
-
-
 async def test_get_list_single_date() -> None:
     df = await get_list("2025-10-09")
     dates = df["Date"].unique().to_list()
@@ -41,14 +36,14 @@ async def test_get_list_multiple_dates() -> None:
 
 
 async def test_get_list_without_dates() -> None:
-    df = await get_list(days=7, max_items=6, callback=callback)
+    df = await get_list(days=7, max_items=6)
     assert df.width == 25
 
 
 async def test_get_documents_csv() -> None:
     df = await get_list(["2025-09-09", "2025-09-19", "2025-09-22"])
     doc_ids = df.filter(CsvFlag=True).get_column("DocumentId").sort()
-    df = await get_documents(doc_ids, max_items=10, callback=callback)
+    df = await get_documents(doc_ids, max_items=10)
     assert df["DocumentId"].n_unique() == 10
 
 
