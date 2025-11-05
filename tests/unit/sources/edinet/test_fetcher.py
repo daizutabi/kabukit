@@ -7,8 +7,8 @@ import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
 
-from kabukit.sources.edinet.batch import get_documents, get_list
 from kabukit.sources.edinet.client import EdinetClient
+from kabukit.sources.edinet.fetcher import get_documents, get_list
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -26,7 +26,7 @@ def dummy_progress(x: Iterable[Any]) -> Iterable[Any]:
 
 @pytest.fixture
 def mock_get_past_dates(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("kabukit.sources.edinet.batch.get_past_dates")
+    return mocker.patch("kabukit.sources.edinet.fetcher.get_past_dates")
 
 
 @pytest.fixture
@@ -34,7 +34,7 @@ def mock_edinet_client(mocker: MockerFixture) -> AsyncMock:
     """EdinetClientの非同期コンテキストマネージャをモックするフィクスチャ"""
     mock_client_instance = mocker.AsyncMock()
     mocker.patch(
-        "kabukit.sources.edinet.batch.EdinetClient",
+        "kabukit.sources.edinet.fetcher.EdinetClient",
         return_value=mocker.MagicMock(
             __aenter__=mocker.AsyncMock(return_value=mock_client_instance),
             __aexit__=mocker.AsyncMock(),

@@ -6,7 +6,7 @@ import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
 
-from kabukit.sources.edinet.batch import get_documents, get_list
+from kabukit.sources.edinet.fetcher import get_documents, get_list
 
 pytestmark = pytest.mark.system
 

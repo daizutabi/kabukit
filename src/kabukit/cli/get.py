@@ -176,7 +176,7 @@ async def edinet(
     quiet: Quiet = False,
 ) -> None:
     """EDINET APIから書類一覧を取得します。"""
-    from kabukit.sources.edinet.batch import get_list
+    from kabukit.sources.edinet.fetcher import get_list
     from kabukit.utils.datetime import today
 
     from .utils import CustomTqdm, display_dataframe, get_code_date, write_cache
