@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from kabukit.utils import gather
+from kabukit.utils import fetcher
 from kabukit.utils.datetime import get_past_dates
 
 from .client import EdinetClient
@@ -13,7 +13,7 @@ from .client import EdinetClient
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from kabukit.utils.gather import Callback, Progress
+    from kabukit.utils.fetcher import Progress
 
 
 async def get_list(
@@ -24,7 +24,6 @@ async def get_list(
     max_items: int | None = None,
     max_concurrency: int = 12,
     progress: Progress | None = None,
-    callback: Callback | None = None,
 ) -> pl.DataFrame:
     """過去 days 日または years 年の文書一覧を取得し、単一の DataFrame にまとめて返す。
 
@@ -41,8 +40,6 @@ async def get_list(
         progress (Progress | None, optional): 進捗表示のための関数。
             tqdm, marimoなどのライブラリを使用できる。
             指定しないときは進捗表示は行われない。
-        callback (Callback | None, optional): 各DataFrameに対して適用する
-            コールバック関数。指定しないときはそのままのDataFrameが使用される。
 
     Returns:
         DataFrame:
@@ -55,14 +52,13 @@ async def get_list(
     if dates is None:
         dates = get_past_dates(days=days, years=years)
 
-    df = await gather.get(
+    df = await fetcher.get(
         EdinetClient,
-        "list",
+        EdinetClient.get_list,
         dates,
         max_items=max_items,
         max_concurrency=max_concurrency,
         progress=progress,
-        callback=callback,
     )
 
     if df.is_empty():
@@ -77,7 +73,6 @@ async def get_documents(
     max_items: int | None = None,
     max_concurrency: int = 12,
     progress: Progress | None = None,
-    callback: Callback | None = None,
     *,
     pdf: bool = False,
 ) -> pl.DataFrame:
@@ -91,8 +86,6 @@ async def get_documents(
         progress (Progress | None, optional): 進捗表示のための関数。
             tqdm, marimoなどのライブラリを使用できる。
             指定しないときは進捗表示は行われない。
-        callback (Callback | None, optional): 各DataFrameに対して適用する
-            コールバック関数。指定しないときはそのままのDataFrameが使用される。
         pdf (bool): PDF形式で取得する場合はTrue、CSV形式で取得する場合はFalse。
 
     Returns:
@@ -103,13 +96,12 @@ async def get_documents(
         async with EdinetClient() as client:
             return await client.get_document(doc_ids, pdf=pdf)
 
-    df = await gather.get(
+    df = await fetcher.get(
         EdinetClient,
-        "pdf" if pdf else "csv",
+        EdinetClient.get_pdf if pdf else EdinetClient.get_csv,
         doc_ids,
         max_items=max_items,
         max_concurrency=max_concurrency,
         progress=progress,
-        callback=callback,
     )
     return df.sort("DocumentId")

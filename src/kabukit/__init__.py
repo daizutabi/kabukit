@@ -5,15 +5,15 @@ from .domain.jquants.info import Info
 from .domain.jquants.prices import Prices
 from .domain.jquants.statements import Statements
 from .domain.tdnet.list import List as TdnetList
-from .sources.edinet.batch import get_documents as get_edinet_documents
-from .sources.edinet.batch import get_list as get_edinet_list
 from .sources.edinet.client import EdinetClient
-from .sources.jquants.batch import get_calendar, get_info, get_prices, get_statements
+from .sources.edinet.fetcher import get_documents as get_edinet_documents
+from .sources.edinet.fetcher import get_list as get_edinet_list
 from .sources.jquants.client import JQuantsClient
-from .sources.tdnet.batch import get_list as get_tdnet_list
+from .sources.jquants.fetcher import get_calendar, get_info, get_prices, get_statements
 from .sources.tdnet.client import TdnetClient
-from .sources.yahoo.batch import get_quote as get_yahoo_quote
+from .sources.tdnet.fetcher import get_list as get_tdnet_list
 from .sources.yahoo.client import YahooClient
+from .sources.yahoo.fetcher import get_quote as get_yahoo_quote
 from .utils import cache
 
 __all__ = [

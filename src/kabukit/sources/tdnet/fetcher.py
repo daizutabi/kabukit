@@ -5,14 +5,14 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from kabukit.utils import gather
+from kabukit.utils import fetcher
 
 from .client import TdnetClient
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from kabukit.utils.gather import Callback, Progress
+    from kabukit.utils.fetcher import Progress
 
 
 async def get_list(
@@ -21,7 +21,6 @@ async def get_list(
     max_items: int | None = None,
     max_concurrency: int = 12,
     progress: Progress | None = None,
-    callback: Callback | None = None,
 ) -> pl.DataFrame:
     """TDnetの文書一覧を取得する。
 
@@ -34,8 +33,6 @@ async def get_list(
         progress (Progress | None, optional): 進捗表示のための関数。
             tqdm, marimoなどのライブラリを使用できる。
             指定しないときは進捗表示は行われない。
-        callback (Callback | None, optional): 各DataFrameに対して適用する
-            コールバック関数。指定しないときはそのままのDataFrameが使用される。
 
     Returns:
         DataFrame:
@@ -49,14 +46,13 @@ async def get_list(
         async with TdnetClient() as client:
             dates = await client.get_dates()
 
-    df = await gather.get(
+    df = await fetcher.get(
         TdnetClient,
-        "list",
+        TdnetClient.get_list,
         dates,
         max_items=max_items,
         max_concurrency=max_concurrency,
         progress=progress,
-        callback=callback,
     )
 
     if df.is_empty():

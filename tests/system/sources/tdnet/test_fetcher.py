@@ -6,7 +6,7 @@ import pytest
 import pytest_asyncio
 
 from kabukit.sources.jquants.client import JQuantsClient
-from kabukit.sources.tdnet.batch import get_list
+from kabukit.sources.tdnet.fetcher import get_list
 from kabukit.utils.datetime import today
 
 pytestmark = pytest.mark.system

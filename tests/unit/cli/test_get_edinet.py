@@ -25,7 +25,7 @@ runner = CliRunner()
 @pytest.fixture
 def mock_get_edinet(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.sources.edinet.batch.get_list",
+        "kabukit.sources.edinet.fetcher.get_list",
         new_callable=AsyncMock,
         return_value=MOCK_DF,
     )

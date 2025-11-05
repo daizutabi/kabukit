@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import functools
 from itertools import islice
 from typing import TYPE_CHECKING, Any, Protocol
 
@@ -15,7 +16,6 @@ if TYPE_CHECKING:
         Callable,
         Iterable,
     )
-    from typing import Any
 
     from marimo._plugins.stateless.status import progress_bar
     from tqdm.asyncio import tqdm
@@ -36,19 +36,19 @@ if TYPE_CHECKING:
 MAX_CONCURRENCY = 12
 
 
-async def collect[R](
-    awaitables: Iterable[Awaitable[R]],
+async def collect[T, R](
+    function: Callable[[T], Awaitable[R]],
+    args: Iterable[T],
     /,
     max_concurrency: int | None = None,
 ) -> AsyncIterator[R]:
-    max_concurrency = max_concurrency or MAX_CONCURRENCY
-    semaphore = asyncio.Semaphore(max_concurrency)
+    semaphore = asyncio.Semaphore(max_concurrency or MAX_CONCURRENCY)
 
-    async def run(awaitable: Awaitable[R]) -> R:
+    async def func(arg: T) -> R:
         async with semaphore:
-            return await awaitable
+            return await function(arg)
 
-    tasks = {asyncio.create_task(run(awaitable)) for awaitable in awaitables}
+    tasks = {asyncio.create_task(func(arg)) for arg in args}
 
     try:
         for future in asyncio.as_completed(tasks):  # async for (python 3.13+)
@@ -61,44 +61,17 @@ async def collect[R](
             await asyncio.gather(*tasks, return_exceptions=True)
 
 
-async def collect_fn[T, R](
-    function: Callable[[T], Awaitable[R]],
-    args: Iterable[T],
-    /,
-    max_concurrency: int | None = None,
-) -> AsyncIterator[R]:
-    max_concurrency = max_concurrency or MAX_CONCURRENCY
-    awaitables = (function(arg) for arg in args)
-
-    async for item in collect(awaitables, max_concurrency=max_concurrency):
-        yield item
-
-
-type Callback = Callable[[pl.DataFrame], pl.DataFrame | None]
 type Progress = type[progress_bar[Any] | tqdm[Any]] | _Progress
 
 
-async def get_stream(
-    client: Client,
-    resource: str,
-    args: list[Any],
-    max_concurrency: int | None = None,
-) -> AsyncIterator[pl.DataFrame]:
-    fn = getattr(client, f"get_{resource}")
-
-    async for df in collect_fn(fn, args, max_concurrency):
-        yield df
-
-
-async def get(
-    client_factory: Callable[[], Client],
-    resource: str,
-    args: Iterable[Any],
+async def get[T, C: Client](
+    client_factory: Callable[[], C],
+    get: Callable[[C, T], Awaitable[pl.DataFrame]],
+    args: Iterable[T],
     /,
     max_items: int | None = None,
     max_concurrency: int | None = None,
     progress: Progress | None = None,
-    callback: Callback | None = None,
 ) -> pl.DataFrame:
     """各種データを取得し、単一のDataFrameにまとめて返す。
 
@@ -106,17 +79,15 @@ async def get(
         client_factory (Callable[[], Client]): Clientインスタンスを生成する
             呼び出し可能オブジェクト。
             JQuantsClientやEdinetClientなど、Clientを継承したクラスを指定できる。
-        resource (str): 取得するデータの種類。Clientのメソッド名から"get_"を
-            除いたものを指定する。
-        args (Iterable[Any]): 取得対象の引数のリスト。
+        get (Callable[[Client, T], Awaitable[pl.DataFrame]]): 取得するClientクラスの
+            メソッドデータ。
+        args (Iterable[T]): 取得対象の引数のリスト。
         max_items (int | None, optional): 取得数する上限。
         max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
             指定しないときはデフォルト値が使用される。
         progress (Progress | None, optional): 進捗表示のための関数。
             tqdm, marimoなどのライブラリを使用できる。
             指定しないときは進捗表示は行われない。
-        callback (Callback | None, optional): 各DataFrameに対して適用する
-            コールバック関数。指定しないときはそのままのDataFrameが使用される。
 
     Returns:
         DataFrame:
@@ -125,13 +96,11 @@ async def get(
     args = list(islice(args, max_items))
 
     async with client_factory() as client:
-        stream = get_stream(client, resource, args, max_concurrency)
+        function = functools.partial(get, client)
+        ait = collect(function, args, max_concurrency=max_concurrency)
 
         if progress:
-            stream = progress(stream, total=len(args))
+            ait = progress(ait, total=len(args))
 
-        if callback:
-            stream = (x if (r := callback(x)) is None else r async for x in stream)
-
-        dfs = [df async for df in stream if not df.is_empty()]  # ty: ignore[not-iterable]
+        dfs = [df async for df in ait if not df.is_empty()]
         return pl.concat(dfs, how="vertical_relaxed") if dfs else pl.DataFrame()

@@ -8,7 +8,7 @@ import pytest_asyncio
 from polars import col as c
 
 from kabukit.domain.jquants.prices import Prices
-from kabukit.sources.jquants.batch import get_prices
+from kabukit.sources.jquants.fetcher import get_prices
 from tests.validation.conftest import pytestmark  # noqa: F401
 
 if TYPE_CHECKING:

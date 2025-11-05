@@ -6,8 +6,8 @@ import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
 
-from kabukit.sources.yahoo.batch import get_quote
 from kabukit.sources.yahoo.client import YahooClient
+from kabukit.sources.yahoo.fetcher import get_quote
 
 if TYPE_CHECKING:
     from unittest.mock import AsyncMock
@@ -30,50 +30,48 @@ async def test_get_quote_single_code(mocker: MockerFixture) -> None:
 
 async def test_get_quote_multiple_codes(
     mocker: MockerFixture,
-    mock_gather_get: AsyncMock,
+    mock_fetcher_get: AsyncMock,
 ) -> None:
     mock_df = pl.DataFrame({"Code": [3, 2, 1]})
-    mock_gather_get.return_value = mock_df
+    mock_fetcher_get.return_value = mock_df
 
     codes = ["1", "2", "3"]
     result = await get_quote(codes)
 
-    mock_gather_get.assert_awaited_once_with(
+    mock_fetcher_get.assert_awaited_once_with(
         YahooClient,
-        "quote",
+        YahooClient.get_quote,
         codes,
         max_items=None,
         max_concurrency=mocker.ANY,
         progress=None,
-        callback=None,
     )
     assert_frame_equal(result, mock_df.sort("Code"))
 
 
 async def test_get_quote_no_codes_specified(
     mocker: MockerFixture,
-    mock_gather_get: AsyncMock,
+    mock_fetcher_get: AsyncMock,
 ) -> None:
     codes = ["1", "2", "3"]
 
     mock_get_target_codes = mocker.patch(
-        "kabukit.sources.yahoo.batch.get_target_codes",
+        "kabukit.sources.yahoo.fetcher.get_target_codes",
         return_value=codes,
     )
 
     mock_df = pl.DataFrame({"Code": [3, 2, 1]})
-    mock_gather_get.return_value = mock_df
+    mock_fetcher_get.return_value = mock_df
 
     result = await get_quote()
 
     mock_get_target_codes.assert_awaited_once_with()
-    mock_gather_get.assert_awaited_once_with(
+    mock_fetcher_get.assert_awaited_once_with(
         YahooClient,
-        "quote",
+        YahooClient.get_quote,
         codes,
         max_items=None,
         max_concurrency=mocker.ANY,
         progress=None,
-        callback=None,
     )
     assert_frame_equal(result, mock_df.sort("Code"))

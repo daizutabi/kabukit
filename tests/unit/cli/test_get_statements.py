@@ -25,7 +25,7 @@ runner = CliRunner()
 @pytest.fixture
 def mock_get_statements(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.sources.jquants.batch.get_statements",
+        "kabukit.sources.jquants.fetcher.get_statements",
         new_callable=AsyncMock,
     )
 

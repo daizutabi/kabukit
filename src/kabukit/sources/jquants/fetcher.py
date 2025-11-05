@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from kabukit.utils import gather
+from kabukit.utils import fetcher
 
 from .client import JQuantsClient
 
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
     import polars as pl
 
-    from kabukit.utils.gather import Callback, Progress
+    from kabukit.utils.fetcher import Progress
 
 
 async def get_calendar() -> pl.DataFrame:
@@ -71,7 +71,6 @@ async def get_statements(
     max_items: int | None = None,
     max_concurrency: int = 12,
     progress: Progress | None = None,
-    callback: Callback | None = None,
 ) -> pl.DataFrame:
     """四半期毎の決算短信サマリーおよび業績・配当の修正に関する開示情報を取得する。
 
@@ -87,8 +86,6 @@ async def get_statements(
         progress (Progress | None, optional): 進捗表示のための関数。
             tqdm, marimoなどのライブラリを使用できる。
             指定しないときは進捗表示は行われない。
-        callback (Callback | None, optional): 各DataFrameに対して適用する
-            コールバック関数。指定しないときはそのままのDataFrameが使用される。
 
     Returns:
         pl.DataFrame: 財務情報を含むDataFrame。
@@ -103,14 +100,13 @@ async def get_statements(
     if codes is None:
         codes = await get_target_codes()
 
-    data = await gather.get(
+    data = await fetcher.get(
         JQuantsClient,
-        "statements",
+        JQuantsClient.get_statements,
         codes,
         max_items=max_items,
         max_concurrency=max_concurrency,
         progress=progress,
-        callback=callback,
     )
     return data.sort("Code", "Date")
 
@@ -122,7 +118,6 @@ async def get_prices(
     max_items: int | None = None,
     max_concurrency: int = 8,
     progress: Progress | None = None,
-    callback: Callback | None = None,
 ) -> pl.DataFrame:
     """日々の株価四本値を取得する。
 
@@ -140,8 +135,6 @@ async def get_prices(
         progress (Progress | None, optional): 進捗表示のための関数。
             tqdm, marimoなどのライブラリを使用できる。
             指定しないときは進捗表示は行われない。
-        callback (Callback | None, optional): 各DataFrameに対して適用する
-            コールバック関数。指定しないときはそのままのDataFrameが使用される。
 
     Returns:
         pl.DataFrame: 日々の株価四本値を含むDataFrame。
@@ -156,13 +149,12 @@ async def get_prices(
     if codes is None:
         codes = await get_target_codes()
 
-    data = await gather.get(
+    data = await fetcher.get(
         JQuantsClient,
-        "prices",
+        JQuantsClient.get_prices,
         codes,
         max_items=max_items,
         max_concurrency=max_concurrency,
         progress=progress,
-        callback=callback,
     )
     return data.sort("Code", "Date")

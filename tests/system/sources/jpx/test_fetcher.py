@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from kabukit.sources.jpx.batch import get_shares
+from kabukit.sources.jpx.fetcher import get_shares
 
 pytestmark = pytest.mark.system
 
