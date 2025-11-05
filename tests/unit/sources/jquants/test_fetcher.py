@@ -6,14 +6,14 @@ import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
 
-from kabukit.sources.jquants.batch import (
+from kabukit.sources.jquants.client import JQuantsClient
+from kabukit.sources.jquants.fetcher import (
     get_calendar,
     get_info,
     get_prices,
     get_statements,
     get_target_codes,
 )
-from kabukit.sources.jquants.client import JQuantsClient
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -30,7 +30,7 @@ def mock_jquants_client(mocker: MockerFixture) -> AsyncMock:
     """JQuantsClientの非同期コンテキストマネージャをモックするフィクスチャ"""
     mock_client_instance = mocker.AsyncMock()
     mocker.patch(
-        "kabukit.sources.jquants.batch.JQuantsClient",
+        "kabukit.sources.jquants.fetcher.JQuantsClient",
         return_value=mocker.MagicMock(
             __aenter__=mocker.AsyncMock(return_value=mock_client_instance),
             __aexit__=mocker.AsyncMock(),
@@ -78,7 +78,7 @@ async def test_get_info_with_date(mock_jquants_client: AsyncMock) -> None:
 @pytest.fixture
 def mock_get_info(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.sources.jquants.batch.get_info",
+        "kabukit.sources.jquants.fetcher.get_info",
         new_callable=mocker.AsyncMock,
     )
 
@@ -96,7 +96,7 @@ async def test_get_target_codes(mock_get_info: AsyncMock) -> None:
 @pytest.fixture
 def mock_get_target_codes(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.sources.jquants.batch.get_target_codes",
+        "kabukit.sources.jquants.fetcher.get_target_codes",
         new_callable=mocker.AsyncMock,
     )
 

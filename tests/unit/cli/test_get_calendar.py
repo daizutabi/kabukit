@@ -22,7 +22,7 @@ runner = CliRunner()
 @pytest.fixture
 def mock_get_calendar(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.sources.jquants.batch.get_calendar",
+        "kabukit.sources.jquants.fetcher.get_calendar",
         new_callable=mocker.AsyncMock,
         return_value=MOCK_DF,
     )
