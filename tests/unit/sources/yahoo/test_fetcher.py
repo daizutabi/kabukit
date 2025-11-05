@@ -6,8 +6,8 @@ import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
 
-from kabukit.sources.yahoo.batch import get_quote
 from kabukit.sources.yahoo.client import YahooClient
+from kabukit.sources.yahoo.fetcher import get_quote
 
 if TYPE_CHECKING:
     from unittest.mock import AsyncMock
@@ -56,7 +56,7 @@ async def test_get_quote_no_codes_specified(
     codes = ["1", "2", "3"]
 
     mock_get_target_codes = mocker.patch(
-        "kabukit.sources.yahoo.batch.get_target_codes",
+        "kabukit.sources.yahoo.fetcher.get_target_codes",
         return_value=codes,
     )
 

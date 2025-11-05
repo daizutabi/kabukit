@@ -12,8 +12,8 @@ from .sources.jquants.client import JQuantsClient
 from .sources.jquants.fetcher import get_calendar, get_info, get_prices, get_statements
 from .sources.tdnet.client import TdnetClient
 from .sources.tdnet.fetcher import get_list as get_tdnet_list
-from .sources.yahoo.batch import get_quote as get_yahoo_quote
 from .sources.yahoo.client import YahooClient
+from .sources.yahoo.fetcher import get_quote as get_yahoo_quote
 from .utils import cache
 
 __all__ = [

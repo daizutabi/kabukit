@@ -272,7 +272,7 @@ async def yahoo(
     """Yahooファイナンスから情報を取得します。"""
     import httpx
 
-    from kabukit.sources.yahoo.batch import get_quote
+    from kabukit.sources.yahoo.fetcher import get_quote
 
     from .utils import CustomTqdm, display_dataframe, write_cache
 
