@@ -9,6 +9,8 @@ from bs4 import BeautifulSoup, Tag
 
 from kabukit.sources.utils import get_soup, iter_contents
 
+pytestmark = pytest.mark.unit
+
 
 def test_get_soup_basic() -> None:
     html = "<html><head><title>Test</title></head><body><p>Hello</p></body></html>"
