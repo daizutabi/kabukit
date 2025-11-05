@@ -6,8 +6,8 @@ import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
 
-from kabukit.sources.jpx.batch import get_shares
 from kabukit.sources.jpx.client import JpxClient
+from kabukit.sources.jpx.fetcher import get_shares
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -38,7 +38,7 @@ def jpx_client_class_mock(mocker: MockerFixture) -> MagicMock:
     )
 
     class_mock = mocker.patch(
-        "kabukit.sources.jpx.batch.JpxClient",
+        "kabukit.sources.jpx.fetcher.JpxClient",
         return_value=mocker.MagicMock(
             __aenter__=mocker.AsyncMock(return_value=mock_client_instance),
             __aexit__=mocker.AsyncMock(),

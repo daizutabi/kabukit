@@ -245,7 +245,7 @@ async def shares(
     quiet: Quiet = False,
 ) -> None:
     """JPXから上場株式数を取得します。"""
-    from kabukit.sources.jpx.batch import get_shares
+    from kabukit.sources.jpx.fetcher import get_shares
 
     from .utils import CustomTqdm, display_dataframe, write_cache
 
