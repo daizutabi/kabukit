@@ -11,11 +11,17 @@ from kabukit.sources.tdnet.client import TdnetClient
 from kabukit.sources.tdnet.fetcher import get_list
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from typing import Any
     from unittest.mock import AsyncMock
 
     from pytest_mock import MockerFixture
 
 pytestmark = pytest.mark.unit
+
+
+def dummy_progress(x: Iterable[Any]) -> Iterable[Any]:
+    return x
 
 
 async def test_get_list_single_date(mocker: MockerFixture) -> None:
@@ -38,7 +44,7 @@ async def test_get_list_multiple_dates(
     mock_df = pl.DataFrame({"Code": [1, 2], "Date": dates})
     mock_fetcher_get.return_value = mock_df
 
-    result = await get_list(dates)
+    result = await get_list(dates, progress=dummy_progress)  # pyright: ignore[reportArgumentType]
 
     mock_fetcher_get.assert_awaited_once_with(
         TdnetClient,
@@ -46,7 +52,7 @@ async def test_get_list_multiple_dates(
         dates,
         max_items=None,
         max_concurrency=mocker.ANY,
-        progress=None,
+        progress=dummy_progress,
     )
     assert_frame_equal(result, mock_df.sort("Code", "Date"))
 
