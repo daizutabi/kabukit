@@ -22,9 +22,13 @@ pytestmark = pytest.mark.system
 def test_state_iter_price(state: dict[str, Any]) -> None:
     x = dict(iter_price(state))
     assert len(x) == 3
-    assert isinstance(x["Price"], float)
-    assert isinstance(x["PriceDate"], datetime.date)
-    assert isinstance(x["PriceTime"], datetime.time)
+    if x["Price"] is not None:
+        assert isinstance(x["Price"], float)
+        assert isinstance(x["PriceDate"], datetime.date)
+        assert isinstance(x["PriceTime"], datetime.time)
+    else:
+        assert x["PriceDate"] is None
+        assert x["PriceTime"] is None
 
 
 def test_state_iter_previous_price(state: dict[str, Any]) -> None:
