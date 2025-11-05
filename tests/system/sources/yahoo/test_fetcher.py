@@ -19,7 +19,7 @@ async def test_get_quote_codes(codes: list[str]) -> None:
     random.shuffle(codes)
     df = await get_quote(codes)
     assert df.shape == (len(codes), 24)
-    assert [x[:4] for x in df["Code"]] == sorted(codes)
+    assert df["Code"].to_list() == sorted(f"{c}0" for c in codes)
 
 
 async def test_get_quote_without_code() -> None:
