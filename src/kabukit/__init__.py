@@ -10,8 +10,8 @@ from .sources.edinet.fetcher import get_documents as get_edinet_documents
 from .sources.edinet.fetcher import get_list as get_edinet_list
 from .sources.jquants.client import JQuantsClient
 from .sources.jquants.fetcher import get_calendar, get_info, get_prices, get_statements
-from .sources.tdnet.batch import get_list as get_tdnet_list
 from .sources.tdnet.client import TdnetClient
+from .sources.tdnet.fetcher import get_list as get_tdnet_list
 from .sources.yahoo.batch import get_quote as get_yahoo_quote
 from .sources.yahoo.client import YahooClient
 from .utils import cache

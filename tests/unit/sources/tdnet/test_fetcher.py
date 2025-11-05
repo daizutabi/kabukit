@@ -7,8 +7,8 @@ import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
 
-from kabukit.sources.tdnet.batch import get_list
 from kabukit.sources.tdnet.client import TdnetClient
+from kabukit.sources.tdnet.fetcher import get_list
 
 if TYPE_CHECKING:
     from unittest.mock import AsyncMock

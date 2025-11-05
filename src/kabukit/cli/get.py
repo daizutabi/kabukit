@@ -212,7 +212,7 @@ async def tdnet(
     quiet: Quiet = False,
 ) -> None:
     """TDnetから書類一覧を取得します。"""
-    from kabukit.sources.tdnet.batch import get_list
+    from kabukit.sources.tdnet.fetcher import get_list
     from kabukit.utils.datetime import today
 
     from .utils import CustomTqdm, display_dataframe, get_code_date, write_cache
