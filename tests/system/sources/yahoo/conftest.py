@@ -9,15 +9,27 @@ from kabukit.sources.yahoo.client import YahooClient
 from kabukit.sources.yahoo.parser import get_preloaded_state, get_preloaded_store
 
 
+@pytest_asyncio.fixture
+async def client():
+    async with YahooClient() as client:
+        yield client
+
+
 async def get(url: str) -> str:
     async with YahooClient() as client:
         response = await client.get(url)
         return response.text
 
 
-@pytest.fixture(scope="module", params=["1375", "6857", "7203", "1773", "6208"])
-def code(request: pytest.FixtureRequest) -> str:
-    return request.param
+@pytest.fixture(scope="module")
+def codes() -> list[str]:
+    return ["1375", "6857", "7203", "1773", "6208"]
+
+
+@pytest.fixture(scope="module", params=range(5))
+def code(codes: list[str], request: pytest.FixtureRequest) -> str:
+    assert isinstance(request.param, int)
+    return codes[request.param]
 
 
 @pytest_asyncio.fixture(scope="module")

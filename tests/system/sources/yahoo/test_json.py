@@ -13,7 +13,7 @@ def test_state_price(state: dict[str, Any]) -> None:
     assert len(x) in [26, 27]
     assert "price" in x
     assert "priceDateTime" in x
-    assert re.match(r"^\d+[/:]\d+$", x["priceDateTime"])
+    assert re.match(r"^[\d-]+[/:][\d-]+$", x["priceDateTime"])
 
 
 def test_state_previous_price(state: dict[str, Any]) -> None:
