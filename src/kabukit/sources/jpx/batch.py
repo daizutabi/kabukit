@@ -6,12 +6,12 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from kabukit.utils import gather
+from kabukit.utils import fetcher
 
 from .client import JpxClient
 
 if TYPE_CHECKING:
-    from kabukit.utils.gather import Callback, Progress
+    from kabukit.utils.fetcher import Progress
 
 
 async def get_shares(
@@ -19,7 +19,6 @@ async def get_shares(
     max_concurrency: int = 12,
     max_workers: int | None = None,
     progress: Progress | None = None,
-    callback: Callback | None = None,
 ) -> pl.DataFrame:
     """上場株式数を取得する。
 
@@ -33,8 +32,6 @@ async def get_shares(
         progress (Progress | None, optional): 進捗表示のための関数。
             tqdm, marimoなどのライブラリを使用できる。
             指定しないときは進捗表示は行われない。
-        callback (Callback | None, optional): 各DataFrameに対して適用する
-            コールバック関数。指定しないときはそのままのDataFrameが使用される。
 
     Returns:
         DataFrame:
@@ -44,14 +41,13 @@ async def get_shares(
         pdf_urls = [url async for url in client.iter_shares_pdf_urls()]
 
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        df = await gather.get(
+        df = await fetcher.get(
             functools.partial(JpxClient, executor=executor),
-            "shares",
+            JpxClient.get_shares,
             pdf_urls,
             max_items=max_items,
             max_concurrency=max_concurrency,
             progress=progress,
-            callback=callback,
         )
 
     if df.is_empty():

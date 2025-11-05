@@ -24,10 +24,6 @@ def dummy_progress(x: Iterable[Any]) -> Iterable[Any]:
     return x
 
 
-def dummy_callback(df: pl.DataFrame) -> pl.DataFrame:
-    return df
-
-
 @pytest.fixture
 def jpx_client_class_mock(mocker: MockerFixture) -> MagicMock:
     """JpxClientクラスをモックし、そのモックオブジェクトを返すフィクスチャ"""
@@ -55,29 +51,27 @@ def jpx_client_class_mock(mocker: MockerFixture) -> MagicMock:
 
 async def test_get_shares(
     jpx_client_class_mock: MagicMock,
-    mock_gather_get: AsyncMock,
+    mock_fetcher_get: AsyncMock,
     mocker: MockerFixture,
 ) -> None:
-    mock_gather_get.return_value = pl.DataFrame({"Code": ["B", "A"], "Date": [2, 1]})
+    mock_fetcher_get.return_value = pl.DataFrame({"Code": ["B", "A"], "Date": [2, 1]})
 
     result = await get_shares(
         max_items=10,
         max_concurrency=5,
         progress=dummy_progress,  # pyright: ignore[reportArgumentType]
-        callback=dummy_callback,
     )
 
     jpx_client_class_mock.mock_client_instance.iter_shares_pdf_urls.assert_called_once()
 
     expected_pdf_urls = ["url1.pdf", "url2.pdf"]
-    mock_gather_get.assert_awaited_once_with(
+    mock_fetcher_get.assert_awaited_once_with(
         mocker.ANY,
-        "shares",
+        jpx_client_class_mock.get_shares,
         expected_pdf_urls,
         max_items=10,
         max_concurrency=5,
         progress=dummy_progress,
-        callback=dummy_callback,
     )
 
     expected_df = pl.DataFrame({"Code": ["A", "B"], "Date": [1, 2]})
@@ -86,11 +80,11 @@ async def test_get_shares(
 
 async def test_get_shares_empty(
     jpx_client_class_mock: MagicMock,  # noqa: ARG001  # pyright: ignore[reportUnusedParameter]
-    mock_gather_get: AsyncMock,
+    mock_fetcher_get: AsyncMock,
 ) -> None:
-    mock_gather_get.return_value = pl.DataFrame()
+    mock_fetcher_get.return_value = pl.DataFrame()
 
     result = await get_shares()
 
     assert result.is_empty()
-    mock_gather_get.assert_awaited_once()
+    mock_fetcher_get.assert_awaited_once()
