@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import functools
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, Self
 
 import httpx
 import tenacity
@@ -11,7 +11,6 @@ from httpx import AsyncClient
 if TYPE_CHECKING:
     from collections.abc import Callable
     from concurrent.futures import Executor
-    from typing import Self
 
     from httpx import Response
     from httpx._types import QueryParamTypes

@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 import json
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import polars as pl
 from bs4 import Tag
@@ -13,7 +13,6 @@ from kabukit.utils.datetime import parse_month_day, parse_time, parse_year_month
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
-    from typing import Any
 
 
 def _get(text: str, pattern: re.Pattern[str]) -> re.Match[str] | None:

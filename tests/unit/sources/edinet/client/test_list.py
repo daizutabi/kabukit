@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import polars as pl
 import pytest
@@ -10,7 +10,6 @@ from polars.testing import assert_frame_equal
 from kabukit.sources.edinet.client import EdinetClient
 
 if TYPE_CHECKING:
-    from typing import Any
     from unittest.mock import AsyncMock
 
     from pytest_mock import MockerFixture

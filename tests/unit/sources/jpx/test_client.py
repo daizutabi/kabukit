@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 from httpx import Response
@@ -8,7 +8,6 @@ from httpx import Response
 from kabukit.sources.jpx.client import SHARES_URL, JpxClient
 
 if TYPE_CHECKING:
-    from typing import Any
     from unittest.mock import AsyncMock
 
     from pytest_mock import MockerFixture
