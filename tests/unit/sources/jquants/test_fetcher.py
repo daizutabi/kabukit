@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import polars as pl
 import pytest
@@ -17,7 +17,6 @@ from kabukit.sources.jquants.fetcher import (
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
-    from typing import Any
     from unittest.mock import AsyncMock
 
     from pytest_mock import MockerFixture

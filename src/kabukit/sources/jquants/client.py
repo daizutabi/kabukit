@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import polars as pl
 
@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     import datetime
     from collections.abc import AsyncIterator
     from concurrent.futures import Executor
-    from typing import Any
 
     from httpx import HTTPStatusError  # noqa: F401
 

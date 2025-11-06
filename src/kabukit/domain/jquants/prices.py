@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Self
 
 import polars as pl
 
@@ -8,7 +8,6 @@ from kabukit.domain.base import Base
 
 if TYPE_CHECKING:
     from datetime import timedelta
-    from typing import Self
 
     from .statements import Statements
 

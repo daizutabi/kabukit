@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import date, time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import polars as pl
 import pytest
@@ -11,7 +11,6 @@ from polars.testing import assert_frame_equal
 from kabukit.sources.datetime import _CalendarCacheManager, _with_date, with_date
 
 if TYPE_CHECKING:
-    from typing import Any
     from unittest.mock import AsyncMock, MagicMock
 
     from pytest_mock import MockerFixture

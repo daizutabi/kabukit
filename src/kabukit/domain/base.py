@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Self
 
 from kabukit.utils.cache import read, write
 from kabukit.utils.config import get_cache_dir
@@ -8,7 +8,6 @@ from kabukit.utils.config import get_cache_dir
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from pathlib import Path
-    from typing import Any, Self
 
     import polars as pl
     from polars._typing import IntoExprColumn

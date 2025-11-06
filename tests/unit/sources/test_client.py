@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import pytest
 from httpx import ConnectTimeout, HTTPStatusError, Response
@@ -10,7 +10,6 @@ from kabukit.sources.client import Client
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from typing import Any
     from unittest.mock import AsyncMock
 
     from pytest_mock import MockerFixture

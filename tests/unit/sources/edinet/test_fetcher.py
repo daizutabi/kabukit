@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import polars as pl
 import pytest
@@ -12,7 +12,6 @@ from kabukit.sources.edinet.fetcher import get_documents, get_list
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
-    from typing import Any
     from unittest.mock import AsyncMock, MagicMock
 
     from pytest_mock import MockerFixture
