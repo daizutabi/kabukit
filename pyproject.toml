@@ -80,7 +80,7 @@ dev = [
   "pytest-xdist>=3.8.0",
   "ruff>=0.14.0",
   "scipy>=1.16.2",
-  "ty==0.0.1a23",
+  "ty>=0.0.1a32",
   "vegafusion-python-embed>=1.6.9",
   "vegafusion>=2.0.3",
   "vl-convert-python>=1.8.0",

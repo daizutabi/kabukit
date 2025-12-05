@@ -108,7 +108,7 @@ async def test_run_in_executor_without_executor(mocker: MockerFixture) -> None:
 
     client = MockClient(executor=None)
 
-    result = await client.run_in_executor(sum, [1, 2, 3])
+    result = await client.run_in_executor(sum, [1, 2, 3])  # ty: ignore[invalid-argument-type]
     assert result == 6
 
     mock_loop.run_in_executor.assert_not_called()
@@ -131,7 +131,7 @@ async def test_run_in_executor_with_executor(mocker: MockerFixture) -> None:
     mock_executor = mocker.MagicMock()
     client = MockClient(executor=mock_executor)
 
-    result = await client.run_in_executor(sum, [1, 2, 3])
+    result = await client.run_in_executor(sum, [1, 2, 3])  # ty: ignore[invalid-argument-type]
 
     assert result == 6  # 戻り値を検証
     mock_loop.run_in_executor.assert_called_once_with(mock_executor, mocker.ANY)
