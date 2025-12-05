@@ -13,14 +13,14 @@ repos:
     hooks:
       - id: validate-pyproject
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.4
+    rev: v0.14.8
     hooks:
       - id: ruff-check
         files: ^(src|tests)/
       - id: ruff-format
         files: ^(src|tests)/
   - repo: https://github.com/DetachHead/basedpyright-prek-mirror
-    rev: 1.33.0
+    rev: 1.35.0
     hooks:
       - id: basedpyright
         files: ^(src|tests)/
@@ -28,5 +28,6 @@ repos:
     hooks:
       - id: ty
         name: ty check
-        entry: uv run ty check . --ignore unresolved-import
+        files: ^(src|tests)/
+        entry: uv run ty check
         language: python
