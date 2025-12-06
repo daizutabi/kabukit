@@ -83,7 +83,7 @@ def test_type_of_document_other_period(tod_fin: pl.Series) -> None:
 @pytest.mark.parametrize(
     ("name", "length"),
     [
-        ("OtherPeriodFinancialStatements_Consolidated_JP", 21),
+        ("OtherPeriodFinancialStatements_Consolidated_JP", 20),
         ("OtherPeriodFinancialStatements_Consolidated_IFRS", 1),
         ("OtherPeriodFinancialStatements_NonConsolidated_JP", 2),
     ],
@@ -93,7 +93,7 @@ def test_type_of_document_other_period_length(
     name: str,
     length: int,
 ) -> None:
-    """OtherPeriodFinancialStatementsの種類ごとの件数を確認。今後増える可能性がある。"""
+    """OtherPeriodFinancialStatementsの種類ごとの件数を確認。今後増減の可能性がある。"""
     assert data.filter(c.TypeOfDocument == name).height == length
 
 

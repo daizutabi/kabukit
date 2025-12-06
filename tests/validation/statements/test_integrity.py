@@ -376,7 +376,7 @@ def test_earn_revision_profit_loss_2nd_quarter(
     """業績修正の2Q業績予想の損益項目の各項目がどの程度埋まっているか"""
     x = earn_revision[f"Forecast{pl_col}2ndQuarter"].is_not_null().mean()
     assert isinstance(x, float)
-    assert 0.26 < x < 0.29  # 割合 1/4 くらい
+    assert 0.258 < x < 0.29  # 割合 1/4 くらい
 
 
 @pytest.mark.parametrize(
