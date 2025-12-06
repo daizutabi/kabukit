@@ -27,9 +27,9 @@ BASE_URL = f"https://api.jquants.com/{API_VERSION}"
 class AuthKey(StrEnum):
     """J-Quants認証のための環境変数キー。"""
 
-    MAILADDRESS = "JQUANTS_MAILADDRESS"
-    PASSWORD = "JQUANTS_PASSWORD"  # noqa: S105
-    ID_TOKEN = "JQUANTS_ID_TOKEN"  # noqa: S105
+    MAILADDRESS = "J_QUANTS_MAILADDRESS"
+    PASSWORD = "J_QUANTS_PASSWORD"  # noqa: S105
+    ID_TOKEN = "J_QUANTS_ID_TOKEN"  # noqa: S105
 
 
 class JQuantsClient(Client):

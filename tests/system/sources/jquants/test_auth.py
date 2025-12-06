@@ -17,8 +17,8 @@ if TYPE_CHECKING:
 
 pytestmark = pytest.mark.system
 
-is_auth_set = bool(os.getenv("JQUANTS_MAILADDRESS") and os.getenv("JQUANTS_PASSWORD"))
-reason = "JQUANTS_MAILADDRESS and JQUANTS_PASSWORD must be set"
+is_auth_set = bool(os.getenv("J_QUANTS_MAILADDRESS") and os.getenv("J_QUANTS_PASSWORD"))
+reason = "J_QUANTS_MAILADDRESS and J_QUANTS_PASSWORD must be set"
 
 
 @pytest.mark.skipif(not is_auth_set, reason=reason)
@@ -29,8 +29,8 @@ async def test_auth_from_config(client: JQuantsClient) -> None:
 
 @pytest.mark.skipif(not is_auth_set, reason=reason)
 async def test_auth_from_args(client: JQuantsClient) -> None:
-    mailaddress = os.getenv("JQUANTS_MAILADDRESS")
-    password = os.getenv("JQUANTS_PASSWORD")
+    mailaddress = os.getenv("J_QUANTS_MAILADDRESS")
+    password = os.getenv("J_QUANTS_PASSWORD")
     id_token = await client.auth(mailaddress, password)
     assert id_token is not None
 
@@ -73,7 +73,7 @@ async def test_auth_and_get_data(client: JQuantsClient) -> None:
 
 @pytest.mark.skipif(
     is_auth_set,
-    reason="JQUANTS_MAILADDRESS and JQUANTS_PASSWORD are set",
+    reason="J_QUANTS_MAILADDRESS and J_QUANTS_PASSWORD are set",
 )
 async def test_auth_error(client: JQuantsClient) -> None:
     with pytest.raises(ValueError, match="メールアドレス"):

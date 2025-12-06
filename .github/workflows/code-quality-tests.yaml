@@ -64,8 +64,8 @@ jobs:
         run: uv sync
       - name: Authenticate (J-Quants)
         env:
-          JQUANTS_MAILADDRESS: ${{ secrets.JQUANTS_MAILADDRESS }}
-          JQUANTS_PASSWORD: ${{ secrets.JQUANTS_PASSWORD }}
+          J_QUANTS_MAILADDRESS: ${{ secrets.J_QUANTS_MAILADDRESS }}
+          J_QUANTS_PASSWORD: ${{ secrets.J_QUANTS_PASSWORD }}
         run: uv run kabu auth jquants
       - name: Cache and get data
         id: cache-data
@@ -78,8 +78,8 @@ jobs:
         run: uv run kabu get statements --all
       - name: Run all tests
         env:
-          JQUANTS_MAILADDRESS: ${{ secrets.JQUANTS_MAILADDRESS }}
-          JQUANTS_PASSWORD: ${{ secrets.JQUANTS_PASSWORD }}
+          J_QUANTS_MAILADDRESS: ${{ secrets.J_QUANTS_MAILADDRESS }}
+          J_QUANTS_PASSWORD: ${{ secrets.J_QUANTS_PASSWORD }}
           EDINET_API_KEY: ${{ secrets.EDINET_API_KEY }}
         run: uv run pytest -v --junitxml=junit.xml
       - name: Upload test results to Codecov

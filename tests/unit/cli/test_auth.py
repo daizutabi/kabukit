@@ -278,7 +278,7 @@ def test_show_with_config_file(mock_get_config_path: MagicMock, tmp_path: Path) 
     mock_get_config_path.exists.return_value = True
 
     mock_get_config_path.read_text.return_value = (
-        'JQUANTS_MAILADDRESS = "test@example.com"\nEDINET_API_KEY = "abc-123"'
+        'J_QUANTS_MAILADDRESS = "test@example.com"\nEDINET_API_KEY = "abc-123"'
     )
 
     result = runner.invoke(app, ["auth", "show"])
@@ -286,7 +286,7 @@ def test_show_with_config_file(mock_get_config_path: MagicMock, tmp_path: Path) 
     assert result.exit_code == 0
     assert f"設定ファイル: {tmp_path / 'config.toml'!s}" in result.stdout
     assert "----" in result.stdout
-    assert 'JQUANTS_MAILADDRESS = "test@example.com"' in result.stdout
+    assert 'J_QUANTS_MAILADDRESS = "test@example.com"' in result.stdout
     assert 'EDINET_API_KEY = "abc-123"' in result.stdout
     mock_get_config_path.exists.assert_called_once()
     mock_get_config_path.read_text.assert_called_once_with(encoding="utf-8")

@@ -17,8 +17,8 @@ pytestmark = pytest.mark.system
 runner = CliRunner()
 
 # 環境変数から認証情報が設定されているかチェック
-is_auth_set = bool(os.getenv("JQUANTS_MAILADDRESS") and os.getenv("JQUANTS_PASSWORD"))
-reason = "JQUANTS_MAILADDRESS and JQUANTS_PASSWORD must be set"
+is_auth_set = bool(os.getenv("J_QUANTS_MAILADDRESS") and os.getenv("J_QUANTS_PASSWORD"))
+reason = "J_QUANTS_MAILADDRESS and J_QUANTS_PASSWORD must be set"
 
 
 @pytest.fixture
