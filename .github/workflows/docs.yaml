@@ -30,9 +30,9 @@ jobs:
         run: uv sync --group docs
       - name: Authenticate (J-Quants)
         env:
-          JQUANTS_MAILADDRESS: ${{ secrets.JQUANTS_MAILADDRESS }}
-          JQUANTS_PASSWORD: ${{ secrets.JQUANTS_PASSWORD }}
-        run: uv run kabu auth jquants --mailaddress "$JQUANTS_MAILADDRESS" --password "$JQUANTS_PASSWORD"
+          J_QUANTS_MAILADDRESS: ${{ secrets.J_QUANTS_MAILADDRESS }}
+          J_QUANTS_PASSWORD: ${{ secrets.J_QUANTS_PASSWORD }}
+        run: uv run kabu auth jquants --mailaddress "$J_QUANTS_MAILADDRESS" --password "$J_QUANTS_PASSWORD"
       - name: Authenticate (EDINET)
         env:
           EDINET_API_KEY: ${{ secrets.EDINET_API_KEY }}

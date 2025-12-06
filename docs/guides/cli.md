@@ -33,7 +33,7 @@ kabukit は、複数のソースからデータを取得するための、
 
 1. コマンドラインオプション (例: `--mailaddress`)
 2. 設定ファイル (例: `~/.config/kabukit/config.toml`)
-3. 環境変数 (例: `JQUANTS_MAILADDRESS`)
+3. 環境変数 (例: `J_QUANTS_MAILADDRESS`)
 4. 上記いずれにも見つからない場合は、インタラクティブな入力プロンプトを表示
 
 ### J-Quants API (`jquants`)
@@ -73,8 +73,8 @@ $ kabu auth jquants --mailaddress my_email@example.com --password my_password
 - 環境変数
 
 ```bash
-$ export JQUANTS_MAILADDRESS="my_email@example.com"
-$ export JQUANTS_PASSWORD="my_password"
+$ export J_QUANTS_MAILADDRESS="my_email@example.com"
+$ export J_QUANTS_PASSWORD="my_password"
 $ kabu auth jquants
 ```
 
@@ -120,7 +120,7 @@ $ export EDINET_API_KEY="my_api_key"
 ```bash
 $ kabu auth show
 設定ファイル: /home/my_name/.config/kabukit/config.toml
-JQUANTS_ID_TOKEN = "..."
+J_QUANTS_ID_TOKEN = "..."
 EDINET_API_KEY = "..."
 ```
 
