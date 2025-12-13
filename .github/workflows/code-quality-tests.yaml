@@ -43,7 +43,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: lcov.info
       - name: Upload test results to Codecov
-        if: ${{ !cancelled() }} && matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14'
+        if: ${{ !cancelled() && matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14' }}
         uses: codecov/test-results-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
