@@ -83,9 +83,9 @@ def test_type_of_document_other_period(tod_fin: pl.Series) -> None:
 @pytest.mark.parametrize(
     ("name", "length"),
     [
-        ("OtherPeriodFinancialStatements_Consolidated_JP", 20),
+        ("OtherPeriodFinancialStatements_Consolidated_JP", 21),
         ("OtherPeriodFinancialStatements_Consolidated_IFRS", 1),
-        ("OtherPeriodFinancialStatements_NonConsolidated_JP", 2),
+        ("OtherPeriodFinancialStatements_NonConsolidated_JP", 3),
     ],
 )
 def test_type_of_document_other_period_length(

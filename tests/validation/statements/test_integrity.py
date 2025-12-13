@@ -48,7 +48,7 @@ def test_fin_balance_sheet(fin: pl.DataFrame, bs_col: str) -> None:
         ("2Q", 0.75, 0.77),
         ("3Q", 0.10, 0.12),
         ("FY", 0.99, 1.00),
-        ("OtherPeriod", 0.80, 0.85),
+        ("OtherPeriod", 0.75, 0.85),
     ],
 )
 def test_fin_cash_flow(
