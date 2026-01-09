@@ -69,7 +69,7 @@ jobs:
         run: uv run kabu auth jquants
       - name: Cache and get data
         id: cache-data
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/kabukit
           key: tests-data-${{ runner.os }}-${{ hashFiles('**/uv.lock') }}
