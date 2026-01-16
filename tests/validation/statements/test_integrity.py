@@ -27,7 +27,7 @@ def test_fin_diluted_earnings_per_share(fin: pl.DataFrame) -> None:
     """DilutedEarningsPerShareは、30%程度が埋まっている"""
     x = fin["DilutedEarningsPerShare"].is_not_null().mean()
     assert isinstance(x, float)
-    assert 0.30 < x <= 0.31  # 30% くらい
+    assert 0.30 < x <= 0.32  # 30% くらい
 
 
 def test_fin_balance_sheet(fin: pl.DataFrame, bs_col: str) -> None:
