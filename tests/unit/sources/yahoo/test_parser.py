@@ -120,7 +120,7 @@ def test_iter_index() -> None:
         "mainStocksDetail": {
             "referenceIndex": {
                 "sharesIssued": "12,345",
-                "sharesIssuedDate": "10/10",
+                "sharesIssuedDate": "1/10",
                 "bps": "1,235.5",
                 "bpsDate": "2020/11",
                 "eps": "3.4",
@@ -134,7 +134,7 @@ def test_iter_index() -> None:
     results = list(iter_index(state))
     assert results == [
         ("IssuedShares", 12345),
-        ("IssuedSharesDate", datetime.date(today().year, 10, 10)),
+        ("IssuedSharesDate", datetime.date(today().year, 1, 10)),
         ("BookValuePerShare", 1235.5),
         ("BookValuePerShareDate", datetime.date(2020, 11, 30)),
         ("EarningsPerShare", 3.4),
