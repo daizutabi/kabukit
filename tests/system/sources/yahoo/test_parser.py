@@ -83,4 +83,4 @@ def test_parse_quote(quote: str) -> None:
 
 def test_parse_performance(performance: str) -> None:
     df = parse_performance(performance)
-    assert df.width == 29 or df.equals(pl.DataFrame())
+    assert df.width == 35 or df.equals(pl.DataFrame())

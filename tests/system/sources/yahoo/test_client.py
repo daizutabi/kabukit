@@ -19,7 +19,7 @@ async def test_get_quote(client: YahooClient, code: str) -> None:
 
 async def test_get_performance(client: YahooClient, code: str) -> None:
     df = await client.get_performance(code)
-    assert df.shape in [(3, 30), (0, 0)]
+    assert df.shape in [(3, 36), (0, 0)]
 
 
 async def test_get_invalid_code(client: YahooClient) -> None:

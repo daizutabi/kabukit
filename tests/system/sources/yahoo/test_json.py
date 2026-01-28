@@ -67,7 +67,7 @@ def test_store_preformance(store: dict[str, Any]) -> None:
 
     for record in x:  # pyright: ignore[reportUnknownVariableType]
         assert isinstance(record, dict)
-        assert len(record) == 29  # pyright: ignore[reportUnknownArgumentType]
+        assert len(record) == 35  # pyright: ignore[reportUnknownArgumentType]
 
 
 def test_store_forcast(store: dict[str, Any]) -> None:

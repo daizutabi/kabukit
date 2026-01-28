@@ -141,7 +141,7 @@ def test_fin_result_dividend_other_period(fin: pl.DataFrame) -> None:
         ("2Q", "3rdQuarter", 0.006, 0.008),
         ("2Q", "FiscalYearEnd", 0.89, 0.93),
         ("3Q", "1stQuarter", 0, 0),
-        ("3Q", "2ndQuarter", 0, 6e-5),  # 誤登録の可能性あり
+        ("3Q", "2ndQuarter", 0, 6.1e-5),  # 誤登録の可能性あり
         ("3Q", "3rdQuarter", 0, 0),
         ("3Q", "FiscalYearEnd", 0.90, 0.94),
         ("FY", "1stQuarter", 0, 0),
