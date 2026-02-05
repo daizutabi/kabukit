@@ -44,9 +44,10 @@ jobs:
           files: lcov.info
       - name: Upload test results to Codecov
         if: ${{ !cancelled() && matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14' }}
-        uses: codecov/test-results-action@v1
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results
 
   full-integration-tests:
     name: Full Integration Tests
@@ -84,6 +85,7 @@ jobs:
         run: uv run pytest -v --junitxml=junit.xml
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
-        uses: codecov/test-results-action@v1
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results
