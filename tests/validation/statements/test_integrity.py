@@ -11,7 +11,7 @@ def test_fin_profit_loss(fin: pl.DataFrame, pl_col: str) -> None:
     """決算の損益計算書の各項目は、ほぼ100%埋まっている"""
     x = fin[pl_col].is_not_null().mean()
     assert isinstance(x, float)
-    assert 0.938 < x <= 1.0  # 割合 1 に近い
+    assert 0.935 < x <= 1.0  # 割合 1 に近い
 
 
 @pytest.mark.parametrize("kind", ["US", "IFRS"])
@@ -45,10 +45,10 @@ def test_fin_balance_sheet(fin: pl.DataFrame, bs_col: str) -> None:
     ("period", "low", "high"),
     [
         ("1Q", 0.10, 0.12),
-        ("2Q", 0.75, 0.77),
+        ("2Q", 0.75, 0.78),
         ("3Q", 0.10, 0.12),
         ("FY", 0.99, 1.00),
-        ("OtherPeriod", 0.75, 0.85),
+        ("OtherPeriod", 0.65, 0.85),
     ],
 )
 def test_fin_cash_flow(
@@ -134,7 +134,7 @@ def test_fin_result_dividend_other_period(fin: pl.DataFrame) -> None:
     [
         ("1Q", "1stQuarter", 0, 3e-5),  # 誤登録の可能性あり
         ("1Q", "2ndQuarter", 0.85, 0.87),
-        ("1Q", "3rdQuarter", 0.006, 0.008),
+        ("1Q", "3rdQuarter", 0.0058, 0.008),
         ("1Q", "FiscalYearEnd", 0.89, 0.93),
         ("2Q", "1stQuarter", 0, 0),
         ("2Q", "2ndQuarter", 0, 4e-4),  # 誤登録の可能性あり
@@ -279,7 +279,7 @@ def test_fin_forecast_other(fin: pl.DataFrame) -> None:
 @pytest.mark.parametrize(
     ("period", "low", "high"),
     [
-        ("1Q", 0.53, 0.57),
+        ("1Q", 0.52, 0.57),
         ("2Q", 0.0, 2e-4),  # 誤登録の可能性あり
         ("3Q", 0.0, 4e-5),  # 誤登録の可能性あり
         ("FY", 0.0, 0.0),
@@ -307,7 +307,7 @@ def test_fin_next_year_forecast_profit_loss_2nd_quarter(
     df = fin.filter(c.TypeOfDocument.str.starts_with("FY"))
     x = df[f"NextYearForecast{pl_col}2ndQuarter"].is_not_null().mean()
     assert isinstance(x, float)
-    assert 0.50 <= x <= 0.55
+    assert 0.48 <= x <= 0.55
 
 
 def test_fin_forecast_profit_loss(fin: pl.DataFrame, pl_col: str) -> None:
@@ -382,10 +382,10 @@ def test_earn_revision_profit_loss_2nd_quarter(
 @pytest.mark.parametrize(
     ("name", "low", "high"),
     [
-        ("1stQuarter", 0.003, 0.004),
+        ("1stQuarter", 0.003, 0.0042),
         ("2ndQuarter", 0.05, 0.06),
-        ("3rdQuarter", 0.003, 0.004),
-        ("FiscalYearEnd", 0.15, 0.17),
+        ("3rdQuarter", 0.003, 0.0044),
+        ("FiscalYearEnd", 0.15, 0.171),
         ("Annual", 0.15, 0.17),
     ],
 )

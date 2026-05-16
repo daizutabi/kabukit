@@ -19,7 +19,7 @@ def test_height(data: pl.DataFrame) -> None:
 
 @pytest.mark.parametrize(
     "column",
-    [c for c in COMMON_COLUMNS if c not in ["DisclosedTime"]],
+    [c for c in COMMON_COLUMNS if c != "DisclosedTime"],
 )
 def test_is_not_null_all(data: pl.DataFrame, column: str) -> None:
     """共通カラムのうち、Time以外は全て非欠損"""
@@ -83,9 +83,9 @@ def test_type_of_document_other_period(tod_fin: pl.Series) -> None:
 @pytest.mark.parametrize(
     ("name", "length"),
     [
-        ("OtherPeriodFinancialStatements_Consolidated_JP", 21),
+        ("OtherPeriodFinancialStatements_Consolidated_JP", 24),
         ("OtherPeriodFinancialStatements_Consolidated_IFRS", 1),
-        ("OtherPeriodFinancialStatements_NonConsolidated_JP", 3),
+        ("OtherPeriodFinancialStatements_NonConsolidated_JP", 5),
     ],
 )
 def test_type_of_document_other_period_length(

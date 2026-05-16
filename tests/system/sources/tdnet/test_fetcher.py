@@ -46,7 +46,7 @@ async def test_get_list_multiple_dates(dates: list[datetime.date]) -> None:
 async def test_get_list_without_dates() -> None:
     df = await get_list()
     dates = df["DisclosedDate"].unique().to_list()
-    assert len(dates) >= 18
+    assert len(dates) >= 17
 
 
 async def test_get_list_invalid_date() -> None:

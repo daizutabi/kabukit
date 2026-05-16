@@ -404,7 +404,7 @@ def test_data_loading_methods_are_idempotent(
 
     statements = Statements(pl.DataFrame({"Date": [date(2023, 1, 1)], "Code": ["A"]}))
 
-    mock_data = {}
+    mock_data: dict[str, list[str | float | date]] = {}
     for col in statements_return_cols:
         if col == "Date":
             mock_data[col] = [date(2023, 1, 1)]

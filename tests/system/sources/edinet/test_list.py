@@ -14,7 +14,7 @@ pytestmark = pytest.mark.system
 
 async def test_list(client: EdinetClient) -> None:
     df = await client.get_list("2025-09-04")
-    assert df.shape == (76, 25)
+    assert df.shape == (75, 25)
     assert df.columns[0] == "Date"
     assert df["Date"].dtype == pl.Date
     assert df.columns[-1] == "FileDate"

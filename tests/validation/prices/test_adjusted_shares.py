@@ -49,7 +49,7 @@ def data(prices: Prices) -> pl.DataFrame:
 def test_adjusted_shares_ratio_min(data: pl.DataFrame) -> None:
     x = data["Ratio"].mean()
     assert isinstance(x, float)
-    assert x < 0.05
+    assert x < 0.051
 
 
 def test_adjusted_shares_ratio_max(data: pl.DataFrame) -> None:

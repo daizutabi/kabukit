@@ -32,7 +32,7 @@ def plot_prices_candlestick(prices: Prices) -> alt.LayerChart:
         alt.value("#3030ff"),
     )
 
-    return alt.layer(rule, bar, height=200).encode(
+    return alt.layer(rule, bar, height=200).encode(  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
         x=alt.X("Date:T", axis=alt.Axis(title="日付", format="%Y-%m-%d")),
         y=alt.Y(title="株価", scale=alt.Scale(zero=False)),
         color=color_condition,
