@@ -1,18 +1,8 @@
 {
   "image": "mcr.microsoft.com/vscode/devcontainers/base:ubuntu24.04",
   "features": {
-    "ghcr.io/devcontainers/features/nvidia-cuda:2": {
-      "cudaVersion": "12.9",
-      "installCudnn": true,
-      "installCudnnDev": true,
-      "installToolkit": true
-    },
     "ghcr.io/devcontainers/features/node:1": {},
     "ghcr.io/devcontainers-extra/features/starship:1": {}
-  },
-  "runArgs": ["--gpus", "all"],
-  "hostRequirements": {
-    "gpu": "optional"
   },
   "customizations": {
     "vscode": {

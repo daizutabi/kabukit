@@ -68,7 +68,7 @@ Source = "https://github.com/daizutabi/kabukit"
 
 [dependency-groups]
 dev = [
-  "altair @ git+https://github.com/vega/altair.git@main",
+  "altair>=6.1.0",
   "basedpyright>=1.36.1",
   "marimo[lsp,mcp]>=0.18.4",
   "prek>=0.2.21",

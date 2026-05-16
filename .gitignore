@@ -4,6 +4,7 @@
 __marimo__/
 __pycache__/
 data/
+devcontainer-lock.json
 dist/
 lcov.info
 site/
