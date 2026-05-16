@@ -10,7 +10,6 @@
         "DavidAnson.vscode-markdownlint",
         "charliermarsh.ruff",
         "detachhead.basedpyright",
-        "esbenp.prettier-vscode",
         "fill-labs.dependi",
         "markis.code-coverage",
         "ms-python.python",

@@ -12,8 +12,6 @@ from .sources.jquants.client import JQuantsClient
 from .sources.jquants.fetcher import get_calendar, get_info, get_prices, get_statements
 from .sources.tdnet.client import TdnetClient
 from .sources.tdnet.fetcher import get_list as get_tdnet_list
-from .sources.yahoo.client import YahooClient
-from .sources.yahoo.fetcher import get_quote as get_yahoo_quote
 from .utils import cache
 
 __all__ = [
@@ -25,7 +23,6 @@ __all__ = [
     "Statements",
     "TdnetClient",
     "TdnetList",
-    "YahooClient",
     "cache",
     "get_calendar",
     "get_edinet_documents",
@@ -34,5 +31,4 @@ __all__ = [
     "get_prices",
     "get_statements",
     "get_tdnet_list",
-    "get_yahoo_quote",
 ]
