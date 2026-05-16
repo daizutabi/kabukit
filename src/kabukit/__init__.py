@@ -8,6 +8,7 @@ from .domain.tdnet.list import List as TdnetList
 from .sources.edinet.client import EdinetClient
 from .sources.edinet.fetcher import get_documents as get_edinet_documents
 from .sources.edinet.fetcher import get_list as get_edinet_list
+from .sources.jpx.fetcher import get_shares as get_jpx_shares
 from .sources.jquants.client import JQuantsClient
 from .sources.jquants.fetcher import get_calendar, get_info, get_prices, get_statements
 from .sources.tdnet.client import TdnetClient
@@ -28,6 +29,7 @@ __all__ = [
     "get_edinet_documents",
     "get_edinet_list",
     "get_info",
+    "get_jpx_shares",
     "get_prices",
     "get_statements",
     "get_tdnet_list",

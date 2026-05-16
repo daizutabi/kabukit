@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.17.6"
+__generated_with = "0.23.6"
 app = marimo.App(width="medium")
 
 
@@ -19,6 +19,7 @@ def _():
     import marimo as mo
     import polars as pl
     from kabukit import get_info
+
     return get_info, mo
 
 

@@ -1,18 +1,16 @@
 import marimo
 
-__generated_with = "0.16.5"
+__generated_with = "0.23.6"
 app = marimo.App(width="medium")
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        """
+    mo.md("""
     # J-Quantsで取得できる財務情報を検証する
 
     <https://pdf.irpocket.com/C3997/bffO/ugVK/I9Yg.pdf>
-    """
-    )
+    """)
     return
 
 
@@ -23,6 +21,7 @@ def _():
     import polars as pl
     from polars import col as c
     from kabukit import Statements, JQuantsClient
+
     return Statements, c, mo, pl
 
 

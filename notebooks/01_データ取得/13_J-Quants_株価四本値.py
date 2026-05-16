@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.17.6"
+__generated_with = "0.23.6"
 app = marimo.App(width="medium")
 
 
@@ -19,6 +19,7 @@ def _():
     import marimo as mo
 
     from kabukit import get_prices
+
     return get_prices, mo
 
 
@@ -39,6 +40,11 @@ def _(mo):
 async def _(button, get_prices, mo):
     if button.value:
         await get_prices(max_items=30, progress=mo.status.progress_bar)
+    return
+
+
+@app.cell
+def _():
     return
 
 

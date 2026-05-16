@@ -23,7 +23,7 @@ async def get_shares(
     """上場株式数を取得する。
 
     Args:
-        max_items (int | None, optional): 取得数の上限。
+        max_items (int | None, optional): 取得月数の上限。
         max_concurrency (int | None, optional): 同時に実行するリクエストの最大数。
             デフォルトは8。
         max_workers (int | None, optional): PDFのパース処理を実行するための

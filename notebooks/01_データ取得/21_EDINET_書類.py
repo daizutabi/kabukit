@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.17.6"
+__generated_with = "0.23.6"
 app = marimo.App(width="medium", sql_output="polars")
 
 
@@ -9,6 +9,7 @@ def _():
     import marimo as mo
     import polars as pl
     from kabukit import EdinetClient, get_edinet_documents, EdinetList
+
     return EdinetClient, EdinetList, get_edinet_documents, mo, pl
 
 
@@ -40,12 +41,18 @@ async def _(EdinetList, button, get_edinet_documents, mo, pl):
 @app.cell
 def _():
     from kabukit import cache
+
     return (cache,)
 
 
 @app.cell
 def _(cache):
     cache.read("edinet", "list")
+    return
+
+
+@app.cell
+def _():
     return
 
 

@@ -1,37 +1,42 @@
 import marimo
 
-__generated_with = "0.16.5"
+__generated_with = "0.23.6"
 app = marimo.App(width="medium")
 
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md("""# J-Quantsで取得できる財務情報を検証する""")
-    return
-
-
-@app.cell
-def _():
+with app.setup:
     from datetime import date
 
     import marimo as mo
     import polars as pl
     from polars import col as c
 
-    from kabukit import Prices, Statements
-    return Prices, Statements, c, mo
+    from kabukit import Prices, Statements, Info
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md("""
+    # J-Quantsで取得できる財務情報を検証する
+    """)
+    return
 
 
 @app.cell
-def _(Prices, Statements):
+def _():
+    Info().data.filter(c.Code == "62000")
+    return
+
+
+@app.cell
+def _():
     statements = Statements()
     prices = Prices().with_adjusted_shares(statements)
     return (prices,)
 
 
 @app.cell
-def _(c, prices):
-    prices.data.filter(c.Code == "62000").select(
+def _(prices):
+    prices.data.filter(c.Code == "39970").select(
         "Date",
         "Close",
         "RawClose",
