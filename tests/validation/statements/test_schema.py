@@ -4,9 +4,11 @@ import polars as pl
 import pytest
 from polars import col as c
 
-from tests.validation.conftest import pytestmark  # noqa: F401
+from tests.validation import conftest
 
 from .conftest import COMMON_COLUMNS
+
+pytestmark = conftest.pytestmark
 
 
 def test_width(data: pl.DataFrame) -> None:

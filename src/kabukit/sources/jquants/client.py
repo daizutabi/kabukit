@@ -17,7 +17,10 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator
     from concurrent.futures import Executor
 
-    from httpx import HTTPStatusError  # noqa: F401
+    # for docstring
+    from httpx import (
+        HTTPStatusError,  # noqa: F401  # pyright: ignore[reportUnusedImport]
+    )
 
 
 API_VERSION = "v1"

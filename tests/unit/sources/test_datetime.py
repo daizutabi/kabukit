@@ -17,6 +17,8 @@ if TYPE_CHECKING:
 
 pytestmark = pytest.mark.unit
 
+# pyright:reportPrivateUsage = false
+
 
 def test_with_date_disclosed() -> None:
     df = pl.DataFrame(

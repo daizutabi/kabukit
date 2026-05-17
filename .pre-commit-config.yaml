@@ -8,26 +8,30 @@ repos:
         exclude: ^mkdocs\.yml$
       - id: end-of-file-fixer
       - id: trailing-whitespace
+
   - repo: https://github.com/abravalheri/validate-pyproject
     rev: v0.25
     hooks:
       - id: validate-pyproject
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.13
     hooks:
       - id: ruff-check
-        files: ^(src|tests)/
+        files: ^(src|tests|notebooks)/
       - id: ruff-format
-        files: ^(src|tests)/
+        files: ^(src|tests|notebooks)/
+
   - repo: https://github.com/DetachHead/basedpyright-prek-mirror
     rev: 1.39.4
     hooks:
       - id: basedpyright
-        files: ^(src|tests)/
+        files: ^(src|tests|notebooks)/
+
   - repo: local
     hooks:
       - id: ty
         name: ty check
-        files: ^(src|tests)/
+        files: ^(src|tests|notebooks)/
         entry: uv run ty check
         language: python

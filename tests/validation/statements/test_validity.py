@@ -7,10 +7,12 @@ import polars as pl
 import pytest
 from polars import col as c
 
-from tests.validation.conftest import pytestmark  # noqa: F401
+from tests.validation import conftest
 
 if TYPE_CHECKING:
     from kabukit.domain.jquants.statements import Statements
+
+pytestmark = conftest.pytestmark
 
 # 指標が乖離している決算書を確認する必要あり
 

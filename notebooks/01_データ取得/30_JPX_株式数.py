@@ -25,7 +25,7 @@ def _():
 @app.cell
 async def _(button):
     if button.value:
-        await get_jpx_shares(years=1, progress=mo.status.progress_bar)
+        await get_jpx_shares(progress=mo.status.progress_bar)
     return
 
 

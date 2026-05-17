@@ -20,6 +20,8 @@ if TYPE_CHECKING:
 
 pytestmark = pytest.mark.unit
 
+# pyright:reportPrivateUsage = false
+
 
 @pytest.fixture
 def mock_cache_dir(tmp_path: Path, mocker: MockerFixture) -> Path:

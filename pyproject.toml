@@ -112,7 +112,7 @@ skip_covered = true
 [tool.ruff]
 line-length = 88
 target-version = "py312"
-include = ["src/**/*.py", "tests/**/*.py"]
+include = ["src/**/*.py", "tests/**/*.py", "notebooks/**/*.py"]
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -140,19 +140,35 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["ANN", "FBT", "S101", "S105", "S607", "PLC2401"]
 "columns.py" = ["E501"]
-"notebooks/**/*.py" = ["F704", "PLE1142"]
+"notebooks/**/*.py" = [
+  "ANN",
+  "B018",
+  "F704",
+  "E501",
+  "N803",
+  "BLE001",
+  "PLE",
+  "PLR",
+  "INP",
+  "I002",
+]
 
 [tool.ruff.lint.isort]
 required-imports = ["from __future__ import annotations"]
 
-[tool.pyright]
-include = ["src", "tests"]
+[tool.basedpyright]
 reportAny = false
 reportExplicitAny = false
-reportIncompatibleVariableOverride = false
-reportPrivateUsage = false
 reportUnusedCallResult = false
-reportUnusedImport = false
+
+[[tool.basedpyright.executionEnvironments]]
+root = "notebooks"
+reportMissingParameterType = false
+reportUnknownMemberType = false
+reportUnknownParameterType = false
+reportUnknownArgumentType = false
+reportUnknownVariableType = false
+reportUnusedExpression = false
 
 [tool.ty.src]
 include = ["src", "tests"]

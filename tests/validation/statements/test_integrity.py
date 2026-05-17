@@ -4,7 +4,9 @@ import polars as pl
 import pytest
 from polars import col as c
 
-from tests.validation.conftest import pytestmark  # noqa: F401
+from tests.validation import conftest
+
+pytestmark = conftest.pytestmark
 
 
 def test_fin_profit_loss(fin: pl.DataFrame, pl_col: str) -> None:

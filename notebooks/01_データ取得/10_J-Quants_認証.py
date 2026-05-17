@@ -1,31 +1,24 @@
 import marimo
 
-__generated_with = "0.17.6"
+__generated_with = "0.23.6"
 app = marimo.App(width="medium")
 
+with app.setup:
+    import marimo as mo
 
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # J-QuantsのリフレッシュトークンおよびIDトークンの取得
-
-    [J-Quants](https://jpx-jquants.com/) で登録したEメールアドレスとパスワードを使って、リフレッシュトークンおよびIDトークンを取得します。
-    """)
-    return
+    from kabukit import JQuantsClient
 
 
 @app.cell
 def _():
-    import marimo as mo
-    return (mo,)
-
-
-@app.cell(hide_code=True)
-def _(mo):
     form = (
         mo.md("{mailaddress}\n\n{password}")
         .batch(
-            mailaddress=mo.ui.text(kind="email", label="メールアドレス", placeholder="user@example.com"),
+            mailaddress=mo.ui.text(
+                kind="email",
+                label="メールアドレス",
+                placeholder="user@example.com",
+            ),
             password=mo.ui.text(kind="password", label="パスワード"),
         )
         .form()
@@ -35,16 +28,22 @@ def _(mo):
 
 
 @app.cell
-async def _(form, mo):
-    from kabukit import JQuantsClient
-
+async def _(form):
     if form.value:
         client = JQuantsClient()
         try:
-            await client.auth(form.value["mailaddress"], form.value["password"])
-            mo.output.append(mo.md("トークンを取得しました"))
+            token = await client.auth(
+                form.value["mailaddress"],
+                form.value["password"],
+            )
+            mo.output.append(mo.md(f"トークンを取得しました: {token[:10]}..."))
         except Exception:
             mo.output.append(mo.md("認証に失敗しました"))
+    return
+
+
+@app.cell
+def _():
     return
 
 

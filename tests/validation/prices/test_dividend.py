@@ -9,10 +9,12 @@ from polars import col as c
 
 from kabukit.domain.jquants.prices import Prices
 from kabukit.sources.jquants.fetcher import get_prices
-from tests.validation.conftest import pytestmark  # noqa: F401
+from tests.validation import conftest
 
 if TYPE_CHECKING:
     from kabukit.domain.jquants.statements import Statements
+
+pytestmark = conftest.pytestmark
 
 
 @pytest_asyncio.fixture(scope="module")
