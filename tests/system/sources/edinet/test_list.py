@@ -20,6 +20,7 @@ async def test_list(client: EdinetClient) -> None:
     assert df.columns[-1] == "FileDate"
     assert df["FileDate"].dtype == pl.Date
     assert df["FileDate"].unique().to_list() == [datetime.date(2025, 9, 4)]
+    assert all(len(x) == 4 for x in df["Code"])
 
 
 async def test_list_invalid_date(client: EdinetClient) -> None:

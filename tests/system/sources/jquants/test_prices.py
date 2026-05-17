@@ -15,6 +15,7 @@ pytestmark = pytest.mark.system
 async def test_code(client: JQuantsClient) -> None:
     df = await client.get_prices(code="7203")
     assert df.width == 16
+    assert df.item(0, "Code") == "7203"
 
 
 async def test_date(client: JQuantsClient) -> None:

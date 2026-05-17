@@ -18,7 +18,7 @@ async def test_date(client: JQuantsClient, *, only_common_stocks: bool) -> None:
     today = datetime.datetime.now(ZoneInfo("Asia/Tokyo")).date()
     date = today - datetime.timedelta(weeks=12)
     df = await client.get_info(date=date, only_common_stocks=only_common_stocks)
-    height = 3700 if only_common_stocks else 4_000
+    height = 3700 if only_common_stocks else 4000
     assert df.height > height
     df_date = df.item(0, "Date")
     assert isinstance(df_date, datetime.date)
@@ -28,9 +28,18 @@ async def test_date(client: JQuantsClient, *, only_common_stocks: bool) -> None:
 async def test_code(client: JQuantsClient) -> None:
     df = await client.get_info(code="7203")
     assert df.height == 1
+    code = df.item(0, "Code")
+    assert isinstance(code, str)
+    assert code == "7203"
     name = df.item(0, "Company")
     assert isinstance(name, str)
     assert "トヨタ" in name
+
+
+async def test_code_invalid(client: JQuantsClient) -> None:
+    df = await client.get_info(code="99999")
+    assert df.is_empty()
+    assert df.shape == (0, 0)
 
 
 @pytest_asyncio.fixture(scope="module")

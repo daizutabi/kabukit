@@ -5,11 +5,30 @@ import zipfile
 from functools import cache
 from typing import TYPE_CHECKING, Literal, overload
 
+import polars as pl
 from bs4 import BeautifulSoup
 
 if TYPE_CHECKING:
     import re
     from collections.abc import Iterator
+
+
+def normalize_code(data: pl.DataFrame, /, column: str = "Code") -> pl.DataFrame:
+    """証券コードを４桁の形式に正規化する。
+
+    Args:
+        data (pl.DataFrame): 正規化前の証券コードを含むDataFrame。
+        column (str): 正規化する列名。デフォルトは"Code"。
+
+    Returns:
+        pl.DataFrame: 正規化された証券コードを含むDataFrame。
+    """
+    return data.filter(
+        pl.col(column).str.len_chars() == 5,
+        pl.col(column).str.ends_with("0"),
+    ).with_columns(
+        pl.col(column).str.slice(0, 4),
+    )
 
 
 @cache

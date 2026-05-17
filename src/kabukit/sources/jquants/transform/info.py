@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import polars as pl
 
+from kabukit.sources.utils import normalize_code
+
 
 def transform(df: pl.DataFrame, *, only_common_stocks: bool = True) -> pl.DataFrame:
     if only_common_stocks:
@@ -11,7 +13,8 @@ def transform(df: pl.DataFrame, *, only_common_stocks: bool = True) -> pl.DataFr
         return pl.DataFrame()
 
     return (
-        df.with_columns(
+        df.pipe(normalize_code)
+        .with_columns(
             pl.col("Date").str.to_date("%Y-%m-%d"),
             pl.col("^.*CodeName$", "ScaleCategory").cast(pl.Categorical),
         )

@@ -23,6 +23,7 @@ async def test_get_list(client: TdnetClient, date: datetime.date) -> None:
     assert df1["DisclosedDate"].dtype == pl.Date
     assert df1["DisclosedDate"].eq(date).all()
     assert df1.columns[:3] == ["Date", "Code", "DisclosedDate"]
+    assert all(len(x) == 4 for x in df1["Code"])
 
     date_str = date.strftime("%Y%m%d")
     df2 = await client.get_list(date_str)

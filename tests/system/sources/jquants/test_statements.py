@@ -15,6 +15,7 @@ pytestmark = pytest.mark.system
 async def test_code(client: JQuantsClient) -> None:
     df = await client.get_statements(code="7203")
     assert df.width == 105
+    assert df.item(0, "Code") == "7203"
 
 
 async def test_date(client: JQuantsClient) -> None:
@@ -76,10 +77,10 @@ async def test_column_names(prefix: str) -> None:
 @pytest.mark.parametrize(
     ("code", "date", "time"),
     [
-        ("30480", datetime.date(2025, 10, 10), datetime.time(12, 0)),
-        ("97780", datetime.date(2025, 10, 10), datetime.time(15, 0)),
-        ("21530", datetime.date(2025, 10, 14), datetime.time(15, 30)),
-        ("59820", datetime.date(2025, 10, 14), datetime.time(16, 0)),
+        ("3048", datetime.date(2025, 10, 10), datetime.time(12, 0)),
+        ("9778", datetime.date(2025, 10, 10), datetime.time(15, 0)),
+        ("2153", datetime.date(2025, 10, 14), datetime.time(15, 30)),
+        ("5982", datetime.date(2025, 10, 14), datetime.time(16, 0)),
     ],
 )
 def test_with_date(

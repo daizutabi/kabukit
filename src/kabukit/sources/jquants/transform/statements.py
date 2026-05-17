@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import polars as pl
 
+from kabukit.sources.utils import normalize_code
+
 
 def transform(df: pl.DataFrame) -> pl.DataFrame:
     return (
         df.select(pl.exclude(r"^.*\(REIT\)$"))
         .pipe(_rename)
         .pipe(_cast)
+        .pipe(normalize_code)
         .select(pl.col("Code"), pl.exclude("Code"))
     )
 

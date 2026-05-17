@@ -4,10 +4,12 @@ import io
 import re
 import zipfile
 
+import polars as pl
 import pytest
 from bs4 import BeautifulSoup, Tag
+from polars.testing import assert_frame_equal
 
-from kabukit.sources.utils import get_soup, iter_contents
+from kabukit.sources.utils import get_soup, iter_contents, normalize_code
 
 pytestmark = pytest.mark.unit
 
@@ -38,6 +40,13 @@ def test_get_soup_cache_different_html() -> None:
     soup2 = get_soup(html2)
     assert soup1 is not soup2
     get_soup.cache_clear()
+
+
+def test_normalize_code() -> None:
+    df = pl.DataFrame({"Code": ["12340", "56789", "abcd"]})
+    result = normalize_code(df)
+    expected = pl.DataFrame({"Code": ["1234"]})
+    assert_frame_equal(result, expected)
 
 
 @pytest.fixture

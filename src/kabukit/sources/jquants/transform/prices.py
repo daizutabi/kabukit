@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import polars as pl
 
+from kabukit.sources.utils import normalize_code
+
 
 def transform(df: pl.DataFrame) -> pl.DataFrame:
-    return df.select(
+    return df.pipe(normalize_code).select(
         pl.col("Date").str.to_date("%Y-%m-%d"),
         "Code",
         Open=pl.col("AdjustmentOpen"),

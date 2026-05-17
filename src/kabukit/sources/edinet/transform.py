@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
+from kabukit.sources.utils import normalize_code
 from kabukit.utils.datetime import parse_date
 
 if TYPE_CHECKING:
@@ -49,6 +50,7 @@ def transform_list(df: pl.DataFrame, date: str | datetime.date) -> pl.DataFrame:
             pl.col("SubmittedDateTime").dt.time().alias("SubmittedTime"),
         )
         .drop("SubmittedDateTime")
+        .pipe(normalize_code)
         .select("Code", "^Submitted.+$", pl.exclude("Code", "^Submitted.+$"))
     )
 
