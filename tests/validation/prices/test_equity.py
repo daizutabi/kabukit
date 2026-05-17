@@ -37,5 +37,5 @@ def test_equity_7203(
     d: date,
     equity: float,
 ) -> None:
-    df = prices.data.filter(c.Code == "72030", c.Date == d)
+    df = prices.data.filter(c.Code == "7203", c.Date == d)
     assert df.item(0, "Equity") == equity

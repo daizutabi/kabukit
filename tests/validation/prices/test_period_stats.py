@@ -36,6 +36,6 @@ def test_book_value_yield_period_open_7203(
     d: date,
     expected: float,
 ) -> None:
-    df = data.filter(c.Code == "72030", c.ReportDate == d)
+    df = data.filter(c.Code == "7203", c.ReportDate == d)
     result = df.item(0, "BookValueYield_PeriodOpen")
     assert result == pytest.approx(expected, rel=1e-2)  # pyright: ignore[reportUnknownMemberType]

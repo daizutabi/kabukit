@@ -18,6 +18,7 @@ def test_transform() -> None:
     df = pl.DataFrame(
         {
             "Date": ["2023-01-01", "2023-01-02"],
+            "Code": ["13000", "13010"],
             "CompanyName": ["A", "B"],
             "Sector17CodeName": ["A", "B"],
             "Sector33CodeName": ["C", "D"],
@@ -29,8 +30,9 @@ def test_transform() -> None:
     )
 
     df = transform(df)
-    assert df.shape == (2, 7)
+    assert df.shape == (2, 8)
     assert df["Date"].dtype == pl.Date
+    assert df["Code"].dtype == pl.String
     assert df["Company"].dtype == pl.String
     assert df["Sector17"].dtype == pl.Categorical
     assert df["Sector33"].dtype == pl.Categorical

@@ -37,7 +37,7 @@ def test_forecast_profit_7203(
     d: date,
     profit: float,
 ) -> None:
-    df = prices.data.filter(c.Code == "72030", c.Date == d)
+    df = prices.data.filter(c.Code == "7203", c.Date == d)
     assert df.item(0, "ForecastProfit") == profit
 
 
@@ -53,5 +53,5 @@ def test_forecast_profit_3997(
     d: date,
     profit: float,
 ) -> None:
-    df = prices.data.filter(c.Code == "39970", c.Date == d)
+    df = prices.data.filter(c.Code == "3997", c.Date == d)
     assert df.item(0, "ForecastProfit") == profit

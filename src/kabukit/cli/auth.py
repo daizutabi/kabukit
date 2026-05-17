@@ -3,11 +3,13 @@ from __future__ import annotations
 from typing import Annotated
 
 import typer
-from async_typer import AsyncTyper  # pyright: ignore[reportMissingTypeStubs]
+from async_typer import AsyncTyper
 from httpx import HTTPStatusError
 from typer import Exit, Option
 
+# pyright: reportMissingTypeStubs=false
 # pyright: reportUnknownMemberType=false
+# pyright: reportUnknownVariableType=false
 
 app = AsyncTyper(
     add_completion=False,

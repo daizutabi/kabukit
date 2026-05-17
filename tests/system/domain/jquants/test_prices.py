@@ -21,7 +21,7 @@ def test_prices_data(prices: Prices) -> None:
     assert not prices.data.is_empty()
     assert "Date" in prices.data.columns
     assert "Code" in prices.data.columns
-    assert prices.data["Code"].unique().to_list() == ["62000"]
+    assert prices.data["Code"].unique().to_list() == ["6200"]
 
 
 def test_adjustment_factor(prices: Prices) -> None:

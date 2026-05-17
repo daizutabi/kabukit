@@ -15,6 +15,8 @@ from typer import Argument, Option
 if TYPE_CHECKING:
     from pathlib import Path
 
+# pyright: reportUnknownVariableType=false
+
 app = typer.Typer(add_completion=False, help="キャッシュを管理します。")
 
 

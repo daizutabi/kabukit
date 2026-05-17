@@ -37,7 +37,7 @@ def test_market_cap_7203(
     d: date,
     market_cap: float,
 ) -> None:
-    df = prices.data.filter(c.Code == "72030", c.Date == d)
+    df = prices.data.filter(c.Code == "7203", c.Date == d)
     assert df.item(0, "MarketCap") == market_cap
 
 
@@ -54,5 +54,5 @@ def test_market_cap_3997(
     d: date,
     market_cap: float,
 ) -> None:
-    df = prices.data.filter(c.Code == "39970", c.Date == d)
+    df = prices.data.filter(c.Code == "3997", c.Date == d)
     assert df.item(0, "MarketCap") == market_cap

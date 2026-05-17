@@ -8,6 +8,7 @@ from typer import Argument, Option
 
 # pyright: reportMissingTypeStubs=false
 # pyright: reportUnknownMemberType=false
+# pyright: reportUnknownVariableType=false
 
 
 app = AsyncTyper(

@@ -34,7 +34,7 @@ def test_get_statements_with_code(mock_sub_dir: Path) -> None:
 
     assert result.exit_code == 0
     assert "shape:" in result.stdout
-    assert "72030" in result.stdout
+    assert "7203" in result.stdout
     assert not mock_sub_dir.exists()
 
 

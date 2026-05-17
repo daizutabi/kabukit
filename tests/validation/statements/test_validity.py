@@ -113,7 +113,7 @@ def test_earnings_per_share_consistency(data: pl.DataFrame) -> None:
     <https://pdf.irpocket.com/C3997/bffO/ugVK/I9Yg.pdf>
     """
     x = data.filter(
-        c.Code == "39970",
+        c.Code == "3997",
         c.DisclosedDate == date(2025, 8, 8),
     ).row(0, named=True)
 
@@ -136,7 +136,7 @@ def test_earnings_per_share_consistency(data: pl.DataFrame) -> None:
 def test_shares_7203(statements: Statements, d: date, n: float) -> None:
     x = (
         statements.shares()
-        .filter(c.Code == "72030", c.Date == d)
+        .filter(c.Code == "7203", c.Date == d)
         .item(0, "TreasuryShares")
     )
     assert x == n
@@ -150,7 +150,7 @@ def test_shares_7203(statements: Statements, d: date, n: float) -> None:
     ],
 )
 def test_equity_7203(statements: Statements, d: date, n: float) -> None:
-    x = statements.equity().filter(c.Code == "72030", c.Date == d).item(0, "Equity")
+    x = statements.equity().filter(c.Code == "7203", c.Date == d).item(0, "Equity")
     assert x == n
 
 
@@ -167,7 +167,7 @@ def test_equity_7203(statements: Statements, d: date, n: float) -> None:
 def test_forecast_profit_7203(statements: Statements, d: date, n: float) -> None:
     x = (
         statements.forecast_profit()
-        .filter(c.Code == "72030", c.Date == d)
+        .filter(c.Code == "7203", c.Date == d)
         .item(0, "ForecastProfit")
     )
     assert x == n
@@ -189,13 +189,13 @@ def test_forecast_dividend_3997(
 ) -> None:
     x = (
         statements.forecast_dividend()
-        .filter(c.Code == "39970", c.Date == d)
+        .filter(c.Code == "3997", c.Date == d)
         .item(0, "ForecastDividend")
     )
     assert x == n
 
     x = statements.data.filter(
-        c.Code == "39970",
+        c.Code == "3997",
         c.Date == d,
     ).item(0, "ForecastDividendPerShareAnnual")
     assert x == dps
@@ -205,7 +205,7 @@ def test_result_forecast_dividend_3997(statements: Statements) -> None:
     x = (
         statements.forecast_dividend()
         .filter(
-            c.Code == "39970",
+            c.Code == "3997",
             c.Date == date(2024, 11, 15),
         )
         .item(0, "ForecastDividend")
@@ -213,7 +213,7 @@ def test_result_forecast_dividend_3997(statements: Statements) -> None:
     assert x == 69_120_539
 
     x = statements.data.filter(
-        c.Code == "39970",
+        c.Code == "3997",
         c.Date == date(2025, 2, 17),
     ).item(0, "ResultTotalDividendPaidAnnual")
     assert x == 68_000_000

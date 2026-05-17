@@ -79,6 +79,7 @@ dev = [
   "pytest-randomly>=4.0.1",
   "pytest-xdist>=3.8.0",
   "ruff>=0.14.9",
+  "scipy-stubs>=1.17.1.4",
   "scipy>=1.16.3",
   "ty>=0.0.1a33",
   "vegafusion-python-embed>=1.6.9",

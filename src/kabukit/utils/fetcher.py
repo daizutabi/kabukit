@@ -94,13 +94,14 @@ async def get[T, C: Client](
             すべての情報を含む単一のDataFrame。
     """
     args = list(islice(args, max_items))
+    total = len(args)
 
     async with client_factory() as client:
         function = functools.partial(get, client)
         ait = collect(function, args, max_concurrency=max_concurrency)
 
         if progress:
-            ait = progress(ait, total=len(args))
+            ait = progress(ait, total=total)
 
         dfs = [df async for df in ait if not df.is_empty()]
         return pl.concat(dfs, how="vertical_relaxed") if dfs else pl.DataFrame()

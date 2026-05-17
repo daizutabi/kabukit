@@ -70,7 +70,7 @@ def df() -> pl.DataFrame:
     return pl.DataFrame(
         {
             "Date": ["2023-01-01", "2023-01-02"],
-            "Code": ["1300", "1301"],
+            "Code": ["13000", "13010"],
             "Open": [1, 2],
             "High": [3, 4],
             "Low": [5, 6],

@@ -42,7 +42,7 @@ def test_book_value_per_share_7203(
     d: date,
     bps: float,
 ) -> None:
-    df = prices.data.filter(c.Code == "72030", c.Date == d)
+    df = prices.data.filter(c.Code == "7203", c.Date == d)
     result = df.item(0, "BookValuePerShare")
     assert result == pytest.approx(bps, rel=1e-2)  # pyright: ignore[reportUnknownMemberType]
 
@@ -59,7 +59,7 @@ def test_book_value_per_share_3997(
     d: date,
     bps: float,
 ) -> None:
-    df = prices.data.filter(c.Code == "39970", c.Date == d)
+    df = prices.data.filter(c.Code == "3997", c.Date == d)
     result = df.item(0, "BookValuePerShare")
     assert result == pytest.approx(bps, rel=1e-2)  # pyright: ignore[reportUnknownMemberType]
 
@@ -77,7 +77,7 @@ def test_book_value_yield_7203(
     d: date,
     by: float,
 ) -> None:
-    df = prices.data.filter(c.Code == "72030", c.Date == d)
+    df = prices.data.filter(c.Code == "7203", c.Date == d)
     result = df.item(0, "BookValueYield")
     assert result == pytest.approx(by, rel=1e-2)  # pyright: ignore[reportUnknownMemberType]
 
@@ -94,6 +94,6 @@ def test_book_value_yield_3997(
     d: date,
     by: float,
 ) -> None:
-    df = prices.data.filter(c.Code == "39970", c.Date == d)
+    df = prices.data.filter(c.Code == "3997", c.Date == d)
     result = df.item(0, "BookValueYield")
     assert result == pytest.approx(by, rel=1e-2)  # pyright: ignore[reportUnknownMemberType]

@@ -34,7 +34,7 @@ def test_list_code(data: pl.DataFrame) -> None:
     x = data["Code"]
     assert x.dtype == pl.String
     assert x.is_not_null().all()
-    assert x.str.len_chars().min() == 5
+    assert all(len(x) == 4 for x in x)
 
 
 def test_list_disclosed_time(data: pl.DataFrame) -> None:

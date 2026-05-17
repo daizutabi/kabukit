@@ -16,7 +16,7 @@ def df() -> pl.DataFrame:
         {
             "DisclosedDate": ["2023-01-01", "2023-01-20", "2023-01-30"],
             "DisclosedTime": ["09:00", "15:30", "12:00"],
-            "LocalCode": ["1300", "1301", "1302"],
+            "LocalCode": ["13000", "13010", "13020"],
             "NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock": [  # noqa: E501
                 "1",
                 "2",

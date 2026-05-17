@@ -73,7 +73,7 @@ def test_adjusted_shares_ratio_ratio_max(data: pl.DataFrame) -> None:
 
 
 def test_adjusted_shares_3997(prices: Prices) -> None:
-    df = prices.filter(c.Code == "39970").data
+    df = prices.filter(c.Code == "3997").data
     a = df.filter(c.Date == date(2025, 9, 26)).row(0, named=True)
     assert a["AdjustmentFactor"] == 1
     assert a["RawClose"] == 3610
@@ -90,7 +90,7 @@ def test_adjusted_shares_3997(prices: Prices) -> None:
 
 
 def test_adjusted_shares_3350(prices: Prices) -> None:
-    df = prices.filter(c.Code == "33500").data
+    df = prices.filter(c.Code == "3350").data
     a = df.filter(c.Date == date(2024, 7, 29)).row(0, named=True)
     assert a["AdjustmentFactor"] == 1
     assert a["RawClose"] == 201
@@ -107,7 +107,7 @@ def test_adjusted_shares_3350(prices: Prices) -> None:
 
 
 def test_adjusted_shares_6200(prices: Prices) -> None:
-    df = prices.filter(c.Code == "62000").data
+    df = prices.filter(c.Code == "6200").data
     a = df.filter(c.Date == date(2022, 12, 28)).row(0, named=True)
     assert a["AdjustmentFactor"] == 1
     assert a["RawClose"] == 3095
