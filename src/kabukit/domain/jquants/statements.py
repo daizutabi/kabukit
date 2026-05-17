@@ -59,8 +59,10 @@ class Statements(Base):
             pl.DataFrame: Date, Code, ForecastProfit 列を持つDataFrame。
         """
         return (
-            self.data.with_columns(
-                pl.when(pl.col("TypeOfDocument").str.starts_with("FY"))
+            self.data
+            .with_columns(
+                pl
+                .when(pl.col("TypeOfDocument").str.starts_with("FY"))
                 .then(pl.col("NextYearForecastProfit"))
                 .otherwise(pl.col("ForecastProfit"))
                 .alias("ForecastProfit"),
@@ -84,7 +86,8 @@ class Statements(Base):
         """
         # 予想株式数を計算
         forecast_shares = (
-            pl.when(pl.col("TypeOfDocument").str.starts_with("FY"))
+            pl
+            .when(pl.col("TypeOfDocument").str.starts_with("FY"))
             .then(
                 pl.col("NextYearForecastProfit")
                 / pl.col("NextYearForecastEarningsPerShare"),
@@ -95,7 +98,8 @@ class Statements(Base):
 
         # 年間配当総額を計算
         annual_forecast_dividend = (
-            pl.when(pl.col("TypeOfDocument").str.starts_with("FY"))
+            pl
+            .when(pl.col("TypeOfDocument").str.starts_with("FY"))
             .then(
                 pl.col("NextYearForecastDividendPerShareAnnual")
                 * pl.col("ForecastShares"),
@@ -108,7 +112,8 @@ class Statements(Base):
         )
 
         return (
-            self.data.with_columns(forecast_shares)
+            self.data
+            .with_columns(forecast_shares)
             .with_columns(annual_forecast_dividend)
             .filter(pl.col("ForecastDividend").is_not_null())
             .select("Date", "Code", "ForecastDividend")

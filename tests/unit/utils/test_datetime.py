@@ -84,8 +84,8 @@ def test_get_past_dates_days() -> None:
 
 
 def test_get_past_dates_years() -> None:
-    assert len(get_past_dates(years=1)) in [365, 366]
-    assert len(get_past_dates(years=2)) in [365 + 365, 366 + 365]
+    assert len(get_past_dates(years=1)) in {365, 366}
+    assert len(get_past_dates(years=2)) in {365 + 365, 366 + 365}
     assert len(get_past_dates(years=4)) == 365 * 4 + 1
 
 

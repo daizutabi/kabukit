@@ -49,7 +49,7 @@ def test_get_calendar_quiet(
     result = runner.invoke(app, ["get", "calendar", "--quiet"])
 
     assert result.exit_code == 0
-    assert result.stdout == ""
+    assert not result.stdout
 
     mock_get_calendar.assert_awaited_once()
     mock_cache_write.assert_called_once_with("jquants", "calendar", MOCK_DF)

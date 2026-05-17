@@ -45,6 +45,7 @@ dependencies = [
   "httpx>=0.28.1,<1.0",
   "ixbrlparse>=0.11.2",
   "lxml>=6.0.2",
+  "patito>=0.8.6",
   "platformdirs>=4.5.1",
   "polars>=1.36.1",
   "pypdf>=6.4.1",
@@ -116,22 +117,30 @@ target-version = "py312"
 include = ["src/**/*.py", "tests/**/*.py", "notebooks/**/*.py"]
 
 [tool.ruff.lint]
+preview = true
 select = ["ALL"]
 unfixable = ["F401"]
 ignore = [
   "A002",
   "ANN401",
+  "CPY001",
   "D",
+  "DOC",
   "ERA001",
   "FBT001",
   "N802",
   "PGH003",
   "PLC0415",
+  "PLC2701",
   "PLR0913",
+  "PLR0917",
   "PLR2004",
+  "PLR6301",
   "RUF001",
   "RUF002",
   "RUF003",
+  "RUF029",
+  "RUF069",
   "S603",
   "SIM102",
   "SIM108",
@@ -156,6 +165,9 @@ ignore = [
 
 [tool.ruff.lint.isort]
 required-imports = ["from __future__ import annotations"]
+
+[tool.ruff.format]
+preview = true
 
 [tool.basedpyright]
 reportAny = false

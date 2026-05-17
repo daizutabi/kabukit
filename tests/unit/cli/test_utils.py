@@ -55,7 +55,7 @@ def test_display_dataframe_quiet(
 ) -> None:
     display_dataframe(df, quiet=True)
 
-    assert capsys.readouterr().out == ""
+    assert not capsys.readouterr().out
 
 
 def test_display_single_row_dataframe(

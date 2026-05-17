@@ -4,24 +4,19 @@ __generated_with = "0.23.6"
 app = marimo.App(width="medium")
 
 with app.setup:
-    import marimo as mo
-
-    from kabukit import JQuantsClient
-    from kabukit.analysis.visualization import plot_topix_timeseries
+    from kabukit import Info, Prices
 
 
 @app.cell
-async def _():
-    async with JQuantsClient() as client:
-        topix_df = await client.get_topix()
-    return (topix_df,)
+def _():
+    Info().data
+    return
 
 
 @app.cell
-def _(topix_df):
-    # チャートの描画
-    chart = plot_topix_timeseries(topix_df).properties(width="container")
-    mo.ui.altair_chart(chart)
+def _():
+    prices = Prices()
+    prices.truncate("1mo").data.filter(Code="3997")
     return
 
 

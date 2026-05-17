@@ -46,7 +46,8 @@ class Prices(Base):
             Self: 指定された頻度で切り詰められた新しいPricesオブジェクト。
         """
         data = (
-            self.data.group_by(pl.col("Date").dt.truncate(every), "Code")
+            self.data
+            .group_by(pl.col("Date").dt.truncate(every), "Code")
             .agg(
                 pl.col("Open").drop_nulls().first(),
                 pl.col("High").max(),
@@ -87,7 +88,8 @@ class Prices(Base):
         shares = statements.shares().rename({"Date": "ReportDate"})
 
         adjusted = (
-            self.data.join_asof(
+            self.data
+            .join_asof(
                 shares,
                 left_on="Date",
                 right_on="ReportDate",
@@ -353,7 +355,8 @@ class Prices(Base):
             Self: 各種利回り指標の列が追加された、新しいPricesオブジェクト。
         """
         return (
-            self.with_adjusted_shares(statements)
+            self
+            .with_adjusted_shares(statements)
             .with_equity(statements)
             .with_book_value_yield()
             .with_forecast_profit(statements)

@@ -63,7 +63,7 @@ def get_code_date(
     if arg is None:
         return None, None
 
-    if len(arg) in [4, 5]:
+    if len(arg) in {4, 5}:
         return arg, None
 
     return None, parse_date(arg)

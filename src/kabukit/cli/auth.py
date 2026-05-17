@@ -44,7 +44,7 @@ async def jquants(mailaddress: Mailaddress = None, password: Password = None) ->
 
     if mailaddress is None:
         mailaddress = typer.prompt("J-Quantsに登録したメールアドレス")
-        if not mailaddress or mailaddress.strip() == "":
+        if not mailaddress or not mailaddress.strip():
             typer.echo("メールアドレスが入力されていません。")
             raise Exit(1)
 
@@ -52,7 +52,7 @@ async def jquants(mailaddress: Mailaddress = None, password: Password = None) ->
 
     if password is None:
         password = typer.prompt("J-Quantsのパスワード", hide_input=True)
-        if not password or password.strip() == "":
+        if not password or not password.strip():
             typer.echo("パスワードが入力されていません。")
             raise Exit(1)
 
@@ -85,7 +85,7 @@ def edinet(api_key: ApiKey = None) -> None:
     if api_key is None:
         api_key = typer.prompt("EDINETで取得したAPIキー")
 
-    if not api_key or api_key.strip() == "":
+    if not api_key or not api_key.strip():
         typer.echo("APIキーが入力されていません。")
         raise Exit(1)
 

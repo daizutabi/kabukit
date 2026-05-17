@@ -20,7 +20,8 @@ def parse_date(date_string: str, fmt: str | None = None, /) -> datetime.date:
         fmt = "%Y-%m-%d" if "-" in date_string else "%Y%m%d"
 
     return (
-        datetime.datetime.strptime(date_string, fmt)
+        datetime.datetime
+        .strptime(date_string, fmt)
         .replace(tzinfo=ZoneInfo("Asia/Tokyo"))
         .date()
     )
@@ -76,7 +77,8 @@ def parse_time(time_string: str, fmt: str | None = None, /) -> datetime.time:
         fmt = "%H:%M"
 
     return (
-        datetime.datetime.strptime(time_string, fmt)
+        datetime.datetime
+        .strptime(time_string, fmt)
         .replace(tzinfo=ZoneInfo("Asia/Tokyo"))
         .time()
     )
@@ -90,7 +92,7 @@ def today(*, as_str: Literal[True]) -> str: ...
 def today(*, as_str: Literal[False] = False) -> datetime.date: ...
 
 
-def today(*, as_str: Literal[True, False] = False) -> datetime.date | str:
+def today(*, as_str: bool = False) -> datetime.date | str:
     """今日の日付を取得する。
 
     Returns:

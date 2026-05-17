@@ -75,7 +75,7 @@ def test_auth_jquants_saves_token_to_config(
 
     # 設定ファイルが正しく書き込まれたことを確認
     assert mock_config_path.exists()
-    text = mock_config_path.read_text()
+    text = mock_config_path.read_text(encoding="utf-8")
     assert f'{JQuantsAuthKey.ID_TOKEN} = "mocked_id_token_123"' in text
 
 
@@ -149,7 +149,7 @@ def test_auth_jquants_config_fallback(
 
     # 設定ファイルが正しく書き込まれたことを確認
     assert mock_config_path.exists()
-    text = mock_config_path.read_text()
+    text = mock_config_path.read_text(encoding="utf-8")
     assert f'{JQuantsAuthKey.ID_TOKEN} = "mocked_id_token_from_config"' in text
     mock_get_config_value.assert_any_call(JQuantsAuthKey.MAILADDRESS)
     mock_get_config_value.assert_any_call(JQuantsAuthKey.PASSWORD)
@@ -186,7 +186,7 @@ def test_auth_jquants_prompt_fallback(
 
     # 設定ファイルが正しく書き込まれたことを確認
     assert mock_config_path.exists()
-    text = mock_config_path.read_text()
+    text = mock_config_path.read_text(encoding="utf-8")
     assert f'{JQuantsAuthKey.ID_TOKEN} = "mocked_id_token_from_prompt"' in text
     mock_get_config_value.assert_any_call(JQuantsAuthKey.MAILADDRESS)
     mock_get_config_value.assert_any_call(JQuantsAuthKey.PASSWORD)
@@ -239,7 +239,7 @@ def test_auth_edinet_saves_api_key_to_config(
 
     # 設定ファイルが正しく書き込まれたことを確認
     assert mock_config_path.exists()
-    text = mock_config_path.read_text()
+    text = mock_config_path.read_text(encoding="utf-8")
     assert f'{EdinetAuthKey.API_KEY} = "cli_api_key_123"' in text
     mock_typer_prompt.assert_not_called()  # プロンプトは呼ばれない
 
@@ -267,7 +267,7 @@ def test_auth_edinet_always_prompts_and_overwrites(
 
     # 設定ファイルが新しいキーで正しく上書きされたことを確認
     assert mock_config_path.exists()
-    text = mock_config_path.read_text()
+    text = mock_config_path.read_text(encoding="utf-8")
     assert f'{EdinetAuthKey.API_KEY} = "new_api_key_from_prompt"' in text
 
 
@@ -291,7 +291,7 @@ def test_auth_edinet_prompt_fallback(
 
     # 設定ファイルが正しく書き込まれたことを確認
     assert mock_config_path.exists()
-    text = mock_config_path.read_text()
+    text = mock_config_path.read_text(encoding="utf-8")
     assert f'{EdinetAuthKey.API_KEY} = "prompt_api_key_456"' in text
     mock_typer_prompt.assert_called_once_with("EDINETで取得したAPIキー")
 
@@ -326,7 +326,7 @@ def test_auth_show_no_config_file(mock_config_path: Path) -> None:
 def test_auth_show_with_config_file(mock_config_path: Path) -> None:
     """auth show コマンドが設定ファイルが存在し、内容が正しく表示されることを確認する"""
     # テスト用の設定ファイルを作成
-    mock_config_path.write_text("abc\n")
+    mock_config_path.write_text("abc\n", encoding="utf-8")
 
     # CLIコマンドを実行
     result = runner.invoke(app, ["auth", "show"])

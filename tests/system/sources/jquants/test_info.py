@@ -50,7 +50,7 @@ async def df():
 
 def test_width(df: pl.DataFrame) -> None:
     assert df.height > 3700
-    assert df.width in [7, 8]  # 7: ライトプラン, 8: スタンダードプラン
+    assert df.width in {7, 8}  # 7: ライトプラン, 8: スタンダードプラン
 
 
 @pytest.mark.parametrize(
