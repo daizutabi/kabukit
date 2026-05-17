@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from kabukit.utils import fetcher
+from kabukit.sources import concurrent
 
 from .client import JQuantsClient
 
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
     import polars as pl
 
-    from kabukit.utils.fetcher import Progress
+    from kabukit.sources.concurrent import Progress
 
 
 async def get_calendar() -> pl.DataFrame:
@@ -100,7 +100,7 @@ async def get_statements(
     if codes is None:
         codes = await get_target_codes()
 
-    data = await fetcher.get(
+    data = await concurrent.get(
         JQuantsClient,
         JQuantsClient.get_statements,
         codes,
@@ -149,7 +149,7 @@ async def get_prices(
     if codes is None:
         codes = await get_target_codes()
 
-    data = await fetcher.get(
+    data = await concurrent.get(
         JQuantsClient,
         JQuantsClient.get_prices,
         codes,

@@ -26,7 +26,7 @@ runner = CliRunner()
 @pytest.fixture
 def mock_get_shares(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.sources.jpx.fetcher.get_shares",
+        "kabukit.sources.jpx.concurrent.get_shares",
         new_callable=mocker.AsyncMock,
         return_value=MOCK_DF,
     )

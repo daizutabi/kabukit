@@ -9,7 +9,7 @@ import pytest_asyncio
 from polars import col as c
 
 from kabukit.domain.jquants.prices import Prices
-from kabukit.sources.jquants.fetcher import get_prices
+from kabukit.sources.jquants.concurrent import get_prices
 from tests.validation import conftest
 
 if TYPE_CHECKING:

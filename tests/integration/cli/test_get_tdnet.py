@@ -27,7 +27,7 @@ runner = CliRunner()
 @pytest.fixture
 def mock_get_tdnet(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.sources.tdnet.fetcher.get_list",
+        "kabukit.sources.tdnet.concurrent.get_list",
         new_callable=mocker.AsyncMock,
         return_value=MOCK_DF,
     )

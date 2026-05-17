@@ -8,7 +8,7 @@ import pytest
 from polars.testing import assert_frame_equal
 
 from kabukit.sources.tdnet.client import TdnetClient
-from kabukit.sources.tdnet.fetcher import get_list
+from kabukit.sources.tdnet.concurrent import get_list
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -35,17 +35,17 @@ async def test_get_list_single_date(mocker: MockerFixture) -> None:
 
 
 async def test_get_list_multiple_dates(
-    mock_fetcher_get: AsyncMock,
+    mock_concurrent_get: AsyncMock,
     mocker: MockerFixture,
 ) -> None:
     dates = [datetime.date(2023, 1, 1), datetime.date(2023, 1, 2)]
 
     mock_df = pl.DataFrame({"Code": [1, 2], "Date": dates})
-    mock_fetcher_get.return_value = mock_df
+    mock_concurrent_get.return_value = mock_df
 
     result = await get_list(dates, progress=dummy_progress)  # pyright: ignore[reportArgumentType]
 
-    mock_fetcher_get.assert_awaited_once_with(
+    mock_concurrent_get.assert_awaited_once_with(
         TdnetClient,
         TdnetClient.get_list,
         dates,
@@ -58,19 +58,19 @@ async def test_get_list_multiple_dates(
 
 async def test_get_list_no_dates_specified(
     mocker: MockerFixture,
-    mock_fetcher_get: AsyncMock,
+    mock_concurrent_get: AsyncMock,
 ) -> None:
     dates = [datetime.date(2023, 1, 1), datetime.date(2023, 1, 2)]
     mock_get_dates_method = mocker.AsyncMock(return_value=dates)
     mocker.patch.object(TdnetClient, "get_dates", new=mock_get_dates_method)
 
     mock_df = pl.DataFrame({"Code": [1, 2], "Date": dates})
-    mock_fetcher_get.return_value = mock_df
+    mock_concurrent_get.return_value = mock_df
 
     result = await get_list(None)
 
     mock_get_dates_method.assert_awaited_once()
-    mock_fetcher_get.assert_awaited_once_with(
+    mock_concurrent_get.assert_awaited_once_with(
         TdnetClient,
         TdnetClient.get_list,
         dates,
@@ -81,8 +81,8 @@ async def test_get_list_no_dates_specified(
     assert_frame_equal(result, mock_df.sort("Code", "Date"))
 
 
-async def test_get_list_returns_empty_dataframe(mock_fetcher_get: AsyncMock) -> None:
-    mock_fetcher_get.return_value = pl.DataFrame()
+async def test_get_list_returns_empty_dataframe(mock_concurrent_get: AsyncMock) -> None:
+    mock_concurrent_get.return_value = pl.DataFrame()
 
     result = await get_list([datetime.date(2023, 1, 1)])
 

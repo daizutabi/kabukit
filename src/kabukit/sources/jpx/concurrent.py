@@ -6,12 +6,12 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from kabukit.utils import fetcher
+from kabukit.sources import concurrent
 
 from .client import JpxClient
 
 if TYPE_CHECKING:
-    from kabukit.utils.fetcher import Progress
+    from kabukit.sources.concurrent import Progress
 
 
 async def get_shares(
@@ -41,7 +41,7 @@ async def get_shares(
         pdf_urls = [url async for url in client.iter_shares_pdf_urls()]
 
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        df = await fetcher.get(
+        df = await concurrent.get(
             functools.partial(JpxClient, executor=executor),
             JpxClient.get_shares,
             pdf_urls,

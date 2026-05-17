@@ -5,7 +5,7 @@ import datetime
 import polars as pl
 import pytest
 
-from kabukit.sources.jquants.fetcher import (
+from kabukit.sources.jquants.concurrent import (
     get_calendar,
     get_info,
     get_prices,

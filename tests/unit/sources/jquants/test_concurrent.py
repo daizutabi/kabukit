@@ -7,7 +7,7 @@ import pytest
 from polars.testing import assert_frame_equal
 
 from kabukit.sources.jquants.client import JQuantsClient
-from kabukit.sources.jquants.fetcher import (
+from kabukit.sources.jquants.concurrent import (
     get_calendar,
     get_info,
     get_prices,
@@ -29,7 +29,7 @@ def mock_jquants_client(mocker: MockerFixture) -> AsyncMock:
     """JQuantsClientの非同期コンテキストマネージャをモックするフィクスチャ"""
     mock_client_instance = mocker.AsyncMock()
     mocker.patch(
-        "kabukit.sources.jquants.fetcher.JQuantsClient",
+        "kabukit.sources.jquants.concurrent.JQuantsClient",
         return_value=mocker.MagicMock(
             __aenter__=mocker.AsyncMock(return_value=mock_client_instance),
             __aexit__=mocker.AsyncMock(),
@@ -77,7 +77,7 @@ async def test_get_info_with_date(mock_jquants_client: AsyncMock) -> None:
 @pytest.fixture
 def mock_get_info(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.sources.jquants.fetcher.get_info",
+        "kabukit.sources.jquants.concurrent.get_info",
         new_callable=mocker.AsyncMock,
     )
 
@@ -95,7 +95,7 @@ async def test_get_target_codes(mock_get_info: AsyncMock) -> None:
 @pytest.fixture
 def mock_get_target_codes(mocker: MockerFixture) -> AsyncMock:
     return mocker.patch(
-        "kabukit.sources.jquants.fetcher.get_target_codes",
+        "kabukit.sources.jquants.concurrent.get_target_codes",
         new_callable=mocker.AsyncMock,
     )
 
@@ -117,10 +117,10 @@ async def test_get_statements_with_date(mock_jquants_client: AsyncMock) -> None:
 
 
 async def test_get_statements_with_codes(
-    mock_fetcher_get: AsyncMock,
+    mock_concurrent_get: AsyncMock,
     mocker: MockerFixture,
 ) -> None:
-    mock_fetcher_get.return_value = pl.DataFrame(
+    mock_concurrent_get.return_value = pl.DataFrame(
         {"Date": [4, 3, 2, 1], "Code": [2, 1, 2, 1]},
     )
 
@@ -135,7 +135,7 @@ async def test_get_statements_with_codes(
         pl.DataFrame({"Date": [1, 3, 2, 4], "Code": [1, 1, 2, 2]}),
     )
 
-    mock_fetcher_get.assert_awaited_once_with(
+    mock_concurrent_get.assert_awaited_once_with(
         JQuantsClient,
         JQuantsClient.get_statements,
         ["1111", "2222"],
@@ -147,11 +147,11 @@ async def test_get_statements_with_codes(
 
 async def test_get_statements(
     mock_get_target_codes: AsyncMock,
-    mock_fetcher_get: AsyncMock,
+    mock_concurrent_get: AsyncMock,
     mocker: MockerFixture,
 ) -> None:
     mock_get_target_codes.return_value = ["1111", "2222", "3333"]
-    mock_fetcher_get.return_value = pl.DataFrame(
+    mock_concurrent_get.return_value = pl.DataFrame(
         {"Date": [4, 3, 2, 1], "Code": [2, 1, 2, 1]},
     )
 
@@ -163,7 +163,7 @@ async def test_get_statements(
     )
 
     mock_get_target_codes.assert_awaited_once()
-    mock_fetcher_get.assert_awaited_once_with(
+    mock_concurrent_get.assert_awaited_once_with(
         JQuantsClient,
         JQuantsClient.get_statements,
         ["1111", "2222", "3333"],
@@ -185,8 +185,8 @@ async def test_get_prices_with_date(mock_jquants_client: AsyncMock) -> None:
     mock_jquants_client.get_prices.assert_awaited_once_with(None, "2025-10-10")
 
 
-async def test_get_prices_with_codes(mock_fetcher_get: AsyncMock) -> None:
-    mock_fetcher_get.return_value = pl.DataFrame(
+async def test_get_prices_with_codes(mock_concurrent_get: AsyncMock) -> None:
+    mock_concurrent_get.return_value = pl.DataFrame(
         {"Date": [4, 3, 2, 1], "Code": [2, 1, 2, 1]},
     )
 
@@ -202,7 +202,7 @@ async def test_get_prices_with_codes(mock_fetcher_get: AsyncMock) -> None:
         pl.DataFrame({"Date": [1, 3, 2, 4], "Code": [1, 1, 2, 2]}),
     )
 
-    mock_fetcher_get.assert_awaited_once_with(
+    mock_concurrent_get.assert_awaited_once_with(
         JQuantsClient,
         JQuantsClient.get_prices,
         ["3333", "4444"],
@@ -214,11 +214,11 @@ async def test_get_prices_with_codes(mock_fetcher_get: AsyncMock) -> None:
 
 async def test_get_prices(
     mock_get_target_codes: AsyncMock,
-    mock_fetcher_get: AsyncMock,
+    mock_concurrent_get: AsyncMock,
     mocker: MockerFixture,
 ) -> None:
     mock_get_target_codes.return_value = ["1111", "2222", "3333"]
-    mock_fetcher_get.return_value = pl.DataFrame(
+    mock_concurrent_get.return_value = pl.DataFrame(
         {"Date": [4, 3, 2, 1], "Code": [2, 1, 2, 1]},
     )
 
@@ -230,7 +230,7 @@ async def test_get_prices(
     )
 
     mock_get_target_codes.assert_awaited_once()
-    mock_fetcher_get.assert_awaited_once_with(
+    mock_concurrent_get.assert_awaited_once_with(
         JQuantsClient,
         JQuantsClient.get_prices,
         ["1111", "2222", "3333"],

@@ -7,7 +7,7 @@ import polars as pl
 import pytest
 
 from kabukit.sources.client import Client
-from kabukit.utils.fetcher import collect, get
+from kabukit.sources.concurrent import collect, get
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterable, AsyncIterator

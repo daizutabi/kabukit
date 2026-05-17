@@ -40,7 +40,7 @@ async def calendar(
     quiet: Quiet = False,
 ) -> None:
     """営業日カレンダーを取得します。"""
-    from kabukit.sources.jquants.fetcher import get_calendar
+    from kabukit.sources.jquants.concurrent import get_calendar
 
     from .utils import display_dataframe, write_cache
 
@@ -60,7 +60,7 @@ async def info(
     quiet: Quiet = False,
 ) -> None:
     """銘柄情報を取得します。"""
-    from kabukit.sources.jquants.fetcher import get_info
+    from kabukit.sources.jquants.concurrent import get_info
 
     from .utils import display_dataframe, get_code_date, write_cache
 
@@ -82,7 +82,7 @@ async def statements(
     quiet: Quiet = False,
 ) -> None:
     """財務情報を取得します。"""
-    from kabukit.sources.jquants.fetcher import get_statements
+    from kabukit.sources.jquants.concurrent import get_statements
     from kabukit.utils.datetime import today
 
     from .utils import CustomTqdm, display_dataframe, get_code_date, write_cache
@@ -112,7 +112,7 @@ async def prices(
     quiet: Quiet = False,
 ) -> None:
     """株価情報を取得します。"""
-    from kabukit.sources.jquants.fetcher import get_prices
+    from kabukit.sources.jquants.concurrent import get_prices
     from kabukit.utils.datetime import today
 
     from .utils import CustomTqdm, display_dataframe, get_code_date, write_cache
@@ -177,7 +177,7 @@ async def edinet(
     quiet: Quiet = False,
 ) -> None:
     """EDINET APIから書類一覧を取得します。"""
-    from kabukit.sources.edinet.fetcher import get_list
+    from kabukit.sources.edinet.concurrent import get_list
     from kabukit.utils.datetime import today
 
     from .utils import CustomTqdm, display_dataframe, get_code_date, write_cache
@@ -213,7 +213,7 @@ async def tdnet(
     quiet: Quiet = False,
 ) -> None:
     """TDnetから書類一覧を取得します。"""
-    from kabukit.sources.tdnet.fetcher import get_list
+    from kabukit.sources.tdnet.concurrent import get_list
     from kabukit.utils.datetime import today
 
     from .utils import CustomTqdm, display_dataframe, get_code_date, write_cache
@@ -246,7 +246,7 @@ async def shares(
     quiet: Quiet = False,
 ) -> None:
     """JPXから上場株式数を取得します。"""
-    from kabukit.sources.jpx.fetcher import get_shares
+    from kabukit.sources.jpx.concurrent import get_shares
 
     from .utils import CustomTqdm, display_dataframe, write_cache
 
