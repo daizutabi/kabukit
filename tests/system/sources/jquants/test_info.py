@@ -13,13 +13,11 @@ from kabukit.sources.jquants.columns import InfoColumns
 pytestmark = pytest.mark.system
 
 
-@pytest.mark.parametrize("only_common_stocks", [True, False])
-async def test_date(client: JQuantsClient, *, only_common_stocks: bool) -> None:
+async def test_date(client: JQuantsClient) -> None:
     today = datetime.datetime.now(ZoneInfo("Asia/Tokyo")).date()
     date = today - datetime.timedelta(weeks=12)
-    df = await client.get_info(date=date, only_common_stocks=only_common_stocks)
-    height = 3700 if only_common_stocks else 4000
-    assert df.height > height
+    df = await client.get_info(date=date)
+    assert df.height > 3700
     df_date = df.item(0, "Date")
     assert isinstance(df_date, datetime.date)
     assert (df_date - date).days <= 7
@@ -59,11 +57,11 @@ def test_width(df: pl.DataFrame) -> None:
         ("Date", pl.Date),
         ("Code", pl.String),
         ("Company", pl.String),
-        ("Sector17", pl.Categorical),
-        ("Sector33", pl.Categorical),
-        ("ScaleCategory", pl.Categorical),
-        ("Market", pl.Categorical),
-        ("Margin", pl.Categorical),
+        ("Sector17", pl.String),
+        ("Sector33", pl.String),
+        ("ScaleCategory", pl.String),
+        ("Market", pl.String),
+        ("Margin", pl.String),
     ],
 )
 def test_column_dtype(df: pl.DataFrame, name: str, dtype: type) -> None:

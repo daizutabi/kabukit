@@ -2,21 +2,21 @@ from __future__ import annotations
 
 import polars as pl
 
+from kabukit.models.jquants.info import InfoDataFrame
 from kabukit.sources.utils import normalize_code
 
 
-def transform(df: pl.DataFrame, *, only_common_stocks: bool = True) -> pl.DataFrame:
-    if only_common_stocks:
-        df = filter_common_stocks(df)
+def transform(df: pl.DataFrame) -> InfoDataFrame:
+    df = filter_common_stocks(df)
 
     if df.is_empty():
-        return pl.DataFrame()
+        return InfoDataFrame()
 
     return (
-        df.pipe(normalize_code)
+        df
+        .pipe(normalize_code)
         .with_columns(
             pl.col("Date").str.to_date("%Y-%m-%d"),
-            pl.col("^.*CodeName$", "ScaleCategory").cast(pl.Categorical),
         )
         .drop("^.+Code$", "CompanyNameEnglish")
         .rename(
@@ -28,6 +28,8 @@ def transform(df: pl.DataFrame, *, only_common_stocks: bool = True) -> pl.DataFr
                 "MarginCodeName": "Margin",
             },
         )
+        .pipe(InfoDataFrame)
+        .validate()
     )
 
 

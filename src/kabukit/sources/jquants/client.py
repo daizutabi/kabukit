@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, ClassVar
 
 import polars as pl
 
+from kabukit.models.jquants.info import InfoDataFrame
 from kabukit.sources.client import Client
 from kabukit.sources.datetime import with_date
 from kabukit.utils.config import get_config_value
@@ -162,23 +163,16 @@ class JQuantsClient(Client):
         self,
         code: str | None = None,
         date: str | datetime.date | None = None,
-        *,
-        transform: bool = True,
-        only_common_stocks: bool = True,
-    ) -> pl.DataFrame:
+    ) -> InfoDataFrame:
         """上場銘柄一覧を取得する。
 
         Args:
             code (str, optional): 銘柄情報を取得する銘柄コード (例: "7203")。
             date (str | datetime.date, optional): 銘柄情報を取得する日付
                 (例: "2025-10-01")。
-            transform (bool, optional): 取得したデータを整形するかどうか。
-                デフォルトはTrue。
-            only_common_stocks (bool, optional): 投資信託や優先株式を除く、
-                普通株式のみを対象とするか。デフォルトはTrue。
 
         Returns:
-            pl.DataFrame: 銘柄情報を含むDataFrame。
+            InfoDataFrame: 銘柄情報を含むDataFrame。
 
         Raises:
             HTTPStatusError: APIリクエストが失敗した場合。
@@ -190,13 +184,10 @@ class JQuantsClient(Client):
 
         df = pl.DataFrame(data["info"])
 
-        if not transform:
-            return df
-
         if df.is_empty():
-            return pl.DataFrame()
+            return InfoDataFrame()
 
-        return info.transform(df, only_common_stocks=only_common_stocks)
+        return info.transform(df)
 
     async def get_statements(
         self,
